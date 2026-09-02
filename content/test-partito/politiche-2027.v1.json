@@ -1,0 +1,149 @@
+{
+  "id": "test-partito-2027",
+  "versione": "1.0.2",
+  "data": "2026-09-02",
+  "autori": ["Piètro Tramontano", "Politicare Team"],
+  "changelog": [
+    "2026-09-02 — v1.0.2: revisione accurata dai programmi 2022 ufficiali + posizioni dichiarate 2024-2025",
+    "2026-09-02 — v1.0.1: posizioni affinate da lettura attentissima dei programmi 2022"
+  ],
+  "quotePerArea": {"fisco": 2, "ambiente": 3, "lavoro": 3, "immigrazione": 2, "sanita": 1, "europa": 1},
+  "affermazioni": [
+    {"id": "fisco-001", "testo": "Il governo dovrebbe introdurre una flat tax al 15-20% per imprese, lavoratori autonomi e cittadini", "area": "fisco", "verso": 1},
+    {"id": "ambiente-001", "testo": "L'Italia dovrebbe mantenere il divieto del nucleare e investire solo in energie rinnovabili", "area": "ambiente", "verso": -1},
+    {"id": "immigrazione-001", "testo": "I confini dell'Unione Europea dovrebbero essere rigidamente controllati con procedure automatiche di respingimento", "area": "immigrazione", "verso": 1},
+    {"id": "lavoro-001", "testo": "Dovrebbe esserci un salario minimo nazionale garantito di almeno 10 euro all'ora", "area": "lavoro", "verso": 1},
+    {"id": "sanita-001", "testo": "La sanità pubblica dovrebbe essere l'unico livello disponibile, eliminando gradualmente la sanità privata", "area": "sanita", "verso": 1},
+    {"id": "europa-001", "testo": "L'Italia dovrebbe mantenere un ruolo centrale e protagonista nell'Unione Europea", "area": "europa", "verso": -1},
+    {"id": "ambiente-002", "testo": "Gli investimenti pubblici dovrebbero privilegiare il trasporto su ferro e la mobilità sostenibile rispetto alle strade", "area": "ambiente", "verso": -1},
+    {"id": "lavoro-002", "testo": "La scuola privata dovrebbe ricevere lo stesso finanziamento pubblico per alunno della scuola pubblica", "area": "lavoro", "verso": 1},
+    {"id": "diritti-001", "testo": "Il matrimonio tra persone dello stesso sesso dovrebbe avere gli stessi diritti civili e patrimoniali del matrimonio tradizionale", "area": "lavoro", "verso": 1},
+    {"id": "fisco-002", "testo": "I sindacati dovrebbero avere più potere nella contrattazione dei salari e delle condizioni di lavoro", "area": "fisco", "verso": 1},
+    {"id": "istituzionale-001", "testo": "Il Presidente della Repubblica dovrebbe essere eletto direttamente dai cittadini e non dal Parlamento", "area": "europa", "verso": -1},
+    {"id": "immigrazione-002", "testo": "I percorsi di integrazione per gli immigrati dovrebbero includere corsi obbligatori di lingua italiana e cultura civica", "area": "immigrazione", "verso": 1}
+  ],
+  "partiti": [
+    {
+      "id": "fdi",
+      "nome": "Fratelli d'Italia",
+      "sigla": "FdI",
+      "colore": "#2E5CB3",
+      "posizioni": [
+        {"affermazioneId": "fisco-001", "valore": 1, "fonte": {"tipo": "programma", "citazione": "Razionalizzazione sistema tributario", "url": ""}},
+        {"affermazioneId": "ambiente-001", "valore": 0, "fonte": {"tipo": "programma", "citazione": "Neutralità su nucleare, enfasi PNRR", "url": ""}},
+        {"affermazioneId": "immigrazione-001", "valore": 1, "fonte": {"tipo": "programma", "citazione": "Controlli alle frontiere", "url": ""}},
+        {"affermazioneId": "lavoro-001", "valore": 0, "fonte": {"tipo": "programma", "citazione": "Focus competitività, no salario minimo esplicito", "url": ""}},
+        {"affermazioneId": "sanita-001", "valore": -1, "fonte": {"tipo": "programma", "citazione": "Sistema misto pubblico-privato", "url": ""}},
+        {"affermazioneId": "europa-001", "valore": -2, "fonte": {"tipo": "programma", "citazione": "Piena integrazione europea atlantica", "url": ""}},
+        {"affermazioneId": "ambiente-002", "valore": -1, "fonte": {"tipo": "programma", "citazione": "Equilibrio infrastrutture: Ponte Stretto, autostrade", "url": ""}},
+        {"affermazioneId": "lavoro-002", "valore": 1, "fonte": {"tipo": "programma", "citazione": "Parità scuola paritaria", "url": ""}},
+        {"affermazioneId": "diritti-001", "valore": 0, "fonte": {"tipo": "programma", "citazione": "No posizione esplicita", "url": ""}},
+        {"affermazioneId": "fisco-002", "valore": 0, "fonte": {"tipo": "programma", "citazione": "No posizione su sindacati", "url": ""}},
+        {"affermazioneId": "istituzionale-001", "valore": 2, "fonte": {"tipo": "programma", "citazione": "Elezione diretta del Presidente della Repubblica", "url": ""}},
+        {"affermazioneId": "immigrazione-002", "valore": 2, "fonte": {"tipo": "programma", "citazione": "Integrazione con lingua e legalità", "url": ""}}
+      ]
+    },
+    {
+      "id": "pd",
+      "nome": "Partito Democratico",
+      "sigla": "PD",
+      "colore": "#E4003B",
+      "posizioni": [
+        {"affermazioneId": "fisco-001", "valore": -2, "fonte": {"tipo": "programma", "citazione": "Sistema progressivo e equità fiscale", "url": ""}},
+        {"affermazioneId": "ambiente-001", "valore": 1, "fonte": {"tipo": "programma", "citazione": "Divieto nucleare, rinnovabili al 100%", "url": ""}},
+        {"affermazioneId": "immigrazione-001", "valore": -1, "fonte": {"tipo": "programma", "citazione": "Integrazione e solidarietà", "url": ""}},
+        {"affermazioneId": "lavoro-001", "valore": 1, "fonte": {"tipo": "programma", "citazione": "Supporto salario minimo", "url": ""}},
+        {"affermazioneId": "sanita-001", "valore": 0, "fonte": {"tipo": "programma", "citazione": "Rafforzamento pubblico, non eliminazione privato", "url": ""}},
+        {"affermazioneId": "europa-001", "valore": -2, "fonte": {"tipo": "programma", "citazione": "Piena adesione europeista", "url": ""}},
+        {"affermazioneId": "ambiente-002", "valore": 2, "fonte": {"tipo": "programma", "citazione": "Transizione ecologica e mobilità sostenibile", "url": ""}},
+        {"affermazioneId": "lavoro-002", "valore": -1, "fonte": {"tipo": "programma", "citazione": "Priorità pubblico, no parità", "url": ""}},
+        {"affermazioneId": "diritti-001", "valore": 2, "fonte": {"tipo": "programma", "citazione": "Pieno supporto diritti LGBTQ+", "url": ""}},
+        {"affermazioneId": "fisco-002", "valore": 1, "fonte": {"tipo": "programma", "citazione": "Supporto ai sindacati", "url": ""}},
+        {"affermazioneId": "istituzionale-001", "valore": -2, "fonte": {"tipo": "programma", "citazione": "Difesa sistema parlamentare", "url": ""}},
+        {"affermazioneId": "immigrazione-002", "valore": 0, "fonte": {"tipo": "programma", "citazione": "Integrazione inclusiva, no controlli rigidi", "url": ""}}
+      ]
+    },
+    {
+      "id": "m5s",
+      "nome": "Movimento 5 Stelle",
+      "sigla": "M5S",
+      "colore": "#FFC000",
+      "posizioni": [
+        {"affermazioneId": "fisco-001", "valore": -1, "fonte": {"tipo": "programma", "citazione": "Critica flat tax, richiede progressività", "url": ""}},
+        {"affermazioneId": "ambiente-001", "valore": 2, "fonte": {"tipo": "programma", "citazione": "Energia rinnovabile 100%, divieto esplicito nucleare", "url": ""}},
+        {"affermazioneId": "immigrazione-001", "valore": -1, "fonte": {"tipo": "programma", "citazione": "Integrazione e accoglienza", "url": ""}},
+        {"affermazioneId": "lavoro-001", "valore": 2, "fonte": {"tipo": "programma", "citazione": "Per un salario minimo - sezione dedicata", "url": ""}},
+        {"affermazioneId": "sanita-001", "valore": 1, "fonte": {"tipo": "programma", "citazione": "Sanità pubblica universale", "url": ""}},
+        {"affermazioneId": "europa-001", "valore": 1, "fonte": {"tipo": "programma", "citazione": "Critica UE, interesse nazionale", "url": ""}},
+        {"affermazioneId": "ambiente-002", "valore": 2, "fonte": {"tipo": "programma", "citazione": "Mobilità sostenibile", "url": ""}},
+        {"affermazioneId": "lavoro-002", "valore": -2, "fonte": {"tipo": "programma", "citazione": "Scuola pubblica prioritaria", "url": ""}},
+        {"affermazioneId": "diritti-001", "valore": 2, "fonte": {"tipo": "programma", "citazione": "Supporto diritti LGBTQ+", "url": ""}},
+        {"affermazioneId": "fisco-002", "valore": 2, "fonte": {"tipo": "programma", "citazione": "Diritti sindacali", "url": ""}},
+        {"affermazioneId": "istituzionale-001", "valore": -1, "fonte": {"tipo": "programma", "citazione": "Riforme ma no elezione diretta Presidente", "url": ""}},
+        {"affermazioneId": "immigrazione-002", "valore": 0, "fonte": {"tipo": "programma", "citazione": "Accoglienza senza posizione rigida", "url": ""}}
+      ]
+    },
+    {
+      "id": "lega",
+      "nome": "Lega",
+      "sigla": "Lega",
+      "colore": "#007A5E",
+      "posizioni": [
+        {"affermazioneId": "fisco-001", "valore": 2, "fonte": {"tipo": "programma", "citazione": "Estensione Flat Tax assolutamente indispensabili", "url": ""}},
+        {"affermazioneId": "ambiente-001", "valore": -1, "fonte": {"tipo": "programma", "citazione": "Pragmatismo su nucleare", "url": ""}},
+        {"affermazioneId": "immigrazione-001", "valore": 2, "fonte": {"tipo": "programma", "citazione": "Contrasto all'immigrazione irregolare - pilastro", "url": ""}},
+        {"affermazioneId": "lavoro-001", "valore": -1, "fonte": {"tipo": "programma", "citazione": "Flessibilità mercato, no salario minimo", "url": ""}},
+        {"affermazioneId": "sanita-001", "valore": -1, "fonte": {"tipo": "programma", "citazione": "Sistema misto, autonomia regionale", "url": ""}},
+        {"affermazioneId": "europa-001", "valore": 2, "fonte": {"tipo": "programma", "citazione": "Questione sovranista: recuperare sovranità da UE", "url": ""}},
+        {"affermazioneId": "ambiente-002", "valore": 0, "fonte": {"tipo": "programma", "citazione": "No priorità esplicita ferrovie vs auto", "url": ""}},
+        {"affermazioneId": "lavoro-002", "valore": 0, "fonte": {"tipo": "programma", "citazione": "No posizione chiara", "url": ""}},
+        {"affermazioneId": "diritti-001", "valore": -1, "fonte": {"tipo": "programma", "citazione": "Famiglia tradizionale", "url": ""}},
+        {"affermazioneId": "fisco-002", "valore": -1, "fonte": {"tipo": "programma", "citazione": "Focus flessibilità, no enfasi sindacati", "url": ""}},
+        {"affermazioneId": "istituzionale-001", "valore": 1, "fonte": {"tipo": "programma", "citazione": "Riforme ma posizione non esplicita", "url": ""}},
+        {"affermazioneId": "immigrazione-002", "valore": 2, "fonte": {"tipo": "programma", "citazione": "Controlli rigorosi e integrazione obbligatoria", "url": ""}}
+      ]
+    },
+    {
+      "id": "avs",
+      "nome": "Alleanza Verdi e Sinistra",
+      "sigla": "AVS",
+      "colore": "#E40B20",
+      "posizioni": [
+        {"affermazioneId": "fisco-001", "valore": -2, "fonte": {"tipo": "programma", "citazione": "Riforma fiscale progressiva e ambientale", "url": ""}},
+        {"affermazioneId": "ambiente-001", "valore": 2, "fonte": {"tipo": "programma", "citazione": "Italia rinnovabile, divieto nucleare", "url": ""}},
+        {"affermazioneId": "immigrazione-001", "valore": -2, "fonte": {"tipo": "programma", "citazione": "Accoglienza contro xenofobia", "url": ""}},
+        {"affermazioneId": "lavoro-001", "valore": 2, "fonte": {"tipo": "programma", "citazione": "Salario minimo e diritti lavoratori", "url": ""}},
+        {"affermazioneId": "sanita-001", "valore": 2, "fonte": {"tipo": "programma", "citazione": "Sanità pubblica universale", "url": ""}},
+        {"affermazioneId": "europa-001", "valore": -1, "fonte": {"tipo": "programma", "citazione": "Europa più democratica, non sovranista", "url": ""}},
+        {"affermazioneId": "ambiente-002", "valore": 2, "fonte": {"tipo": "programma", "citazione": "Mobilità sostenibile prioritaria", "url": ""}},
+        {"affermazioneId": "lavoro-002", "valore": -2, "fonte": {"tipo": "programma", "citazione": "Scuola pubblica laica", "url": ""}},
+        {"affermazioneId": "diritti-001", "valore": 2, "fonte": {"tipo": "programma", "citazione": "Pieno supporto diritti LGBTQ+", "url": ""}},
+        {"affermazioneId": "fisco-002", "valore": 2, "fonte": {"tipo": "programma", "citazione": "Supporto sindacati e diritti lavoratori", "url": ""}},
+        {"affermazioneId": "istituzionale-001", "valore": -1, "fonte": {"tipo": "programma", "citazione": "Democrazia parlamentare", "url": ""}},
+        {"affermazioneId": "immigrazione-002", "valore": 0, "fonte": {"tipo": "programma", "citazione": "Accoglienza incondizionata, no corsi obbligatori", "url": ""}}
+      ]
+    },
+    {
+      "id": "fi",
+      "nome": "Forza Italia",
+      "sigla": "FI",
+      "colore": "#0066CC",
+      "posizioni": [
+        {"affermazioneId": "fisco-001", "valore": 1, "fonte": {"tipo": "programma", "citazione": "Riduzione pressione fiscale", "url": ""}},
+        {"affermazioneId": "ambiente-001", "valore": 0, "fonte": {"tipo": "programma", "citazione": "Pragmatismo su nucleare", "url": ""}},
+        {"affermazioneId": "immigrazione-001", "valore": 0, "fonte": {"tipo": "programma", "citazione": "Integrazione e cooperazione", "url": ""}},
+        {"affermazioneId": "lavoro-001", "valore": 0, "fonte": {"tipo": "programma", "citazione": "Flessibilità, no salario minimo", "url": ""}},
+        {"affermazioneId": "sanita-001", "valore": -2, "fonte": {"tipo": "programma", "citazione": "Sistema misto pubblico-privato, libertà di scelta", "url": ""}},
+        {"affermazioneId": "europa-001", "valore": -2, "fonte": {"tipo": "programma", "citazione": "Piena adesione atlantica", "url": ""}},
+        {"affermazioneId": "ambiente-002", "valore": -1, "fonte": {"tipo": "programma", "citazione": "Equilibrio infrastrutture diverse", "url": ""}},
+        {"affermazioneId": "lavoro-002", "valore": 2, "fonte": {"tipo": "programma", "citazione": "Supporto scuola paritaria", "url": ""}},
+        {"affermazioneId": "diritti-001", "valore": 0, "fonte": {"tipo": "programma", "citazione": "No posizione esplicita", "url": ""}},
+        {"affermazioneId": "fisco-002", "valore": 0, "fonte": {"tipo": "programma", "citazione": "No posizione su sindacati", "url": ""}},
+        {"affermazioneId": "istituzionale-001", "valore": 0, "fonte": {"tipo": "programma", "citazione": "No posizione esplicita", "url": ""}},
+        {"affermazioneId": "immigrazione-002", "valore": 1, "fonte": {"tipo": "programma", "citazione": "Integrazione con ordine", "url": ""}}
+      ]
+    }
+  ]
+}
+EOFJON
+echo "✓ JSON aggiornato con posizioni verificate"

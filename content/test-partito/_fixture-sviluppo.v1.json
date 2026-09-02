@@ -1,0 +1,123 @@
+{
+  "id": "test-partito-fixture-sviluppo",
+  "versione": "0.1.0-fixture",
+  "data": "2026-09-02",
+  "autori": ["Fixture interna — dati non reali, solo per sviluppo UI"],
+  "changelog": [
+    "0.1.0-fixture: pack fittizio creato per sviluppare e testare il motore e la UI. Le posizioni NON provengono da questionari, programmi o voti reali di alcun partito esistente. I nomi dei partiti sono inventati. Da sostituire con un pack sourced (vedi vincolo 1 in CLAUDE.md) prima del lancio."
+  ],
+  "quotePerArea": {
+    "fisco": 2,
+    "ambiente": 2,
+    "lavoro": 2,
+    "immigrazione": 2,
+    "sanita": 2,
+    "europa": 2
+  },
+  "affermazioni": [
+    { "id": "a1", "testo": "Introdurre un'aliquota unica sul reddito (flat tax), indipendentemente dall'importo.", "area": "fisco", "verso": 1 },
+    { "id": "a2", "testo": "Aumentare il numero di scaglioni IRPEF per rafforzare la progressività dell'imposta.", "area": "fisco", "verso": -1 },
+    { "id": "a3", "testo": "Vietare la vendita di nuove auto a motore termico a partire dal 2030.", "area": "ambiente", "verso": 1 },
+    { "id": "a4", "testo": "Mantenere gli incentivi statali per tutte le tipologie di motore, incluso quello termico.", "area": "ambiente", "verso": -1 },
+    { "id": "a5", "testo": "Introdurre un salario minimo legale uguale per tutti i settori.", "area": "lavoro", "verso": 1 },
+    { "id": "a6", "testo": "Lasciare la determinazione dei minimi salariali alla contrattazione collettiva di settore, senza una legge.", "area": "lavoro", "verso": -1 },
+    { "id": "a7", "testo": "Aprire nuovi canali legali di ingresso per lavoro stagionale.", "area": "immigrazione", "verso": 1 },
+    { "id": "a8", "testo": "Mantenere gli attuali limiti annuali di ingresso per motivi di lavoro (decreto flussi).", "area": "immigrazione", "verso": -1 },
+    { "id": "a9", "testo": "Aumentare la spesa sanitaria pubblica fino a raggiungere la media dei paesi UE.", "area": "sanita", "verso": 1 },
+    { "id": "a10", "testo": "Mantenere l'attuale livello di spesa sanitaria pubblica, intervenendo solo sull'efficienza.", "area": "sanita", "verso": -1 },
+    { "id": "a11", "testo": "Estendere il voto a maggioranza qualificata in Consiglio UE anche alla politica estera.", "area": "europa", "verso": 1 },
+    { "id": "a12", "testo": "Mantenere la regola dell'unanimità in Consiglio UE per le decisioni di politica estera.", "area": "europa", "verso": -1 }
+  ],
+  "partiti": [
+    {
+      "id": "esempio-a",
+      "nome": "Partito Esempio A",
+      "posizioni": [
+        { "affermazioneId": "a1", "valore": -2, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-a#a1" } },
+        { "affermazioneId": "a2", "valore": 2, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-a#a2" } },
+        { "affermazioneId": "a3", "valore": 2, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-a#a3" } },
+        { "affermazioneId": "a4", "valore": -2, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-a#a4" } },
+        { "affermazioneId": "a5", "valore": 2, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-a#a5" } },
+        { "affermazioneId": "a6", "valore": -1, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-a#a6" } },
+        { "affermazioneId": "a7", "valore": 2, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-a#a7" } },
+        { "affermazioneId": "a8", "valore": -1, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-a#a8" } },
+        { "affermazioneId": "a9", "valore": 2, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-a#a9" } },
+        { "affermazioneId": "a10", "valore": -1, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-a#a10" } },
+        { "affermazioneId": "a11", "valore": 2, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-a#a11" } },
+        { "affermazioneId": "a12", "valore": -2, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-a#a12" } }
+      ]
+    },
+    {
+      "id": "esempio-b",
+      "nome": "Partito Esempio B",
+      "posizioni": [
+        { "affermazioneId": "a1", "valore": 2, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-b#a1" } },
+        { "affermazioneId": "a2", "valore": -1, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-b#a2" } },
+        { "affermazioneId": "a3", "valore": -2, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-b#a3" } },
+        { "affermazioneId": "a4", "valore": 2, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-b#a4" } },
+        { "affermazioneId": "a5", "valore": -1, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-b#a5" } },
+        { "affermazioneId": "a6", "valore": 2, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-b#a6" } },
+        { "affermazioneId": "a7", "valore": -2, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-b#a7" } },
+        { "affermazioneId": "a8", "valore": 2, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-b#a8" } },
+        { "affermazioneId": "a9", "valore": 0, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-b#a9" } },
+        { "affermazioneId": "a10", "valore": 1, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-b#a10" } },
+        { "affermazioneId": "a11", "valore": -2, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-b#a11" } },
+        { "affermazioneId": "a12", "valore": 2, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-b#a12" } }
+      ]
+    },
+    {
+      "id": "esempio-c",
+      "nome": "Partito Esempio C",
+      "posizioni": [
+        { "affermazioneId": "a1", "valore": 0, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-c#a1" } },
+        { "affermazioneId": "a2", "valore": 1, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-c#a2" } },
+        { "affermazioneId": "a3", "valore": 1, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-c#a3" } },
+        { "affermazioneId": "a4", "valore": -1, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-c#a4" } },
+        { "affermazioneId": "a5", "valore": 0, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-c#a5" } },
+        { "affermazioneId": "a6", "valore": 1, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-c#a6" } },
+        { "affermazioneId": "a7", "valore": 1, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-c#a7" } },
+        { "affermazioneId": "a8", "valore": 0, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-c#a8" } },
+        { "affermazioneId": "a9", "valore": 1, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-c#a9" } },
+        { "affermazioneId": "a10", "valore": 0, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-c#a10" } },
+        { "affermazioneId": "a11", "valore": 1, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-c#a11" } },
+        { "affermazioneId": "a12", "valore": -1, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-c#a12" } }
+      ]
+    },
+    {
+      "id": "esempio-d",
+      "nome": "Partito Esempio D",
+      "posizioni": [
+        { "affermazioneId": "a1", "valore": 1, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-d#a1" } },
+        { "affermazioneId": "a2", "valore": -1, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-d#a2" } },
+        { "affermazioneId": "a3", "valore": -1, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-d#a3" } },
+        { "affermazioneId": "a4", "valore": 1, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-d#a4" } },
+        { "affermazioneId": "a5", "valore": 1, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-d#a5" } },
+        { "affermazioneId": "a6", "valore": -1, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-d#a6" } },
+        { "affermazioneId": "a7", "valore": -2, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-d#a7" } },
+        { "affermazioneId": "a8", "valore": 2, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-d#a8" } },
+        { "affermazioneId": "a9", "valore": 2, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-d#a9" } },
+        { "affermazioneId": "a10", "valore": -1, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-d#a10" } },
+        { "affermazioneId": "a11", "valore": -2, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-d#a11" } },
+        { "affermazioneId": "a12", "valore": 2, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-d#a12" } }
+      ]
+    },
+    {
+      "id": "esempio-e",
+      "nome": "Partito Esempio E",
+      "posizioni": [
+        { "affermazioneId": "a1", "valore": -1, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-e#a1" } },
+        { "affermazioneId": "a2", "valore": 1, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-e#a2" } },
+        { "affermazioneId": "a3", "valore": 2, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-e#a3" } },
+        { "affermazioneId": "a4", "valore": -2, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-e#a4" } },
+        { "affermazioneId": "a5", "valore": 1, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-e#a5" } },
+        { "affermazioneId": "a6", "valore": 0, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-e#a6" } },
+        { "affermazioneId": "a7", "valore": 1, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-e#a7" } },
+        { "affermazioneId": "a8", "valore": -1, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-e#a8" } },
+        { "affermazioneId": "a9", "valore": 2, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-e#a9" } },
+        { "affermazioneId": "a10", "valore": -2, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-e#a10" } },
+        { "affermazioneId": "a11", "valore": 1, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-e#a11" } },
+        { "affermazioneId": "a12", "valore": -1, "fonte": { "tipo": "programma", "citazione": "Dato di fixture per sviluppo — non rappresenta una posizione reale", "url": "https://example.org/fixture/esempio-e#a12" } }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+Scarica i loghi ufficiali dei partiti e salvali come:
+- pd.png (Partito Democratico)
+- fdi.png (Fratelli d'Italia) 
+- m5s.png (Movimento 5 Stelle)
+- lega.png (Lega)
+- avs.png (Alleanza Verdi e Sinistra)
+- fi.png (Forza Italia)
+
+I loghi verranno caricati automaticamente dal componente LogoPartito.tsx

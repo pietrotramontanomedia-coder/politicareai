@@ -1,0 +1,70 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+
+  /* Dark mode: nero bg, bianco text, giallo ocra accento */
+  --color-nero: #000000;
+  --color-bg-dark: #0f0f0f;
+  --color-bg-elevated: #1a1a1a;
+  --color-bianco: #ffffff;
+  --color-bianco-muta: #e0e0e0;
+  --color-grigio-dark: #333333;
+  --color-grigio-medio: #666666;
+  --color-giallo-ocra: #d4a574;
+  --color-giallo-ocra-bright: #f0c77a;
+
+  /* Scala di accordo: rosso (disaccordo) → giallo (neutro) → verde (accordo) */
+  --color-accordo-min: #ef4444;      /* -2: rosso intenso */
+  --color-accordo-1: #f87171;        /* -1: rosso chiaro */
+  --color-accordo-0: #fbbf24;        /* 0: giallo (neutro) */
+  --color-accordo-plus1: #84cc16;    /* +1: verde chiaro */
+  --color-accordo-max: #22c55e;      /* +2: verde intenso */
+
+  /* Barre e indicatori */
+  --color-bar-low: #ef4444;          /* disaccordo */
+  --color-bar-mid: #f0c77a;          /* neutro */
+  --color-bar-high: #22c55e;         /* accordo */
+  --color-bar-bg: #2d2d2d;           /* sfondo barre */
+}
+
+:root {
+  color-scheme: dark;
+  --bg: var(--color-bg-dark);
+  --bg-elevated: var(--color-bg-elevated);
+  --fg: var(--color-bianco);
+  --fg-muta: var(--color-bianco-muta);
+  --accento: var(--color-giallo-ocra);
+  --accento-bright: var(--color-giallo-ocra-bright);
+  --focus: var(--color-giallo-ocra);
+  --bordo: var(--color-grigio-dark);
+}
+
+* {
+  border-color: var(--bordo);
+}
+
+html {
+  color-scheme: light dark;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
