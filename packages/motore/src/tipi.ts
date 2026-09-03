@@ -80,3 +80,29 @@ export interface Classifica {
   /** true se primo e secondo sono entro 3 punti percentuali di punteggio. */
   pariMerito: boolean;
 }
+
+/** Quiz settimanale su fatti politici correnti. */
+export interface DomandaQuiz {
+  id: string;
+  testo: string;
+  /** Risposte possibili (3-4 opzioni) */
+  opzioni: string[];
+  /** Indice della risposta corretta (0-3) */
+  rispostaCorretta: number;
+  /** Spiegazione della risposta corretta */
+  spiegazione: string;
+  fonte: Fonte;
+  /** Difficoltà: 'facile' | 'media' | 'difficile' */
+  difficolta: 'facile' | 'media' | 'difficile';
+}
+
+export interface QuizSettimanale {
+  id: string;
+  settimana: number;
+  anno: number;
+  data: string;
+  titolo: string;
+  descrizione: string;
+  autori: string[];
+  domande: DomandaQuiz[];
+}

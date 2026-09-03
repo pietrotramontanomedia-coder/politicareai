@@ -1,0 +1,20 @@
+{
+  "id": "quiz-2027-w36",
+  "settimana": 36,
+  "anno": 2027,
+  "data": "2027-09-03",
+  "titolo": "Quiz Settimanale - Settimana 36",
+  "descrizione": "Domande su fatti politici accaduti questa settimana",
+  "autori": ["Politicare Team"],
+  "domande": [
+    {
+      "id": "q1",
+      "testo": "Quale paese ha annunciato nuove misure climatiche durante il G7?",
+      "opzioni": ["Germania", "Francia", "Italia", "Canada"],
+      "rispostaCorretta": 1,
+      "spiegazione": "La Francia ha presentato un nuovo piano climatico con investimenti significativi.",
+      "fonte": {"tipo": "programma", "citazione": "Annuncio G7", "url": "https://example.com"},
+      "difficolta": "facile"
+    }
+  ]
+}

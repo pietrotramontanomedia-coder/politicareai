@@ -2,41 +2,47 @@
 
 @theme {
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Clash Display', 'Inter', ui-sans-serif, system-ui, sans-serif;
 
-  /* Dark mode: nero bg, bianco text, giallo ocra accento */
+  /* Brand Politicare */
+  --color-politicare: #FFDD00;
+  --color-politicare-dark: #F0C800;
+
+  /* Palette moderna scura */
   --color-nero: #000000;
-  --color-bg-dark: #0f0f0f;
-  --color-bg-elevated: #1a1a1a;
+  --color-nero-deep: #050505;
+  --color-bg-dark: #0a0a0a;
+  --color-bg-elevated: #141414;
+  --color-bg-card: #1a1a1a;
   --color-bianco: #ffffff;
   --color-bianco-muta: #e0e0e0;
-  --color-grigio-dark: #333333;
-  --color-grigio-medio: #666666;
-  --color-giallo-ocra: #d4a574;
-  --color-giallo-ocra-bright: #f0c77a;
+  --color-grigio-dark: #2a2a2a;
+  --color-grigio-medio: #555555;
 
-  /* Scala di accordo: rosso (disaccordo) → giallo (neutro) → verde (accordo) */
-  --color-accordo-min: #ef4444;      /* -2: rosso intenso */
-  --color-accordo-1: #f87171;        /* -1: rosso chiaro */
-  --color-accordo-0: #fbbf24;        /* 0: giallo (neutro) */
-  --color-accordo-plus1: #84cc16;    /* +1: verde chiaro */
-  --color-accordo-max: #22c55e;      /* +2: verde intenso */
+  /* Scala accordo: rosso → giallo → verde */
+  --color-accordo-min: #ef4444;
+  --color-accordo-1: #f87171;
+  --color-accordo-0: #fbbf24;
+  --color-accordo-plus1: #84cc16;
+  --color-accordo-max: #22c55e;
 
-  /* Barre e indicatori */
-  --color-bar-low: #ef4444;          /* disaccordo */
-  --color-bar-mid: #f0c77a;          /* neutro */
-  --color-bar-high: #22c55e;         /* accordo */
-  --color-bar-bg: #2d2d2d;           /* sfondo barre */
+  /* Barre */
+  --color-bar-low: #ef4444;
+  --color-bar-mid: #fbbf24;
+  --color-bar-high: #22c55e;
+  --color-bar-bg: #2d2d2d;
 }
 
 :root {
   color-scheme: dark;
   --bg: var(--color-bg-dark);
   --bg-elevated: var(--color-bg-elevated);
+  --bg-card: var(--color-bg-card);
   --fg: var(--color-bianco);
   --fg-muta: var(--color-bianco-muta);
-  --accento: var(--color-giallo-ocra);
-  --accento-bright: var(--color-giallo-ocra-bright);
-  --focus: var(--color-giallo-ocra);
+  --accento: var(--color-politicare);
+  --accento-dark: var(--color-politicare-dark);
+  --focus: var(--color-politicare);
   --bordo: var(--color-grigio-dark);
 }
 
@@ -49,7 +55,7 @@ html {
 }
 
 body {
-  background: var(--bg);
+  background: linear-gradient(180deg, var(--bg) 0%, rgba(255,221,0,0.02) 50%);
   color: var(--fg);
   font-family: var(--font-sans);
 }
@@ -58,6 +64,11 @@ body {
   outline: 2px solid var(--focus);
   outline-offset: 2px;
   border-radius: 2px;
+}
+
+/* Smooth transitions */
+* {
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
 @media (prefers-reduced-motion: reduce) {
