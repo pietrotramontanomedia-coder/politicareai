@@ -11,6 +11,7 @@ export default function Header() {
       style={{
         borderColor: 'var(--bordo)',
         background: 'rgba(10,10,10,0.8)',
+        paddingTop: 'env(safe-area-inset-top)',
       }}
     >
       <div className="mx-auto max-w-6xl px-4 sm:px-6 h-16 flex items-center justify-between">
