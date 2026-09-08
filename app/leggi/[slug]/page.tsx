@@ -21,7 +21,7 @@ interface ArticoloCompleto {
   link: string;
 }
 
-const OCRA = '#BF9000';
+const OCRA = '#FEDC01';
 
 const SIGLE_PARTITI =
   'FdI|Fratelli d’Italia|Pd|Partito Democratico|M5S|Movimento 5 Stelle|Lega|Forza Italia|Azione|Iv|Italia Viva|Avs|Alleanza Verdi e Sinistra|Noi Moderati|Terzo Polo';

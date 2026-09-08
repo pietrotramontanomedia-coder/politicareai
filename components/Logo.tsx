@@ -36,7 +36,7 @@ export default function Logo({ size = 'lg', className = '' }: LogoProps) {
             bottom: '-0.02em',
             width: dot,
             height: dot,
-            background: '#FFB800',
+            background: '#FEDC01',
             borderRadius: '15%',
           }}
         />
@@ -56,7 +56,7 @@ export default function Logo({ size = 'lg', className = '' }: LogoProps) {
             transform: 'translateX(-50%)',
             width: dot,
             height: dot,
-            background: '#FFB800',
+            background: '#FEDC01',
             borderRadius: '15%',
           }}
         />
@@ -74,7 +74,7 @@ export default function Logo({ size = 'lg', className = '' }: LogoProps) {
             transform: 'translateX(-50%)',
             width: dot,
             height: dot,
-            background: '#FFB800',
+            background: '#FEDC01',
             borderRadius: '15%',
           }}
         />
