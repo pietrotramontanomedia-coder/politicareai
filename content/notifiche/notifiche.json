@@ -1,0 +1,30 @@
+{
+  "id": "notifiche-politicare",
+  "versione": "1.0.0",
+  "notifiche": [
+    {
+      "id": "notif-003",
+      "data": "2026-09-08T09:00:00+02:00",
+      "tipo": "quiz",
+      "titolo": "Nuovo quiz settimanale disponibile",
+      "testo": "Testa la tua cultura politica sui fatti della settimana 36.",
+      "link": "/quiz-settimanale"
+    },
+    {
+      "id": "notif-002",
+      "data": "2026-09-05T18:30:00+02:00",
+      "tipo": "aggiornamento",
+      "titolo": "Test partiti aggiornato",
+      "testo": "Rivista una posizione dopo la dichiarazione ufficiale del partito.",
+      "link": "/test-partito"
+    },
+    {
+      "id": "notif-001",
+      "data": "2026-09-01T10:00:00+02:00",
+      "tipo": "generale",
+      "titolo": "Benvenuto su Politicare",
+      "testo": "Scopri con quale partito sei allineato e resta aggiornato con il quiz settimanale.",
+      "link": "/"
+    }
+  ]
+}

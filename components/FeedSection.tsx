@@ -73,8 +73,8 @@ export default function FeedSection() {
         <ArticoliWidget articoli={resto} />
       </div>
 
-      {/* Agenzia stampa - flusso ultim'ora */}
-      <AgenziaStampa articoli={articoli} />
+      {/* Agenzia stampa - contenuto editoriale separato */}
+      <AgenziaStampa />
     </motion.section>
   );
 }

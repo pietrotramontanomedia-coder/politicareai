@@ -59,6 +59,17 @@ function estraiContenuto($: ReturnType<typeof load>): BloccoContenuto[] {
       }
 
       const testo = $node.text().trim();
+      if (testo.length === 0) return;
+
+      // Molti editor (WordPress/Elementor) non usano <h2/h3> per i sottotitoli
+      // ma un <p> il cui unico contenuto è un <strong>/<b>: lo trattiamo come titolo.
+      const forti = $node.children('strong, b');
+      const soloTestoForte = forti.length > 0 && forti.text().trim() === testo;
+      if (soloTestoForte && testo.length < 100 && !/[.!?]$/.test(testo)) {
+        blocchi.push({ tipo: 'titolo', testo });
+        return;
+      }
+
       if (testo.length > 30) {
         blocchi.push({ tipo: 'paragrafo', testo });
       }

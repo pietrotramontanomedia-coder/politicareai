@@ -21,6 +21,36 @@ interface ArticoloCompleto {
   link: string;
 }
 
+const OCRA = '#D4A017';
+
+// Evidenzia in grassetto ocra numeri, percentuali e orari nel testo,
+// per dare risalto ai dati salienti senza dover marcare a mano il contenuto scrapato.
+function evidenziaDati(testo: string): React.ReactNode[] {
+  const pattern = /\d+([.,]\d+)?\s?%|\d{1,2}:\d{2}|\b\d+\s?(milion[ei]|miliard[oi]|ann[oi]|vot[oi]|euro)\b/gi;
+  const nodi: React.ReactNode[] = [];
+  let ultimoIndice = 0;
+  let match: RegExpExecArray | null;
+  let chiave = 0;
+
+  while ((match = pattern.exec(testo)) !== null) {
+    if (match.index > ultimoIndice) {
+      nodi.push(testo.slice(ultimoIndice, match.index));
+    }
+    nodi.push(
+      <strong key={chiave++} style={{ color: OCRA, fontWeight: 700 }}>
+        {match[0]}
+      </strong>,
+    );
+    ultimoIndice = match.index + match[0].length;
+  }
+
+  if (ultimoIndice < testo.length) {
+    nodi.push(testo.slice(ultimoIndice));
+  }
+
+  return nodi;
+}
+
 export default function LeggiArticoloPage() {
   const params = useParams();
   const router = useRouter();
@@ -101,9 +131,9 @@ export default function LeggiArticoloPage() {
               <div className="flex items-center gap-2 mb-4">
                 <span
                   className="h-1.5 w-1.5 rounded-full"
-                  style={{ background: 'var(--accento)' }}
+                  style={{ background: OCRA }}
                 />
-                <p className="text-xs font-bold tracking-widest uppercase" style={{ color: 'var(--accento)' }}>
+                <p className="text-xs font-bold tracking-widest uppercase" style={{ color: OCRA }}>
                   {articolo.data}
                 </p>
               </div>
@@ -142,7 +172,7 @@ export default function LeggiArticoloPage() {
                       viewport={{ once: true, margin: '-50px' }}
                       transition={{ duration: 0.4 }}
                       className="text-xl sm:text-2xl font-bold mt-10 mb-4 pl-4 border-l-4"
-                      style={{ borderColor: 'var(--accento)', color: 'var(--accento)' }}
+                      style={{ borderColor: OCRA, color: OCRA }}
                     >
                       {blocco.testo}
                     </motion.h2>
@@ -185,7 +215,7 @@ export default function LeggiArticoloPage() {
                     className={isLead ? 'mb-5 font-semibold text-lg sm:text-xl leading-snug' : 'mb-5'}
                     style={isLead ? { color: 'var(--fg)' } : { color: 'var(--fg-muta)' }}
                   >
-                    {blocco.testo}
+                    {evidenziaDati(blocco.testo)}
                   </motion.p>
                 );
               })}
