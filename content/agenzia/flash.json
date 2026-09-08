@@ -1,0 +1,44 @@
+{
+  "id": "agenzia-flash",
+  "versione": "1.0.0",
+  "data": "2026-09-08",
+  "autori": ["Redazione Politicare"],
+  "voci": [
+    {
+      "id": "flash-001",
+      "orario": "2026-09-08T14:20:00+02:00",
+      "titolo": "Consiglio dei Ministri: approvato il decreto sicurezza bis",
+      "testo": "Via libera al nuovo pacchetto che inasprisce le pene per reati commessi in gruppo. Il testo passa ora alle Camere per la conversione."
+    },
+    {
+      "id": "flash-002",
+      "orario": "2026-09-08T14:00:00+02:00",
+      "titolo": "Manovra 2027, slitta il vertice di maggioranza",
+      "testo": "Rinviato a domani l'incontro tra i capigruppo sui tagli al cuneo fiscale. Tensioni sulla copertura finanziaria."
+    },
+    {
+      "id": "flash-003",
+      "orario": "2026-09-08T13:40:00+02:00",
+      "titolo": "Ue, accordo raggiunto sul nuovo patto migrazione",
+      "testo": "I ministri degli Interni trovano l'intesa sui centri di rimpatrio. Italia soddisfatta, critiche da ONG."
+    },
+    {
+      "id": "flash-004",
+      "orario": "2026-09-08T13:15:00+02:00",
+      "titolo": "Camera, approvato in prima lettura il ddl concorrenza",
+      "testo": "Passa con 210 voti favorevoli. Il testo ora al Senato per il secondo passaggio parlamentare."
+    },
+    {
+      "id": "flash-005",
+      "orario": "2026-09-08T12:50:00+02:00",
+      "titolo": "Sondaggi, FdI stabile al 28%, cresce il M5S",
+      "testo": "L'ultima rilevazione mostra un lieve calo del Pd. Terzo polo fermo sotto la soglia del 10%."
+    },
+    {
+      "id": "flash-006",
+      "orario": "2026-09-08T12:30:00+02:00",
+      "titolo": "Giustizia, la riforma arriva in aula il 15 settembre",
+      "testo": "Confermato il calendario. Opposizioni annunciano battaglia sugli emendamenti in commissione."
+    }
+  ]
+}

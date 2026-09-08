@@ -17,8 +17,8 @@ export default function Logo({ size = 'lg', className = '' }: LogoProps) {
     <div
       className={`inline-flex items-baseline select-none ${className}`}
       style={{
-        fontFamily: 'var(--font-poppins), Poppins, sans-serif',
-        fontWeight: 800,
+        fontFamily: 'var(--font-google-sans), "Google Sans", sans-serif',
+        fontWeight: 700,
         fontSize,
         color: '#ffffff',
         letterSpacing: '-0.01em',
