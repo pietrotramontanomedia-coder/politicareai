@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import FeedSection from '@/components/FeedSection';
+import Logo from '@/components/Logo';
 
 export default function Home() {
   return (
@@ -13,28 +14,15 @@ export default function Home() {
       className="min-h-dvh flex flex-col justify-center px-4 py-16 sm:px-6"
     >
       <div className="mx-auto max-w-6xl w-full">
-        {/* Logo e titolo */}
+        {/* Logo */}
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.4, delay: 0.1 }}
-          className="flex justify-center mb-8"
+          className="flex justify-center mb-6"
         >
-          <svg viewBox="0 0 120 120" className="h-20 w-20" xmlns="http://www.w3.org/2000/svg">
-            <rect x="15" y="65" width="25" height="25" fill="var(--accento)" rx="3"/>
-            <rect x="50" y="20" width="25" height="25" fill="var(--accento)" rx="3"/>
-            <rect x="85" y="50" width="25" height="25" fill="var(--accento)" rx="3"/>
-          </svg>
+          <Logo size="xl" />
         </motion.div>
-
-        <motion.h1
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.15 }}
-          className="text-center text-4xl sm:text-5xl font-bold tracking-tight text-balance"
-        >
-          Politicare
-        </motion.h1>
 
         <motion.p
           initial={{ opacity: 0 }}

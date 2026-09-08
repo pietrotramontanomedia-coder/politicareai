@@ -43,7 +43,7 @@ async function scrapaPoliticare(): Promise<FeedArticle[]> {
       }
     });
 
-    return articoli.slice(0, 6);
+    return articoli.slice(0, 20);
   } catch (error) {
     console.error('Scraping error:', error);
     return [];

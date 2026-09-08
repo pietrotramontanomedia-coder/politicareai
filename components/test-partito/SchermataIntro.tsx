@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import Image from 'next/image';
 import type { TestPartitoPack } from '@politicare/motore';
 import { etichettaArea } from '@/lib/aree';
+import Logo from '@/components/Logo';
 
 interface Props {
   pack: TestPartitoPack;
@@ -27,12 +28,7 @@ export default function SchermataIntro({ pack, onInizia }: Props) {
         transition={{ duration: 0.4, delay: 0.1 }}
         className="mb-8 flex justify-center"
       >
-        <svg viewBox="0 0 120 120" className="h-16 w-16" xmlns="http://www.w3.org/2000/svg">
-          <rect x="10" y="35" width="20" height="20" fill="var(--accento)" rx="2"/>
-          <rect x="50" y="25" width="20" height="20" fill="var(--accento)" rx="2"/>
-          <rect x="90" y="35" width="20" height="20" fill="var(--accento)" rx="2"/>
-          <line x1="50" y1="60" x2="70" y2="60" stroke="var(--accento)" strokeWidth="2" strokeLinecap="round"/>
-        </svg>
+        <Logo size="md" />
       </motion.div>
 
       {/* Header */}
@@ -41,10 +37,7 @@ export default function SchermataIntro({ pack, onInizia }: Props) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.15 }}
       >
-        <p className="text-center text-sm font-medium tracking-wide uppercase" style={{ color: 'var(--accento)' }}>
-          Politicare
-        </p>
-        <h1 className="mt-4 text-center text-4xl font-bold tracking-tight text-balance sm:text-5xl">
+        <h1 className="text-center text-4xl font-bold tracking-tight text-balance sm:text-5xl">
           Con quale partito sei più allineato?
         </h1>
       </motion.div>

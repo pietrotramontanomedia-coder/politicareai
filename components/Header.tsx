@@ -1,0 +1,34 @@
+'use client';
+
+import Link from 'next/link';
+import Logo from './Logo';
+
+export default function Header() {
+  return (
+    <header
+      className="sticky top-0 z-50 border-b backdrop-blur-md"
+      style={{
+        borderColor: 'var(--bordo)',
+        background: 'rgba(10,10,10,0.8)',
+      }}
+    >
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 h-16 flex items-center justify-between">
+        <Link href="/">
+          <Logo size="sm" />
+        </Link>
+
+        <nav className="hidden sm:flex items-center gap-6 text-sm font-medium">
+          <Link href="/test-partito" className="hover:opacity-70 transition-opacity">
+            Test Partiti
+          </Link>
+          <Link href="/quiz-settimanale" className="hover:opacity-70 transition-opacity">
+            Quiz
+          </Link>
+          <Link href="/metodologia" className="hover:opacity-70 transition-opacity" style={{ color: 'var(--fg-muta)' }}>
+            Metodologia
+          </Link>
+        </nav>
+      </div>
+    </header>
+  );
+}
