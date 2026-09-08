@@ -1,15 +1,21 @@
 import { load } from 'cheerio';
 
+interface BloccoContenuto {
+  tipo: 'titolo' | 'paragrafo' | 'lista';
+  testo: string;
+  voci?: string[];
+}
+
 interface ArticoloCompleto {
   titolo: string;
   immagine?: string;
   data?: string;
   autore?: string;
-  contenuto: string[];
+  contenuto: BloccoContenuto[];
   link: string;
 }
 
-function estraiContenuto($: ReturnType<typeof load>): string[] {
+function estraiContenuto($: ReturnType<typeof load>): BloccoContenuto[] {
   const selettori = [
     'article .content',
     'article .entry-content',
@@ -23,16 +29,44 @@ function estraiContenuto($: ReturnType<typeof load>): string[] {
     const el = $(sel).first();
     if (el.length === 0) continue;
 
-    const paragrafi: string[] = [];
-    el.find('p').each((_, p) => {
-      const testo = $(p).text().trim();
+    const blocchi: BloccoContenuto[] = [];
+
+    el.find('h2, h3, h4, p, ul, ol').each((_, node) => {
+      const tag = (node as { tagName?: string }).tagName?.toLowerCase();
+      const $node = $(node);
+
+      // Salta elementi annidati dentro elementi già catturati (es. p dentro li)
+      if ($node.parents('li').length > 0) return;
+
+      if (tag === 'h2' || tag === 'h3' || tag === 'h4') {
+        const testo = $node.text().trim();
+        if (testo.length > 2 && testo.length < 150) {
+          blocchi.push({ tipo: 'titolo', testo });
+        }
+        return;
+      }
+
+      if (tag === 'ul' || tag === 'ol') {
+        const voci = $node
+          .find('li')
+          .map((_, li) => $(li).text().trim())
+          .get()
+          .filter((v) => v.length > 0);
+        if (voci.length > 0) {
+          blocchi.push({ tipo: 'lista', testo: '', voci });
+        }
+        return;
+      }
+
+      const testo = $node.text().trim();
       if (testo.length > 30) {
-        paragrafi.push(testo);
+        blocchi.push({ tipo: 'paragrafo', testo });
       }
     });
 
-    if (paragrafi.length > 0) {
-      return paragrafi;
+    const numParagrafi = blocchi.filter((b) => b.tipo === 'paragrafo').length;
+    if (numParagrafi > 0) {
+      return blocchi;
     }
   }
 

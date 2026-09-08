@@ -51,8 +51,8 @@ export default function NewsCarousel({ articoli }: { articoli: FeedArticle[] }) 
 
   return (
     <div
-      className="relative w-full overflow-hidden rounded-2xl sm:rounded-3xl"
-      style={{ height: 'clamp(280px, 45vw, 480px)', background: 'var(--bg-card)' }}
+      className="relative w-full overflow-hidden rounded-2xl sm:rounded-3xl aspect-square mx-auto"
+      style={{ maxWidth: 'min(100%, 560px)', background: 'var(--bg-card)' }}
       onMouseEnter={() => timerRef.current && clearInterval(timerRef.current)}
       onMouseLeave={() => {
         timerRef.current = setInterval(avanti, INTERVALLO_MS);
@@ -83,17 +83,17 @@ export default function NewsCarousel({ articoli }: { articoli: FeedArticle[] }) 
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
 
           {/* Contenuto */}
-          <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-10">
+          <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-8">
             <span
               className="inline-block rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide mb-3"
               style={{ background: 'var(--accento)', color: '#000' }}
             >
               In evidenza
             </span>
-            <h2 className="text-2xl sm:text-4xl font-bold text-white leading-tight max-w-2xl">
+            <h2 className="text-xl sm:text-2xl font-bold text-white leading-tight line-clamp-3">
               {corrente.titolo}
             </h2>
-            <p className="mt-3 text-sm sm:text-base text-white/80 max-w-xl line-clamp-2">
+            <p className="mt-2 text-sm text-white/80 line-clamp-2">
               {corrente.descrizione}
             </p>
           </div>

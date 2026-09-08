@@ -6,12 +6,18 @@ import { motion } from 'framer-motion';
 import { slugToUrl } from '@/lib/slug';
 import ArticoloSkeleton from '@/components/ArticoloSkeleton';
 
+interface BloccoContenuto {
+  tipo: 'titolo' | 'paragrafo' | 'lista';
+  testo: string;
+  voci?: string[];
+}
+
 interface ArticoloCompleto {
   titolo: string;
   immagine?: string;
   data?: string;
   autore?: string;
-  contenuto: string[];
+  contenuto: BloccoContenuto[];
   link: string;
 }
 
@@ -48,6 +54,8 @@ export default function LeggiArticoloPage() {
       .catch(() => setErrore(true))
       .finally(() => setLoading(false));
   }, [slug]);
+
+  const numParagrafo = { i: 0 };
 
   return (
     <main className="min-h-dvh px-4 py-8 sm:px-6">
@@ -90,31 +98,97 @@ export default function LeggiArticoloPage() {
             transition={{ duration: 0.4 }}
           >
             {articolo.data && (
-              <p className="text-xs font-bold tracking-widest uppercase mb-3" style={{ color: 'var(--accento)' }}>
-                {articolo.data}
-              </p>
+              <div className="flex items-center gap-2 mb-4">
+                <span
+                  className="h-1.5 w-1.5 rounded-full"
+                  style={{ background: 'var(--accento)' }}
+                />
+                <p className="text-xs font-bold tracking-widest uppercase" style={{ color: 'var(--accento)' }}>
+                  {articolo.data}
+                </p>
+              </div>
             )}
 
-            <h1 className="text-3xl sm:text-4xl font-bold leading-tight mb-6">
+            <h1 className="text-3xl sm:text-4xl font-extrabold leading-tight mb-6 tracking-tight">
               {articolo.titolo}
             </h1>
 
             {articolo.autore && (
-              <p className="text-sm mb-6" style={{ color: 'var(--fg-muta)' }}>
-                di {articolo.autore}
+              <p className="text-sm mb-6 font-medium" style={{ color: 'var(--fg-muta)' }}>
+                di <span style={{ color: 'var(--fg)' }}>{articolo.autore}</span>
               </p>
             )}
 
             {articolo.immagine && (
-              <div className="mb-8 rounded-2xl overflow-hidden">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                className="mb-8 rounded-2xl overflow-hidden shadow-2xl"
+                style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.4)' }}
+              >
                 <img src={articolo.immagine} alt={articolo.titolo} className="w-full h-auto" />
-              </div>
+              </motion.div>
             )}
 
-            <div className="space-y-4 text-base leading-relaxed">
-              {articolo.contenuto.map((paragrafo, idx) => (
-                <p key={idx}>{paragrafo}</p>
-              ))}
+            <div className="text-base sm:text-lg leading-relaxed" style={{ color: 'var(--fg)' }}>
+              {articolo.contenuto.map((blocco, idx) => {
+                if (blocco.tipo === 'titolo') {
+                  return (
+                    <motion.h2
+                      key={idx}
+                      initial={{ opacity: 0, x: -10 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true, margin: '-50px' }}
+                      transition={{ duration: 0.4 }}
+                      className="text-xl sm:text-2xl font-bold mt-10 mb-4 pl-4 border-l-4"
+                      style={{ borderColor: 'var(--accento)', color: 'var(--accento)' }}
+                    >
+                      {blocco.testo}
+                    </motion.h2>
+                  );
+                }
+
+                if (blocco.tipo === 'lista') {
+                  return (
+                    <motion.ul
+                      key={idx}
+                      initial={{ opacity: 0 }}
+                      whileInView={{ opacity: 1 }}
+                      viewport={{ once: true, margin: '-50px' }}
+                      className="my-5 space-y-3 rounded-xl p-5"
+                      style={{ background: 'var(--bg-card)', border: '1px solid var(--bordo)' }}
+                    >
+                      {blocco.voci?.map((voce, vIdx) => (
+                        <li key={vIdx} className="flex gap-3 items-start">
+                          <span
+                            className="mt-2 h-1.5 w-1.5 rounded-full shrink-0"
+                            style={{ background: 'var(--accento)' }}
+                          />
+                          <span>{voce}</span>
+                        </li>
+                      ))}
+                    </motion.ul>
+                  );
+                }
+
+                numParagrafo.i += 1;
+                const isLead = numParagrafo.i === 1;
+
+                return (
+                  <motion.p
+                    key={idx}
+                    initial={{ opacity: 0, y: 8 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: '-30px' }}
+                    transition={{ duration: 0.35 }}
+                    className={isLead ? 'mb-5 font-semibold text-lg sm:text-xl leading-snug' : 'mb-5'}
+                    style={isLead ? { color: 'var(--fg)' } : { color: 'var(--fg-muta)' }}
+                  >
+                    {blocco.testo}
+                  </motion.p>
+                );
+              })}
             </div>
 
             <div className="mt-10 pt-6 border-t" style={{ borderColor: 'var(--bordo)' }}>
@@ -122,7 +196,7 @@ export default function LeggiArticoloPage() {
                 href={articolo.link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm font-medium underline"
+                className="inline-flex items-center gap-2 text-sm font-bold"
                 style={{ color: 'var(--accento)' }}
               >
                 Vedi articolo originale su politicare.it →
