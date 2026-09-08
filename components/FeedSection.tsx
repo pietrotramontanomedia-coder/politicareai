@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import NewsCarousel from './NewsCarousel';
+import FeedSkeleton from './FeedSkeleton';
 
 interface FeedArticle {
   id: string;
@@ -36,11 +37,7 @@ export default function FeedSection() {
   }, []);
 
   if (loading) {
-    return (
-      <div className="mt-24 py-12 text-center" style={{ color: 'var(--fg-muta)' }}>
-        <p>📰 Caricamento articoli da Politicare...</p>
-      </div>
-    );
+    return <FeedSkeleton />;
   }
 
   if (articoli.length === 0) {

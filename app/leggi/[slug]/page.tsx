@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { slugToUrl } from '@/lib/slug';
+import ArticoloSkeleton from '@/components/ArticoloSkeleton';
 
 interface ArticoloCompleto {
   titolo: string;
@@ -60,11 +61,7 @@ export default function LeggiArticoloPage() {
           <span>←</span> Indietro
         </button>
 
-        {loading && (
-          <div className="py-24 text-center" style={{ color: 'var(--fg-muta)' }}>
-            <p>📰 Caricamento articolo...</p>
-          </div>
-        )}
+        {loading && <ArticoloSkeleton />}
 
         {errore && !loading && (
           <div className="py-24 text-center">
