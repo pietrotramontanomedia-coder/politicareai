@@ -21,12 +21,21 @@ interface ArticoloCompleto {
   link: string;
 }
 
-const OCRA = '#D4A017';
+const OCRA = '#BF9000';
 
-// Evidenzia in grassetto ocra numeri, percentuali e orari nel testo,
-// per dare risalto ai dati salienti senza dover marcare a mano il contenuto scrapato.
+const SIGLE_PARTITI =
+  'FdI|Fratelli d’Italia|Pd|Partito Democratico|M5S|Movimento 5 Stelle|Lega|Forza Italia|Azione|Iv|Italia Viva|Avs|Alleanza Verdi e Sinistra|Noi Moderati|Terzo Polo';
+
+// Evidenzia in grassetto ocra i dati salienti del testo: numeri/percentuali/orari,
+// citazioni dirette fra virgolette e sigle di partiti - per dare risalto visivo
+// senza dover marcare a mano il contenuto scrapato.
 function evidenziaDati(testo: string): React.ReactNode[] {
-  const pattern = /\d+([.,]\d+)?\s?%|\d{1,2}:\d{2}|\b\d+\s?(milion[ei]|miliard[oi]|ann[oi]|vot[oi]|euro)\b/gi;
+  const pattern = new RegExp(
+    `\\d+([.,]\\d+)?\\s?%|\\d{1,2}:\\d{2}|\\b\\d+\\s?(milion[ei]|miliard[oi]|ann[oi]|vot[oi]|euro)\\b` +
+      `|[«"“][^»"”]{4,80}[»"”]` +
+      `|\\b(${SIGLE_PARTITI})\\b`,
+    'gi',
+  );
   const nodi: React.ReactNode[] = [];
   let ultimoIndice = 0;
   let match: RegExpExecArray | null;
@@ -42,6 +51,7 @@ function evidenziaDati(testo: string): React.ReactNode[] {
       </strong>,
     );
     ultimoIndice = match.index + match[0].length;
+    if (match.index === pattern.lastIndex) pattern.lastIndex++;
   }
 
   if (ultimoIndice < testo.length) {
