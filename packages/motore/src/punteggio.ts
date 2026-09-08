@@ -61,9 +61,12 @@ export function calcolaPunteggio(risposte: Risposta[], partito: Partito): Risult
  * l'intera classifica (vincolo di prodotto, non solo di calcolo).
  */
 export function calcolaClassifica(risposte: Risposta[], partiti: Partito[]): Classifica {
+  // A parità di punteggio esatta, l'ordine non deve dipendere dalla posizione
+  // del partito nel content pack (che riflette la sua rilevanza attuale):
+  // il tie-break è alfabetico, l'unico criterio neutro rispetto alla dimensione del partito.
   const risultati = partiti
     .map((partito) => calcolaPunteggio(risposte, partito))
-    .sort((a, b) => b.punteggio - a.punteggio);
+    .sort((a, b) => b.punteggio - a.punteggio || a.nome.localeCompare(b.nome));
 
   const pariMerito =
     risultati.length >= 2 &&

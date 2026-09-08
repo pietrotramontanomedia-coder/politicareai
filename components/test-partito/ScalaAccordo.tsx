@@ -3,11 +3,11 @@
 import type { Valore } from '@politicare/motore';
 
 const OPZIONI: Array<{ valore: Valore; label: string; colore: string }> = [
-  { valore: -2, label: 'Molto contrario', colore: 'var(--color-accordo-1)' },
-  { valore: -1, label: 'Contrario', colore: 'var(--color-accordo-2)' },
-  { valore: 0, label: 'Neutro', colore: 'var(--color-accordo-3)' },
-  { valore: 1, label: 'Favorevole', colore: 'var(--color-accordo-4)' },
-  { valore: 2, label: 'Molto favorevole', colore: 'var(--color-accordo-5)' },
+  { valore: -2, label: 'Molto contrario', colore: 'var(--color-scala-1)' },
+  { valore: -1, label: 'Contrario', colore: 'var(--color-scala-2)' },
+  { valore: 0, label: 'Neutro', colore: 'var(--color-scala-3)' },
+  { valore: 1, label: 'Favorevole', colore: 'var(--color-scala-4)' },
+  { valore: 2, label: 'Molto favorevole', colore: 'var(--color-scala-5)' },
 ];
 
 interface Props {

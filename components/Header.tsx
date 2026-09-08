@@ -14,7 +14,7 @@ export default function Header() {
         paddingTop: 'env(safe-area-inset-top)',
       }}
     >
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 h-16 flex items-center justify-between">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 h-20 flex items-center justify-between">
         <Link href="/">
           <Logo size="sm" />
         </Link>

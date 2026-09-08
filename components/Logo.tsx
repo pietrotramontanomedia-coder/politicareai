@@ -8,7 +8,7 @@ interface LogoProps {
 const ASPECT_RATIO = 3360 / 1890;
 
 const ALTEZZE: Record<NonNullable<LogoProps['size']>, number> = {
-  sm: 24,
+  sm: 52,
   md: 32,
   lg: 56,
   xl: 90,

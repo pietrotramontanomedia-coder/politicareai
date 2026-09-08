@@ -26,6 +26,13 @@
   --color-accordo-plus1: #84cc16;
   --color-accordo-max: #22c55e;
 
+  /* Scala a 5 punti per le opzioni di risposta del test (molto contrario -> molto favorevole) */
+  --color-scala-1: #ef4444;
+  --color-scala-2: #f59e0b;
+  --color-scala-3: #9ca3af;
+  --color-scala-4: #84cc16;
+  --color-scala-5: #22c55e;
+
   /* Barre */
   --color-bar-low: #ef4444;
   --color-bar-mid: #fbbf24;

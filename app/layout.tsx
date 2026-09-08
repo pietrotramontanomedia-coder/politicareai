@@ -7,14 +7,10 @@ import './globals.css';
 
 const googleSans = localFont({
   src: [
-    { path: '../public/fonts/Google-Sans-400.ttf', weight: '400', style: 'normal' },
-    { path: '../public/fonts/Google-Sans-400-Italic.ttf', weight: '400', style: 'italic' },
-    { path: '../public/fonts/Google-Sans-500.ttf', weight: '500', style: 'normal' },
-    { path: '../public/fonts/Google-Sans-500-Italic.ttf', weight: '500', style: 'italic' },
-    { path: '../public/fonts/Google-Sans-600.ttf', weight: '600', style: 'normal' },
-    { path: '../public/fonts/Google-Sans-600-Italic.ttf', weight: '600', style: 'italic' },
-    { path: '../public/fonts/Google-Sans-700.ttf', weight: '700', style: 'normal' },
-    { path: '../public/fonts/Google-Sans-700-Italic.ttf', weight: '700', style: 'italic' },
+    { path: '../public/fonts/Google-Sans-400.woff2', weight: '400', style: 'normal' },
+    { path: '../public/fonts/Google-Sans-500.woff2', weight: '500', style: 'normal' },
+    { path: '../public/fonts/Google-Sans-600.woff2', weight: '600', style: 'normal' },
+    { path: '../public/fonts/Google-Sans-700.woff2', weight: '700', style: 'normal' },
   ],
   variable: '--font-google-sans',
   display: 'swap',
