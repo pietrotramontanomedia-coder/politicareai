@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import FeedSection from '@/components/FeedSection';
 
 export default function Home() {
   return (
@@ -131,6 +132,9 @@ export default function Home() {
             </Link>
           </p>
         </motion.div>
+
+        {/* Feed sezione */}
+        <FeedSection />
       </div>
     </motion.main>
   );
