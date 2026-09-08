@@ -12,7 +12,7 @@ export default function Home() {
       transition={{ duration: 0.5 }}
       className="min-h-dvh flex flex-col justify-center px-4 py-16 sm:px-6"
     >
-      <div className="mx-auto max-w-2xl w-full">
+      <div className="mx-auto max-w-6xl w-full">
         {/* Logo e titolo */}
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
@@ -21,10 +21,9 @@ export default function Home() {
           className="flex justify-center mb-8"
         >
           <svg viewBox="0 0 120 120" className="h-20 w-20" xmlns="http://www.w3.org/2000/svg">
-            <rect x="10" y="35" width="20" height="20" fill="var(--accento)" rx="2"/>
-            <rect x="50" y="25" width="20" height="20" fill="var(--accento)" rx="2"/>
-            <rect x="90" y="35" width="20" height="20" fill="var(--accento)" rx="2"/>
-            <line x1="50" y1="60" x2="70" y2="60" stroke="var(--accento)" strokeWidth="2" strokeLinecap="round"/>
+            <rect x="15" y="65" width="25" height="25" fill="var(--accento)" rx="3"/>
+            <rect x="50" y="20" width="25" height="25" fill="var(--accento)" rx="3"/>
+            <rect x="85" y="50" width="25" height="25" fill="var(--accento)" rx="3"/>
           </svg>
         </motion.div>
 
@@ -52,7 +51,7 @@ export default function Home() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.4, delay: 0.3 }}
-          className="mt-16 space-y-4 sm:space-y-6"
+          className="mt-16 grid grid-cols-1 lg:grid-cols-2 gap-6"
         >
           {/* Test Allineamento */}
           <Link href="/test-partito">
