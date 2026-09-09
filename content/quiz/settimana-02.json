@@ -1,0 +1,172 @@
+{
+  "id": "quiz-settimana-02",
+  "versione": "1.0.0",
+  "numero": 2,
+  "data": "2026-09-09",
+  "periodo": {
+    "dal": "2026-08-26",
+    "al": "2026-09-01"
+  },
+  "titolo": "Quiz settimanale",
+  "sottotitolo": "Quiz 2",
+  "descrizione": "Sette domande sui fatti politici della settimana, quattro sull'Italia e tre sull'estero. Ogni risposta ha una spiegazione e una fonte verificabile.",
+  "autori": [
+    "Redazione Politicare"
+  ],
+  "changelog": [
+    {
+      "versione": "1.0.0",
+      "data": "2026-09-09",
+      "note": "Prima pubblicazione, a recupero della settimana 26 agosto - 1 settembre."
+    }
+  ],
+  "sezioni": [
+    {
+      "id": "italia",
+      "titolo": "Italia",
+      "icona": "🇮🇹",
+      "descrizione": "Alleanze a destra, Difesa, Rai e un ricovero all'estero."
+    },
+    {
+      "id": "estero",
+      "titolo": "Estero",
+      "icona": "🌍",
+      "descrizione": "Norvegia, Stati Uniti e Regno Unito."
+    }
+  ],
+  "domande": [
+    {
+      "id": "q1",
+      "sezione": "italia",
+      "difficolta": "facile",
+      "testo": "Il 29 agosto l'ex deputato del Movimento 5 Stelle Alessandro Di Battista è stato ricoverato in gravi condizioni dopo un malore, mentre era all'estero per un reportage. In quale Paese?",
+      "opzioni": [
+        "Venezuela",
+        "Cuba",
+        "Messico",
+        "Nicaragua"
+      ],
+      "rispostaCorretta": 1,
+      "spiegazione": "Di Battista è stato ricoverato a Santa Clara, a Cuba, dopo forti mal di testa e un malore, poi trasferito all'Avana. Si trovava sull'isola per un reportage per Il Fatto Quotidiano e TvLoft. Il ministro degli Esteri Tajani si è messo in contatto con l'ambasciata italiana e il M5S ha espresso vicinanza alla famiglia.",
+      "fonte": {
+        "tipo": "stampa",
+        "citazione": "ANSA, 29 agosto 2026: \"Alessandro Di Battista ricoverato a Cuba in gravi condizioni, 'forte mal di testa e malore'\"",
+        "url": "https://www.ansa.it/sito/notizie/politica/2026/08/29/alessandro-di-battista-ricoverato-a-cuba-tajani-in-contatto-con-lambasciata_97ec2496-cf44-4da9-83da-8df05bbe6eaf.html"
+      }
+    },
+    {
+      "id": "q2",
+      "sezione": "italia",
+      "difficolta": "media",
+      "testo": "Il 27 agosto il viceministro degli Esteri Edmondo Cirielli (FdI) ha detto: \"Spero si possa governare insieme a Vannacci\". Come ha reagito Fratelli d'Italia?",
+      "opzioni": [
+        "Ha confermato che l'alleanza con Futuro Nazionale è in agenda",
+        "In meno di un'ora ha precisato che sono dichiarazioni personali, non la posizione del partito",
+        "Ha aperto un procedimento disciplinare contro Cirielli",
+        "Ha invitato Vannacci al prossimo evento di partito"
+      ],
+      "rispostaCorretta": 1,
+      "spiegazione": "Cirielli aveva parlato a Ischia, alla presentazione di un circolo di Gioventù Nazionale. Fonti del partito hanno gelato l'apertura in meno di un'ora: \"Dichiarazioni personali, non è la posizione di FdI\". Cirielli ha poi definito le sue valutazioni \"teoriche e ipotetiche\", negando che un'alleanza con Futuro Nazionale sia in agenda.",
+      "fonte": {
+        "tipo": "stampa",
+        "citazione": "ANSA, 27 agosto 2026: \"'Spero si governi con Vannacci', ma sull'apertura di Cirielli il gelo di FdI\"",
+        "url": "https://www.ansa.it/sito/notizie/politica/2026/08/27/cirielli-fdi-spero-si-possa-governare-con-vannacci_d529dcc4-9ebd-46b5-b4e1-5d5e84a72992.html"
+      }
+    },
+    {
+      "id": "q3",
+      "sezione": "italia",
+      "difficolta": "media",
+      "testo": "Il 28 agosto il ministro Crosetto ha annunciato un incarico per Mykhailo Fedorov, ex ministro della Difesa ucraino rimosso da Zelensky a luglio. Quale?",
+      "opzioni": [
+        "Consulente per l'innovazione della Difesa italiana, con focus su droni e difesa aerea",
+        "Ambasciatore dell'Ucraina in Italia",
+        "Comandante di una missione di addestramento NATO in Italia",
+        "Commissario per la ricostruzione dell'Ucraina"
+      ],
+      "rispostaCorretta": 0,
+      "spiegazione": "Fedorov, 35 anni, prima di guidare la Difesa da gennaio 2026 aveva a lungo diretto la trasformazione digitale ucraina. Per Crosetto è l'occasione di confrontarsi \"su droni, sistemi senza pilota e difesa aerea\": sarà consulente per l'innovazione, con attenzione anche all'accelerazione di sviluppo e acquisti.",
+      "fonte": {
+        "tipo": "stampa",
+        "citazione": "ANSA, 28 agosto 2026: \"L'ex ministro ucraino Fedorov consulente per la Difesa, 'focus sui droni'\"",
+        "url": "https://www.ansa.it/sito/notizie/politica/2026/08/28/lex-ministro-ucraino-fedorov-sara-consulente-della-difesa-italiana_992ed9d2-0d65-420b-af66-170aee3be177.html"
+      }
+    },
+    {
+      "id": "q4",
+      "sezione": "italia",
+      "difficolta": "difficile",
+      "testo": "Il 28 agosto la Rai ha rimosso Sigfrido Ranucci dalla conduzione di Report, che tornerà in onda l'8 novembre. A quale vicenda è legata la decisione, secondo le ricostruzioni?",
+      "opzioni": [
+        "A un contenzioso sui compensi della squadra del programma",
+        "All'inchiesta sull'attentato subito da Ranucci nel 2025, organizzato dal suo amico Valter Lavitola",
+        "A una querela per diffamazione presentata da un ministro",
+        "Al passaggio di Ranucci a un'altra emittente"
+      ],
+      "rispostaCorretta": 1,
+      "spiegazione": "La Rai non ha dato motivazioni ufficiali. La decisione arriva dopo quanto emerso dalle indagini sull'attentato dell'ottobre 2025, organizzato da Valter Lavitola, imprenditore coinvolto in vari scandali e molto vicino a Ranucci: fra l'altro intercettazioni in cui il giornalista condivideva con lui documenti interni dell'azienda. Ranucci ha contestato la scelta e la redazione ha protestato.",
+      "fonte": {
+        "tipo": "stampa",
+        "citazione": "Il Post, 29 agosto 2026: \"Perché la Rai ha rimosso Ranucci?\"",
+        "url": "https://www.ilpost.it/2026/08/29/rapporti-rai-ranucci/"
+      }
+    },
+    {
+      "id": "q5",
+      "sezione": "estero",
+      "difficolta": "facile",
+      "testo": "Il 28 agosto è morto a 89 anni re Harald V di Norvegia, dopo 35 anni di regno. Chi gli è succeduto e ha giurato davanti al Parlamento il 1° settembre?",
+      "opzioni": [
+        "Haakon VIII",
+        "Olav VI",
+        "Magnus VIII",
+        "Frederik X"
+      ],
+      "rispostaCorretta": 0,
+      "spiegazione": "Il figlio Haakon, 53 anni, ha scelto il nome regale Haakon VIII. Davanti al Parlamento a Oslo ha promesso di \"governare il Regno di Norvegia in conformità con la sua Costituzione e le sue leggi\" e ha adottato il motto tradizionale \"Tutto per la Norvegia\".",
+      "fonte": {
+        "tipo": "stampa",
+        "citazione": "LaPresse, 1 settembre 2026: \"Norvegia, re Haakon VIII giura davanti al Parlamento\"",
+        "url": "https://www.lapresse.it/esteri/2026/09/01/norvegia-re-haakon-viii-giura-davanti-al-parlamento/"
+      }
+    },
+    {
+      "id": "q6",
+      "sezione": "estero",
+      "difficolta": "media",
+      "testo": "Il 26 agosto l'amministrazione Trump ha sospeso in tutto il mondo le richieste di visto per immigrati. Con quale motivazione ufficiale?",
+      "opzioni": [
+        "Un allarme terrorismo segnalato dall'intelligence",
+        "Una \"formazione approfondita\" dei funzionari consolari per escludere chi potrebbe dipendere dall'assistenza pubblica",
+        "Il blocco delle attività federali per mancanza di fondi",
+        "Una nuova legge approvata dal Congresso"
+      ],
+      "rispostaCorretta": 1,
+      "spiegazione": "La sospensione serve a completare la formazione del personale consolare avviata a inizio agosto, con nuove linee guida per escludere i richiedenti che potrebbero \"necessitare di assistenza negli Stati Uniti\" o pesare sulla finanza pubblica. Chi aveva un colloquio fissato nelle ambasciate ha ricevuto un'email di rinvio.",
+      "fonte": {
+        "tipo": "stampa",
+        "citazione": "ANSA, 26 agosto 2026: \"'Trump sospende le richieste di visto per immigrati in tutto il mondo'\"",
+        "url": "https://www.ansa.it/sito/notizie/mondo/nordamerica/2026/08/26/trump-sospende-le-richieste-di-visto-per-immigrati-in-tutto-il-mondo_5ca56ad8-845f-451f-a373-48f93e52fea2.html"
+      }
+    },
+    {
+      "id": "q7",
+      "sezione": "estero",
+      "difficolta": "difficile",
+      "testo": "Il 1° settembre Andy Burnham ha tenuto il primo discorso alla Camera dei Comuni da primo ministro. Quale programma sui servizi essenziali ha ribadito?",
+      "opzioni": [
+        "Privatizzare il servizio sanitario nazionale",
+        "Riportare trasporti, energia e acqua sotto il controllo pubblico",
+        "Uscire dalla Convenzione europea dei diritti umani",
+        "Reintrodurre il servizio militare obbligatorio"
+      ],
+      "rispostaCorretta": 1,
+      "spiegazione": "Burnham, premier laburista dal 20 luglio dopo le dimissioni di Starmer, ha promesso di dare priorità \"alla soluzione dei problemi\" e di riportare la speranza nel Paese: costo della vita, più autonomia alle autorità locali sul modello della sua Manchester e servizi essenziali come trasporti, energia e acqua sotto controllo pubblico.",
+      "fonte": {
+        "tipo": "stampa",
+        "citazione": "Il Sole 24 Ore, 1 settembre 2026: \"Burnham nel suo primo discorso punta al rilancio dell'economia e alla lotta al carovita\"",
+        "url": "https://www.ilsole24ore.com/art/burnham-suo-primo-discorso-punta-rilancio-dell-economia-e-lotta-carovita-AJDpuu0"
+      }
+    }
+  ]
+}

@@ -1,20 +1,23 @@
 'use client';
 
+import Link from 'next/link';
 import { motion, useReducedMotion } from 'framer-motion';
 import type { QuizSettimanale } from '@politicare/motore';
 import { contaPerDifficolta, contaPerSezione, DIFFICOLTA_ORDINATE } from '@politicare/motore';
 import Logo from '@/components/Logo';
-import { ETICHETTE_DIFFICOLTA, TESTI_QUIZ } from '@/lib/quiz';
+import { ETICHETTE_DIFFICOLTA, percorsoQuiz, TESTI_QUIZ } from '@/lib/quiz';
 
 interface Props {
   quiz: QuizSettimanale;
+  archivio: QuizSettimanale[];
   onInizia: () => void;
 }
 
-export default function SchermataIntroQuiz({ quiz, onInizia }: Props) {
+export default function SchermataIntroQuiz({ quiz, archivio, onInizia }: Props) {
   const riduciMovimento = useReducedMotion();
   const perSezione = contaPerSezione(quiz.domande);
   const perDifficolta = contaPerDifficolta(quiz.domande);
+  const numeroPiuRecente = Math.max(quiz.numero, ...archivio.map((a) => a.numero));
   const entra = (ritardo: number) => ({
     initial: riduciMovimento ? undefined : { opacity: 0, y: 10 },
     animate: { opacity: 1, y: 0 },
@@ -33,8 +36,8 @@ export default function SchermataIntroQuiz({ quiz, onInizia }: Props) {
           {quiz.titolo}
         </p>
         <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-5xl">{quiz.sottotitolo}</h1>
-        <p className="mt-3 text-sm" style={{ color: 'var(--fg-muta)' }}>
-          {TESTI_QUIZ.periodo(quiz.periodo.dal, quiz.periodo.al)}
+        <p className="mt-3 text-base font-medium sm:text-lg" style={{ color: 'var(--fg-muta)' }}>
+          {TESTI_QUIZ.settimana(quiz.periodo.dal, quiz.periodo.al)}
         </p>
       </motion.header>
 
@@ -126,6 +129,49 @@ export default function SchermataIntroQuiz({ quiz, onInizia }: Props) {
           {TESTI_QUIZ.autori(quiz.autori)} · {TESTI_QUIZ.versione(quiz.versione, quiz.data)}
         </p>
       </motion.div>
+
+      {/* Archivio: gli altri quiz pubblicati */}
+      {archivio.length > 0 && (
+        <motion.nav {...entra(0.35)} className="mt-12" aria-labelledby="archivio-quiz">
+          <h2 id="archivio-quiz" className="text-sm font-semibold tracking-wide uppercase" style={{ color: 'var(--fg-muta)' }}>
+            {TESTI_QUIZ.archivio.titolo}
+          </h2>
+          <ul className="mt-3 space-y-2">
+            {archivio.map((altro) => {
+              const eIlPiuRecente = altro.numero === numeroPiuRecente;
+              return (
+                <li key={altro.id}>
+                  <Link
+                    href={percorsoQuiz(altro)}
+                    className="flex items-center justify-between gap-3 rounded-xl border px-4 py-3 transition-colors hover:border-[var(--accento)]"
+                    style={{ borderColor: 'var(--bordo)', background: 'var(--bg-card)' }}
+                  >
+                    <span className="min-w-0">
+                      <span className="block font-semibold">
+                        {altro.sottotitolo}
+                        {eIlPiuRecente && (
+                          <span
+                            className="ml-2 rounded-full px-2 py-0.5 text-xs font-semibold align-middle"
+                            style={{ background: 'rgba(254,220,1,0.12)', color: 'var(--accento)' }}
+                          >
+                            {TESTI_QUIZ.archivio.piuRecente}
+                          </span>
+                        )}
+                      </span>
+                      <span className="block text-sm" style={{ color: 'var(--fg-muta)' }}>
+                        {TESTI_QUIZ.settimana(altro.periodo.dal, altro.periodo.al)}
+                      </span>
+                    </span>
+                    <span className="shrink-0 text-sm tabular-nums" style={{ color: 'var(--fg-muta)' }}>
+                      {TESTI_QUIZ.archivio.domande(altro.domande.length)} →
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </motion.nav>
+      )}
     </div>
   );
 }

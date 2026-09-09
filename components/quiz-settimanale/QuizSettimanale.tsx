@@ -13,7 +13,13 @@ type Fase = 'intro' | 'quiz' | 'risultati';
  * Contenitore del quiz: tiene lo stato in memoria e basta. Niente storage,
  * niente rete: il punteggio nasce e muore nel dispositivo dell'utente.
  */
-export default function QuizSettimanale({ quiz }: { quiz: QuizSettimanale }) {
+interface Props {
+  quiz: QuizSettimanale;
+  /** Gli altri quiz pubblicati, mostrati nell'intro come archivio. */
+  archivio?: QuizSettimanale[];
+}
+
+export default function QuizSettimanale({ quiz, archivio = [] }: Props) {
   const [fase, setFase] = useState<Fase>('intro');
   const [indice, setIndice] = useState(0);
   const [risposte, setRisposte] = useState<RispostaQuiz[]>([]);
@@ -66,7 +72,7 @@ export default function QuizSettimanale({ quiz }: { quiz: QuizSettimanale }) {
   }, []);
 
   if (fase === 'intro') {
-    return <SchermataIntroQuiz quiz={quiz} onInizia={inizia} />;
+    return <SchermataIntroQuiz quiz={quiz} archivio={archivio} onInizia={inizia} />;
   }
 
   if (fase === 'quiz') {

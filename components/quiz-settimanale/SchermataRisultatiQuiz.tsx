@@ -65,8 +65,9 @@ export default function SchermataRisultatiQuiz({ quiz, risposte, onRicomincia }:
       {/* Punteggio */}
       <header className="text-center">
         <p className="text-sm font-medium tracking-wide uppercase" style={{ color: 'var(--accento)' }}>
-          {TESTI_QUIZ.risultati.etichetta} · {quiz.sottotitolo}
+          {TESTI_QUIZ.risultati.etichetta}
         </p>
+        <p className="mt-1 text-base font-medium">{TESTI_QUIZ.intestazione(quiz)}</p>
         <p className="mt-4 text-6xl font-bold tabular-nums tracking-tight sm:text-7xl">{riepilogo.percentuale}%</p>
         <p className="mt-2 text-lg font-medium">{TESTI_QUIZ.risultati.riepilogo(riepilogo.corrette, riepilogo.totale)}</p>
         <p className="mt-1 text-sm" style={{ color: 'var(--fg-muta)' }}>

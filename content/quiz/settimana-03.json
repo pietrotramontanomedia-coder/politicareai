@@ -1,0 +1,172 @@
+{
+  "id": "quiz-settimana-03",
+  "versione": "1.0.0",
+  "numero": 3,
+  "data": "2026-09-09",
+  "periodo": {
+    "dal": "2026-09-02",
+    "al": "2026-09-08"
+  },
+  "titolo": "Quiz settimanale",
+  "sottotitolo": "Quiz 3",
+  "descrizione": "Sette domande sui fatti politici della settimana, quattro sull'Italia e tre sull'estero. Ogni risposta ha una spiegazione e una fonte verificabile.",
+  "autori": [
+    "Redazione Politicare"
+  ],
+  "changelog": [
+    {
+      "versione": "1.0.0",
+      "data": "2026-09-09",
+      "note": "Prima pubblicazione."
+    }
+  ],
+  "sezioni": [
+    {
+      "id": "italia",
+      "titolo": "Italia",
+      "icona": "🇮🇹",
+      "descrizione": "Regioni, governo e partiti nella settimana appena conclusa."
+    },
+    {
+      "id": "estero",
+      "titolo": "Estero",
+      "icona": "🌍",
+      "descrizione": "Germania e Medio Oriente."
+    }
+  ],
+  "domande": [
+    {
+      "id": "q1",
+      "sezione": "italia",
+      "difficolta": "facile",
+      "testo": "Il 2 settembre un Consiglio regionale ha approvato una legge di iniziativa popolare sul fine vita: è la prima Regione guidata dal centrodestra a farlo. Quale?",
+      "opzioni": [
+        "Lombardia",
+        "Veneto",
+        "Piemonte",
+        "Liguria"
+      ],
+      "rispostaCorretta": 1,
+      "spiegazione": "È il Veneto. La legge è passata con 32 voti favorevoli, 14 contrari e 5 astenuti. È la quarta Regione a dotarsi di una legge sul suicidio medicalmente assistito dopo Toscana, Sardegna ed Emilia-Romagna, e la prima guidata dal centrodestra.",
+      "fonte": {
+        "tipo": "stampa",
+        "citazione": "ANSA, 2 settembre 2026: \"Il Consiglio regionale del Veneto approva la legge sul fine vita\"",
+        "url": "https://www.ansa.it/sito/notizie/topnews/2026/09/02/il-consiglio-regionale-del-veneto-approva-la-legge-sul-fine-vita_d9cc4e9e-2783-4142-bb0d-4fc24cbfccd5.html"
+      }
+    },
+    {
+      "id": "q2",
+      "sezione": "italia",
+      "difficolta": "media",
+      "testo": "Ospite de \"L'aria che tira\" su La7, Matteo Salvini ha risposto a chi ipotizza elezioni anticipate. Quando ha detto che si voterà per le politiche?",
+      "opzioni": [
+        "In primavera 2027, subito dopo la legge di bilancio",
+        "In autunno 2027, a fine legislatura",
+        "Entro la fine del 2026",
+        "Non ha voluto indicare una data"
+      ],
+      "rispostaCorretta": 1,
+      "spiegazione": "\"Si andrà a votare a fine legislatura, autunno 2027. Non stiamo qui a fare i record, quelli li fa Kimi Antonelli\", ha detto il vicepremier, aggiungendo che gli italiani hanno chiesto al governo di arrivare fino in fondo al mandato.",
+      "fonte": {
+        "tipo": "stampa",
+        "citazione": "ANSA, 7 settembre 2026: \"Salvini, si voterà a fine legislatura in autunno 2027, non stiamo qui a fare i record\"",
+        "url": "https://www.ansa.it/sito/notizie/topnews/2026/09/07/salvini-si-votera-a-fine-legislatura-in-autunno-2027-non-stiamo-qui-a-fare_b7785281-65af-49ff-a28e-a80f80ceda62.html"
+      }
+    },
+    {
+      "id": "q3",
+      "sezione": "italia",
+      "difficolta": "media",
+      "testo": "Dopo la vittoria di AfD in Sassonia-Anhalt, la ministra per le Disabilità Alessandra Locatelli (Lega) ha preso le distanze da una proposta del partito tedesco. Quale?",
+      "opzioni": [
+        "La \"remigrazione\" dei cittadini di origine straniera",
+        "Le classi separate per alunni con disabilità e figli di rifugiati",
+        "L'abolizione del salario minimo",
+        "L'uscita della Germania dall'euro"
+      ],
+      "rispostaCorretta": 1,
+      "spiegazione": "Il programma di AfD in Sassonia-Anhalt prevede la fine dell'inclusione scolastica, con scuole speciali per gli alunni con disabilità e classi separate per i figli dei rifugiati. \"Non mi piace, l'Italia è un modello di inclusione dagli anni '70\", ha detto Locatelli a Radio 24.",
+      "fonte": {
+        "tipo": "stampa",
+        "citazione": "Intervista alla ministra Locatelli a \"24 Mattino\" (Radio 24), 8 settembre 2026",
+        "url": "https://www.napolimagazine.com/attualita/articolo/on-air-la-ministra-locatelli-sul-ddl-caregiver-spero-venga-approvato-entro-settembre-no-alle-classi-08-09-2026"
+      }
+    },
+    {
+      "id": "q4",
+      "sezione": "italia",
+      "difficolta": "difficile",
+      "testo": "A Torino è scoppiata una polemica sul convegno \"Insicurezza urbana\" del 18 settembre, con Roberto Vannacci tra i relatori. Qual era il motivo principale delle proteste?",
+      "opzioni": [
+        "L'evento era stato riconosciuto come aggiornamento professionale per gli agenti di polizia",
+        "Si sarebbe tenuto all'interno di una scuola pubblica",
+        "Era finanziato con fondi del Comune di Torino",
+        "Vannacci lo aveva organizzato come iniziativa del suo partito"
+      ],
+      "rispostaCorretta": 0,
+      "spiegazione": "Il convegno, promosso dal sindacato di polizia Fsp, era stato accreditato come formazione con esonero dal servizio per gli agenti. Il Silp Cgil ha chiesto al questore Massimo Gambino di revocare il riconoscimento e il Dipartimento della pubblica sicurezza ha poi chiarito che l'evento non costituirà aggiornamento professionale.",
+      "fonte": {
+        "tipo": "stampa",
+        "citazione": "ANSA, 8 settembre 2026: \"Gli agenti a lezione da Vannacci, un caso l'evento a Torino\"",
+        "url": "https://www.ansa.it/sito/notizie/politica/2026/09/08/e-bufera-sul-convegno-con-vannacci-a-torino-il-silp-cgil-chiede-lo-stop_a5be0d1c-8d60-43f7-a267-c27ac8ed3a52.html"
+      }
+    },
+    {
+      "id": "q5",
+      "sezione": "estero",
+      "difficolta": "facile",
+      "testo": "Il 6 settembre si è votato per le regionali in Sassonia-Anhalt, in Germania. Quale partito è arrivato primo con circa il 44% dei voti, un risultato senza precedenti per un Land tedesco?",
+      "opzioni": [
+        "CDU",
+        "SPD",
+        "AfD",
+        "Die Linke"
+      ],
+      "rispostaCorretta": 2,
+      "spiegazione": "AfD ha ottenuto circa il 44,5%, più del doppio del 20,8% del 2021, con la CDU ferma al 18,5%. Nonostante il risultato, il partito si è fermato a 39 seggi su 83: tre in meno della maggioranza assoluta.",
+      "fonte": {
+        "tipo": "stampa",
+        "citazione": "ANSA, 6 settembre 2026: \"Elezioni in Germania, Afd trionfa con oltre il 44% in Sassonia-Anhalt\"",
+        "url": "https://www.ansa.it/sito/notizie/mondo/2026/09/06/elezioni-in-germania-exit-poll-ard-in-sassonia-anhalt-afd-trionfa-con_243aead0-87e3-4c0c-aebc-18a1cdcd76be.html"
+      }
+    },
+    {
+      "id": "q6",
+      "sezione": "estero",
+      "difficolta": "media",
+      "testo": "L'8 settembre dodici Paesi, tra cui Regno Unito, Francia, Canada e Spagna, hanno annunciato lo stop all'acquisto di beni e servizi prodotti nelle colonie israeliane in Cisgiordania. Come ha reagito il governo israeliano?",
+      "opzioni": [
+        "Ha richiamato gli ambasciatori dai dodici Paesi",
+        "Ha annunciato la chiusura del consolato britannico a Gerusalemme",
+        "Ha sospeso l'accordo di associazione con l'Unione Europea",
+        "Non ha commentato la decisione"
+      ],
+      "rispostaCorretta": 1,
+      "spiegazione": "L'iniziativa è stata annunciata ai Comuni dal ministro degli Esteri britannico Ed Miliband; in risposta il ministro israeliano Gideon Saar ha disposto la chiusura del consolato del Regno Unito a Gerusalemme. L'Italia non ha aderito: per Tajani \"le decisioni vanno prese a livello europeo\".",
+      "fonte": {
+        "tipo": "stampa",
+        "citazione": "Il Post, 8 settembre 2026: \"Le sanzioni contro le colonie israeliane in Cisgiordania\"",
+        "url": "https://www.ilpost.it/2026/09/08/regno-unito-francia-canada-sanzioni-insediamenti-israeliani-cisgiordania/"
+      }
+    },
+    {
+      "id": "q7",
+      "sezione": "estero",
+      "difficolta": "difficile",
+      "testo": "Secondo l'inchiesta di Haaretz pubblicata questa settimana, chi avrebbe avvertito personalmente Netanyahu circa una settimana prima dell'attacco del 7 ottobre 2023?",
+      "opzioni": [
+        "Il presidente egiziano al-Sisi",
+        "Il presidente degli Emirati Arabi Uniti Mohammed bin Zayed",
+        "Il direttore della CIA",
+        "L'emiro del Qatar"
+      ],
+      "rispostaCorretta": 1,
+      "spiegazione": "Secondo i giornalisti Shlomi Eldar e Ruth Yuval, bin Zayed telefonò a Netanyahu per 45 minuti dopo aver ricevuto l'allarme da un mediatore vicino a Yahya Sinwar. Netanyahu ha definito la ricostruzione \"una menzogna totale\" e ha annunciato una querela contro il quotidiano.",
+      "fonte": {
+        "tipo": "stampa",
+        "citazione": "ANSA, 8 settembre 2026: \"'Gli Emirati avvertirono Netanyahu dell'attacco del 7 ottobre'. Lui: 'Menzogna totale'\"",
+        "url": "https://www.ansa.it/sito/notizie/mondo/2026/09/08/gli-emirati-avvertirono-netanyahu-dellattacco-del-7-ottobre.-lui-menzogna-totale_ba81122c-b804-48e1-b88e-998c3dc87b7d.html"
+      }
+    }
+  ]
+}

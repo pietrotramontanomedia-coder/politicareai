@@ -1,9 +1,32 @@
 import type { DifficoltaQuiz, QuizSettimanale } from '@politicare/motore';
 import quizSettimana01 from '@/content/quiz/settimana-01.json';
+import quizSettimana02 from '@/content/quiz/settimana-02.json';
+import quizSettimana03 from '@/content/quiz/settimana-03.json';
 
-/** Il quiz corrente pubblicato. Quando si aggiunge una settimana, si cambia qui l'import. */
+/**
+ * Tutti i quiz pubblicati, in ordine di numero crescente. Quando si aggiunge
+ * una settimana, si importa il nuovo file e lo si aggiunge qui.
+ */
+export const TUTTI_I_QUIZ: QuizSettimanale[] = (
+  [quizSettimana01, quizSettimana02, quizSettimana03] as QuizSettimanale[]
+).sort((a, b) => a.numero - b.numero);
+
+/** Il quiz più recente: è quello servito su /quiz-settimanale. */
 export function caricaQuizCorrente(): QuizSettimanale {
-  return quizSettimana01 as QuizSettimanale;
+  return TUTTI_I_QUIZ[TUTTI_I_QUIZ.length - 1];
+}
+
+export function caricaQuizPerNumero(numero: number): QuizSettimanale | undefined {
+  return TUTTI_I_QUIZ.find((q) => q.numero === numero);
+}
+
+/** Gli altri quiz oltre a quello indicato, dal più recente al più vecchio. */
+export function archivioQuiz(escludiNumero: number): QuizSettimanale[] {
+  return TUTTI_I_QUIZ.filter((q) => q.numero !== escludiNumero).sort((a, b) => b.numero - a.numero);
+}
+
+export function percorsoQuiz(quiz: QuizSettimanale): string {
+  return quiz.numero === caricaQuizCorrente().numero ? '/quiz-settimanale' : `/quiz-settimanale/${quiz.numero}`;
 }
 
 /** Testi di interfaccia del quiz, tenuti fuori dai componenti. */
@@ -27,6 +50,12 @@ export const TESTI_QUIZ = {
       'Nessun dato viene inviato: il punteggio resta sul tuo dispositivo.',
     ],
   },
+  archivio: {
+    titolo: 'Gli altri quiz',
+    piuRecente: 'Ultimo quiz',
+    vaiAlPiuRecente: 'Vai al quiz più recente',
+    domande: (n: number) => `${n} domande`,
+  },
   risultati: {
     etichetta: 'Quiz completato',
     riepilogo: (corrette: number, totale: number) => `${corrette} risposte esatte su ${totale}`,
@@ -41,7 +70,10 @@ export const TESTI_QUIZ = {
       return 'Settimana intensa: le spiegazioni qui sotto la ricostruiscono passo passo.';
     },
   },
-  periodo: (dal: string, al: string) => `Fatti dal ${formattaData(dal)} al ${formattaData(al)}`,
+  /** "Settimana dal 19 al 25 agosto 2026", "Settimana dal 26 agosto al 1° settembre 2026". */
+  settimana: (dal: string, al: string) => `Settimana ${formattaPeriodo(dal, al)}`,
+  /** "Quiz 1 · Settimana dal 19 al 25 agosto 2026": l'intestazione completa di un quiz. */
+  intestazione: (quiz: QuizSettimanale) => `${quiz.sottotitolo} · Settimana ${formattaPeriodo(quiz.periodo.dal, quiz.periodo.al)}`,
   autori: (autori: string[]) => `A cura di ${autori.join(', ')}`,
   versione: (versione: string, data: string) => `Versione ${versione} · pubblicato il ${formattaData(data)}`,
 } as const;
@@ -57,9 +89,49 @@ const MESI = [
   'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre',
 ];
 
+function scomponi(iso: string): { anno: number; mese: number; giorno: number } | null {
+  const [anno, mese, giorno] = iso.split('-').map(Number);
+  if (!anno || !mese || !giorno) return null;
+  return { anno, mese, giorno };
+}
+
+/** "1" -> "1°", gli altri giorni restano numeri. */
+function giornoInLettere(giorno: number): string {
+  return giorno === 1 ? '1°' : String(giorno);
+}
+
+/** Preposizione "dal"/"dall'" e "al"/"all'" corrette davanti a 1, 8 e 11. */
+function conPreposizione(prep: 'dal' | 'al', giorno: number): string {
+  const elisione = giorno === 8 || giorno === 11;
+  if (elisione) return `${prep === 'dal' ? "dall'" : "all'"}${giorno}`;
+  return `${prep} ${giornoInLettere(giorno)}`;
+}
+
 /** "2026-09-02" -> "2 settembre 2026". Nessuna dipendenza da locale del browser. */
 export function formattaData(iso: string): string {
-  const [anno, mese, giorno] = iso.split('-').map(Number);
-  if (!anno || !mese || !giorno) return iso;
-  return `${giorno} ${MESI[mese - 1]} ${anno}`;
+  const d = scomponi(iso);
+  if (!d) return iso;
+  return `${giornoInLettere(d.giorno)} ${MESI[d.mese - 1]} ${d.anno}`;
+}
+
+/**
+ * Intervallo in italiano, compatto quando mese e anno coincidono:
+ * ("2026-08-19","2026-08-25") -> "dal 19 al 25 agosto 2026"
+ * ("2026-08-26","2026-09-01") -> "dal 26 agosto al 1° settembre 2026"
+ * ("2026-09-02","2026-09-08") -> "dal 2 all'8 settembre 2026"
+ */
+export function formattaPeriodo(dal: string, al: string): string {
+  const a = scomponi(dal);
+  const b = scomponi(al);
+  if (!a || !b) return `dal ${dal} al ${al}`;
+
+  const inizio = conPreposizione('dal', a.giorno);
+  const fine = conPreposizione('al', b.giorno);
+  if (a.anno === b.anno && a.mese === b.mese) {
+    return `${inizio} ${fine} ${MESI[b.mese - 1]} ${b.anno}`;
+  }
+  if (a.anno === b.anno) {
+    return `${inizio} ${MESI[a.mese - 1]} ${fine} ${MESI[b.mese - 1]} ${b.anno}`;
+  }
+  return `${inizio} ${MESI[a.mese - 1]} ${a.anno} ${fine} ${MESI[b.mese - 1]} ${b.anno}`;
 }

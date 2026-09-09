@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { contaPerDifficolta, contaPerSezione, mescolaIndici, riepilogaQuiz, validaQuiz } from '../src/quiz';
 import type { QuizSettimanale } from '../src/tipi';
 import quizSettimana01 from '../../../content/quiz/settimana-01.json' with { type: 'json' };
+import quizSettimana02 from '../../../content/quiz/settimana-02.json' with { type: 'json' };
+import quizSettimana03 from '../../../content/quiz/settimana-03.json' with { type: 'json' };
 
 const fonte = { tipo: 'stampa' as const, citazione: 'ANSA, 1 settembre 2026', url: 'https://example.org/notizia' };
 
@@ -155,14 +157,31 @@ describe('mescolaIndici', () => {
   });
 });
 
-describe('content pack quiz settimana 1', () => {
-  it('passa tutte le regole di validaQuiz', () => {
-    expect(validaQuiz(quizSettimana01 as unknown as QuizSettimanale)).toEqual([]);
+describe('content pack dei quiz pubblicati', () => {
+  const pubblicati = [quizSettimana01, quizSettimana02, quizSettimana03] as unknown as QuizSettimanale[];
+
+  it.each(pubblicati.map((q) => [q.id, q] as const))('%s passa tutte le regole di validaQuiz', (_, quiz) => {
+    expect(validaQuiz(quiz)).toEqual([]);
   });
 
-  it('è il quiz numero 1 con quattro domande Italia e tre Estero', () => {
-    const quiz = quizSettimana01 as unknown as QuizSettimanale;
-    expect(quiz.numero).toBe(1);
+  it.each(pubblicati.map((q) => [q.id, q] as const))('%s ha quattro domande Italia e tre Estero', (_, quiz) => {
     expect(contaPerSezione(quiz.domande)).toEqual({ italia: 4, estero: 3 });
+  });
+
+  it('i numeri sono progressivi da 1, senza buchi, e i periodi non si sovrappongono', () => {
+    const ordinati = [...pubblicati].sort((a, b) => a.numero - b.numero);
+    ordinati.forEach((q, i) => {
+      expect(q.numero).toBe(i + 1);
+      expect(q.id).toBe(`quiz-settimana-${String(i + 1).padStart(2, '0')}`);
+      expect(q.sottotitolo).toBe(`Quiz ${i + 1}`);
+      if (i > 0) expect(q.periodo.dal > ordinati[i - 1].periodo.al).toBe(true);
+    });
+  });
+
+  it('ogni periodo copre esattamente sette giorni', () => {
+    for (const q of pubblicati) {
+      const giorni = (Date.parse(q.periodo.al) - Date.parse(q.periodo.dal)) / 86_400_000 + 1;
+      expect(giorni).toBe(7);
+    }
   });
 });

@@ -3,26 +3,35 @@
   "versione": "1.0.0",
   "numero": 1,
   "data": "2026-09-09",
-  "periodo": { "dal": "2026-09-02", "al": "2026-09-08" },
+  "periodo": {
+    "dal": "2026-08-19",
+    "al": "2026-08-25"
+  },
   "titolo": "Quiz settimanale",
-  "sottotitolo": "Settimana 1",
+  "sottotitolo": "Quiz 1",
   "descrizione": "Sette domande sui fatti politici della settimana, quattro sull'Italia e tre sull'estero. Ogni risposta ha una spiegazione e una fonte verificabile.",
-  "autori": ["Redazione Politicare"],
+  "autori": [
+    "Redazione Politicare"
+  ],
   "changelog": [
-    { "versione": "1.0.0", "data": "2026-09-09", "note": "Prima pubblicazione." }
+    {
+      "versione": "1.0.0",
+      "data": "2026-09-09",
+      "note": "Prima pubblicazione, a recupero della settimana 19-25 agosto."
+    }
   ],
   "sezioni": [
     {
       "id": "italia",
       "titolo": "Italia",
       "icona": "🇮🇹",
-      "descrizione": "Regioni, governo e partiti nella settimana appena conclusa."
+      "descrizione": "Banche, tensioni nella Lega, carburanti e Meeting di Rimini."
     },
     {
       "id": "estero",
       "titolo": "Estero",
       "icona": "🌍",
-      "descrizione": "Germania e Medio Oriente."
+      "descrizione": "Stati Uniti fra Hormuz, Canada e sondaggi."
     }
   ],
   "domande": [
@@ -30,123 +39,133 @@
       "id": "q1",
       "sezione": "italia",
       "difficolta": "facile",
-      "testo": "Il 2 settembre un Consiglio regionale ha approvato una legge di iniziativa popolare sul fine vita: è la prima Regione guidata dal centrodestra a farlo. Quale?",
-      "opzioni": ["Lombardia", "Veneto", "Piemonte", "Liguria"],
+      "testo": "Il 21 agosto Monte dei Paschi di Siena ha lanciato una doppia offerta da 34 miliardi per resistere all'offerta di Intesa Sanpaolo. Su quali due istituti?",
+      "opzioni": [
+        "UniCredit e Mediobanca",
+        "Banco BPM e Banca Generali",
+        "BPER e Popolare di Sondrio",
+        "Fineco e Banca Ifis"
+      ],
       "rispostaCorretta": 1,
-      "spiegazione": "È il Veneto. La legge è passata con 32 voti favorevoli, 14 contrari e 5 astenuti. È la quarta Regione a dotarsi di una legge sul suicidio medicalmente assistito dopo Toscana, Sardegna ed Emilia-Romagna, e la prima guidata dal centrodestra.",
+      "spiegazione": "L'offerta vale 25,3 miliardi per Banco BPM e 8,7 per Banca Generali. È la contromossa di Mps all'offerta di Intesa da 30,6 miliardi annunciata due mesi prima: per l'amministratore delegato Luigi Lovaglio l'obiettivo è \"creare valore con l'integrazione\" invece dello spezzatino della rete. Le offerte vanno approvate dai soci Mps con i due terzi in assemblea il 29 ottobre.",
       "fonte": {
         "tipo": "stampa",
-        "citazione": "ANSA, 2 settembre 2026: \"Il Consiglio regionale del Veneto approva la legge sul fine vita\"",
-        "url": "https://www.ansa.it/sito/notizie/topnews/2026/09/02/il-consiglio-regionale-del-veneto-approva-la-legge-sul-fine-vita_d9cc4e9e-2783-4142-bb0d-4fc24cbfccd5.html"
+        "citazione": "ANSA, 21 agosto 2026: \"La mossa di Mps, doppia offerta da 34 miliardi per Bpm e Banca Generali\"",
+        "url": "https://www.ansa.it/sito/notizie/economia/aziende/2026/08/21/mps-lancia-offerte-su-banco-bpm-e-banca-generali-per-complessivi-34-miliardi_fdeb6455-ab43-41bd-8e06-a7bac6ac937e.html"
       }
     },
     {
       "id": "q2",
       "sezione": "italia",
       "difficolta": "media",
-      "testo": "Ospite de \"L'aria che tira\" su La7, Matteo Salvini ha risposto a chi ipotizza elezioni anticipate. Quando ha detto che si voterà per le politiche?",
+      "testo": "Il 20 agosto, dal palco della Versiliana, il presidente della Lombardia Attilio Fontana e il capogruppo al Senato Massimiliano Romeo hanno detto che \"la Lega così non va\". Che cosa hanno chiesto?",
       "opzioni": [
-        "In primavera 2027, subito dopo la legge di bilancio",
-        "In autunno 2027, a fine legislatura",
-        "Entro la fine del 2026",
-        "Non ha voluto indicare una data"
+        "Le dimissioni immediate di Salvini da segretario",
+        "Una leadership allargata a governatori e sindaci, da definire prima di Pontida",
+        "L'uscita della Lega dal governo Meloni",
+        "Un congresso straordinario entro settembre"
       ],
       "rispostaCorretta": 1,
-      "spiegazione": "\"Si andrà a votare a fine legislatura, autunno 2027. Non stiamo qui a fare i record, quelli li fa Kimi Antonelli\", ha detto il vicepremier, aggiungendo che gli italiani hanno chiesto al governo di arrivare fino in fondo al mandato.",
+      "spiegazione": "Fontana e Romeo hanno lasciato aperto il dialogo con Salvini, ma chiedono \"una nuova struttura\" per rilanciare il partito: l'idea è una guida allargata, con dentro governatori o sindaci, da trovare prima del raduno di Pontida. Dal pubblico alcuni militanti li hanno contestati al grido di \"Salvini non si tocca\".",
       "fonte": {
         "tipo": "stampa",
-        "citazione": "ANSA, 7 settembre 2026: \"Salvini, si voterà a fine legislatura in autunno 2027, non stiamo qui a fare i record\"",
-        "url": "https://www.ansa.it/sito/notizie/topnews/2026/09/07/salvini-si-votera-a-fine-legislatura-in-autunno-2027-non-stiamo-qui-a-fare_b7785281-65af-49ff-a28e-a80f80ceda62.html"
+        "citazione": "ANSA, 20 agosto 2026: \"La fronda del Nord: 'La Lega così non va, soluzione prima di Pontida'\"",
+        "url": "https://www.ansa.it/sito/notizie/politica/2026/08/20/la-fronda-del-nord-la-lega-cosi-non-va-soluzione-prima-di-pontida_16f364ac-ed3e-480b-b172-f1efa95e2fa3.html"
       }
     },
     {
       "id": "q3",
       "sezione": "italia",
       "difficolta": "media",
-      "testo": "Dopo la vittoria di AfD in Sassonia-Anhalt, la ministra per le Disabilità Alessandra Locatelli (Lega) ha preso le distanze da una proposta del partito tedesco. Quale?",
+      "testo": "Il 25 agosto Meloni, Tajani, Salvini, Lupi e Giorgetti si sono riuniti sul caro carburanti. Che cosa hanno deciso sul taglio delle accise in vigore da marzo?",
       "opzioni": [
-        "La \"remigrazione\" dei cittadini di origine straniera",
-        "Le classi separate per alunni con disabilità e figli di rifugiati",
-        "L'abolizione del salario minimo",
-        "L'uscita della Germania dall'euro"
+        "Di prorogarlo per tutti fino a fine anno",
+        "Di abolirlo subito per finanziare la legge di bilancio",
+        "Di prorogarlo di pochi giorni e poi sostituirlo con aiuti mirati ai redditi bassi",
+        "Di estenderlo anche al gas e all'elettricità"
       ],
-      "rispostaCorretta": 1,
-      "spiegazione": "Il programma di AfD in Sassonia-Anhalt prevede la fine dell'inclusione scolastica, con scuole speciali per gli alunni con disabilità e classi separate per i figli dei rifugiati. \"Non mi piace, l'Italia è un modello di inclusione dagli anni '70\", ha detto Locatelli a Radio 24.",
+      "rispostaCorretta": 2,
+      "spiegazione": "Il Consiglio dei ministri del 26 agosto ha prorogato di alcuni giorni lo sconto esistente. Nel frattempo il governo studia una misura \"più concentrata sulle fasce di reddito che hanno più bisogno del sostegno dello Stato\", cioè aiuti selettivi al posto del taglio generalizzato.",
       "fonte": {
         "tipo": "stampa",
-        "citazione": "Intervista alla ministra Locatelli a \"24 Mattino\" (Radio 24), 8 settembre 2026",
-        "url": "https://www.napolimagazine.com/attualita/articolo/on-air-la-ministra-locatelli-sul-ddl-caregiver-spero-venga-approvato-entro-settembre-no-alle-classi-08-09-2026"
+        "citazione": "ANSA, 25 agosto 2026: \"Taglio delle accise verso la proroga, 'poi aiuti ai redditi bassi'\"",
+        "url": "https://www.ansa.it/sito/notizie/politica/2026/08/25/taglio-delle-accise-verso-la-proroga-poi-aiuti-ai-redditi-bassi_fb725722-357f-4d7f-b1c6-fa89004ea853.html"
       }
     },
     {
       "id": "q4",
       "sezione": "italia",
       "difficolta": "difficile",
-      "testo": "A Torino è scoppiata una polemica sul convegno \"Insicurezza urbana\" del 18 settembre, con Roberto Vannacci tra i relatori. Qual era il motivo principale delle proteste?",
+      "testo": "Cinque giorni dopo lo strappo della Versiliana, il 25 agosto Salvini ha risposto alla fronda: \"Nessun passo di lato\". Con Fontana si è limitato a una foto. In quale occasione?",
       "opzioni": [
-        "L'evento era stato riconosciuto come aggiornamento professionale per gli agenti di polizia",
-        "Si sarebbe tenuto all'interno di una scuola pubblica",
-        "Era finanziato con fondi del Comune di Torino",
-        "Vannacci lo aveva organizzato come iniziativa del suo partito"
+        "Al raduno di Pontida",
+        "Al Meeting di Rimini",
+        "Alla Festa della Lega di Pinzolo",
+        "In Consiglio federale a Milano"
       ],
-      "rispostaCorretta": 0,
-      "spiegazione": "Il convegno, promosso dal sindacato di polizia Fsp, era stato accreditato come formazione con esonero dal servizio per gli agenti. Il Silp Cgil ha chiesto al questore Massimo Gambino di revocare il riconoscimento e il Dipartimento della pubblica sicurezza ha poi chiarito che l'evento non costituirà aggiornamento professionale.",
+      "rispostaCorretta": 1,
+      "spiegazione": "Salvini è intervenuto al Meeting di Rimini all'incontro \"Il Paese che si muove\", con l'amministratore delegato di Ferrovie dello Stato Gianpiero Strisciuglio. Ha escluso di farsi da parte, ricordando che davanti c'è \"più di un anno\" di governo. Con il presidente della Lombardia solo una foto, nessun chiarimento pubblico.",
       "fonte": {
         "tipo": "stampa",
-        "citazione": "ANSA, 8 settembre 2026: \"Gli agenti a lezione da Vannacci, un caso l'evento a Torino\"",
-        "url": "https://www.ansa.it/sito/notizie/politica/2026/09/08/e-bufera-sul-convegno-con-vannacci-a-torino-il-silp-cgil-chiede-lo-stop_a5be0d1c-8d60-43f7-a267-c27ac8ed3a52.html"
+        "citazione": "ANSA, 25 agosto 2026: \"Salvini: 'Nessun passo di lato'. Con Fontana solo una foto al meeting\"",
+        "url": "https://www.ansa.it/sito/notizie/politica/2026/08/25/il-paese-che-si-muove-lincontro-al-meeting-di-rimini-con-salvini_540f01dd-1fb0-48ce-85bd-7508f2cf250a.html"
       }
     },
     {
       "id": "q5",
       "sezione": "estero",
       "difficolta": "facile",
-      "testo": "Il 6 settembre si è votato per le regionali in Sassonia-Anhalt, in Germania. Quale partito è arrivato primo con circa il 44% dei voti, un risultato senza precedenti per un Land tedesco?",
-      "opzioni": ["CDU", "SPD", "AfD", "Die Linke"],
-      "rispostaCorretta": 2,
-      "spiegazione": "AfD ha ottenuto circa il 44,5%, più del doppio del 20,8% del 2021, con la CDU ferma al 18,5%. Nonostante il risultato, il partito si è fermato a 39 seggi su 83: tre in meno della maggioranza assoluta.",
+      "testo": "Il 22 agosto Donald Trump ha definito \"territorio americano\" uno stretto strategico per il traffico di petrolio, dopo notizie di stampa su un dispositivo militare USA per far transitare le petroliere. Quale?",
+      "opzioni": [
+        "Lo Stretto di Hormuz",
+        "Il Bosforo",
+        "Lo Stretto di Malacca",
+        "Il Canale di Suez"
+      ],
+      "rispostaCorretta": 0,
+      "spiegazione": "Trump ha rivendicato lo Stretto di Hormuz e ribadito che non può \"permettere all'Iran di avere un'arma nucleare\", mentre Washington annunciava nuove sanzioni. Teheran ha risposto rivendicando il controllo dello stretto e annunciando il rafforzamento del proprio arsenale.",
       "fonte": {
         "tipo": "stampa",
-        "citazione": "ANSA, 6 settembre 2026: \"Elezioni in Germania, Afd trionfa con oltre il 44% in Sassonia-Anhalt\"",
-        "url": "https://www.ansa.it/sito/notizie/mondo/2026/09/06/elezioni-in-germania-exit-poll-ard-in-sassonia-anhalt-afd-trionfa-con_243aead0-87e3-4c0c-aebc-18a1cdcd76be.html"
+        "citazione": "ANSA, 22 agosto 2026: \"Trump rivendica Hormuz, Teheran annuncia il rafforzamento dell'arsenale\"",
+        "url": "https://www.ansa.it/sito/notizie/mondo/2026/08/22/trump-rivendica-hormuz-teheran-annuncia-il-rafforzamento-dellarsenale_038f5f38-b5db-4bad-9ab7-552b5dec514b.html"
       }
     },
     {
       "id": "q6",
       "sezione": "estero",
       "difficolta": "media",
-      "testo": "L'8 settembre dodici Paesi, tra cui Regno Unito, Francia, Canada e Spagna, hanno annunciato lo stop all'acquisto di beni e servizi prodotti nelle colonie israeliane in Cisgiordania. Come ha reagito il governo israeliano?",
+      "testo": "Il 22 agosto sono falliti i negoziati fra Stati Uniti e Canada e sono entrati in vigore dazi USA del 50% su circa 20 miliardi di dollari di prodotti canadesi. Come ha reagito il governo di Mark Carney?",
       "opzioni": [
-        "Ha richiamato gli ambasciatori dai dodici Paesi",
-        "Ha annunciato la chiusura del consolato britannico a Gerusalemme",
-        "Ha sospeso l'accordo di associazione con l'Unione Europea",
-        "Non ha commentato la decisione"
+        "Ha accettato le condizioni americane per evitare un'escalation",
+        "Ha annunciato dazi del 50% sui prodotti americani dall'8 settembre",
+        "Ha portato il caso all'Organizzazione mondiale del commercio senza contromisure",
+        "Ha sospeso le esportazioni di petrolio verso gli Stati Uniti"
       ],
       "rispostaCorretta": 1,
-      "spiegazione": "L'iniziativa è stata annunciata ai Comuni dal ministro degli Esteri britannico Ed Miliband; in risposta il ministro israeliano Gideon Saar ha disposto la chiusura del consolato del Regno Unito a Gerusalemme. L'Italia non ha aderito: per Tajani \"le decisioni vanno prese a livello europeo\".",
+      "spiegazione": "Ottawa ha annunciato dazi del 50% dall'8 settembre su acciaio, elettronica, latticini, carta e elettrodomestici americani. Secondo Carney l'amministrazione Trump ha posto all'ultimo momento condizioni \"inique\", fra cui limiti al bilinguismo sulle etichette e ai sussidi alle industrie culturali. \"Si è in guerra quando si viene attaccati, e noi siamo stati attaccati\", ha detto.",
       "fonte": {
         "tipo": "stampa",
-        "citazione": "Il Post, 8 settembre 2026: \"Le sanzioni contro le colonie israeliane in Cisgiordania\"",
-        "url": "https://www.ilpost.it/2026/09/08/regno-unito-francia-canada-sanzioni-insediamenti-israeliani-cisgiordania/"
+        "citazione": "Il Post, 22 agosto 2026: \"Il Canada imporrà dazi agli Stati Uniti in risposta ai dazi di Trump, dopo il fallimento dei negoziati\"",
+        "url": "https://www.ilpost.it/2026/08/22/canada-stati-uniti-nuovi-dazi-negoziati-falliti/"
       }
     },
     {
       "id": "q7",
       "sezione": "estero",
       "difficolta": "difficile",
-      "testo": "Secondo l'inchiesta di Haaretz pubblicata questa settimana, chi avrebbe avvertito personalmente Netanyahu circa una settimana prima dell'attacco del 7 ottobre 2023?",
+      "testo": "Il 24 agosto un sondaggio YouGov per The Economist ha misurato il gradimento di Trump stato per stato. In quanti stati su 50 chi boccia il suo operato supera chi lo approva?",
       "opzioni": [
-        "Il presidente egiziano al-Sisi",
-        "Il presidente degli Emirati Arabi Uniti Mohammed bin Zayed",
-        "Il direttore della CIA",
-        "L'emiro del Qatar"
+        "27",
+        "37",
+        "47",
+        "50"
       ],
-      "rispostaCorretta": 1,
-      "spiegazione": "Secondo i giornalisti Shlomi Eldar e Ruth Yuval, bin Zayed telefonò a Netanyahu per 45 minuti dopo aver ricevuto l'allarme da un mediatore vicino a Yahya Sinwar. Netanyahu ha definito la ricostruzione \"una menzogna totale\" e ha annunciato una querela contro il quotidiano.",
+      "rispostaCorretta": 2,
+      "spiegazione": "In 47 stati su 50 il saldo è negativo. Solo in Wyoming, Idaho e Virginia la maggioranza degli intervistati promuove il presidente. Il dato segue il sondaggio Reuters del 17 agosto, secondo cui un americano su tre approva l'operato di Trump.",
       "fonte": {
         "tipo": "stampa",
-        "citazione": "ANSA, 8 settembre 2026: \"'Gli Emirati avvertirono Netanyahu dell'attacco del 7 ottobre'. Lui: 'Menzogna totale'\"",
-        "url": "https://www.ansa.it/sito/notizie/mondo/2026/09/08/gli-emirati-avvertirono-netanyahu-dellattacco-del-7-ottobre.-lui-menzogna-totale_ba81122c-b804-48e1-b88e-998c3dc87b7d.html"
+        "citazione": "ANSA, 24 agosto 2026: \"Sondaggio, Trump in difficoltà in 47 stati Usa su 50\"",
+        "url": "https://www.ansa.it/sito/notizie/mondo/2026/08/24/sondaggio-trump-in-difficolta-in-47-stati-usa-su-50_d8fd73de-990f-40d9-a698-23c755112a53.html"
       }
     }
   ]
