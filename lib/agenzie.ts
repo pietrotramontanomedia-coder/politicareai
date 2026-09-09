@@ -7,7 +7,7 @@ export type { Agenzia, LancioAgenzia, RispostaAgenzie, StatoAgenzia } from '@/li
 export { AGENZIE, DESCRIZIONI_AGENZIE } from '@/lib/agenzie/tipi';
 export { TESTI_AGENZIE } from '@/lib/agenzie/testi';
 
-const VUOTA: RispostaAgenzie = { success: false, lanci: [], fonti: [], simulazione: false, timestamp: '' };
+const VUOTA: RispostaAgenzie = { success: false, lanci: [], fonti: [], simulazione: false, letti: 0, scartati: 0, timestamp: '' };
 const richieste = new Map<string, Promise<RispostaAgenzie>>();
 
 function richiestaCondivisa(url: string): Promise<RispostaAgenzie> {

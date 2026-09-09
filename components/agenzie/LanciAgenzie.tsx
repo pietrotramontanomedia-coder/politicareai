@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { AGENZIE, DESCRIZIONI_AGENZIE, TESTI_AGENZIE, useLanciAgenzie, type Agenzia } from '@/lib/agenzie';
+import { agenzieDi } from '@/lib/agenzie/selezione';
 import { formattaDataRelativa } from '@/lib/data-ora';
 import BadgeAgenzia from './BadgeAgenzia';
 import BadgeSimulazione from './BadgeSimulazione';
@@ -15,10 +16,10 @@ interface Props {
 
 export default function LanciAgenzie({ limite }: Props) {
   const [filtro, setFiltro] = useState<Agenzia | 'tutte'>('tutte');
-  const { lanci, fonti, simulazione, caricamento } = useLanciAgenzie();
+  const { lanci, fonti, simulazione, letti, scartati, caricamento } = useLanciAgenzie();
   const compatta = Boolean(limite);
 
-  const visibili = (filtro === 'tutte' ? lanci : lanci.filter((l) => l.agenzia === filtro)).slice(0, limite ?? lanci.length);
+  const visibili = (filtro === 'tutte' ? lanci : lanci.filter((l) => agenzieDi(l).includes(filtro))).slice(0, limite ?? lanci.length);
   const fontiInErrore = fonti.filter((f) => f.stato === 'errore' || f.stato === 'vuoto');
 
   return (
@@ -59,7 +60,7 @@ export default function LanciAgenzie({ limite }: Props) {
           {(['tutte', ...AGENZIE] as const).map((voce) => {
             const attivo = filtro === voce;
             const etichetta = voce === 'tutte' ? TESTI_AGENZIE.tutte : DESCRIZIONI_AGENZIE[voce].nome;
-            const conteggio = voce === 'tutte' ? lanci.length : lanci.filter((l) => l.agenzia === voce).length;
+            const conteggio = voce === 'tutte' ? lanci.length : lanci.filter((l) => agenzieDi(l).includes(voce)).length;
             return (
               <button
                 key={voce}
@@ -130,6 +131,11 @@ export default function LanciAgenzie({ limite }: Props) {
               <div className="min-w-0 flex-1">
                 <div className="mb-1 flex flex-wrap items-center gap-1.5">
                   <BadgeAgenzia agenzia={lancio.agenzia} />
+                  {(lancio.altreAgenzie ?? []).length > 0 && (
+                    <span className="text-[10px] uppercase tracking-widest" style={{ color: 'var(--fg-muta)' }}>
+                      {TESTI_AGENZIE.anche(lancio.altreAgenzie!.map((a) => DESCRIZIONI_AGENZIE[a].sigla))}
+                    </span>
+                  )}
                   {lancio.simulato && <BadgeSimulazione />}
                   {!compatta && lancio.categoria && !/simulazione/i.test(lancio.categoria) && (
                     <span className="text-[10px] uppercase tracking-widest" style={{ color: 'var(--fg-muta)' }}>
@@ -156,6 +162,12 @@ export default function LanciAgenzie({ limite }: Props) {
           ))}
         </ol>
       </div>
+
+      {!compatta && !caricamento && letti > 0 && (
+        <p className="mt-4 text-xs leading-relaxed" style={{ color: 'var(--fg-muta)' }}>
+          {TESTI_AGENZIE.selezione(lanci.length, letti, scartati)}
+        </p>
+      )}
     </section>
   );
 }

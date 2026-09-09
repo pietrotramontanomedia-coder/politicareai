@@ -55,6 +55,10 @@ export interface LancioAgenzia {
   categoria?: string;
   /** true quando il lancio viene da un feed finto di sviluppo: la UI lo dichiara sempre. */
   simulato: boolean;
+  /** Altre agenzie che hanno dato la stessa notizia: il lancio principale è di chi l'ha data per prima. */
+  altreAgenzie?: Agenzia[];
+  /** Punteggio di rilevanza assegnato da lib/agenzie/selezione.ts. */
+  rilevanza?: number;
 }
 
 export type StatoFonte = 'ok' | 'simulato' | 'vuoto' | 'errore';
@@ -74,6 +78,10 @@ export interface RispostaAgenzie {
   fonti: StatoAgenzia[];
   /** true se almeno una fonte è simulata. */
   simulazione: boolean;
+  /** Lanci letti dai feed prima di fusione e filtro. */
+  letti: number;
+  /** Lanci esclusi perché sotto la soglia di rilevanza. */
+  scartati: number;
   timestamp: string;
 }
 

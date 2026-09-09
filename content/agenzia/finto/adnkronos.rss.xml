@@ -60,5 +60,13 @@
       <category>Simulazione</category>
       <description>(Lancio simulato per lo sviluppo, non è una notizia reale.) Il protocollo definisce tempi e criteri di assegnazione delle risorse.</description>
     </item>
+    <item>
+      <title>Simulazione: Un titolo breve</title>
+      <link>https://www.adnkronos.com/politica/simulazione/lancio-007</link>
+      <guid>https://www.adnkronos.com/politica/simulazione/lancio-007</guid>
+      <pubDate>{{fa:45m}}</pubDate>
+      <category>Simulazione</category>
+      <description></description>
+    </item>
   </channel>
 </rss>

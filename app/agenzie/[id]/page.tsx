@@ -38,6 +38,9 @@ export default async function LancioPage({ params }: Props) {
 
         <div className="mb-4 flex flex-wrap items-center gap-3">
           <BadgeAgenzia agenzia={lancio.agenzia} forma="nome" />
+          {(lancio.altreAgenzie ?? []).map((a) => (
+            <BadgeAgenzia key={a} agenzia={a} forma="nome" />
+          ))}
           {lancio.simulato && <BadgeSimulazione />}
           <time dateTime={lancio.data} className="text-xs font-mono font-bold tabular-nums sm:text-sm" style={{ color: 'var(--accento)' }}>
             {formattaDataEstesa(lancio.data)}

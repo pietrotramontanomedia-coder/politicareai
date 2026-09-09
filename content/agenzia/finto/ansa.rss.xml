@@ -68,5 +68,29 @@
       <category>Simulazione</category>
       <description><![CDATA[Duplicato voluto del lancio 002: serve a verificare che il lettore lo scarti.]]></description>
     </item>
+    <item>
+      <title>Simulazione: VIDEO Il ministro arriva a Palazzo Chigi</title>
+      <link>https://www.ansa.it/sito/notizie/politica/simulazione/lancio-007.html</link>
+      <guid isPermaLink="false">ansa-finto-007</guid>
+      <pubDate>{{fa:25m}}</pubDate>
+      <category>Simulazione</category>
+      <description><![CDATA[Formato video: il filtro di rilevanza deve scartarlo.]]></description>
+    </item>
+    <item>
+      <title>Simulazione: Le prime pagine dei giornali di oggi</title>
+      <link>https://www.ansa.it/sito/notizie/politica/simulazione/lancio-008.html</link>
+      <guid isPermaLink="false">ansa-finto-008</guid>
+      <pubDate>{{fa:6h}}</pubDate>
+      <category>Simulazione</category>
+      <description><![CDATA[Rassegna stampa: il filtro di rilevanza deve scartarla.]]></description>
+    </item>
+    <item>
+      <title>Simulazione: Sciopero generale confermato per venerdì, adesione dei sindacati</title>
+      <link>https://www.ansa.it/sito/notizie/politica/simulazione/lancio-009.html</link>
+      <guid isPermaLink="false">ansa-finto-009</guid>
+      <pubDate>{{fa:2h}}</pubDate>
+      <category>Simulazione</category>
+      <description><![CDATA[(Lancio simulato per lo sviluppo, non è una notizia reale.) Stessa notizia del lancio Adnkronos 004, arrivata dopo: deve essere fusa in quello.]]></description>
+    </item>
   </channel>
 </rss>

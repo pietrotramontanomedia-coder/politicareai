@@ -13,5 +13,8 @@ export const TESTI_AGENZIE = {
       'Feed di prova: i lanci qui sotto sono finti, generati per lo sviluppo. Non sono notizie reali e non provengono dalle agenzie.',
   },
   fonteNonDisponibile: (agenzia: string) => `${agenzia} non risponde al momento.`,
+  anche: (agenzie: string[]) => `anche ${agenzie.join(' e ')}`,
+  selezione: (mostrati: number, letti: number, scartati: number) =>
+    `Selezione automatica per rilevanza: ${mostrati} lanci su ${letti} letti dai feed, ${scartati} esclusi perché non riguardano un fatto istituzionale o sono formati come video, foto e rassegne. La stessa notizia data da più agenzie compare una volta sola, con l'agenzia che l'ha data per prima.`,
   tornaAllaLista: 'Tutti i lanci',
 } as const;

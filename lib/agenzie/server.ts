@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { leggiRss, risolviDateRelative, unisci } from './rss';
+import { selezionaInteressanti } from './selezione';
 import { AGENZIE, DESCRIZIONI_AGENZIE, type Agenzia, type LancioAgenzia, type RispostaAgenzie, type StatoAgenzia } from './tipi';
 
 /**
@@ -82,7 +83,9 @@ export async function leggiLanci(agenzie: Agenzia[] = AGENZIE): Promise<Risposta
   const simulato = simulazioneAttiva();
   const esiti = await Promise.all(agenzie.map((a) => leggiFonte(a, simulato)));
 
-  const lanci = unisci(esiti.map((e) => e.lanci), LIMITE);
+  const letti = esiti.flatMap((e) => e.lanci);
+  const { scelti, scartati } = selezionaInteressanti(letti);
+  const lanci = unisci([scelti], LIMITE);
   const fonti = esiti.map((e) => e.stato);
 
   return {
@@ -90,13 +93,19 @@ export async function leggiLanci(agenzie: Agenzia[] = AGENZIE): Promise<Risposta
     lanci,
     fonti,
     simulazione: fonti.some((f) => f.stato === 'simulato'),
+    letti: letti.length,
+    scartati: scartati.length,
     timestamp: new Date().toISOString(),
   };
 }
 
+/**
+ * Un lancio per id. Si leggono tutte le agenzie perché la fusione può aver
+ * reso principale il lancio di un'altra agenzia; un id secondario non esiste
+ * più come voce a sé e restituisce null.
+ */
 export async function leggiLancio(id: string): Promise<LancioAgenzia | null> {
-  const agenzia = AGENZIE.find((a) => id.startsWith(`${a}-`));
-  if (!agenzia) return null;
-  const { lanci } = await leggiLanci([agenzia]);
+  if (!AGENZIE.some((a) => id.startsWith(`${a}-`))) return null;
+  const { lanci } = await leggiLanci();
   return lanci.find((l) => l.id === id) ?? null;
 }

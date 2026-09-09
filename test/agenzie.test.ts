@@ -23,8 +23,8 @@ describe('risolviDateRelative', () => {
 describe('leggiRss sui feed finti', () => {
   it('legge il feed ANSA finto, scarta il duplicato e marca tutto come simulato', () => {
     const lanci = leggiRss(feedFinto('ansa'), { agenzia: 'ansa', simulato: true });
-    // 7 item nel file, uno è un duplicato voluto
-    expect(lanci).toHaveLength(6);
+    // 10 item nel file, uno è un duplicato voluto
+    expect(lanci).toHaveLength(9);
     expect(lanci.every((l) => l.simulato)).toBe(true);
     expect(lanci.every((l) => l.agenzia === 'ansa')).toBe(true);
     expect(lanci.every((l) => l.id.startsWith('ansa-'))).toBe(true);
@@ -108,5 +108,76 @@ describe('funzioni di supporto', () => {
 
   it('testoSemplice rimuove i tag e normalizza gli spazi', () => {
     expect(testoSemplice('<p>Ciao   <b>mondo</b>&nbsp;&amp; co.</p>')).toBe('Ciao mondo & co.');
+  });
+});
+
+describe('selezione: fusione fra agenzie e rilevanza', async () => {
+  const { fondiTraAgenzie, selezionaInteressanti, stessaNotizia, valuta, SOGLIA_RILEVANZA } = await import('../lib/agenzie/selezione');
+  const ansa = leggiRss(feedFinto('ansa'), { agenzia: 'ansa', simulato: true });
+  const adn = leggiRss(feedFinto('adnkronos'), { agenzia: 'adnkronos', simulato: true });
+
+  it('riconosce la stessa notizia con titoli di lunghezza diversa', () => {
+    expect(
+      stessaNotizia(
+        "Consiglio dei ministri convocato per le 18, all'ordine del giorno un decreto",
+        'Consiglio dei ministri convocato per le 18',
+      ),
+    ).toBe(true);
+    expect(stessaNotizia('Camera, seduta sospesa dopo il voto', 'Senato, la commissione riprende l\'esame')).toBe(false);
+    expect(stessaNotizia('Governo', 'Governo')).toBe(false); // meno di tre parole in comune
+  });
+
+  it('fonde la stessa notizia tenendo chi l\'ha data per prima', () => {
+    const fusi = fondiTraAgenzie([...ansa, ...adn]);
+    const cdm = fusi.filter((l) => /Consiglio dei ministri convocato/.test(l.titolo));
+    expect(cdm).toHaveLength(1);
+    // ANSA 12 minuti fa, Adnkronos 20 minuti fa: la prima a darla è Adnkronos
+    expect(cdm[0].agenzia).toBe('adnkronos');
+    expect(cdm[0].altreAgenzie).toEqual(['ansa']);
+
+    const sciopero = fusi.filter((l) => /sciopero generale/i.test(l.titolo));
+    expect(sciopero).toHaveLength(1);
+    expect(sciopero[0].agenzia).toBe('adnkronos'); // 3 ore fa contro 2 ore fa
+    expect(sciopero[0].altreAgenzie).toEqual(['ansa']);
+  });
+
+  it('scarta video, rassegne e titoli senza sostanza; tiene i fatti istituzionali', () => {
+    const { scelti, scartati } = selezionaInteressanti([...ansa, ...adn]);
+    const titoli = (l: { titolo: string }[]) => l.map((x) => x.titolo);
+    expect(titoli(scartati)).toEqual(
+      expect.arrayContaining([
+        expect.stringMatching(/VIDEO Il ministro/),
+        expect.stringMatching(/prime pagine/),
+        expect.stringMatching(/Un titolo breve/),
+      ]),
+    );
+    expect(titoli(scelti)).toEqual(
+      expect.arrayContaining([
+        expect.stringMatching(/Consiglio dei ministri convocato/),
+        expect.stringMatching(/Legge di bilancio/),
+        expect.stringMatching(/sciopero generale/i),
+        expect.stringMatching(/Quirinale/),
+      ]),
+    );
+    expect(scelti.every((l) => (l.rilevanza ?? 0) >= SOGLIA_RILEVANZA)).toBe(true);
+    expect(scartati.every((l) => (l.rilevanza ?? 0) < SOGLIA_RILEVANZA)).toBe(true);
+    // nessuna notizia doppia fra i scelti
+    for (let i = 0; i < scelti.length; i++) {
+      for (let j = i + 1; j < scelti.length; j++) {
+        expect(stessaNotizia(scelti[i].titolo, scelti[j].titolo)).toBe(false);
+      }
+    }
+  });
+
+  it('spiega il punteggio con motivi leggibili', () => {
+    const video = ansa.find((l) => /VIDEO/.test(l.titolo))!;
+    const v = valuta(video);
+    expect(v.punteggio).toBeLessThan(SOGLIA_RILEVANZA);
+    expect(v.motivi).toContain('formato non notizia (video, foto, rassegna, agenda, diretta)');
+
+    const cdm = ansa.find((l) => /Consiglio dei ministri/.test(l.titolo))!;
+    const c = valuta(cdm);
+    expect(c.motivi).toContain('istituzioni o iter legislativo nel titolo');
+    expect(c.motivi).toContain('ha un sommario');
   });
 });
