@@ -7,7 +7,7 @@ interface BloccoContenuto {
 }
 
 export interface SocialAutore {
-  tipo: 'email' | 'sito' | 'instagram' | 'x' | 'linkedin' | 'facebook' | 'link';
+  tipo: 'sito' | 'instagram' | 'x' | 'linkedin' | 'facebook' | 'link';
   url: string;
   etichetta: string;
 }
@@ -32,11 +32,8 @@ const SELETTORE_BOX_AUTORE = '.elementor-widget-cmsmasters-author-box__wrapper';
 
 function normalizzaSocial(href: string, etichettaGrezza: string): SocialAutore | null {
   const h = href.trim();
-  if (!h) return null;
-
-  if (h.startsWith('mailto:')) {
-    return { tipo: 'email', url: h, etichetta: 'Email' };
-  }
+  // Le email personali degli autori non vengono esposte
+  if (!h || h.startsWith('mailto:')) return null;
 
   let url: URL;
   try {

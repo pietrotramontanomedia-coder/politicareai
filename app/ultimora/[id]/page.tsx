@@ -7,21 +7,23 @@ import flashData from '@/content/agenzia/flash.json';
 
 export const revalidate = 900;
 
+const PROFILO_INSTAGRAM = 'https://www.instagram.com/politicareit/';
+
 interface Notizia {
   titolo: string;
   testo: string;
   data: string;
   immagine?: string;
-  fonte?: string;
+  daInstagram: boolean;
 }
 
 async function caricaNotizia(id: string): Promise<Notizia | null> {
   const post = await leggiPostSingolo(id);
   if (post) {
-    return { titolo: post.titolo, testo: post.testo, data: post.data, immagine: post.immagine, fonte: post.link };
+    return { titolo: post.titolo, testo: post.testo, data: post.data, immagine: post.immagine, daInstagram: true };
   }
   const flash = flashData.voci.find((v) => v.id === id);
-  if (flash) return { titolo: flash.titolo, testo: flash.testo, data: flash.orario };
+  if (flash) return { titolo: flash.titolo, testo: flash.testo, data: flash.orario, daInstagram: false };
   return null;
 }
 
@@ -96,11 +98,17 @@ export default async function NotiziaPage({ params }: Props) {
           </div>
         )}
 
-        {notizia.fonte && (
+        {notizia.daInstagram && (
           <p className="mt-10 text-xs" style={{ color: 'var(--fg-muta)' }}>
             Fonte:{' '}
-            <a href={notizia.fonte} target="_blank" rel="noopener noreferrer" className="underline hover:no-underline">
-              post originale su Instagram
+            <a
+              href={PROFILO_INSTAGRAM}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold underline hover:no-underline"
+              style={{ color: 'var(--fg)' }}
+            >
+              profilo ufficiale @politicareit
             </a>
           </p>
         )}

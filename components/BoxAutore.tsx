@@ -5,7 +5,6 @@ import { motion } from 'framer-motion';
 import type { Autore, SocialAutore } from '@/app/api/articolo/route';
 
 const ICONE: Record<SocialAutore['tipo'], string> = {
-  email: '✉',
   sito: '🌐',
   instagram: '◎',
   x: '𝕏',
@@ -81,8 +80,8 @@ export default function BoxAutore({ autore }: { autore: Autore }) {
               <li key={s.url}>
                 <a
                   href={s.url}
-                  target={s.tipo === 'email' ? undefined : '_blank'}
-                  rel={s.tipo === 'email' ? undefined : 'noopener noreferrer'}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors hover:bg-[rgba(255,221,0,0.12)]"
                   style={{ border: '1px solid var(--bordo)', color: 'var(--fg)' }}
                 >
