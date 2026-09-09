@@ -97,3 +97,57 @@ describe('validaPack', () => {
     expect(errori.some((e) => e.regola === 'metadati-obbligatori')).toBe(true);
   });
 });
+
+describe('validaPack: fonti, completezza e copertura', () => {
+  it('accetta url vuoto solo per posizioni null', () => {
+    const pack = packBase();
+    pack.partiti[0].posizioni[0] = {
+      affermazioneId: 'a1',
+      valore: null,
+      fonte: { tipo: 'programma', citazione: 'nessuna fonte verificabile trovata', url: '' },
+    };
+    expect(validaPack(pack).filter((e) => e.regola === 'fonte-obbligatoria')).toEqual([]);
+
+    pack.partiti[0].posizioni[0].valore = 1;
+    expect(validaPack(pack).some((e) => e.regola === 'fonte-obbligatoria' && /URL/.test(e.messaggio))).toBe(true);
+  });
+
+  it('richiede la data per le dichiarazioni e la valida', () => {
+    const pack = packBase();
+    pack.partiti[0].posizioni[0].fonte = { tipo: 'dichiarazione', citazione: 'x', url: 'https://example.org/a' };
+    expect(validaPack(pack).some((e) => /dichiarazione deve avere la data/.test(e.messaggio))).toBe(true);
+    pack.partiti[0].posizioni[0].fonte.data = '12/03/2026';
+    expect(validaPack(pack).some((e) => /formato YYYY-MM-DD/.test(e.messaggio))).toBe(true);
+    pack.partiti[0].posizioni[0].fonte.data = '2026-03-12';
+    expect(validaPack(pack).filter((e) => e.regola === 'fonte-obbligatoria')).toEqual([]);
+  });
+
+  it('rifiuta il tipo stampa nel test partito e ±2 con confidenza bassa', () => {
+    const pack = packBase();
+    pack.partiti[0].posizioni[0].fonte = { tipo: 'stampa' as never, citazione: 'x', url: 'https://example.org/a' };
+    expect(validaPack(pack).some((e) => /non ammesso/.test(e.messaggio))).toBe(true);
+
+    const pack2 = packBase();
+    pack2.partiti[0].posizioni[0].confidenza = 'bassa';
+    expect(validaPack(pack2).some((e) => e.regola === 'confidenza-valore')).toBe(true);
+    pack2.partiti[0].posizioni[0].valore = 1;
+    expect(validaPack(pack2).filter((e) => e.regola === 'confidenza-valore')).toEqual([]);
+  });
+
+  it('segnala voci mancanti, duplicate o su affermazioni inesistenti', () => {
+    const pack = packBase();
+    pack.partiti[0].posizioni.pop();
+    pack.partiti[1].posizioni.push({ ...pack.partiti[1].posizioni[0] });
+    pack.partiti[1].posizioni.push({ ...pack.partiti[1].posizioni[0], affermazioneId: 'zz' });
+    const messaggi = validaPack(pack).filter((e) => e.regola === 'posizioni-complete').map((e) => e.messaggio);
+    expect(messaggi.some((m) => /non ha alcuna voce su "a2"/.test(m))).toBe(true);
+    expect(messaggi.some((m) => /due posizioni su "a1"/.test(m))).toBe(true);
+    expect(messaggi.some((m) => /"zz", che non esiste/.test(m))).toBe(true);
+  });
+
+  it('segnala un partito con copertura sotto il 50%', () => {
+    const pack = packBase();
+    for (const p of pack.partiti[0].posizioni) p.valore = null;
+    expect(validaPack(pack).some((e) => e.regola === 'copertura-minima')).toBe(true);
+  });
+});

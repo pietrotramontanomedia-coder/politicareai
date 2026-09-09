@@ -3,82 +3,232 @@
   "$id": "https://politicare.it/schema/test-partito.schema.json",
   "title": "Content pack — test di allineamento con i partiti",
   "type": "object",
-  "required": ["id", "versione", "data", "autori", "changelog", "quotePerArea", "affermazioni", "partiti"],
+  "required": [
+    "id",
+    "versione",
+    "data",
+    "autori",
+    "changelog",
+    "quotePerArea",
+    "affermazioni",
+    "partiti"
+  ],
   "additionalProperties": false,
   "properties": {
-    "id": { "type": "string", "minLength": 1 },
-    "versione": { "type": "string", "minLength": 1 },
-    "data": { "type": "string", "format": "date" },
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "versione": {
+      "type": "string",
+      "minLength": 1
+    },
+    "data": {
+      "type": "string",
+      "format": "date"
+    },
     "autori": {
       "type": "array",
-      "items": { "type": "string", "minLength": 1 },
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
       "minItems": 1
     },
     "changelog": {
       "type": "array",
-      "items": { "type": "string" }
+      "items": {
+        "type": "string"
+      }
     },
     "quotePerArea": {
       "type": "object",
-      "additionalProperties": { "type": "integer", "minimum": 0 }
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 0
+      }
     },
     "affermazioni": {
       "type": "array",
       "minItems": 1,
-      "items": { "$ref": "#/$defs/affermazione" }
+      "items": {
+        "$ref": "#/$defs/affermazione"
+      }
     },
     "partiti": {
       "type": "array",
       "minItems": 2,
-      "items": { "$ref": "#/$defs/partito" }
+      "items": {
+        "$ref": "#/$defs/partito"
+      }
     }
   },
   "$defs": {
     "valore": {
-      "type": ["integer", "null"],
-      "enum": [-2, -1, 0, 1, 2, null]
+      "type": [
+        "integer",
+        "null"
+      ],
+      "enum": [
+        -2,
+        -1,
+        0,
+        1,
+        2,
+        null
+      ]
     },
     "affermazione": {
       "type": "object",
-      "required": ["id", "testo", "area", "verso"],
+      "required": [
+        "id",
+        "testo",
+        "area",
+        "verso"
+      ],
       "additionalProperties": false,
       "properties": {
-        "id": { "type": "string", "minLength": 1 },
-        "testo": { "type": "string", "minLength": 1 },
-        "area": { "type": "string", "minLength": 1 },
-        "verso": { "type": "integer", "enum": [1, -1] }
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "testo": {
+          "type": "string",
+          "minLength": 1
+        },
+        "area": {
+          "type": "string",
+          "minLength": 1
+        },
+        "verso": {
+          "type": "integer",
+          "enum": [
+            1,
+            -1
+          ]
+        }
       }
     },
     "fonte": {
       "type": "object",
-      "required": ["tipo", "citazione", "url"],
+      "required": [
+        "tipo",
+        "citazione",
+        "url"
+      ],
       "additionalProperties": false,
       "properties": {
-        "tipo": { "type": "string", "enum": ["questionario", "programma", "voto"] },
-        "citazione": { "type": "string", "minLength": 1 },
-        "url": { "type": "string", "format": "uri", "minLength": 1 }
+        "tipo": {
+          "type": "string",
+          "enum": [
+            "questionario",
+            "programma",
+            "voto",
+            "dichiarazione"
+          ]
+        },
+        "citazione": {
+          "type": "string",
+          "minLength": 1
+        },
+        "url": {
+          "type": "string",
+          "description": "http(s) obbligatorio quando valore non è null; vuoto ammesso solo per valore null"
+        },
+        "data": {
+          "type": "string",
+          "format": "date"
+        }
       }
     },
     "posizione": {
       "type": "object",
-      "required": ["affermazioneId", "valore", "fonte"],
+      "required": [
+        "affermazioneId",
+        "valore",
+        "fonte"
+      ],
       "additionalProperties": false,
       "properties": {
-        "affermazioneId": { "type": "string", "minLength": 1 },
-        "valore": { "$ref": "#/$defs/valore" },
-        "fonte": { "$ref": "#/$defs/fonte" }
+        "affermazioneId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "valore": {
+          "$ref": "#/$defs/valore"
+        },
+        "fonte": {
+          "$ref": "#/$defs/fonte"
+        },
+        "confidenza": {
+          "type": "string",
+          "enum": [
+            "alta",
+            "media",
+            "bassa"
+          ]
+        },
+        "nota": {
+          "type": "string"
+        }
+      },
+      "if": {
+        "properties": {
+          "valore": {
+            "type": "integer"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "fonte": {
+            "properties": {
+              "url": {
+                "pattern": "^https?://"
+              }
+            }
+          }
+        }
       }
     },
     "partito": {
       "type": "object",
-      "required": ["id", "nome", "posizioni"],
+      "required": [
+        "id",
+        "nome",
+        "posizioni"
+      ],
       "additionalProperties": false,
       "properties": {
-        "id": { "type": "string", "minLength": 1 },
-        "nome": { "type": "string", "minLength": 1 },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "nome": {
+          "type": "string",
+          "minLength": 1
+        },
         "posizioni": {
           "type": "array",
-          "items": { "$ref": "#/$defs/posizione" }
+          "items": {
+            "$ref": "#/$defs/posizione"
+          }
+        },
+        "sigla": {
+          "type": "string",
+          "minLength": 1
+        },
+        "leader": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sito": {
+          "type": "string",
+          "format": "uri"
+        },
+        "colore": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$"
         }
       }
     }

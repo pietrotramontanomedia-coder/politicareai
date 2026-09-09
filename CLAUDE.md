@@ -14,14 +14,28 @@ Prima di scrivere qualsiasi codice o contenuto, questi valgono sempre.
 
 ### 1. Nessuna posizione di partito inventata
 
-Le posizioni dei partiti nel test di allineamento provengono **solo** da:
+Le posizioni dei partiti nel test di allineamento provengono **solo** da, in
+ordine di forza:
 
-- risposta diretta del partito al questionario (metodo preferito), oppure
-- estratto testuale dal programma elettorale, oppure
-- voto parlamentare registrato su un atto specifico
+- voto parlamentare registrato su un atto specifico, oppure
+- estratto testuale dal programma elettorale o da un documento ufficiale del partito, oppure
+- dichiarazione pubblica del leader o di un dirigente a nome del partito, con
+  citazione diretta e **data**, riportata da agenzia/testata o su canale ufficiale
+  (serve per tenere il test attuale: se la linea recente diverge dal programma
+  2022, si codifica la posizione recente e si annota la divergenza in `nota`), oppure
+- risposta diretta del partito al questionario (metodo preferito quando disponibile)
 
-Ogni posizione nel JSON ha un campo `fonte` obbligatorio con citazione e URL.
-Una posizione senza fonte è un bug che blocca il build.
+Ogni posizione nel JSON ha un campo `fonte` obbligatorio con citazione e URL
+http(s); le dichiarazioni hanno anche `data`. Una posizione senza fonte è un bug
+che blocca il build. Se non c'è fonte, il valore è `null` (mai `0`): il partito
+non viene valutato su quell'affermazione.
+
+Rubrica di codifica, meccanica: ±2 solo con voto o programma esplicito; ±1 se
+favorevole/contrario con condizioni o solo per dichiarazione; 0 solo per
+neutralità o spaccatura interna documentate. Ogni posizione porta `confidenza`
+(alta/media/bassa); con confidenza bassa il valore non può essere ±2.
+Ogni partito deve avere una posizione documentata su almeno il 50% delle
+affermazioni, altrimenti il pack non passa.
 
 Non si chiede mai a un LLM di dedurre dove sta un partito. L'LLM può aiutare a
 estrarre e a riassumere, mai a decidere.
@@ -42,6 +56,8 @@ Conseguenze architetturali:
 ### 3. Il risultato non è un verdetto
 
 - si mostra sempre la classifica completa, mai un solo vincitore
+- un partito entra in classifica solo con copertura ≥ 60% delle risposte date;
+  sotto, è mostrato a parte come "dati insufficienti", con la copertura dichiarata
 - se il primo e il secondo sono entro 3 punti percentuali, l'interfaccia lo
   dichiara esplicitamente come pari merito
 - il risultato principale non è la percentuale ma il dettaglio: su quali
@@ -126,7 +142,10 @@ I test seguenti girano sui file in `content/` e bloccano la merge.
 - se più dell'85% dei partiti ha la stessa posizione su un'affermazione, questa
   non discrimina e va rimossa
 - le quote per area tematica sono dichiarate nel manifest del pack e verificate
-- ogni posizione ha `fonte` non vuota
+- ogni posizione ha `fonte` non vuota; URL http(s) e tipo ammesso se il valore
+  non è `null`; `data` obbligatoria per le dichiarazioni
+- ogni partito ha una voce per ogni affermazione e copertura ≥ 50%
+- `/metodologia/fonti` pubblica ogni posizione con citazione, tipo, data e link
 
 **Quiz**
 

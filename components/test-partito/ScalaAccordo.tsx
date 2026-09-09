@@ -35,7 +35,7 @@ export default function ScalaAccordo({ valoreSelezionato, onSeleziona }: Props) 
             style={{
               borderColor: selezionata ? opzione.colore : 'var(--bordo)',
               borderWidth: selezionata ? 2 : 1,
-              background: selezionata ? opzione.colore + '22' : 'var(--bg-alta)',
+              background: selezionata ? opzione.colore + '22' : 'var(--bg-card)',
             }}
           >
             <span

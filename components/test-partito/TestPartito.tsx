@@ -161,7 +161,7 @@ export default function TestPartito({ pack }: { pack: TestPartitoPack }) {
       valore: risposte[a.id]?.valore ?? null,
       importante: risposte[a.id]?.importante ?? false,
     }));
-    return { risultati: calcolaClassifica(listaRisposte, pack.partiti), listaRisposte };
+    return { risultati: calcolaClassifica(listaRisposte, pack.partiti, { affermazioni: pack.affermazioni }), listaRisposte };
   }, [fase, pack, risposte]);
 
   if (fase === 'intro') {

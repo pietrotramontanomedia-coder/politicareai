@@ -23,7 +23,7 @@ export default function PaginaMetodologia() {
       {usaFixture && (
         <div
           className="mt-6 rounded-2xl border p-4 text-sm"
-          style={{ borderColor: 'var(--color-terra)', background: 'var(--accento-chiaro)', color: 'var(--color-inchiostro)' }}
+          style={{ borderColor: 'var(--accento)', background: 'rgba(254,220,1,0.08)', color: 'var(--fg)' }}
         >
           <strong>Contenuto di sviluppo.</strong> Il pack in uso in questo momento (
           <code>{pack.id}</code>) è un fixture con partiti e posizioni inventati, non un pack
@@ -35,12 +35,44 @@ export default function PaginaMetodologia() {
       <section className="mt-10">
         <h2 className="text-xl font-semibold">Da dove vengono le posizioni</h2>
         <p className="mt-2 leading-relaxed" style={{ color: 'var(--fg-muta)' }}>
-          Ogni posizione di partito proviene solo da una di queste tre fonti: risposta diretta del
-          partito al nostro questionario (il metodo che preferiamo), un estratto testuale dal
-          programma elettorale, oppure un voto parlamentare registrato su un atto specifico.
-          Nessuna posizione è dedotta o stimata: se non abbiamo una fonte verificabile, quella
-          posizione non entra nel pack. Ogni posizione porta con sé la citazione e il link alla
-          fonte.
+          Ogni posizione di partito proviene da una fonte verificabile, in questa gerarchia: un voto
+          parlamentare registrato su un atto specifico; un estratto testuale dal programma o da un
+          documento ufficiale del partito; una dichiarazione pubblica del leader o di un dirigente a
+          nome del partito, con citazione diretta e data; la risposta diretta del partito al nostro
+          questionario, il metodo che preferiamo quando è disponibile. Le dichiarazioni servono a
+          tenere il test aggiornato: quando un partito ha cambiato linea rispetto al programma del
+          2022, codifichiamo la posizione recente e annotiamo la divergenza.
+        </p>
+        <p className="mt-2 leading-relaxed" style={{ color: 'var(--fg-muta)' }}>
+          Nessuna posizione è dedotta dalla collocazione politica del partito. Se non abbiamo una
+          fonte, la posizione resta vuota e quell&apos;affermazione non entra nel calcolo per quel
+          partito, esattamente come una domanda saltata. Ogni posizione porta con sé la citazione, il
+          link e la data della fonte:{' '}
+          <Link href="/metodologia/fonti" className="underline underline-offset-2" style={{ color: 'var(--accento)' }}>
+            l&apos;elenco completo è pubblico
+          </Link>
+          .
+        </p>
+      </section>
+
+      <section className="mt-8">
+        <h2 className="text-xl font-semibold">Come codifichiamo una posizione</h2>
+        <p className="mt-2 leading-relaxed" style={{ color: 'var(--fg-muta)' }}>
+          La scala va da −2 a +2 ed è sempre relativa all&apos;affermazione così com&apos;è scritta.
+          La regola è meccanica, così chiunque può ricontrollarla:
+        </p>
+        <ul className="mt-3 space-y-1.5 text-sm leading-relaxed" style={{ color: 'var(--fg-muta)' }}>
+          <li><strong style={{ color: 'var(--fg)' }}>+2</strong> il partito propone la misura nel programma o ha votato a favore, senza condizioni</li>
+          <li><strong style={{ color: 'var(--fg)' }}>+1</strong> favorevole con condizioni o in parte, oppure solo tramite dichiarazione senza impegno programmatico</li>
+          <li><strong style={{ color: 'var(--fg)' }}>0</strong> neutralità esplicita e documentata, oppure spaccatura interna documentata con fonti su entrambi i lati. Mai usato per &quot;non sappiamo&quot;</li>
+          <li><strong style={{ color: 'var(--fg)' }}>−1</strong> e <strong style={{ color: 'var(--fg)' }}>−2</strong> specularmente</li>
+        </ul>
+        <p className="mt-3 leading-relaxed" style={{ color: 'var(--fg-muta)' }}>
+          A ogni posizione è associata una confidenza: alta con voto o programma esplicito, media con
+          una dichiarazione chiara del leader, bassa con una dichiarazione indiretta. Con confidenza
+          bassa il valore non può mai essere ±2. Queste regole sono verificate automaticamente prima
+          di ogni pubblicazione, insieme alle altre: un partito deve avere una posizione documentata
+          su almeno metà delle affermazioni, altrimenti il pack non passa.
         </p>
       </section>
 
@@ -78,7 +110,7 @@ export default function PaginaMetodologia() {
         </p>
         <pre
           className="mt-3 overflow-x-auto rounded-xl border p-4 text-sm"
-          style={{ borderColor: 'var(--bordo)', background: 'var(--bg-alta)' }}
+          style={{ borderColor: 'var(--bordo)', background: 'var(--bg-card)' }}
         >
 {`accordo   = 1 − |risposta − posizione| / 4
 punteggio = Σ (peso × accordo) / Σ peso`}
@@ -87,6 +119,13 @@ punteggio = Σ (peso × accordo) / Σ peso`}
           Il peso è 1, oppure 2 se hai segnato quel tema come importante per te. Le domande
           saltate sono escluse dal calcolo, non contano come disaccordo. Il calcolo avviene
           interamente nel tuo browser: le risposte non vengono mai inviate a un server.
+        </p>
+        <p className="mt-3 leading-relaxed" style={{ color: 'var(--fg-muta)' }}>
+          Un partito entra in classifica solo se ha una posizione documentata su almeno il 60% delle
+          affermazioni a cui hai risposto: sotto quella soglia il suo punteggio poggia su troppo
+          pochi punti per essere confrontato con gli altri, e lo mostriamo a parte con la
+          copertura dichiarata. Per ogni partito vedi anche il punteggio per area tematica e, per ogni
+          affermazione, la sua posizione con la fonte.
         </p>
       </section>
 
@@ -118,8 +157,8 @@ punteggio = Σ (peso × accordo) / Σ peso`}
 
       <Link
         href="/test-partito"
-        className="mt-10 inline-flex items-center justify-center rounded-full px-6 py-3 text-base font-semibold text-white"
-        style={{ background: 'var(--color-terra)' }}
+        className="mt-10 inline-flex items-center justify-center rounded-full px-6 py-3 text-base font-semibold"
+        style={{ background: 'var(--accento)', color: '#0a0a0a' }}
       >
         ← Torna al test
       </Link>
