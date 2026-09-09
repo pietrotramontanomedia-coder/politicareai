@@ -14,8 +14,9 @@ function formattaOrario(iso: string): string {
   return new Date(iso).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
 }
 
-export default function AgenziaStampa() {
-  const voci = flashData.voci as VoceFlash[];
+export default function AgenziaStampa({ limite }: { limite?: number }) {
+  const tutte = flashData.voci as VoceFlash[];
+  const voci = limite ? tutte.slice(0, limite) : tutte;
 
   if (voci.length === 0) return null;
 

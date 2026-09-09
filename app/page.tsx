@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import FeedSection from '@/components/FeedSection';
+import AgenziaStampa from '@/components/AgenziaStampa';
 import Logo from '@/components/Logo';
 
 export default function Home() {
@@ -11,9 +12,19 @@ export default function Home() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="min-h-dvh flex flex-col justify-center px-4 py-16 sm:px-6"
+      className="min-h-dvh flex flex-col justify-center px-4 py-8 sm:px-6"
     >
       <div className="mx-auto max-w-6xl w-full">
+        {/* Ultim'ora in evidenza */}
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="mb-10"
+        >
+          <AgenziaStampa limite={3} />
+        </motion.div>
+
         {/* Logo */}
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
