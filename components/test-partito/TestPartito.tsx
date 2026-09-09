@@ -55,6 +55,9 @@ export default function TestPartito({ pack }: { pack: TestPartitoPack }) {
   useEffect(() => {
     const salvato = leggiStatoSalvato(pack.id);
     if (salvato && Object.keys(salvato.risposte).length > 0) {
+      // Lettura da sessionStorage dopo il mount: non può stare nell'inizializzatore
+      // di useState perché il server renderizza sempre l'intro (idratazione coerente).
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setRisposte(salvato.risposte);
       setIndice(salvato.indice);
       setFase('quiz');

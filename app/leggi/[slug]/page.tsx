@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { slugToUrl } from '@/lib/slug';
@@ -68,34 +68,49 @@ export default function LeggiArticoloPage() {
   const router = useRouter();
   const slug = params.slug as string;
 
+  // L'URL originale deriva dallo slug: si calcola, non si tiene in stato.
+  // Stringa vuota = slug non decodificabile.
+  const urlOriginale = useMemo(() => {
+    try {
+      return slugToUrl(slug);
+    } catch {
+      return '';
+    }
+  }, [slug]);
+  const slugNonValido = urlOriginale === '';
+
   const [articolo, setArticolo] = useState<ArticoloCompleto | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [errore, setErrore] = useState(false);
-  const [urlOriginale, setUrlOriginale] = useState('');
+  const [caricamentoFinito, setCaricamentoFinito] = useState(false);
+  const [erroreRete, setErroreRete] = useState(false);
+
+  const loading = !slugNonValido && !caricamentoFinito;
+  const errore = slugNonValido || erroreRete;
 
   useEffect(() => {
-    let url = '';
-    try {
-      url = slugToUrl(slug);
-      setUrlOriginale(url);
-    } catch {
-      setErrore(true);
-      setLoading(false);
-      return;
-    }
+    if (slugNonValido) return;
+    let annullato = false;
 
-    fetch(`/api/articolo?url=${encodeURIComponent(url)}`)
+    fetch(`/api/articolo?url=${encodeURIComponent(urlOriginale)}`)
       .then((res) => res.json())
       .then((data) => {
+        if (annullato) return;
         if (data.success) {
           setArticolo(data.articolo);
         } else {
-          setErrore(true);
+          setErroreRete(true);
         }
       })
-      .catch(() => setErrore(true))
-      .finally(() => setLoading(false));
-  }, [slug]);
+      .catch(() => {
+        if (!annullato) setErroreRete(true);
+      })
+      .finally(() => {
+        if (!annullato) setCaricamentoFinito(true);
+      });
+
+    return () => {
+      annullato = true;
+    };
+  }, [slugNonValido, urlOriginale]);
 
   const numParagrafo = { i: 0 };
 
