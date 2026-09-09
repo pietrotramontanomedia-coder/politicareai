@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import Link from 'next/link';
 import { useInstagram } from '@/lib/instagram';
-import { formattaDataPrecisa } from '@/lib/data-ora';
+import { formattaDataRelativa } from '@/lib/data-ora';
 
 const PROFILO = 'https://www.instagram.com/politicareit/';
 const MAX_POST = 10;
@@ -111,7 +111,7 @@ export default function PostCarousel() {
                     className="text-[11px] font-mono font-bold tabular-nums"
                     style={{ color: 'var(--accento)' }}
                   >
-                    {formattaDataPrecisa(p.data)}
+                    {formattaDataRelativa(p.data)}
                   </span>
                   <h3 className="mt-1.5 font-bold text-sm sm:text-base leading-snug line-clamp-3 group-hover:underline">
                     {p.titolo}

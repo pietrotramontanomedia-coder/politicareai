@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useUltimOra } from '@/lib/instagram';
-import { soloData, soloOra } from '@/lib/data-ora';
+import { formattaDataRelativa } from '@/lib/data-ora';
 
 export default function AgenziaStampa({ limite }: { limite?: number }) {
   const { voci: tutte } = useUltimOra();
@@ -48,13 +48,11 @@ export default function AgenziaStampa({ limite }: { limite?: number }) {
             className={`flex gap-3 ${compatta ? 'py-2' : 'p-4 sm:p-5'}`}
             style={idx > 0 ? { borderTop: '1px solid var(--bordo)' } : undefined}
           >
-            <div className={`shrink-0 text-right font-mono tabular-nums leading-tight ${compatta ? 'w-14 text-[11px]' : 'w-16 sm:w-20 text-xs sm:text-sm'}`}>
-              <div className="font-bold" style={{ color: compatta ? 'var(--fg-muta)' : 'var(--accento)' }}>
-                {soloOra(voce.orario)}
-              </div>
-              <div className="uppercase" style={{ color: 'var(--fg-muta)' }}>
-                {soloData(voce.orario)}
-              </div>
+            <div
+              className={`shrink-0 text-right font-mono font-bold tabular-nums leading-tight ${compatta ? 'w-16 text-[11px]' : 'w-20 sm:w-24 text-xs sm:text-sm'}`}
+              style={{ color: compatta ? 'var(--fg-muta)' : 'var(--accento)' }}
+            >
+              {formattaDataRelativa(voce.orario)}
             </div>
 
             {!compatta && (

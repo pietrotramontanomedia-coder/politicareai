@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import Link from 'next/link';
 import { useUltimOra } from '@/lib/instagram';
-import { formattaDataPrecisa } from '@/lib/data-ora';
+import { formattaDataRelativa } from '@/lib/data-ora';
 
 const INTERVALLO_MS = 4000;
 
@@ -61,7 +61,7 @@ export default function UltimOraTicker({ limite = 5 }: { limite?: number }) {
                 className="shrink-0 text-xs font-mono font-bold tabular-nums"
                 style={{ color: 'var(--accento)' }}
               >
-                {formattaDataPrecisa(corrente.orario)}
+                {formattaDataRelativa(corrente.orario)}
               </span>
               <span className="truncate text-sm sm:text-base font-medium">{corrente.titolo}</span>
             </Link>
