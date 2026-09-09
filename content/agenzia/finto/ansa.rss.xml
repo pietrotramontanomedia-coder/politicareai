@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  FEED FINTO PER LO SVILUPPO. Imita la struttura del feed RSS di ANSA Politica
+  per provare il lettore e l'interfaccia senza dipendere dalla rete.
+  I lanci NON sono notizie reali e non sono stati scritti da ANSA.
+  Le date sono relative ({{fa:15m}} = quindici minuti fa) e vengono risolte
+  al momento della lettura da lib/agenzie/rss.ts.
+-->
+<rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <channel>
+    <title>ANSA Politica (feed simulato per sviluppo)</title>
+    <link>https://www.ansa.it/sito/notizie/politica/politica.shtml</link>
+    <description>Simulazione del feed politica. Nessun lancio è reale.</description>
+    <language>it</language>
+    <item>
+      <title>Simulazione: Consiglio dei ministri convocato per le 18, all'ordine del giorno un decreto</title>
+      <link>https://www.ansa.it/sito/notizie/politica/simulazione/lancio-001.html</link>
+      <guid isPermaLink="false">ansa-finto-001</guid>
+      <pubDate>{{fa:12m}}</pubDate>
+      <category>Simulazione</category>
+      <description><![CDATA[<p>(Lancio simulato per lo sviluppo, non è una notizia reale.) Palazzo Chigi ha diffuso la convocazione del Consiglio dei ministri con l'ordine del giorno. Il testo del decreto sarà pubblicato al termine della riunione.</p>]]></description>
+    </item>
+    <item>
+      <title>Simulazione: Senato, la commissione Affari costituzionali riprende l'esame del ddl</title>
+      <link>https://www.ansa.it/sito/notizie/politica/simulazione/lancio-002.html</link>
+      <guid isPermaLink="false">ansa-finto-002</guid>
+      <pubDate>{{fa:38m}}</pubDate>
+      <category>Simulazione</category>
+      <description><![CDATA[(Lancio simulato per lo sviluppo, non è una notizia reale.) Riprende in commissione l'esame degli emendamenti. Il relatore ha chiesto di concludere il voto entro la settimana.]]></description>
+    </item>
+    <item>
+      <title>Simulazione: Quirinale, il presidente riceve una delegazione di sindaci</title>
+      <link>https://www.ansa.it/sito/notizie/politica/simulazione/lancio-003.html</link>
+      <guid isPermaLink="false">ansa-finto-003</guid>
+      <pubDate>{{fa:1h}}</pubDate>
+      <category>Simulazione</category>
+      <description><![CDATA[(Lancio simulato per lo sviluppo, non è una notizia reale.) L'incontro è dedicato ai bilanci comunali e alla gestione dei fondi europei.]]></description>
+    </item>
+    <item>
+      <title>Simulazione: Camera, seduta sospesa dopo il voto sulle pregiudiziali</title>
+      <link>https://www.ansa.it/sito/notizie/politica/simulazione/lancio-004.html</link>
+      <guid isPermaLink="false">ansa-finto-004</guid>
+      <pubDate>{{fa:2h}}</pubDate>
+      <category>Simulazione</category>
+      <description><![CDATA[(Lancio simulato per lo sviluppo, non è una notizia reale.) I lavori riprendono nel pomeriggio con la discussione generale.]]></description>
+    </item>
+    <item>
+      <title>Simulazione: Regioni, la Conferenza approva il riparto del fondo sanitario</title>
+      <link>https://www.ansa.it/sito/notizie/politica/simulazione/lancio-005.html</link>
+      <guid isPermaLink="false">ansa-finto-005</guid>
+      <pubDate>{{fa:5h}}</pubDate>
+      <category>Simulazione</category>
+      <description><![CDATA[(Lancio simulato per lo sviluppo, non è una notizia reale.) Intesa raggiunta all'unanimità sui criteri di riparto per l'anno in corso.]]></description>
+    </item>
+    <item>
+      <title>Simulazione: Parlamento europeo, votata la risoluzione sul bilancio pluriennale</title>
+      <link>https://www.ansa.it/sito/notizie/politica/simulazione/lancio-006.html</link>
+      <guid isPermaLink="false">ansa-finto-006</guid>
+      <pubDate>{{fa:1d}}</pubDate>
+      <category>Simulazione</category>
+      <description><![CDATA[(Lancio simulato per lo sviluppo, non è una notizia reale.) La risoluzione passa ora al negoziato con il Consiglio.]]></description>
+    </item>
+    <item>
+      <title>Simulazione: Senato, la commissione Affari costituzionali riprende l'esame del ddl</title>
+      <link>https://www.ansa.it/sito/notizie/politica/simulazione/lancio-002-bis.html</link>
+      <guid isPermaLink="false">ansa-finto-002-bis</guid>
+      <pubDate>{{fa:40m}}</pubDate>
+      <category>Simulazione</category>
+      <description><![CDATA[Duplicato voluto del lancio 002: serve a verificare che il lettore lo scarti.]]></description>
+    </item>
+  </channel>
+</rss>

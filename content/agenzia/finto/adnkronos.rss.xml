@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  FEED FINTO PER LO SVILUPPO. Imita la struttura del feed RSS di Adnkronos
+  Politica per provare il lettore e l'interfaccia senza dipendere dalla rete.
+  I lanci NON sono notizie reali e non sono stati scritti da Adnkronos.
+  Le date sono relative ({{fa:15m}} = quindici minuti fa) e vengono risolte
+  al momento della lettura da lib/agenzie/rss.ts.
+-->
+<rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Adnkronos Politica (feed simulato per sviluppo)</title>
+    <link>https://www.adnkronos.com/politica</link>
+    <description>Simulazione del feed politica. Nessun lancio è reale.</description>
+    <language>it-it</language>
+    <item>
+      <title>Simulazione: Legge di bilancio, vertice di maggioranza fissato per domani</title>
+      <link>https://www.adnkronos.com/politica/simulazione/lancio-001</link>
+      <guid>https://www.adnkronos.com/politica/simulazione/lancio-001</guid>
+      <pubDate>{{fa:5m}}</pubDate>
+      <category>Simulazione</category>
+      <description>(Lancio simulato per lo sviluppo, non è una notizia reale.) Sul tavolo le priorità della manovra e il calendario parlamentare d'autunno.</description>
+    </item>
+    <item>
+      <title>Simulazione: Consiglio dei ministri convocato per le 18</title>
+      <link>https://www.adnkronos.com/politica/simulazione/lancio-002</link>
+      <guid>https://www.adnkronos.com/politica/simulazione/lancio-002</guid>
+      <pubDate>{{fa:20m}}</pubDate>
+      <category>Simulazione</category>
+      <description>(Lancio simulato per lo sviluppo, non è una notizia reale.) Stessa notizia del lancio ANSA 001, scritta in modo diverso: le due agenzie restano entrambe visibili, il lettore non le fonde.</description>
+    </item>
+    <item>
+      <title>Simulazione: Elezioni regionali, depositate le liste nei termini</title>
+      <link>https://www.adnkronos.com/politica/simulazione/lancio-003</link>
+      <guid>https://www.adnkronos.com/politica/simulazione/lancio-003</guid>
+      <pubDate>{{fa:55m}}</pubDate>
+      <category>Simulazione</category>
+      <content:encoded><![CDATA[<p>(Lancio simulato per lo sviluppo, non è una notizia reale.) Le liste sono state depositate negli uffici elettorali. Da domani la verifica delle firme.</p>]]></content:encoded>
+    </item>
+    <item>
+      <title>Simulazione: Sindacati, sciopero generale confermato per venerdì</title>
+      <link>https://www.adnkronos.com/politica/simulazione/lancio-004</link>
+      <guid>https://www.adnkronos.com/politica/simulazione/lancio-004</guid>
+      <pubDate>{{fa:3h}}</pubDate>
+      <category>Simulazione</category>
+      <description>(Lancio simulato per lo sviluppo, non è una notizia reale.) Confermata la mobilitazione nazionale con manifestazioni in venti città.</description>
+    </item>
+    <item>
+      <title>Simulazione: Ue, la Commissione presenta il pacchetto sull'energia</title>
+      <link>https://www.adnkronos.com/politica/simulazione/lancio-005</link>
+      <guid>https://www.adnkronos.com/politica/simulazione/lancio-005</guid>
+      <pubDate>{{fa:7h}}</pubDate>
+      <category>Simulazione</category>
+      <description>(Lancio simulato per lo sviluppo, non è una notizia reale.) Il pacchetto passa ora al Parlamento europeo e al Consiglio.</description>
+    </item>
+    <item>
+      <title>Simulazione: Comuni, firmato il protocollo sui fondi per le periferie</title>
+      <link>https://www.adnkronos.com/politica/simulazione/lancio-006</link>
+      <guid>https://www.adnkronos.com/politica/simulazione/lancio-006</guid>
+      <pubDate>{{fa:2d}}</pubDate>
+      <category>Simulazione</category>
+      <description>(Lancio simulato per lo sviluppo, non è una notizia reale.) Il protocollo definisce tempi e criteri di assegnazione delle risorse.</description>
+    </item>
+  </channel>
+</rss>
