@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import FeedSection from '@/components/FeedSection';
 import UltimOraTicker from '@/components/UltimOraTicker';
-import InstagramFeed from '@/components/InstagramFeed';
+import PostCarousel from '@/components/PostCarousel';
 import Logo from '@/components/Logo';
 
 export default function Home() {
@@ -36,22 +36,31 @@ export default function Home() {
           <Logo size="xl" />
         </motion.div>
 
-        <motion.p
+        <motion.h1
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.2 }}
+          className="mt-2 text-center text-2xl sm:text-4xl lg:text-5xl font-bold tracking-tight leading-tight"
+        >
+          La politica, spiegata{' '}
+          <span style={{ color: 'var(--accento)' }}>senza schieramenti</span>.
+        </motion.h1>
+
+        {/* Post Instagram a rotazione */}
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.4, delay: 0.2 }}
-          className="mt-4 text-center text-base sm:text-lg"
-          style={{ color: 'var(--fg-muta)' }}
+          transition={{ duration: 0.4, delay: 0.3 }}
         >
-          Capisci la politica italiana, un&apos;affermazione alla volta
-        </motion.p>
+          <PostCarousel />
+        </motion.div>
 
         {/* Griglia moduli */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.4, delay: 0.3 }}
-          className="mt-16 grid grid-cols-1 lg:grid-cols-2 gap-6"
+          transition={{ duration: 0.4, delay: 0.4 }}
+          className="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-6"
         >
           {/* Test Allineamento */}
           <Link href="/test-partito">
@@ -115,9 +124,6 @@ export default function Home() {
             </motion.div>
           </Link>
         </motion.div>
-
-        {/* Instagram */}
-        <InstagramFeed />
 
         {/* Footer */}
         <motion.div
