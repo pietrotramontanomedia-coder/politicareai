@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
+import { useSwipe } from '@/lib/useSwipe';
 
 interface FeedArticle {
   id: string;
@@ -45,6 +46,11 @@ export default function NewsCarousel({ articoli }: { articoli: FeedArticle[] }) 
     };
   }, [avanti, slide.length]);
 
+  const swipe = useSwipe({
+    avanti: () => vaiA(indice + 1),
+    indietro: () => vaiA(indice - 1),
+  });
+
   if (slide.length === 0) return null;
 
   const corrente = slide[indice];
@@ -52,7 +58,9 @@ export default function NewsCarousel({ articoli }: { articoli: FeedArticle[] }) 
   return (
     <div
       className="relative w-full overflow-hidden rounded-2xl sm:rounded-3xl aspect-square mx-auto"
-      style={{ maxWidth: 'min(100%, 560px)', background: 'var(--bg-card)' }}
+      style={{ maxWidth: 'min(100%, 560px)', background: 'var(--bg-card)', ...swipe.style }}
+      onTouchStart={swipe.onTouchStart}
+      onTouchEnd={swipe.onTouchEnd}
       onMouseEnter={() => timerRef.current && clearInterval(timerRef.current)}
       onMouseLeave={() => {
         timerRef.current = setInterval(avanti, INTERVALLO_MS);

@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import Link from 'next/link';
 import { useUltimOra } from '@/lib/instagram';
 import { formattaDataRelativa } from '@/lib/data-ora';
+import { useSwipe } from '@/lib/useSwipe';
 
 const INTERVALLO_MS = 4000;
 
@@ -26,6 +27,11 @@ export default function UltimOraTicker({ limite = 5 }: { limite?: number }) {
     };
   }, [avanti, voci.length]);
 
+  const swipe = useSwipe({
+    avanti,
+    indietro: () => setIndice((i) => (i - 1 + voci.length) % voci.length),
+  });
+
   if (voci.length === 0) return null;
 
   const corrente = voci[indice % voci.length];
@@ -33,7 +39,9 @@ export default function UltimOraTicker({ limite = 5 }: { limite?: number }) {
   return (
     <div
       className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 sm:px-4 sm:py-3 w-full"
-      style={{ background: 'var(--bg-card)', border: '1px solid var(--bordo)' }}
+      style={{ background: 'var(--bg-card)', border: '1px solid var(--bordo)', ...swipe.style }}
+      onTouchStart={swipe.onTouchStart}
+      onTouchEnd={swipe.onTouchEnd}
       onMouseEnter={() => timerRef.current && clearInterval(timerRef.current)}
       onMouseLeave={() => {
         timerRef.current = setInterval(avanti, INTERVALLO_MS);

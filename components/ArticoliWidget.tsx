@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import Link from 'next/link';
+import { useSwipe } from '@/lib/useSwipe';
 
 interface FeedArticle {
   id: string;
@@ -38,6 +39,11 @@ export default function ArticoliWidget({ articoli }: { articoli: FeedArticle[] }
     };
   }, [avanti, gruppi.length]);
 
+  const swipe = useSwipe({
+    avanti,
+    indietro: () => setIndice((i) => (i - 1 + gruppi.length) % gruppi.length),
+  });
+
   if (gruppi.length === 0) return null;
 
   const gruppoCorrente = gruppi[indice];
@@ -69,7 +75,12 @@ export default function ArticoliWidget({ articoli }: { articoli: FeedArticle[] }
         </div>
       </div>
 
-      <div className="relative overflow-hidden rounded-2xl border" style={{ borderColor: 'var(--bordo)', background: 'var(--bg-card)' }}>
+      <div
+        className="relative overflow-hidden rounded-2xl border"
+        style={{ borderColor: 'var(--bordo)', background: 'var(--bg-card)', ...swipe.style }}
+        onTouchStart={swipe.onTouchStart}
+        onTouchEnd={swipe.onTouchEnd}
+      >
         <AnimatePresence mode="wait">
           <motion.div
             key={indice}

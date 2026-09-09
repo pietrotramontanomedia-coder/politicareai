@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import Link from 'next/link';
 import { useInstagram } from '@/lib/instagram';
 import { formattaDataRelativa } from '@/lib/data-ora';
+import { useSwipe } from '@/lib/useSwipe';
 
 const MAX_POST = 10;
 const PER_GRUPPO = 2;
@@ -39,6 +40,17 @@ export default function PostCarousel() {
     return ferma;
   }, [riparti]);
 
+  const swipe = useSwipe({
+    avanti: () => {
+      avanti();
+      riparti();
+    },
+    indietro: () => {
+      setIndice((i) => (i - 1 + gruppi.length) % gruppi.length);
+      riparti();
+    },
+  });
+
   if (gruppi.length === 0) return null;
 
   const corrente = gruppi[indice % gruppi.length];
@@ -66,7 +78,7 @@ export default function PostCarousel() {
         </div>
       </div>
 
-      <div className="relative overflow-hidden">
+      <div className="relative overflow-hidden" {...swipe}>
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={indice}

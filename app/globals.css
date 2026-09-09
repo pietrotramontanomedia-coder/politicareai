@@ -91,35 +91,116 @@ body {
 .banda {
   width: 100%;
   position: relative;
+  isolation: isolate;
+  overflow: hidden;
 }
 
+.banda > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Hero: aurora lenta in ocra e blu istituzionale dietro logo e claim */
 .banda-hero {
-  background:
-    radial-gradient(ellipse 70% 55% at 50% 28%, rgba(254, 220, 1, 0.09), transparent 70%),
-    var(--bg);
+  background: var(--bg);
 }
 
+.banda-hero::before {
+  content: '';
+  position: absolute;
+  inset: -20%;
+  background:
+    radial-gradient(45% 35% at 50% 32%, rgba(254, 220, 1, 0.13), transparent 70%),
+    radial-gradient(35% 30% at 18% 78%, rgba(74, 108, 168, 0.16), transparent 70%),
+    radial-gradient(35% 30% at 84% 72%, rgba(254, 220, 1, 0.06), transparent 70%);
+  filter: blur(40px);
+  animation: aurora 22s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+.banda-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(70% 60% at 50% 40%, #000 20%, transparent 100%);
+  -webkit-mask-image: radial-gradient(70% 60% at 50% 40%, #000 20%, transparent 100%);
+  pointer-events: none;
+}
+
+@keyframes aurora {
+  0% { transform: translate3d(-3%, -2%, 0) scale(1); }
+  50% { transform: translate3d(2%, 3%, 0) scale(1.06); }
+  100% { transform: translate3d(3%, -3%, 0) scale(1.02); }
+}
+
+/* Strumenti: griglia fine da documento istituzionale, filo ocra in testa */
 .banda-elevata {
   background-color: var(--bg-elevated);
-  background-image: radial-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px);
-  background-size: 22px 22px;
-  border-top: 1px solid var(--bordo);
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 48px 48px;
   border-bottom: 1px solid var(--bordo);
 }
 
-.banda-notizie {
-  background: linear-gradient(180deg, var(--bg) 0%, #100f0b 100%);
+.banda-elevata::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(70% 55% at 50% 0%, rgba(254, 220, 1, 0.07), transparent 70%);
+  pointer-events: none;
 }
 
+.banda-elevata::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, var(--accento) 35%, var(--accento) 65%, transparent 100%);
+  background-size: 200% 100%;
+  animation: filo 8s linear infinite;
+}
+
+@keyframes filo {
+  from { background-position: 100% 0; }
+  to { background-position: -100% 0; }
+}
+
+/* Notizie: fondo caldo con tratteggio diagonale appena percettibile */
+.banda-notizie {
+  background:
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.018) 0 2px, transparent 2px 16px),
+    linear-gradient(180deg, var(--bg) 0%, #12100a 100%);
+}
+
+/* Ultim'ora: tinta rossa "live" con filo in testa */
 .banda-live {
   background:
-    linear-gradient(180deg, rgba(239, 68, 68, 0.07) 0%, transparent 55%),
+    radial-gradient(60% 40% at 0% 0%, rgba(239, 68, 68, 0.12), transparent 70%),
+    linear-gradient(180deg, rgba(239, 68, 68, 0.05) 0%, transparent 60%),
     var(--color-bg-elevated);
-  border-top: 1px solid rgba(239, 68, 68, 0.28);
+}
+
+.banda-live::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #ef4444 0%, rgba(239, 68, 68, 0.25) 40%, transparent 100%);
 }
 
 .banda-footer {
-  background: var(--color-nero-deep);
+  background:
+    linear-gradient(180deg, transparent, rgba(254, 220, 1, 0.03)),
+    var(--color-nero-deep);
   border-top: 1px solid var(--bordo);
 }
 
