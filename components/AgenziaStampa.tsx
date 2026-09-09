@@ -1,21 +1,12 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import flashData from '@/content/agenzia/flash.json';
-
-interface VoceFlash {
-  id: string;
-  orario: string;
-  titolo: string;
-  testo: string;
-}
-
-function formattaOrario(iso: string): string {
-  return new Date(iso).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
-}
+import Link from 'next/link';
+import { useUltimOra } from '@/lib/instagram';
+import { soloData, soloOra } from '@/lib/data-ora';
 
 export default function AgenziaStampa({ limite }: { limite?: number }) {
-  const tutte = flashData.voci as VoceFlash[];
+  const { voci: tutte } = useUltimOra();
   const voci = limite ? tutte.slice(0, limite) : tutte;
   const compatta = Boolean(limite);
 
@@ -57,13 +48,13 @@ export default function AgenziaStampa({ limite }: { limite?: number }) {
             className={`flex gap-3 ${compatta ? 'py-2' : 'p-4 sm:p-5'}`}
             style={idx > 0 ? { borderTop: '1px solid var(--bordo)' } : undefined}
           >
-            <div className="shrink-0 w-11 sm:w-16 text-right">
-              <span
-                className={`font-mono font-bold tabular-nums ${compatta ? 'text-[11px]' : 'text-xs sm:text-sm'}`}
-                style={{ color: compatta ? 'var(--fg-muta)' : 'var(--accento)' }}
-              >
-                {formattaOrario(voce.orario)}
-              </span>
+            <div className={`shrink-0 text-right font-mono tabular-nums leading-tight ${compatta ? 'w-14 text-[11px]' : 'w-16 sm:w-20 text-xs sm:text-sm'}`}>
+              <div className="font-bold" style={{ color: compatta ? 'var(--fg-muta)' : 'var(--accento)' }}>
+                {soloOra(voce.orario)}
+              </div>
+              <div className="uppercase" style={{ color: 'var(--fg-muta)' }}>
+                {soloData(voce.orario)}
+              </div>
             </div>
 
             {!compatta && (
@@ -71,17 +62,19 @@ export default function AgenziaStampa({ limite }: { limite?: number }) {
             )}
 
             <div className="min-w-0 flex-1">
-              <h3 className={compatta ? 'text-xs sm:text-sm font-medium leading-snug line-clamp-1' : 'font-bold text-sm sm:text-base leading-snug'}>
-                {voce.titolo}
-              </h3>
-              {!compatta && (
-                <p
-                  className="mt-1 text-xs sm:text-sm leading-relaxed line-clamp-2"
-                  style={{ color: 'var(--fg-muta)' }}
-                >
-                  {voce.testo}
-                </p>
-              )}
+              <Link href={voce.href} className="group block">
+                <h3 className={`${compatta ? 'text-xs sm:text-sm font-medium line-clamp-1' : 'font-bold text-sm sm:text-base'} leading-snug group-hover:underline`}>
+                  {voce.titolo}
+                </h3>
+                {!compatta && voce.testo && (
+                  <p
+                    className="mt-1 text-xs sm:text-sm leading-relaxed line-clamp-2"
+                    style={{ color: 'var(--fg-muta)' }}
+                  >
+                    {voce.testo}
+                  </p>
+                )}
+              </Link>
             </div>
           </motion.div>
         ))}

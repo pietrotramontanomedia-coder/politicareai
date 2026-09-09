@@ -1,18 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-
-interface PostInstagram {
-  id: string;
-  immagine: string;
-  link: string;
-  didascalia: string;
-  tipo: 'IMAGE' | 'VIDEO' | 'CAROUSEL_ALBUM';
-  data: string;
-}
+import { useInstagram, type PostInstagram } from '@/lib/instagram';
 
 const PROFILO = 'https://www.instagram.com/politicareit/';
+const LIMITE = 6;
 
 function IconaTipo({ tipo }: { tipo: PostInstagram['tipo'] }) {
   if (tipo === 'IMAGE') return null;
@@ -28,14 +20,8 @@ function IconaTipo({ tipo }: { tipo: PostInstagram['tipo'] }) {
 }
 
 export default function InstagramFeed() {
-  const [post, setPost] = useState<PostInstagram[]>([]);
-
-  useEffect(() => {
-    fetch('/api/instagram')
-      .then((r) => r.json())
-      .then((d) => setPost(d.post ?? []))
-      .catch(() => setPost([]));
-  }, []);
+  const { post: tutti } = useInstagram();
+  const post = tutti.slice(0, LIMITE);
 
   if (post.length === 0) return null;
 
@@ -85,11 +71,11 @@ export default function InstagramFeed() {
             whileHover={{ scale: 1.03 }}
             className="group relative aspect-square overflow-hidden rounded-xl border"
             style={{ borderColor: 'var(--bordo)', background: 'var(--bg-card)' }}
-            title={p.didascalia}
+            title={p.titolo}
           >
             <img
               src={p.immagine}
-              alt={p.didascalia || 'Post Instagram di Politicare'}
+              alt={p.titolo || 'Post Instagram di Politicare'}
               loading="lazy"
               className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
             />
@@ -98,7 +84,7 @@ export default function InstagramFeed() {
               className="absolute inset-x-0 bottom-0 p-2 text-[11px] leading-snug line-clamp-2 opacity-0 transition-opacity group-hover:opacity-100"
               style={{ background: 'linear-gradient(transparent, rgba(0,0,0,0.85))', color: '#fff' }}
             >
-              {p.didascalia}
+              {p.titolo}
             </div>
           </motion.a>
         ))}

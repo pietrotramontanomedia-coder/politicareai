@@ -2,23 +2,15 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import flashData from '@/content/agenzia/flash.json';
-
-interface VoceFlash {
-  id: string;
-  orario: string;
-  titolo: string;
-  testo: string;
-}
+import Link from 'next/link';
+import { useUltimOra } from '@/lib/instagram';
+import { formattaDataPrecisa } from '@/lib/data-ora';
 
 const INTERVALLO_MS = 4000;
 
-function formattaOrario(iso: string): string {
-  return new Date(iso).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
-}
-
 export default function UltimOraTicker({ limite = 5 }: { limite?: number }) {
-  const voci = (flashData.voci as VoceFlash[]).slice(0, limite);
+  const { voci: tutte } = useUltimOra();
+  const voci = tutte.slice(0, limite);
   const [indice, setIndice] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -36,7 +28,7 @@ export default function UltimOraTicker({ limite = 5 }: { limite?: number }) {
 
   if (voci.length === 0) return null;
 
-  const corrente = voci[indice];
+  const corrente = voci[indice % voci.length];
 
   return (
     <div
@@ -62,15 +54,17 @@ export default function UltimOraTicker({ limite = 5 }: { limite?: number }) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.35, ease: 'easeInOut' }}
-            className="absolute inset-0 flex items-center gap-2"
+            className="absolute inset-0 flex items-center"
           >
-            <span
-              className="shrink-0 text-xs font-mono font-bold tabular-nums"
-              style={{ color: 'var(--accento)' }}
-            >
-              {formattaOrario(corrente.orario)}
-            </span>
-            <span className="truncate text-sm sm:text-base font-medium">{corrente.titolo}</span>
+            <Link href={corrente.href} className="flex items-center gap-2 min-w-0 w-full hover:underline">
+              <span
+                className="shrink-0 text-xs font-mono font-bold tabular-nums"
+                style={{ color: 'var(--accento)' }}
+              >
+                {formattaDataPrecisa(corrente.orario)}
+              </span>
+              <span className="truncate text-sm sm:text-base font-medium">{corrente.titolo}</span>
+            </Link>
           </motion.div>
         </AnimatePresence>
       </div>
