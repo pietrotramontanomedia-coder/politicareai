@@ -6,13 +6,90 @@ interface BloccoContenuto {
   voci?: string[];
 }
 
+export interface SocialAutore {
+  tipo: 'email' | 'sito' | 'instagram' | 'x' | 'linkedin' | 'facebook' | 'link';
+  url: string;
+  etichetta: string;
+}
+
+export interface Autore {
+  nome: string;
+  bio?: string;
+  avatar?: string;
+  social: SocialAutore[];
+}
+
 interface ArticoloCompleto {
   titolo: string;
   immagine?: string;
   data?: string;
-  autore?: string;
+  autore?: Autore;
   contenuto: BloccoContenuto[];
   link: string;
+}
+
+const SELETTORE_BOX_AUTORE = '.elementor-widget-cmsmasters-author-box__wrapper';
+
+function normalizzaSocial(href: string, etichettaGrezza: string): SocialAutore | null {
+  const h = href.trim();
+  if (!h) return null;
+
+  if (h.startsWith('mailto:')) {
+    return { tipo: 'email', url: h, etichetta: 'Email' };
+  }
+
+  let url: URL;
+  try {
+    url = new URL(h.startsWith('http') ? h : `https://${h}`);
+  } catch {
+    return null;
+  }
+
+  const host = url.hostname.replace(/^www\./, '');
+
+  // Alcuni autori inseriscono un handle Instagram al posto di un URL
+  if (!host.includes('.')) {
+    const handle = host.replace(/^@/, '');
+    return { tipo: 'instagram', url: `https://www.instagram.com/${handle}/`, etichetta: `@${handle}` };
+  }
+
+  if (host === 'instagram.com') {
+    const handle = url.pathname.split('/').filter(Boolean)[0];
+    return { tipo: 'instagram', url: url.href, etichetta: handle ? `@${handle}` : 'Instagram' };
+  }
+  if (host === 'x.com' || host === 'twitter.com') return { tipo: 'x', url: url.href, etichetta: 'X' };
+  if (host === 'linkedin.com') return { tipo: 'linkedin', url: url.href, etichetta: 'LinkedIn' };
+  if (host === 'facebook.com') return { tipo: 'facebook', url: url.href, etichetta: 'Facebook' };
+  if (/website|sito/i.test(etichettaGrezza)) return { tipo: 'sito', url: url.href, etichetta: host };
+
+  return { tipo: 'link', url: url.href, etichetta: host };
+}
+
+function estraiAutore($: ReturnType<typeof load>): Autore | undefined {
+  const box = $(SELETTORE_BOX_AUTORE).first();
+  const nome =
+    box.find('.elementor-widget-cmsmasters-author-box__name').text().trim() ||
+    $('meta[name="author"]').attr('content')?.trim() ||
+    $('.author, .byline, [rel="author"]').first().text().trim();
+
+  if (!nome) return undefined;
+
+  const bio = box.find('.elementor-widget-cmsmasters-author-box__bio').text().trim() || undefined;
+
+  // Gravatar con d=404 invece del segnaposto: così il client sa quando mostrare le iniziali
+  const avatar = box
+    .find('.elementor-widget-cmsmasters-author-box__avatar img')
+    .attr('src')
+    ?.replace(/([?&])d=[^&]*/, '$1d=404')
+    .replace(/([?&])s=\d+/, '$1s=160');
+
+  const social: SocialAutore[] = [];
+  box.find('.elementor-widget-cmsmasters-author-box__social-list a').each((_, a) => {
+    const voce = normalizzaSocial($(a).attr('href') ?? '', $(a).attr('aria-label') ?? '');
+    if (voce && !social.some((s) => s.url === voce.url)) social.push(voce);
+  });
+
+  return { nome, bio, avatar, social };
 }
 
 function estraiContenuto($: ReturnType<typeof load>): BloccoContenuto[] {
@@ -105,7 +182,7 @@ async function scaricaArticolo(url: string): Promise<ArticoloCompleto | null> {
 
     const immagine = $('meta[property="og:image"]').attr('content');
     const data = $('time').first().attr('datetime') || $('time').first().text().trim();
-    const autore = $('.author, .byline, [rel="author"]').first().text().trim();
+    const autore = estraiAutore($);
 
     const contenuto = estraiContenuto($);
 
@@ -115,7 +192,7 @@ async function scaricaArticolo(url: string): Promise<ArticoloCompleto | null> {
       titolo,
       immagine,
       data,
-      autore: autore || undefined,
+      autore,
       contenuto,
       link: url,
     };

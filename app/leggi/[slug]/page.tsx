@@ -5,6 +5,8 @@ import { useParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { slugToUrl } from '@/lib/slug';
 import ArticoloSkeleton from '@/components/ArticoloSkeleton';
+import BoxAutore from '@/components/BoxAutore';
+import type { Autore } from '@/app/api/articolo/route';
 
 interface BloccoContenuto {
   tipo: 'titolo' | 'paragrafo' | 'lista';
@@ -16,7 +18,7 @@ interface ArticoloCompleto {
   titolo: string;
   immagine?: string;
   data?: string;
-  autore?: string;
+  autore?: Autore;
   contenuto: BloccoContenuto[];
   link: string;
 }
@@ -155,7 +157,7 @@ export default function LeggiArticoloPage() {
 
             {articolo.autore && (
               <p className="text-sm mb-6 font-medium" style={{ color: 'var(--fg-muta)' }}>
-                di <span style={{ color: 'var(--fg)' }}>{articolo.autore}</span>
+                di <span style={{ color: 'var(--fg)' }}>{articolo.autore.nome}</span>
               </p>
             )}
 
@@ -230,6 +232,8 @@ export default function LeggiArticoloPage() {
                 );
               })}
             </div>
+
+            {articolo.autore && <BoxAutore autore={articolo.autore} />}
 
             <div className="mt-10 pt-6 border-t" style={{ borderColor: 'var(--bordo)' }}>
               <a
