@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { useInstagram } from '@/lib/instagram';
 import { formattaDataRelativa } from '@/lib/data-ora';
 
-const PROFILO = 'https://www.instagram.com/politicareit/';
 const MAX_POST = 10;
 const PER_GRUPPO = 2;
 const INTERVALLO_MS = 5000;
@@ -45,20 +44,9 @@ export default function PostCarousel() {
   const corrente = gruppi[indice % gruppi.length];
 
   return (
-    <section className="mt-10" onMouseEnter={ferma} onMouseLeave={riparti}>
-      <div className="flex items-center justify-between gap-4 mb-4">
-        <div className="flex items-baseline gap-3">
-          <h2 className="text-lg sm:text-xl font-bold">Dal nostro Instagram</h2>
-          <a
-            href={PROFILO}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-sm hover:underline"
-            style={{ color: 'var(--fg-muta)' }}
-          >
-            @politicareit
-          </a>
-        </div>
+    <section className="mt-14" onMouseEnter={ferma} onMouseLeave={riparti}>
+      <div className="flex items-center justify-between gap-4 mb-5">
+        <h2 className="text-xl sm:text-2xl font-bold">I nostri ultimi post</h2>
         <div className="flex gap-1.5">
           {gruppi.map((_, i) => (
             <button
@@ -86,17 +74,17 @@ export default function PostCarousel() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -32 }}
             transition={{ duration: 0.4, ease: 'easeInOut' }}
-            className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+            className="grid grid-cols-1 sm:grid-cols-2 gap-5"
           >
             {corrente.map((p) => (
               <Link
                 key={p.id}
                 href={`/ultimora/${p.id}`}
-                className="group flex gap-4 rounded-2xl border p-3 sm:p-4 transition-all hover:shadow-xl"
+                className="group flex gap-5 rounded-2xl border p-4 sm:p-5 transition-all hover:shadow-xl"
                 style={{ borderColor: 'var(--bordo)', background: 'var(--bg-card)' }}
               >
                 <div
-                  className="shrink-0 w-28 sm:w-36 aspect-[4/5] overflow-hidden rounded-xl"
+                  className="shrink-0 w-36 sm:w-44 lg:w-52 aspect-[4/5] overflow-hidden rounded-xl"
                   style={{ background: 'var(--bordo)' }}
                 >
                   <img
@@ -108,24 +96,24 @@ export default function PostCarousel() {
                 </div>
                 <div className="min-w-0 flex-1 flex flex-col">
                   <span
-                    className="text-[11px] font-mono font-bold tabular-nums"
+                    className="text-xs font-mono font-bold tabular-nums"
                     style={{ color: 'var(--accento)' }}
                   >
                     {formattaDataRelativa(p.data)}
                   </span>
-                  <h3 className="mt-1.5 font-bold text-sm sm:text-base leading-snug line-clamp-3 group-hover:underline">
+                  <h3 className="mt-2 font-bold text-lg sm:text-xl leading-snug line-clamp-4">
                     {p.titolo}
                   </h3>
-                  {p.testo && (
-                    <p
-                      className="mt-1.5 text-xs sm:text-sm leading-relaxed line-clamp-3"
-                      style={{ color: 'var(--fg-muta)' }}
+                  <span className="mt-auto pt-4 self-start">
+                    <span
+                      className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors group-hover:border-[var(--accento)]"
+                      style={{ border: '1px solid var(--bordo)', color: 'var(--fg)' }}
                     >
-                      {p.testo}
-                    </p>
-                  )}
-                  <span className="mt-auto pt-2 text-xs font-semibold" style={{ color: 'var(--accento)' }}>
-                    Leggi →
+                      Apri
+                      <span className="transition-transform group-hover:translate-x-0.5" style={{ color: 'var(--accento)' }}>
+                        →
+                      </span>
+                    </span>
                   </span>
                 </div>
               </Link>

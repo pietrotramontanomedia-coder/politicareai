@@ -87,6 +87,61 @@ body {
   }
 }
 
+/* Bande a tutta larghezza della home: ogni sezione ha un tono diverso per separarsi dalle altre */
+.banda {
+  width: 100%;
+  position: relative;
+}
+
+.banda-hero {
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 28%, rgba(254, 220, 1, 0.09), transparent 70%),
+    var(--bg);
+}
+
+.banda-elevata {
+  background-color: var(--bg-elevated);
+  background-image: radial-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+  background-size: 22px 22px;
+  border-top: 1px solid var(--bordo);
+  border-bottom: 1px solid var(--bordo);
+}
+
+.banda-notizie {
+  background: linear-gradient(180deg, var(--bg) 0%, #100f0b 100%);
+}
+
+.banda-live {
+  background:
+    linear-gradient(180deg, rgba(239, 68, 68, 0.07) 0%, transparent 55%),
+    var(--color-bg-elevated);
+  border-top: 1px solid rgba(239, 68, 68, 0.28);
+}
+
+.banda-footer {
+  background: var(--color-nero-deep);
+  border-top: 1px solid var(--bordo);
+}
+
+.occhiello {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accento);
+}
+
+.occhiello::before {
+  content: '';
+  width: 1.25rem;
+  height: 2px;
+  background: var(--accento);
+  border-radius: 2px;
+}
+
 /* Skeleton loading shimmer */
 .skeleton-shimmer {
   position: relative;

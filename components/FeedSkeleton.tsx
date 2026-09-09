@@ -2,7 +2,7 @@ import Skeleton from './Skeleton';
 
 export default function FeedSkeleton() {
   return (
-    <div className="mt-24 py-12">
+    <div>
       {/* Header */}
       <div className="mb-8">
         <Skeleton className="h-9 w-52 sm:h-10 sm:w-64" />

@@ -37,44 +37,46 @@ export default function FeedSection() {
     fetchFeed();
   }, []);
 
-  if (loading) {
-    return <FeedSkeleton />;
-  }
-
-  if (articoli.length === 0) {
-    return null;
-  }
-
   const inEvidenza = articoli.slice(0, 5);
   const resto = articoli.slice(5);
 
   return (
-    <motion.section
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5, delay: 0.5 }}
-      className="mt-24 py-12"
-    >
-      {/* Header */}
-      <div className="mb-8">
-        <h2 className="text-3xl sm:text-4xl font-bold">Ultimi Articoli</h2>
-        <p className="mt-2 text-base" style={{ color: 'var(--fg-muta)' }}>
-          {articoli.length} articoli dalle principali notizie politiche italiane
-        </p>
-      </div>
+    <>
+      {(loading || articoli.length > 0) && (
+        <section className="banda banda-notizie px-4 sm:px-6 py-14">
+          <div className="mx-auto max-w-6xl w-full">
+            {loading ? (
+              <FeedSkeleton />
+            ) : (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5 }}
+              >
+                <div className="mb-8">
+                  <span className="occhiello">Dal sito</span>
+                  <h2 className="mt-3 text-3xl sm:text-4xl font-bold">Ultimi Articoli</h2>
+                  <p className="mt-2 text-base" style={{ color: 'var(--fg-muta)' }}>
+                    {articoli.length} articoli dalle principali notizie politiche italiane
+                  </p>
+                </div>
 
-      {/* Hero Carousel */}
-      <div className="mb-12">
-        <NewsCarousel articoli={inEvidenza} />
-      </div>
+                <div className="mb-12">
+                  <NewsCarousel articoli={inEvidenza} />
+                </div>
 
-      {/* Widget articoli a rotazione */}
-      <div className="mb-16">
-        <ArticoliWidget articoli={resto} />
-      </div>
+                <ArticoliWidget articoli={resto} />
+              </motion.div>
+            )}
+          </div>
+        </section>
+      )}
 
-      {/* Agenzia stampa - contenuto editoriale separato */}
-      <AgenziaStampa />
-    </motion.section>
+      <section className="banda banda-live px-4 sm:px-6 py-14">
+        <div className="mx-auto max-w-6xl w-full">
+          <AgenziaStampa />
+        </div>
+      </section>
+    </>
   );
 }
