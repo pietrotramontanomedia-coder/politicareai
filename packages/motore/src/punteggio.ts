@@ -34,7 +34,7 @@ export function calcolaPunteggio(risposte: Risposta[], partito: Partito): Risult
     const posizione = partito.posizioni.find(
       (p) => p.affermazioneId === risposta.affermazioneId,
     );
-    if (!posizione) continue;
+    if (!posizione || posizione.valore === null) continue;
 
     const peso = risposta.importante ? 2 : 1;
     const gradoAccordo = accordo(risposta.valore, posizione.valore);

@@ -63,7 +63,7 @@ function validaPotereDiscriminante(pack: TestPartitoPack): ErroreValidazione[] {
   if (numPartiti === 0) return errori;
 
   for (const affermazione of pack.affermazioni) {
-    const conteggi = new Map<number, number>();
+    const conteggi = new Map<number | null, number>();
     for (const partito of pack.partiti) {
       const posizione = partito.posizioni.find((p) => p.affermazioneId === affermazione.id);
       if (!posizione) continue;

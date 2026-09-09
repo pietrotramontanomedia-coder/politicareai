@@ -6,6 +6,10 @@ export const ETICHETTE_AREA: Record<string, { label: string; icona: string }> = 
   immigrazione: { label: 'Immigrazione', icona: '✈️' },
   sanita: { label: 'Sanità', icona: '💊' },
   europa: { label: 'Europa', icona: '🇪🇺' },
+  diritti: { label: 'Diritti', icona: '⚖️' },
+  istituzionale: { label: 'Istituzioni', icona: '🏛️' },
+  giustizia: { label: 'Giustizia', icona: '👨‍⚖️' },
+  esteri: { label: 'Esteri', icona: '🌐' },
 };
 
 export function etichettaArea(area: string): { label: string; icona: string } {

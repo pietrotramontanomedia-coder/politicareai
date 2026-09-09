@@ -11,12 +11,16 @@
     "2026-09-02 — v1.0.1: posizioni affinate da lettura attentissima dei programmi 2022"
   ],
   "quotePerArea": {
-    "fisco": 2,
+    "fisco": 3,
     "ambiente": 3,
-    "lavoro": 3,
     "immigrazione": 2,
+    "lavoro": 3,
     "sanita": 1,
-    "europa": 1
+    "europa": 1,
+    "diritti": 2,
+    "istituzionale": 1,
+    "giustizia": 1,
+    "esteri": 1
   },
   "affermazioni": [
     {
@@ -70,7 +74,7 @@
     {
       "id": "diritti-001",
       "testo": "Il matrimonio tra persone dello stesso sesso dovrebbe avere gli stessi diritti civili e patrimoniali del matrimonio tradizionale",
-      "area": "lavoro",
+      "area": "diritti",
       "verso": 1
     },
     {
@@ -82,13 +86,49 @@
     {
       "id": "istituzionale-001",
       "testo": "Il Presidente della Repubblica dovrebbe essere eletto direttamente dai cittadini e non dal Parlamento",
-      "area": "europa",
+      "area": "istituzionale",
       "verso": -1
     },
     {
       "id": "immigrazione-002",
       "testo": "I percorsi di integrazione per gli immigrati dovrebbero includere corsi obbligatori di lingua italiana e cultura civica",
       "area": "immigrazione",
+      "verso": 1
+    },
+    {
+      "id": "giustizia-001",
+      "testo": "Le carriere di giudici e pubblici ministeri dovrebbero essere separate, con due diversi Consigli Superiori della Magistratura",
+      "area": "giustizia",
+      "verso": 1
+    },
+    {
+      "id": "lavoro-003",
+      "testo": "Il Jobs Act, che prevede solo un indennizzo economico e non il reintegro in caso di licenziamento illegittimo in una grande impresa, dovrebbe essere mantenuto così com'è",
+      "area": "lavoro",
+      "verso": -1
+    },
+    {
+      "id": "fisco-003",
+      "testo": "Il sistema fiscale attuale, che non prevede una patrimoniale sui grandi patrimoni superiori a 1 milione di euro, dovrebbe rimanere così com'è",
+      "area": "fisco",
+      "verso": -1
+    },
+    {
+      "id": "ambiente-003",
+      "testo": "Il divieto di vendita di nuove auto a benzina e diesel dal 2035, già approvato dall'Unione Europea, dovrebbe essere confermato",
+      "area": "ambiente",
+      "verso": -1
+    },
+    {
+      "id": "esteri-001",
+      "testo": "L'Italia dovrebbe continuare a inviare armi all'Ucraina per la sua difesa contro l'invasione russa",
+      "area": "esteri",
+      "verso": -1
+    },
+    {
+      "id": "diritti-002",
+      "testo": "Dovrebbe essere approvata una legge sul fine vita che permetta l'eutanasia legale in condizioni definite",
+      "area": "diritti",
       "verso": 1
     }
   ],
@@ -173,16 +213,16 @@
         },
         {
           "affermazioneId": "diritti-001",
-          "valore": 0,
+          "valore": -2,
           "fonte": {
             "tipo": "programma",
-            "citazione": "No posizione esplicita",
-            "url": ""
+            "citazione": "Meloni non ritiene il matrimonio egualitario una priorità: \"ci sono già le unioni civili\", posizione ufficialmente contraria",
+            "url": "https://www.editorialedomani.it/politica/italia/cosa-pensano-i-partiti-su-matrimonio-egualitario-e-omogenitorialita-m7gz1hfl"
           }
         },
         {
           "affermazioneId": "fisco-002",
-          "valore": 0,
+          "valore": null,
           "fonte": {
             "tipo": "programma",
             "citazione": "No posizione su sindacati",
@@ -205,6 +245,60 @@
             "tipo": "programma",
             "citazione": "Integrazione con lingua e legalità",
             "url": ""
+          }
+        },
+        {
+          "affermazioneId": "giustizia-001",
+          "valore": 2,
+          "fonte": {
+            "tipo": "dichiarazione",
+            "citazione": "FdI è promotrice della riforma costituzionale sulla separazione delle carriere, approvata dal governo Meloni e sottoposta a referendum il 22-23 marzo 2026; sostegno compatto al Sì.",
+            "url": "https://www.lettera43.it/separazione-carriere-quando-referendum-quorum-posizioni-partiti/"
+          }
+        },
+        {
+          "affermazioneId": "lavoro-003",
+          "valore": -1,
+          "fonte": {
+            "tipo": "dichiarazione",
+            "citazione": "Per il referendum abrogativo dell'8-9 giugno 2025 (ripristino reintegro art.18), FdI ha scelto la linea dell'astensione attiva per far fallire il quorum, difendendo di fatto l'assetto del Jobs Act (solo indennizzo).",
+            "url": "https://www.ansa.it/sito/notizie/speciali/referendum/2025/06/02/referendum-le-posizioni-dei-partiti_e69db797-6080-410b-8bd7-272f31ab1ff2.html"
+          }
+        },
+        {
+          "affermazioneId": "fisco-003",
+          "valore": -2,
+          "fonte": {
+            "tipo": "dichiarazione",
+            "citazione": "Meloni: \"Tagliamo tasse a milioni di italiani, mai patrimoniale\"; \"con la destra al governo mai patrimoniale\".",
+            "url": "https://www.lapresse.it/politica/2025/11/18/meloni-tagliamo-tasse-a-milioni-italiani-mai-patrimoniale/"
+          }
+        },
+        {
+          "affermazioneId": "ambiente-003",
+          "valore": -2,
+          "fonte": {
+            "tipo": "dichiarazione",
+            "citazione": "Il governo Meloni (FdI) ha dichiarato voto contrario allo stop dei motori endotermici dal 2035, chiedendo il riconoscimento di biocarburanti/e-fuel come alternative.",
+            "url": "https://www.ansa.it/canale_motori/notizie/istituzioni/2023/02/28/ministero-ambiente-se-no-a-bando-motori-endotermici-al-2035_e0cf267e-3546-42d0-8ac8-858b8078522a.html"
+          }
+        },
+        {
+          "affermazioneId": "esteri-001",
+          "valore": 2,
+          "fonte": {
+            "tipo": "voto",
+            "citazione": "Governo a guida FdI, voto favorevole costante ai decreti di proroga della cessione di armi all'Ucraina (gennaio 2023, febbraio 2024, gennaio 2025).",
+            "url": "https://www.fanpage.it/politica/armi-allucraina-dal-senato-via-libera-al-decreto-votano-contro-m5s-verdi-e-sinistra/"
+          }
+        },
+        {
+          "affermazioneId": "diritti-002",
+          "valore": -2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Il programma 2022 del centrodestra non contiene alcun passaggio sul fine vita; Meloni si è opposta all'approvazione del ddl su morte medicalmente assistita; FdI ha votato contro il testo base in commissione nel 2021.",
+            "url": "https://tg24.sky.it/politica/2022/09/21/fine-vita-programmi-elettorali-confronto"
           }
         }
       ]
@@ -322,6 +416,60 @@
             "citazione": "Integrazione inclusiva, no controlli rigidi",
             "url": ""
           }
+        },
+        {
+          "affermazioneId": "giustizia-001",
+          "valore": -2,
+          "fonte": {
+            "tipo": "dichiarazione",
+            "citazione": "Il PD si colloca sul fronte del No al referendum, sostenendo che la riforma renderebbe il PM troppo vicino all'esecutivo.",
+            "url": "https://pagellapolitica.it/articoli/partiti-opposizione-divisi-riforma-referendum-giustizia-separazione-carriere-magistrati"
+          }
+        },
+        {
+          "affermazioneId": "lavoro-003",
+          "valore": 2,
+          "fonte": {
+            "tipo": "dichiarazione",
+            "citazione": "Linea ufficiale PD: Sì a tutti e 5 i quesiti del referendum dell'8-9 giugno 2025, incluso il ripristino del reintegro (art.18); nota: minoranza riformista interna dissente su questo specifico quesito.",
+            "url": "https://www.ansa.it/sito/notizie/speciali/referendum/2025/06/02/referendum-le-posizioni-dei-partiti_e69db797-6080-410b-8bd7-272f31ab1ff2.html"
+          }
+        },
+        {
+          "affermazioneId": "fisco-003",
+          "valore": 1,
+          "fonte": {
+            "tipo": "dichiarazione",
+            "citazione": "Schlein: tassare super-ricchi e grandi patrimoni \"non può essere un tabù\", ma ha poi precisato che una patrimoniale nazionale \"non è tra le cose già condivise\" nel programma della coalizione, preferendo un intervento a livello UE. Posizione esplicitamente descritta come non chiara/in evoluzione.",
+            "url": "https://pagellapolitica.it/articoli/schlein-patrimoniale"
+          }
+        },
+        {
+          "affermazioneId": "ambiente-003",
+          "valore": 2,
+          "fonte": {
+            "tipo": "voto",
+            "citazione": "Gli eurodeputati PD (gruppo S&D) hanno votato a favore dello stop ai motori endotermici dal 2035 nel voto del Parlamento europeo di febbraio 2023.",
+            "url": "https://www.esg360.it/smart-technology/il-parlamento-europeo-conferma-lo-stop-ai-motori-endotermici-dal-2035/"
+          }
+        },
+        {
+          "affermazioneId": "esteri-001",
+          "valore": 2,
+          "fonte": {
+            "tipo": "voto",
+            "citazione": "Il PD ha votato a favore di tutti i decreti di proroga dell'invio di armi all'Ucraina (2023, 2024, 2025), con la sola eccezione del deputato Paolo Ciani.",
+            "url": "https://www.ilfattoquotidiano.it/2023/01/24/ucraina-via-libera-definitivo-al-decreto-sulle-armi-italiane-a-kiev-contrari-solo-m5s-verdi-sinistra-e-ciani-del-pd/6948508/"
+          }
+        },
+        {
+          "affermazioneId": "diritti-002",
+          "valore": 1,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Programma 2022: \"approvare una legge sul fine vita, per permettere a tutte e a tutti di decidere per sé\"; voto favorevole al ddl sulla morte medicalmente assistita (marzo 2022). Nota: il testo riguarda il suicidio assistito, non l'eutanasia attiva in senso stretto, che il programma non nomina esplicitamente.",
+            "url": "https://tg24.sky.it/politica/2022/09/21/fine-vita-programmi-elettorali-confronto"
+          }
         }
       ]
     },
@@ -438,6 +586,60 @@
             "citazione": "Accoglienza senza posizione rigida",
             "url": ""
           }
+        },
+        {
+          "affermazioneId": "giustizia-001",
+          "valore": -2,
+          "fonte": {
+            "tipo": "dichiarazione",
+            "citazione": "M5S sul fronte del No al referendum sulla separazione delle carriere, insieme a PD e AVS.",
+            "url": "https://pagellapolitica.it/articoli/partiti-opposizione-divisi-riforma-referendum-giustizia-separazione-carriere-magistrati"
+          }
+        },
+        {
+          "affermazioneId": "lavoro-003",
+          "valore": 2,
+          "fonte": {
+            "tipo": "dichiarazione",
+            "citazione": "M5S per il Sì a tutti i quesiti referendari dell'8-9 giugno 2025, incluso il ripristino del reintegro obbligatorio (art.18).",
+            "url": "https://www.ansa.it/sito/notizie/speciali/referendum/2025/06/02/referendum-le-posizioni-dei-partiti_e69db797-6080-410b-8bd7-272f31ab1ff2.html"
+          }
+        },
+        {
+          "affermazioneId": "fisco-003",
+          "valore": -1,
+          "fonte": {
+            "tipo": "dichiarazione",
+            "citazione": "Giuseppe Conte (leader) si dichiara contrario a una patrimoniale nazionale (\"rischio fuga dei milionari\"), aprendo solo a un'imposta sui grandi patrimoni a livello europeo; forte pressione interna della base e di esponenti come Appendino in senso favorevole a una patrimoniale nazionale.",
+            "url": "https://www.ilfattoquotidiano.it/2026/06/13/tassa-grandi-patrimoni-conte-appendino-notizie/8418494/"
+          }
+        },
+        {
+          "affermazioneId": "ambiente-003",
+          "valore": 2,
+          "fonte": {
+            "tipo": "voto",
+            "citazione": "Gli eurodeputati M5S hanno votato a favore dello stop ai motori endotermici dal 2035 nel voto del Parlamento europeo del febbraio 2023.",
+            "url": "https://www.linkiesta.it/2023/02/destra-italia-mobilita-elettrica-2035-parlamento-europeo-voto/"
+          }
+        },
+        {
+          "affermazioneId": "esteri-001",
+          "valore": -2,
+          "fonte": {
+            "tipo": "voto",
+            "citazione": "M5S ha votato contro tutti i decreti di proroga della cessione di armi all'Ucraina (gennaio 2023, febbraio 2024, gennaio 2025).",
+            "url": "https://www.fanpage.it/politica/armi-allucraina-dal-senato-via-libera-al-decreto-votano-contro-m5s-verdi-e-sinistra/"
+          }
+        },
+        {
+          "affermazioneId": "diritti-002",
+          "valore": 1,
+          "fonte": {
+            "tipo": "voto",
+            "citazione": "Il programma 2022 non menziona il tema, ma M5S ha partecipato alla stesura e votato a favore del ddl sulla morte medicalmente assistita approvato dalla Camera nel marzo 2022. Nota: riguarda suicidio assistito, non eutanasia attiva esplicitamente.",
+            "url": "https://tg24.sky.it/politica/2022/09/21/fine-vita-programmi-elettorali-confronto"
+          }
         }
       ]
     },
@@ -503,7 +705,7 @@
         },
         {
           "affermazioneId": "ambiente-002",
-          "valore": 0,
+          "valore": null,
           "fonte": {
             "tipo": "programma",
             "citazione": "No priorità esplicita ferrovie vs auto",
@@ -512,7 +714,7 @@
         },
         {
           "affermazioneId": "lavoro-002",
-          "valore": 0,
+          "valore": null,
           "fonte": {
             "tipo": "programma",
             "citazione": "No posizione chiara",
@@ -553,6 +755,60 @@
             "tipo": "programma",
             "citazione": "Controlli rigorosi e integrazione obbligatoria",
             "url": ""
+          }
+        },
+        {
+          "affermazioneId": "giustizia-001",
+          "valore": 2,
+          "fonte": {
+            "tipo": "dichiarazione",
+            "citazione": "La Lega, parte della maggioranza di centrodestra, sostiene compattamente il Sì al referendum sulla separazione delle carriere.",
+            "url": "https://www.lettera43.it/separazione-carriere-quando-referendum-quorum-posizioni-partiti/"
+          }
+        },
+        {
+          "affermazioneId": "lavoro-003",
+          "valore": -1,
+          "fonte": {
+            "tipo": "dichiarazione",
+            "citazione": "Linea dell'astensione attiva sul referendum dell'8-9 giugno 2025, per far fallire il quorum e mantenere l'attuale disciplina del Jobs Act (indennizzo, non reintegro).",
+            "url": "https://www.ansa.it/sito/notizie/speciali/referendum/2025/06/02/referendum-le-posizioni-dei-partiti_e69db797-6080-410b-8bd7-272f31ab1ff2.html"
+          }
+        },
+        {
+          "affermazioneId": "fisco-003",
+          "valore": -2,
+          "fonte": {
+            "tipo": "dichiarazione",
+            "citazione": "Salvini: \"Con la Lega al governo non ci sarà nessuna patrimoniale\"; \"la patrimoniale non ha senso, gli italiani hanno già pagato le tasse su quei soldi\".",
+            "url": "https://www.ilsussidiario.net/news/salvini-lega-spazio-per-tutti-si-chiacchieri-di-meno-patrimoniale-mai-vannacci-decida-con-chi-stare/2992347/"
+          }
+        },
+        {
+          "affermazioneId": "ambiente-003",
+          "valore": -2,
+          "fonte": {
+            "tipo": "voto",
+            "citazione": "La Lega ha votato contro lo stop ai motori endotermici dal 2035 al Parlamento europeo (febbraio 2023), denunciando rischi per la competitività industriale.",
+            "url": "https://www.esg360.it/smart-technology/il-parlamento-europeo-conferma-lo-stop-ai-motori-endotermici-dal-2035/"
+          }
+        },
+        {
+          "affermazioneId": "esteri-001",
+          "valore": 1,
+          "fonte": {
+            "tipo": "voto",
+            "citazione": "La Lega ha votato a favore dei decreti di proroga dell'invio di armi all'Ucraina nel 2023, 2024 e 2025, ma nel novembre 2025 Salvini ha espresso pubblico scetticismo (\"più armi si mandano, più la guerra continua\"), aprendo un conflitto nella maggioranza sul decreto successivo.",
+            "url": "https://www.ilfattoquotidiano.it/2025/11/16/armi-ucraina-scontro-lega-pd-news/8197713/"
+          }
+        },
+        {
+          "affermazioneId": "diritti-002",
+          "valore": -2,
+          "fonte": {
+            "tipo": "dichiarazione",
+            "citazione": "La Lega ha respinto le normative a favore di eutanasia e suicidio assistito; ha votato contro il testo base sul fine vita in commissione nel 2021.",
+            "url": "https://www.ilpost.it/2021/09/15/posizione-partiti-eutanasia-cannabis/"
           }
         }
       ]
@@ -670,6 +926,60 @@
             "citazione": "Accoglienza incondizionata, no corsi obbligatori",
             "url": ""
           }
+        },
+        {
+          "affermazioneId": "giustizia-001",
+          "valore": -2,
+          "fonte": {
+            "tipo": "dichiarazione",
+            "citazione": "AVS sul fronte del No al referendum sulla separazione delle carriere.",
+            "url": "https://pagellapolitica.it/articoli/partiti-opposizione-divisi-riforma-referendum-giustizia-separazione-carriere-magistrati"
+          }
+        },
+        {
+          "affermazioneId": "lavoro-003",
+          "valore": 2,
+          "fonte": {
+            "tipo": "dichiarazione",
+            "citazione": "AVS per il Sì a tutti i quesiti referendari dell'8-9 giugno 2025, incluso il ripristino del reintegro per licenziamento illegittimo.",
+            "url": "https://www.collettiva.it/speciali/referendum-2025/referendum-art-18-jobs-act-pbl9ynmb"
+          }
+        },
+        {
+          "affermazioneId": "fisco-003",
+          "valore": 2,
+          "fonte": {
+            "tipo": "dichiarazione",
+            "citazione": "Nicola Fratoianni (AVS) propone esplicitamente una \"tassa sui grandi patrimoni\", in dissenso con la linea più cauta di PD e M5S che preferiscono agire a livello UE.",
+            "url": "https://www.open.online/2026/05/12/patrimoniale-centrosinistra-diviso-proposte/"
+          }
+        },
+        {
+          "affermazioneId": "ambiente-003",
+          "valore": 2,
+          "fonte": {
+            "tipo": "voto",
+            "citazione": "Gli eurodeputati di Sinistra Italiana/Verdi (gruppo Verdi/ALE) hanno votato a favore dello stop ai motori endotermici dal 2035.",
+            "url": "https://www.esg360.it/smart-technology/il-parlamento-europeo-conferma-lo-stop-ai-motori-endotermici-dal-2035/"
+          }
+        },
+        {
+          "affermazioneId": "esteri-001",
+          "valore": -2,
+          "fonte": {
+            "tipo": "voto",
+            "citazione": "AVS ha votato contro tutti i decreti di proroga della cessione di armi all'Ucraina (2023, 2024, 2025).",
+            "url": "https://www.fanpage.it/politica/armi-allucraina-dal-senato-via-libera-al-decreto-votano-contro-m5s-verdi-e-sinistra/"
+          }
+        },
+        {
+          "affermazioneId": "diritti-002",
+          "valore": 2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Programma 2022 di Sinistra Italiana/Verdi: favorevoli a \"una legge sul fine vita che ascolti le disperate richieste di tante e tanti di poter mettere fine alla propria vita con dignità\"; adesione esplicita alla campagna referendaria per l'eutanasia legale (2021).",
+            "url": "https://www.ilpost.it/2021/09/15/posizione-partiti-eutanasia-cannabis/"
+          }
         }
       ]
     },
@@ -753,16 +1063,16 @@
         },
         {
           "affermazioneId": "diritti-001",
-          "valore": 0,
+          "valore": -1,
           "fonte": {
-            "tipo": "programma",
-            "citazione": "No posizione esplicita",
-            "url": ""
+            "tipo": "dichiarazione",
+            "citazione": "Posizione ufficiale di partito contraria al matrimonio egualitario, con forti tensioni interne (48% degli elettori FI favorevole secondo sondaggi, pressioni di Marina Berlusconi per aprire)",
+            "url": "https://www.editorialedomani.it/politica/italia/cosa-pensano-i-partiti-su-matrimonio-egualitario-e-omogenitorialita-m7gz1hfl"
           }
         },
         {
           "affermazioneId": "fisco-002",
-          "valore": 0,
+          "valore": null,
           "fonte": {
             "tipo": "programma",
             "citazione": "No posizione su sindacati",
@@ -771,7 +1081,7 @@
         },
         {
           "affermazioneId": "istituzionale-001",
-          "valore": 0,
+          "valore": null,
           "fonte": {
             "tipo": "programma",
             "citazione": "No posizione esplicita",
@@ -785,6 +1095,60 @@
             "tipo": "programma",
             "citazione": "Integrazione con ordine",
             "url": ""
+          }
+        },
+        {
+          "affermazioneId": "giustizia-001",
+          "valore": 2,
+          "fonte": {
+            "tipo": "dichiarazione",
+            "citazione": "Forza Italia, parte della maggioranza di centrodestra, sostiene compattamente il Sì al referendum sulla separazione delle carriere.",
+            "url": "https://www.lettera43.it/separazione-carriere-quando-referendum-quorum-posizioni-partiti/"
+          }
+        },
+        {
+          "affermazioneId": "lavoro-003",
+          "valore": -2,
+          "fonte": {
+            "tipo": "dichiarazione",
+            "citazione": "Forza Italia si oppone al ripristino del reintegro obbligatorio e difende l'attuale normativa sui licenziamenti (Jobs Act); linea di astensione attiva al referendum dell'8-9 giugno 2025.",
+            "url": "https://quifinanza.it/politica/referendum-giugno-2025-posizione-forza-italia/909821/"
+          }
+        },
+        {
+          "affermazioneId": "fisco-003",
+          "valore": -2,
+          "fonte": {
+            "tipo": "dichiarazione",
+            "citazione": "Tajani: \"Con noi non ci sarà mai una patrimoniale\"; \"finché siamo al governo non ci sarà alcuna patrimoniale\".",
+            "url": "https://lespresso.it/c/politica/2026/6/1/patrimoniale-tassa-schlein-tajani-magi-patrimoni-dibattito/62478"
+          }
+        },
+        {
+          "affermazioneId": "ambiente-003",
+          "valore": -2,
+          "fonte": {
+            "tipo": "dichiarazione",
+            "citazione": "Massimiliano Salini (FI, relatore ombra PPE) ha definito la messa al bando totale dei motori endotermici un \"errore ambientale\"; Forza Italia ha votato contro il provvedimento.",
+            "url": "https://www.esg360.it/smart-technology/il-parlamento-europeo-conferma-lo-stop-ai-motori-endotermici-dal-2035/"
+          }
+        },
+        {
+          "affermazioneId": "esteri-001",
+          "valore": 2,
+          "fonte": {
+            "tipo": "voto",
+            "citazione": "Forza Italia ha votato a favore di tutti i decreti di proroga dell'invio di armi all'Ucraina (2023, 2024, 2025); posizione atlantista coerente di Tajani.",
+            "url": "https://www.fanpage.it/politica/armi-allucraina-dal-senato-via-libera-al-decreto-votano-contro-m5s-verdi-e-sinistra/"
+          }
+        },
+        {
+          "affermazioneId": "diritti-002",
+          "valore": -1,
+          "fonte": {
+            "tipo": "dichiarazione",
+            "citazione": "Programma 2022: si limita a richiamare il \"valore inalienabile della vita\"; forte divisione interna: la linea ufficiale è contraria, ma un gruppo di 7 deputati FI votò a favore del ddl sul fine vita a marzo 2022, distanziandosi dalla linea di partito.",
+            "url": "https://www.iltempo.it/politica/2022/03/11/news/forza-italia-divisione-spaccatura-fine-vita-eutanasia-diritti-civili-ius-scholae-camera-silvio-berlusconi-30785194/"
           }
         }
       ]
@@ -833,10 +1197,10 @@
         },
         {
           "affermazioneId": "sanita-001",
-          "valore": 0,
+          "valore": -1,
           "fonte": {
             "tipo": "programma",
-            "citazione": "Nessuna posizione esplicita reperita sull'eliminazione della sanità privata; il programma parla genericamente di potenziare il sistema sanitario pubblico",
+            "citazione": "Propone sinergia e integrazione tra sanità pubblica e privata, non l'eliminazione della sanità privata",
             "url": "https://dait.interno.gov.it/documenti/trasparenza/POLITICHE_20220925/Documenti/7/(7_progr_2_)-programma_azione-italia_viva-calenda.pdf"
           }
         },
@@ -887,10 +1251,10 @@
         },
         {
           "affermazioneId": "istituzionale-001",
-          "valore": 0,
+          "valore": 1,
           "fonte": {
             "tipo": "programma",
-            "citazione": "Nessuna posizione esplicita reperita sul presidenzialismo o l'elezione diretta del Presidente della Repubblica nel programma 2022",
+            "citazione": "Propone l'elezione diretta del Presidente del Consiglio (\"sindaco d'Italia\"), non del Presidente della Repubblica: spirito favorevole all'elezione diretta del vertice esecutivo ma su una carica diversa da quella dell'affermazione",
             "url": "https://dait.interno.gov.it/documenti/trasparenza/POLITICHE_20220925/Documenti/7/(7_progr_2_)-programma_azione-italia_viva-calenda.pdf"
           }
         },
@@ -901,6 +1265,60 @@
             "tipo": "programma",
             "citazione": "Propone corsi intensivi obbligatori di lingua italiana e cultura civica per i nuovi arrivati",
             "url": "https://dait.interno.gov.it/documenti/trasparenza/POLITICHE_20220925/Documenti/7/(7_progr_2_)-programma_azione-italia_viva-calenda.pdf"
+          }
+        },
+        {
+          "affermazioneId": "giustizia-001",
+          "valore": 2,
+          "fonte": {
+            "tipo": "dichiarazione",
+            "citazione": "Carlo Calenda: la riforma della magistratura (separazione delle carriere) è nel programma di Azione fin dalla sua fondazione; sostegno al Sì.",
+            "url": "https://www.lettera43.it/separazione-carriere-quando-referendum-quorum-posizioni-partiti/"
+          }
+        },
+        {
+          "affermazioneId": "lavoro-003",
+          "valore": -2,
+          "fonte": {
+            "tipo": "dichiarazione",
+            "citazione": "Azione per il No al referendum sul reintegro (art.18), contrario al ripristino dell'obbligo di reintegro.",
+            "url": "https://www.ansa.it/sito/notizie/speciali/referendum/2025/06/02/referendum-le-posizioni-dei-partiti_e69db797-6080-410b-8bd7-272f31ab1ff2.html"
+          }
+        },
+        {
+          "affermazioneId": "fisco-003",
+          "valore": -2,
+          "fonte": {
+            "tipo": "dichiarazione",
+            "citazione": "Calenda: \"le tasse vanno tagliate. No a patrimoniale e tasse di successione\"; \"solo chi non capisce quanto soffra il Paese può proporre patrimoniale e tasse di successione\".",
+            "url": "https://www.italiaoggi.it/economia-e-politica/attualita/calenda-le-tasse-vanno-tagliate-no-a-patrimoniale-e-tasse-di-successione-mfq00vkm"
+          }
+        },
+        {
+          "affermazioneId": "ambiente-003",
+          "valore": 1,
+          "fonte": {
+            "tipo": "dichiarazione",
+            "citazione": "Calenda critica il divieto totale: \"dire che nel 2035 si venderanno solo auto elettriche è una favola\"; Azione chiede una revisione del piano UE per difficoltà tecniche/industriali, senza opporsi frontalmente alla transizione.",
+            "url": "https://www.motorionline.com/anche-azione-di-calenda-chiede-di-rivedere-il-passaggio-alle-auto-elettriche/"
+          }
+        },
+        {
+          "affermazioneId": "esteri-001",
+          "valore": 2,
+          "fonte": {
+            "tipo": "voto",
+            "citazione": "Azione ha votato a favore di tutti i decreti di proroga dell'invio di armi all'Ucraina (2023, 2024, 2025).",
+            "url": "https://www.fanpage.it/politica/armi-allucraina-dal-senato-via-libera-al-decreto-votano-contro-m5s-verdi-e-sinistra/"
+          }
+        },
+        {
+          "affermazioneId": "diritti-002",
+          "valore": 1,
+          "fonte": {
+            "tipo": "voto",
+            "citazione": "Assente dal programma 2022, ma Azione ha votato a favore del ddl sulla morte medicalmente assistita alla Camera nel marzo 2022. Nota: riguarda suicidio assistito, non eutanasia attiva esplicita.",
+            "url": "https://tg24.sky.it/politica/2022/09/21/fine-vita-programmi-elettorali-confronto"
           }
         }
       ]
@@ -949,10 +1367,10 @@
         },
         {
           "affermazioneId": "sanita-001",
-          "valore": 0,
+          "valore": -1,
           "fonte": {
             "tipo": "programma",
-            "citazione": "Nessuna posizione esplicita reperita sull'eliminazione della sanità privata nel programma comune 2022",
+            "citazione": "Programma comune Azione-IV 2022: sinergia e integrazione tra sanità pubblica e privata, non eliminazione della privata",
             "url": "https://dait.interno.gov.it/documenti/trasparenza/POLITICHE_20220925/Documenti/7/(7_progr_2_)-programma_azione-italia_viva-calenda.pdf"
           }
         },
@@ -1003,10 +1421,10 @@
         },
         {
           "affermazioneId": "istituzionale-001",
-          "valore": 0,
+          "valore": 1,
           "fonte": {
             "tipo": "programma",
-            "citazione": "Nessuna posizione esplicita reperita sul presidenzialismo nel programma comune 2022",
+            "citazione": "Programma comune Azione-IV 2022: elezione diretta del Presidente del Consiglio (\"sindaco d'Italia\"), non del Presidente della Repubblica; Renzi propose un modello simile già nel referendum 2016",
             "url": "https://dait.interno.gov.it/documenti/trasparenza/POLITICHE_20220925/Documenti/7/(7_progr_2_)-programma_azione-italia_viva-calenda.pdf"
           }
         },
@@ -1017,6 +1435,60 @@
             "tipo": "programma",
             "citazione": "Programma comune Azione-IV 2022: corsi intensivi obbligatori di lingua italiana e cultura civica per i nuovi arrivati",
             "url": "https://dait.interno.gov.it/documenti/trasparenza/POLITICHE_20220925/Documenti/7/(7_progr_2_)-programma_azione-italia_viva-calenda.pdf"
+          }
+        },
+        {
+          "affermazioneId": "giustizia-001",
+          "valore": -1,
+          "fonte": {
+            "tipo": "dichiarazione",
+            "citazione": "Renzi conferma il sostegno di Italia Viva alla separazione delle carriere in linea di principio, ma ha criticato il testo specifico (\"riformicchia\"), si è astenuto in Aula e ha lasciato \"libertà di voto\" ai propri elettori per il referendum di marzo 2026.",
+            "url": "https://www.ilfoglio.it/politica/2026/03/19/news/renzi-ci-scrive-e-prova-a-farci-capire-come-votera-al-referendum--263594"
+          }
+        },
+        {
+          "affermazioneId": "lavoro-003",
+          "valore": -2,
+          "fonte": {
+            "tipo": "dichiarazione",
+            "citazione": "Italia Viva per il No al referendum sul reintegro; il partito ha promosso un fact-checking contro quelle che definisce \"bugie\" sul Jobs Act.",
+            "url": "https://pagellapolitica.it/articoli/italia-viva-jobs-act-referendum"
+          }
+        },
+        {
+          "affermazioneId": "fisco-003",
+          "valore": -2,
+          "fonte": {
+            "tipo": "dichiarazione",
+            "citazione": "Italia Viva (Renzi), come Azione, respinge lo strumento della patrimoniale, preferendo interventi su bollette, energia e industria 4.0.",
+            "url": "https://www.ilsussidiario.net/news/patrimoniale-riesumata-a-sinistra-campo-largo-si-spacca-ok-avs-schlein-m5s-faccia-lue-caos-centristi/2802967/"
+          }
+        },
+        {
+          "affermazioneId": "ambiente-003",
+          "valore": -1,
+          "fonte": {
+            "tipo": "dichiarazione",
+            "citazione": "Nicola Danti (IV, allora vicepresidente di Renew Europe) ha criticato il governo Meloni per non aver difeso gli interessi italiani nel negoziato sullo stop 2035, posizione che presuppone l'accettazione della norma UE piuttosto che il suo rigetto.",
+            "url": "https://www.rinnovabili.it/mobilita/automotive/stop-motori-endotermici-2035-piano-italia/"
+          }
+        },
+        {
+          "affermazioneId": "esteri-001",
+          "valore": 2,
+          "fonte": {
+            "tipo": "voto",
+            "citazione": "Italia Viva ha votato a favore di tutti i decreti di proroga dell'invio di armi all'Ucraina (2023, 2024, 2025).",
+            "url": "https://www.fanpage.it/politica/armi-allucraina-dal-senato-via-libera-al-decreto-votano-contro-m5s-verdi-e-sinistra/"
+          }
+        },
+        {
+          "affermazioneId": "diritti-002",
+          "valore": 1,
+          "fonte": {
+            "tipo": "voto",
+            "citazione": "Assente dal programma 2022, ma Italia Viva ha votato a favore del ddl sulla morte medicalmente assistita alla Camera nel marzo 2022. Nota: riguarda suicidio assistito, non eutanasia attiva esplicita.",
+            "url": "https://tg24.sky.it/politica/2022/09/21/fine-vita-programmi-elettorali-confronto"
           }
         }
       ]
@@ -1065,7 +1537,7 @@
         },
         {
           "affermazioneId": "sanita-001",
-          "valore": 0,
+          "valore": null,
           "fonte": {
             "tipo": "programma",
             "citazione": "Nessuna posizione esplicita reperita sull'eliminazione della sanità privata",
@@ -1083,7 +1555,7 @@
         },
         {
           "affermazioneId": "ambiente-002",
-          "valore": 0,
+          "valore": null,
           "fonte": {
             "tipo": "programma",
             "citazione": "Nessuna posizione esplicita reperita sulla priorità ferro/mobilità sostenibile rispetto alle strade",
@@ -1092,7 +1564,7 @@
         },
         {
           "affermazioneId": "lavoro-002",
-          "valore": 0,
+          "valore": null,
           "fonte": {
             "tipo": "programma",
             "citazione": "Nessuna posizione esplicita reperita sul finanziamento paritario della scuola privata",
@@ -1110,7 +1582,7 @@
         },
         {
           "affermazioneId": "fisco-002",
-          "valore": 0,
+          "valore": null,
           "fonte": {
             "tipo": "programma",
             "citazione": "Nessuna posizione esplicita reperita sul potere dei sindacati nella contrattazione",
@@ -1133,6 +1605,60 @@
             "tipo": "programma",
             "citazione": "Propone lo ius scholae, che presuppone un percorso scolastico e di integrazione completato in Italia",
             "url": "https://www.piueuropa.eu/una_generazione_avanti_il_programma_elettorale_di_europa"
+          }
+        },
+        {
+          "affermazioneId": "giustizia-001",
+          "valore": -1,
+          "fonte": {
+            "tipo": "dichiarazione",
+            "citazione": "Riccardo Magi (segretario +Europa) sostiene il principio della separazione delle carriere e ha votato Sì personalmente, ma esprime forti riserve sul metodo del governo e su alcuni contenuti della riforma (es. Alta Corte disciplinare).",
+            "url": "https://pagellapolitica.it/articoli/partiti-opposizione-divisi-riforma-referendum-giustizia-separazione-carriere-magistrati"
+          }
+        },
+        {
+          "affermazioneId": "lavoro-003",
+          "valore": -2,
+          "fonte": {
+            "tipo": "dichiarazione",
+            "citazione": "+Europa per il No al referendum sul reintegro (art.18), insieme ad Azione, Italia Viva e Noi Moderati.",
+            "url": "https://www.ansa.it/sito/notizie/speciali/referendum/2025/06/02/referendum-le-posizioni-dei-partiti_e69db797-6080-410b-8bd7-272f31ab1ff2.html"
+          }
+        },
+        {
+          "affermazioneId": "fisco-003",
+          "valore": null,
+          "fonte": {
+            "tipo": "dichiarazione",
+            "citazione": "Nessuna posizione esplicita e specifica reperita sulla patrimoniale sui patrimoni oltre 1 milione di euro. +Europa ha preso posizione contro la flat tax e per un'imposizione più progressiva in generale, ma non è stata reperita una dichiarazione diretta pro o contro una patrimoniale sui grandi patrimoni.",
+            "url": "https://www.piueuropa.eu/dl_fiscale_ecco_il_pacchetto_di_proposte_di_europa"
+          }
+        },
+        {
+          "affermazioneId": "ambiente-003",
+          "valore": null,
+          "fonte": {
+            "tipo": "dichiarazione",
+            "citazione": "Nessuna posizione esplicita reperita di +Europa sullo stop auto benzina/diesel 2035.",
+            "url": "https://www.piueuropa.eu/una_generazione_avanti_il_programma_elettorale_di_europa"
+          }
+        },
+        {
+          "affermazioneId": "esteri-001",
+          "valore": 2,
+          "fonte": {
+            "tipo": "voto",
+            "citazione": "Risoluzione parlamentare Della Vedova-Magi (n. 6-153, Camera dei Deputati, 22 gennaio 2025) a sostegno del proseguimento dell'invio di armi all'Ucraina; appello di +Europa \"Per un maggiore sostegno militare all'Ucraina\".",
+            "url": "https://www.piueuropa.eu/free_ukraine"
+          }
+        },
+        {
+          "affermazioneId": "diritti-002",
+          "valore": 2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Programma 2022: sostiene l'approvazione di una legge che garantisca \"la possibilità di ricorrere all'aiuto medico alla morte volontaria e all'eutanasia\"; +Europa ha aderito ufficialmente alla campagna per il referendum sull'eutanasia legale (2021).",
+            "url": "https://tg24.sky.it/politica/2022/09/21/fine-vita-programmi-elettorali-confronto"
           }
         }
       ]
@@ -1181,7 +1707,7 @@
         },
         {
           "affermazioneId": "sanita-001",
-          "valore": 0,
+          "valore": null,
           "fonte": {
             "tipo": "programma",
             "citazione": "Nessuna posizione esplicita reperita sull'eliminazione della sanità privata; il programma propone un fascicolo sanitario elettronico unico",
@@ -1199,7 +1725,7 @@
         },
         {
           "affermazioneId": "ambiente-002",
-          "valore": 0,
+          "valore": null,
           "fonte": {
             "tipo": "programma",
             "citazione": "Nessuna posizione esplicita reperita sulla priorità ferro/mobilità sostenibile rispetto alle strade",
@@ -1226,7 +1752,7 @@
         },
         {
           "affermazioneId": "fisco-002",
-          "valore": 0,
+          "valore": null,
           "fonte": {
             "tipo": "programma",
             "citazione": "Nessuna posizione esplicita reperita sul potere dei sindacati nella contrattazione",
@@ -1244,11 +1770,65 @@
         },
         {
           "affermazioneId": "immigrazione-002",
-          "valore": 0,
+          "valore": null,
           "fonte": {
             "tipo": "programma",
             "citazione": "Nessuna posizione esplicita reperita su percorsi di integrazione obbligatori per gli immigrati",
             "url": "https://www.money.it/noi-moderati-programma-elettorale-elezioni-politiche-2022"
+          }
+        },
+        {
+          "affermazioneId": "giustizia-001",
+          "valore": 2,
+          "fonte": {
+            "tipo": "dichiarazione",
+            "citazione": "Noi Moderati (Lupi) sostiene il Sì al referendum sulla separazione delle carriere; ha depositato le firme per la richiesta di referendum insieme a FdI, Lega e FI (4 novembre 2025).",
+            "url": "https://tg24.sky.it/politica/2026/03/20/referendum-giustizia-perche-votare-si-no"
+          }
+        },
+        {
+          "affermazioneId": "lavoro-003",
+          "valore": -2,
+          "fonte": {
+            "tipo": "dichiarazione",
+            "citazione": "Maurizio Lupi (Noi Moderati): \"Io vado a votare No ai referendum dell'8 e 9 giugno\" (incluso il quesito sul reintegro art.18) — unico partito di maggioranza a indicare esplicitamente il voto No anziché l'astensione.",
+            "url": "https://www.radioradicale.it/scheda/758739/io-vado-a-votare-no-ai-referendum-dell8-e-9-giugno-intervista-a-maurizio-lupi-7-05-2025"
+          }
+        },
+        {
+          "affermazioneId": "fisco-003",
+          "valore": null,
+          "fonte": {
+            "tipo": "dichiarazione",
+            "citazione": "Nessuna posizione esplicita e specifica reperita di Noi Moderati sulla patrimoniale sui patrimoni oltre 1 milione di euro.",
+            "url": "https://www.noimoderati.it/"
+          }
+        },
+        {
+          "affermazioneId": "ambiente-003",
+          "valore": null,
+          "fonte": {
+            "tipo": "dichiarazione",
+            "citazione": "Nessuna posizione esplicita reperita. Noi Moderati non aveva eurodeputati al momento del voto UE di febbraio 2023 (partito fondato nel 2022).",
+            "url": "https://www.noimoderati.it/"
+          }
+        },
+        {
+          "affermazioneId": "esteri-001",
+          "valore": 2,
+          "fonte": {
+            "tipo": "dichiarazione",
+            "citazione": "FdI, Lega, FI e Noi Moderati hanno chiesto congiuntamente al governo di \"continuare a sostenere... le autorità governative ucraine anche attraverso la cessione di mezzi, materiali ed equipaggiamenti militari\".",
+            "url": "https://pagellapolitica.it/fact-checking/voto-parlamento-contro-invio-armi-ucraina"
+          }
+        },
+        {
+          "affermazioneId": "diritti-002",
+          "valore": -2,
+          "fonte": {
+            "tipo": "dichiarazione",
+            "citazione": "Maurizio Lupi (Noi Moderati): \"non esiste il diritto alla morte\"; posizione contraria a eutanasia e suicidio assistito.",
+            "url": "https://tg24.sky.it/politica/2022/09/21/fine-vita-programmi-elettorali-confronto"
           }
         }
       ]

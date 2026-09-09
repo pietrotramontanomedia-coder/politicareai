@@ -29,7 +29,14 @@ export interface Affermazione {
 
 export interface Posizione {
   affermazioneId: string;
-  valore: Valore;
+  /**
+   * null = posizione non reperita da nessuna fonte verificabile: l'affermazione
+   * è esclusa dal calcolo del punteggio per questo partito (non conta né a favore
+   * né contro), esattamente come una risposta saltata dall'utente. Non usare 0
+   * per "non so" — 0 è una posizione neutra REALMENTE dichiarata dal partito,
+   * e nel calcolo genera comunque un 50% di accordo con risposte estreme.
+   */
+  valore: Valore | null;
   fonte: Fonte;
 }
 
