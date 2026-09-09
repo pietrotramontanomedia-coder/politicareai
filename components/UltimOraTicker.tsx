@@ -40,7 +40,7 @@ export default function UltimOraTicker({ limite = 5 }: { limite?: number }) {
 
   return (
     <div
-      className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 sm:px-4 sm:py-3 max-w-md mx-auto lg:mx-0"
+      className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 sm:px-4 sm:py-3 w-full"
       style={{ background: 'var(--bg-card)', border: '1px solid var(--bordo)' }}
       onMouseEnter={() => timerRef.current && clearInterval(timerRef.current)}
       onMouseLeave={() => {
