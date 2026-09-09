@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import FeedSection from '@/components/FeedSection';
 import UltimOraTicker from '@/components/UltimOraTicker';
+import InstagramFeed from '@/components/InstagramFeed';
 import Logo from '@/components/Logo';
 
 export default function Home() {
@@ -114,6 +115,9 @@ export default function Home() {
             </motion.div>
           </Link>
         </motion.div>
+
+        {/* Instagram */}
+        <InstagramFeed />
 
         {/* Footer */}
         <motion.div
