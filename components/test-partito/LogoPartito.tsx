@@ -14,6 +14,10 @@ const mappaLoghi: Record<string, string> = {
   'Lega': '/loghi-partiti/lega.png',
   'Alleanza Verdi e Sinistra': '/loghi-partiti/avs.png',
   'Forza Italia': '/loghi-partiti/fi.png',
+  'Azione': '/loghi-partiti/azione.png',
+  'Italia Viva': '/loghi-partiti/iv.png',
+  '+Europa': '/loghi-partiti/piueuropa.png',
+  'Noi Moderati': '/loghi-partiti/noimoderati.png',
 };
 
 export function LogoPartito({ nome, className = 'w-10 h-10' }: LogoPartito) {

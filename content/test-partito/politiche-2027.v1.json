@@ -2,25 +2,95 @@
   "id": "test-partito-2027",
   "versione": "1.0.2",
   "data": "2026-09-02",
-  "autori": ["Piètro Tramontano", "Politicare Team"],
+  "autori": [
+    "Piètro Tramontano",
+    "Politicare Team"
+  ],
   "changelog": [
     "2026-09-02 — v1.0.2: revisione accurata dai programmi 2022 ufficiali + posizioni dichiarate 2024-2025",
     "2026-09-02 — v1.0.1: posizioni affinate da lettura attentissima dei programmi 2022"
   ],
-  "quotePerArea": {"fisco": 2, "ambiente": 3, "lavoro": 3, "immigrazione": 2, "sanita": 1, "europa": 1},
+  "quotePerArea": {
+    "fisco": 2,
+    "ambiente": 3,
+    "lavoro": 3,
+    "immigrazione": 2,
+    "sanita": 1,
+    "europa": 1
+  },
   "affermazioni": [
-    {"id": "fisco-001", "testo": "Il governo dovrebbe introdurre una flat tax al 15-20% per imprese, lavoratori autonomi e cittadini", "area": "fisco", "verso": 1},
-    {"id": "ambiente-001", "testo": "L'Italia dovrebbe mantenere il divieto del nucleare e investire solo in energie rinnovabili", "area": "ambiente", "verso": -1},
-    {"id": "immigrazione-001", "testo": "I confini dell'Unione Europea dovrebbero essere rigidamente controllati con procedure automatiche di respingimento", "area": "immigrazione", "verso": 1},
-    {"id": "lavoro-001", "testo": "Dovrebbe esserci un salario minimo nazionale garantito di almeno 10 euro all'ora", "area": "lavoro", "verso": 1},
-    {"id": "sanita-001", "testo": "La sanità pubblica dovrebbe essere l'unico livello disponibile, eliminando gradualmente la sanità privata", "area": "sanita", "verso": 1},
-    {"id": "europa-001", "testo": "L'Italia dovrebbe mantenere un ruolo centrale e protagonista nell'Unione Europea", "area": "europa", "verso": -1},
-    {"id": "ambiente-002", "testo": "Gli investimenti pubblici dovrebbero privilegiare il trasporto su ferro e la mobilità sostenibile rispetto alle strade", "area": "ambiente", "verso": -1},
-    {"id": "lavoro-002", "testo": "La scuola privata dovrebbe ricevere lo stesso finanziamento pubblico per alunno della scuola pubblica", "area": "lavoro", "verso": 1},
-    {"id": "diritti-001", "testo": "Il matrimonio tra persone dello stesso sesso dovrebbe avere gli stessi diritti civili e patrimoniali del matrimonio tradizionale", "area": "lavoro", "verso": 1},
-    {"id": "fisco-002", "testo": "I sindacati dovrebbero avere più potere nella contrattazione dei salari e delle condizioni di lavoro", "area": "fisco", "verso": 1},
-    {"id": "istituzionale-001", "testo": "Il Presidente della Repubblica dovrebbe essere eletto direttamente dai cittadini e non dal Parlamento", "area": "europa", "verso": -1},
-    {"id": "immigrazione-002", "testo": "I percorsi di integrazione per gli immigrati dovrebbero includere corsi obbligatori di lingua italiana e cultura civica", "area": "immigrazione", "verso": 1}
+    {
+      "id": "fisco-001",
+      "testo": "Il governo dovrebbe introdurre una flat tax al 15-20% per imprese, lavoratori autonomi e cittadini",
+      "area": "fisco",
+      "verso": 1
+    },
+    {
+      "id": "ambiente-001",
+      "testo": "L'Italia dovrebbe mantenere il divieto del nucleare e investire solo in energie rinnovabili",
+      "area": "ambiente",
+      "verso": -1
+    },
+    {
+      "id": "immigrazione-001",
+      "testo": "I confini dell'Unione Europea dovrebbero essere rigidamente controllati con procedure automatiche di respingimento",
+      "area": "immigrazione",
+      "verso": 1
+    },
+    {
+      "id": "lavoro-001",
+      "testo": "Dovrebbe esserci un salario minimo nazionale garantito di almeno 10 euro all'ora",
+      "area": "lavoro",
+      "verso": 1
+    },
+    {
+      "id": "sanita-001",
+      "testo": "La sanità pubblica dovrebbe essere l'unico livello disponibile, eliminando gradualmente la sanità privata",
+      "area": "sanita",
+      "verso": 1
+    },
+    {
+      "id": "europa-001",
+      "testo": "L'Italia dovrebbe mantenere un ruolo centrale e protagonista nell'Unione Europea",
+      "area": "europa",
+      "verso": -1
+    },
+    {
+      "id": "ambiente-002",
+      "testo": "Gli investimenti pubblici dovrebbero privilegiare il trasporto su ferro e la mobilità sostenibile rispetto alle strade",
+      "area": "ambiente",
+      "verso": -1
+    },
+    {
+      "id": "lavoro-002",
+      "testo": "La scuola privata dovrebbe ricevere lo stesso finanziamento pubblico per alunno della scuola pubblica",
+      "area": "lavoro",
+      "verso": 1
+    },
+    {
+      "id": "diritti-001",
+      "testo": "Il matrimonio tra persone dello stesso sesso dovrebbe avere gli stessi diritti civili e patrimoniali del matrimonio tradizionale",
+      "area": "lavoro",
+      "verso": 1
+    },
+    {
+      "id": "fisco-002",
+      "testo": "I sindacati dovrebbero avere più potere nella contrattazione dei salari e delle condizioni di lavoro",
+      "area": "fisco",
+      "verso": 1
+    },
+    {
+      "id": "istituzionale-001",
+      "testo": "Il Presidente della Repubblica dovrebbe essere eletto direttamente dai cittadini e non dal Parlamento",
+      "area": "europa",
+      "verso": -1
+    },
+    {
+      "id": "immigrazione-002",
+      "testo": "I percorsi di integrazione per gli immigrati dovrebbero includere corsi obbligatori di lingua italiana e cultura civica",
+      "area": "immigrazione",
+      "verso": 1
+    }
   ],
   "partiti": [
     {
@@ -29,18 +99,114 @@
       "sigla": "FdI",
       "colore": "#2E5CB3",
       "posizioni": [
-        {"affermazioneId": "fisco-001", "valore": 1, "fonte": {"tipo": "programma", "citazione": "Razionalizzazione sistema tributario", "url": ""}},
-        {"affermazioneId": "ambiente-001", "valore": 0, "fonte": {"tipo": "programma", "citazione": "Neutralità su nucleare, enfasi PNRR", "url": ""}},
-        {"affermazioneId": "immigrazione-001", "valore": 1, "fonte": {"tipo": "programma", "citazione": "Controlli alle frontiere", "url": ""}},
-        {"affermazioneId": "lavoro-001", "valore": 0, "fonte": {"tipo": "programma", "citazione": "Focus competitività, no salario minimo esplicito", "url": ""}},
-        {"affermazioneId": "sanita-001", "valore": -1, "fonte": {"tipo": "programma", "citazione": "Sistema misto pubblico-privato", "url": ""}},
-        {"affermazioneId": "europa-001", "valore": -2, "fonte": {"tipo": "programma", "citazione": "Piena integrazione europea atlantica", "url": ""}},
-        {"affermazioneId": "ambiente-002", "valore": -1, "fonte": {"tipo": "programma", "citazione": "Equilibrio infrastrutture: Ponte Stretto, autostrade", "url": ""}},
-        {"affermazioneId": "lavoro-002", "valore": 1, "fonte": {"tipo": "programma", "citazione": "Parità scuola paritaria", "url": ""}},
-        {"affermazioneId": "diritti-001", "valore": 0, "fonte": {"tipo": "programma", "citazione": "No posizione esplicita", "url": ""}},
-        {"affermazioneId": "fisco-002", "valore": 0, "fonte": {"tipo": "programma", "citazione": "No posizione su sindacati", "url": ""}},
-        {"affermazioneId": "istituzionale-001", "valore": 2, "fonte": {"tipo": "programma", "citazione": "Elezione diretta del Presidente della Repubblica", "url": ""}},
-        {"affermazioneId": "immigrazione-002", "valore": 2, "fonte": {"tipo": "programma", "citazione": "Integrazione con lingua e legalità", "url": ""}}
+        {
+          "affermazioneId": "fisco-001",
+          "valore": 1,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Razionalizzazione sistema tributario",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "ambiente-001",
+          "valore": 0,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Neutralità su nucleare, enfasi PNRR",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "immigrazione-001",
+          "valore": 1,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Controlli alle frontiere",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "lavoro-001",
+          "valore": 0,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Focus competitività, no salario minimo esplicito",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "sanita-001",
+          "valore": -1,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Sistema misto pubblico-privato",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "europa-001",
+          "valore": -2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Piena integrazione europea atlantica",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "ambiente-002",
+          "valore": -1,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Equilibrio infrastrutture: Ponte Stretto, autostrade",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "lavoro-002",
+          "valore": 1,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Parità scuola paritaria",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "diritti-001",
+          "valore": 0,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "No posizione esplicita",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "fisco-002",
+          "valore": 0,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "No posizione su sindacati",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "istituzionale-001",
+          "valore": 2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Elezione diretta del Presidente della Repubblica",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "immigrazione-002",
+          "valore": 2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Integrazione con lingua e legalità",
+            "url": ""
+          }
+        }
       ]
     },
     {
@@ -49,18 +215,114 @@
       "sigla": "PD",
       "colore": "#E4003B",
       "posizioni": [
-        {"affermazioneId": "fisco-001", "valore": -2, "fonte": {"tipo": "programma", "citazione": "Sistema progressivo e equità fiscale", "url": ""}},
-        {"affermazioneId": "ambiente-001", "valore": 1, "fonte": {"tipo": "programma", "citazione": "Divieto nucleare, rinnovabili al 100%", "url": ""}},
-        {"affermazioneId": "immigrazione-001", "valore": -1, "fonte": {"tipo": "programma", "citazione": "Integrazione e solidarietà", "url": ""}},
-        {"affermazioneId": "lavoro-001", "valore": 1, "fonte": {"tipo": "programma", "citazione": "Supporto salario minimo", "url": ""}},
-        {"affermazioneId": "sanita-001", "valore": 0, "fonte": {"tipo": "programma", "citazione": "Rafforzamento pubblico, non eliminazione privato", "url": ""}},
-        {"affermazioneId": "europa-001", "valore": -2, "fonte": {"tipo": "programma", "citazione": "Piena adesione europeista", "url": ""}},
-        {"affermazioneId": "ambiente-002", "valore": 2, "fonte": {"tipo": "programma", "citazione": "Transizione ecologica e mobilità sostenibile", "url": ""}},
-        {"affermazioneId": "lavoro-002", "valore": -1, "fonte": {"tipo": "programma", "citazione": "Priorità pubblico, no parità", "url": ""}},
-        {"affermazioneId": "diritti-001", "valore": 2, "fonte": {"tipo": "programma", "citazione": "Pieno supporto diritti LGBTQ+", "url": ""}},
-        {"affermazioneId": "fisco-002", "valore": 1, "fonte": {"tipo": "programma", "citazione": "Supporto ai sindacati", "url": ""}},
-        {"affermazioneId": "istituzionale-001", "valore": -2, "fonte": {"tipo": "programma", "citazione": "Difesa sistema parlamentare", "url": ""}},
-        {"affermazioneId": "immigrazione-002", "valore": 0, "fonte": {"tipo": "programma", "citazione": "Integrazione inclusiva, no controlli rigidi", "url": ""}}
+        {
+          "affermazioneId": "fisco-001",
+          "valore": -2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Sistema progressivo e equità fiscale",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "ambiente-001",
+          "valore": 1,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Divieto nucleare, rinnovabili al 100%",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "immigrazione-001",
+          "valore": -1,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Integrazione e solidarietà",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "lavoro-001",
+          "valore": 1,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Supporto salario minimo",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "sanita-001",
+          "valore": 0,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Rafforzamento pubblico, non eliminazione privato",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "europa-001",
+          "valore": -2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Piena adesione europeista",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "ambiente-002",
+          "valore": 2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Transizione ecologica e mobilità sostenibile",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "lavoro-002",
+          "valore": -1,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Priorità pubblico, no parità",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "diritti-001",
+          "valore": 2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Pieno supporto diritti LGBTQ+",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "fisco-002",
+          "valore": 1,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Supporto ai sindacati",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "istituzionale-001",
+          "valore": -2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Difesa sistema parlamentare",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "immigrazione-002",
+          "valore": 0,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Integrazione inclusiva, no controlli rigidi",
+            "url": ""
+          }
+        }
       ]
     },
     {
@@ -69,18 +331,114 @@
       "sigla": "M5S",
       "colore": "#FFC000",
       "posizioni": [
-        {"affermazioneId": "fisco-001", "valore": -1, "fonte": {"tipo": "programma", "citazione": "Critica flat tax, richiede progressività", "url": ""}},
-        {"affermazioneId": "ambiente-001", "valore": 2, "fonte": {"tipo": "programma", "citazione": "Energia rinnovabile 100%, divieto esplicito nucleare", "url": ""}},
-        {"affermazioneId": "immigrazione-001", "valore": -1, "fonte": {"tipo": "programma", "citazione": "Integrazione e accoglienza", "url": ""}},
-        {"affermazioneId": "lavoro-001", "valore": 2, "fonte": {"tipo": "programma", "citazione": "Per un salario minimo - sezione dedicata", "url": ""}},
-        {"affermazioneId": "sanita-001", "valore": 1, "fonte": {"tipo": "programma", "citazione": "Sanità pubblica universale", "url": ""}},
-        {"affermazioneId": "europa-001", "valore": 1, "fonte": {"tipo": "programma", "citazione": "Critica UE, interesse nazionale", "url": ""}},
-        {"affermazioneId": "ambiente-002", "valore": 2, "fonte": {"tipo": "programma", "citazione": "Mobilità sostenibile", "url": ""}},
-        {"affermazioneId": "lavoro-002", "valore": -2, "fonte": {"tipo": "programma", "citazione": "Scuola pubblica prioritaria", "url": ""}},
-        {"affermazioneId": "diritti-001", "valore": 2, "fonte": {"tipo": "programma", "citazione": "Supporto diritti LGBTQ+", "url": ""}},
-        {"affermazioneId": "fisco-002", "valore": 2, "fonte": {"tipo": "programma", "citazione": "Diritti sindacali", "url": ""}},
-        {"affermazioneId": "istituzionale-001", "valore": -1, "fonte": {"tipo": "programma", "citazione": "Riforme ma no elezione diretta Presidente", "url": ""}},
-        {"affermazioneId": "immigrazione-002", "valore": 0, "fonte": {"tipo": "programma", "citazione": "Accoglienza senza posizione rigida", "url": ""}}
+        {
+          "affermazioneId": "fisco-001",
+          "valore": -1,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Critica flat tax, richiede progressività",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "ambiente-001",
+          "valore": 2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Energia rinnovabile 100%, divieto esplicito nucleare",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "immigrazione-001",
+          "valore": -1,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Integrazione e accoglienza",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "lavoro-001",
+          "valore": 2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Per un salario minimo - sezione dedicata",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "sanita-001",
+          "valore": 1,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Sanità pubblica universale",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "europa-001",
+          "valore": 1,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Critica UE, interesse nazionale",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "ambiente-002",
+          "valore": 2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Mobilità sostenibile",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "lavoro-002",
+          "valore": -2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Scuola pubblica prioritaria",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "diritti-001",
+          "valore": 2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Supporto diritti LGBTQ+",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "fisco-002",
+          "valore": 2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Diritti sindacali",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "istituzionale-001",
+          "valore": -1,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Riforme ma no elezione diretta Presidente",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "immigrazione-002",
+          "valore": 0,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Accoglienza senza posizione rigida",
+            "url": ""
+          }
+        }
       ]
     },
     {
@@ -89,18 +447,114 @@
       "sigla": "Lega",
       "colore": "#007A5E",
       "posizioni": [
-        {"affermazioneId": "fisco-001", "valore": 2, "fonte": {"tipo": "programma", "citazione": "Estensione Flat Tax assolutamente indispensabili", "url": ""}},
-        {"affermazioneId": "ambiente-001", "valore": -1, "fonte": {"tipo": "programma", "citazione": "Pragmatismo su nucleare", "url": ""}},
-        {"affermazioneId": "immigrazione-001", "valore": 2, "fonte": {"tipo": "programma", "citazione": "Contrasto all'immigrazione irregolare - pilastro", "url": ""}},
-        {"affermazioneId": "lavoro-001", "valore": -1, "fonte": {"tipo": "programma", "citazione": "Flessibilità mercato, no salario minimo", "url": ""}},
-        {"affermazioneId": "sanita-001", "valore": -1, "fonte": {"tipo": "programma", "citazione": "Sistema misto, autonomia regionale", "url": ""}},
-        {"affermazioneId": "europa-001", "valore": 2, "fonte": {"tipo": "programma", "citazione": "Questione sovranista: recuperare sovranità da UE", "url": ""}},
-        {"affermazioneId": "ambiente-002", "valore": 0, "fonte": {"tipo": "programma", "citazione": "No priorità esplicita ferrovie vs auto", "url": ""}},
-        {"affermazioneId": "lavoro-002", "valore": 0, "fonte": {"tipo": "programma", "citazione": "No posizione chiara", "url": ""}},
-        {"affermazioneId": "diritti-001", "valore": -1, "fonte": {"tipo": "programma", "citazione": "Famiglia tradizionale", "url": ""}},
-        {"affermazioneId": "fisco-002", "valore": -1, "fonte": {"tipo": "programma", "citazione": "Focus flessibilità, no enfasi sindacati", "url": ""}},
-        {"affermazioneId": "istituzionale-001", "valore": 1, "fonte": {"tipo": "programma", "citazione": "Riforme ma posizione non esplicita", "url": ""}},
-        {"affermazioneId": "immigrazione-002", "valore": 2, "fonte": {"tipo": "programma", "citazione": "Controlli rigorosi e integrazione obbligatoria", "url": ""}}
+        {
+          "affermazioneId": "fisco-001",
+          "valore": 2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Estensione Flat Tax assolutamente indispensabili",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "ambiente-001",
+          "valore": -1,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Pragmatismo su nucleare",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "immigrazione-001",
+          "valore": 2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Contrasto all'immigrazione irregolare - pilastro",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "lavoro-001",
+          "valore": -1,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Flessibilità mercato, no salario minimo",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "sanita-001",
+          "valore": -1,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Sistema misto, autonomia regionale",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "europa-001",
+          "valore": 2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Questione sovranista: recuperare sovranità da UE",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "ambiente-002",
+          "valore": 0,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "No priorità esplicita ferrovie vs auto",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "lavoro-002",
+          "valore": 0,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "No posizione chiara",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "diritti-001",
+          "valore": -1,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Famiglia tradizionale",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "fisco-002",
+          "valore": -1,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Focus flessibilità, no enfasi sindacati",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "istituzionale-001",
+          "valore": 1,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Riforme ma posizione non esplicita",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "immigrazione-002",
+          "valore": 2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Controlli rigorosi e integrazione obbligatoria",
+            "url": ""
+          }
+        }
       ]
     },
     {
@@ -109,18 +563,114 @@
       "sigla": "AVS",
       "colore": "#E40B20",
       "posizioni": [
-        {"affermazioneId": "fisco-001", "valore": -2, "fonte": {"tipo": "programma", "citazione": "Riforma fiscale progressiva e ambientale", "url": ""}},
-        {"affermazioneId": "ambiente-001", "valore": 2, "fonte": {"tipo": "programma", "citazione": "Italia rinnovabile, divieto nucleare", "url": ""}},
-        {"affermazioneId": "immigrazione-001", "valore": -2, "fonte": {"tipo": "programma", "citazione": "Accoglienza contro xenofobia", "url": ""}},
-        {"affermazioneId": "lavoro-001", "valore": 2, "fonte": {"tipo": "programma", "citazione": "Salario minimo e diritti lavoratori", "url": ""}},
-        {"affermazioneId": "sanita-001", "valore": 2, "fonte": {"tipo": "programma", "citazione": "Sanità pubblica universale", "url": ""}},
-        {"affermazioneId": "europa-001", "valore": -1, "fonte": {"tipo": "programma", "citazione": "Europa più democratica, non sovranista", "url": ""}},
-        {"affermazioneId": "ambiente-002", "valore": 2, "fonte": {"tipo": "programma", "citazione": "Mobilità sostenibile prioritaria", "url": ""}},
-        {"affermazioneId": "lavoro-002", "valore": -2, "fonte": {"tipo": "programma", "citazione": "Scuola pubblica laica", "url": ""}},
-        {"affermazioneId": "diritti-001", "valore": 2, "fonte": {"tipo": "programma", "citazione": "Pieno supporto diritti LGBTQ+", "url": ""}},
-        {"affermazioneId": "fisco-002", "valore": 2, "fonte": {"tipo": "programma", "citazione": "Supporto sindacati e diritti lavoratori", "url": ""}},
-        {"affermazioneId": "istituzionale-001", "valore": -1, "fonte": {"tipo": "programma", "citazione": "Democrazia parlamentare", "url": ""}},
-        {"affermazioneId": "immigrazione-002", "valore": 0, "fonte": {"tipo": "programma", "citazione": "Accoglienza incondizionata, no corsi obbligatori", "url": ""}}
+        {
+          "affermazioneId": "fisco-001",
+          "valore": -2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Riforma fiscale progressiva e ambientale",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "ambiente-001",
+          "valore": 2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Italia rinnovabile, divieto nucleare",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "immigrazione-001",
+          "valore": -2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Accoglienza contro xenofobia",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "lavoro-001",
+          "valore": 2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Salario minimo e diritti lavoratori",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "sanita-001",
+          "valore": 2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Sanità pubblica universale",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "europa-001",
+          "valore": -1,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Europa più democratica, non sovranista",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "ambiente-002",
+          "valore": 2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Mobilità sostenibile prioritaria",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "lavoro-002",
+          "valore": -2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Scuola pubblica laica",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "diritti-001",
+          "valore": 2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Pieno supporto diritti LGBTQ+",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "fisco-002",
+          "valore": 2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Supporto sindacati e diritti lavoratori",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "istituzionale-001",
+          "valore": -1,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Democrazia parlamentare",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "immigrazione-002",
+          "valore": 0,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Accoglienza incondizionata, no corsi obbligatori",
+            "url": ""
+          }
+        }
       ]
     },
     {
@@ -129,18 +679,578 @@
       "sigla": "FI",
       "colore": "#0066CC",
       "posizioni": [
-        {"affermazioneId": "fisco-001", "valore": 1, "fonte": {"tipo": "programma", "citazione": "Riduzione pressione fiscale", "url": ""}},
-        {"affermazioneId": "ambiente-001", "valore": 0, "fonte": {"tipo": "programma", "citazione": "Pragmatismo su nucleare", "url": ""}},
-        {"affermazioneId": "immigrazione-001", "valore": 0, "fonte": {"tipo": "programma", "citazione": "Integrazione e cooperazione", "url": ""}},
-        {"affermazioneId": "lavoro-001", "valore": 0, "fonte": {"tipo": "programma", "citazione": "Flessibilità, no salario minimo", "url": ""}},
-        {"affermazioneId": "sanita-001", "valore": -2, "fonte": {"tipo": "programma", "citazione": "Sistema misto pubblico-privato, libertà di scelta", "url": ""}},
-        {"affermazioneId": "europa-001", "valore": -2, "fonte": {"tipo": "programma", "citazione": "Piena adesione atlantica", "url": ""}},
-        {"affermazioneId": "ambiente-002", "valore": -1, "fonte": {"tipo": "programma", "citazione": "Equilibrio infrastrutture diverse", "url": ""}},
-        {"affermazioneId": "lavoro-002", "valore": 2, "fonte": {"tipo": "programma", "citazione": "Supporto scuola paritaria", "url": ""}},
-        {"affermazioneId": "diritti-001", "valore": 0, "fonte": {"tipo": "programma", "citazione": "No posizione esplicita", "url": ""}},
-        {"affermazioneId": "fisco-002", "valore": 0, "fonte": {"tipo": "programma", "citazione": "No posizione su sindacati", "url": ""}},
-        {"affermazioneId": "istituzionale-001", "valore": 0, "fonte": {"tipo": "programma", "citazione": "No posizione esplicita", "url": ""}},
-        {"affermazioneId": "immigrazione-002", "valore": 1, "fonte": {"tipo": "programma", "citazione": "Integrazione con ordine", "url": ""}}
+        {
+          "affermazioneId": "fisco-001",
+          "valore": 1,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Riduzione pressione fiscale",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "ambiente-001",
+          "valore": 0,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Pragmatismo su nucleare",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "immigrazione-001",
+          "valore": 0,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Integrazione e cooperazione",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "lavoro-001",
+          "valore": 0,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Flessibilità, no salario minimo",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "sanita-001",
+          "valore": -2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Sistema misto pubblico-privato, libertà di scelta",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "europa-001",
+          "valore": -2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Piena adesione atlantica",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "ambiente-002",
+          "valore": -1,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Equilibrio infrastrutture diverse",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "lavoro-002",
+          "valore": 2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Supporto scuola paritaria",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "diritti-001",
+          "valore": 0,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "No posizione esplicita",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "fisco-002",
+          "valore": 0,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "No posizione su sindacati",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "istituzionale-001",
+          "valore": 0,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "No posizione esplicita",
+            "url": ""
+          }
+        },
+        {
+          "affermazioneId": "immigrazione-002",
+          "valore": 1,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Integrazione con ordine",
+            "url": ""
+          }
+        }
+      ]
+    },
+    {
+      "id": "azione",
+      "nome": "Azione",
+      "sigla": "AZ",
+      "colore": "#1E5FA8",
+      "posizioni": [
+        {
+          "affermazioneId": "fisco-001",
+          "valore": -1,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Propone 'minimo esente' e 'imposta negativa' per i redditi bassi, non un'aliquota unica forfettaria",
+            "url": "https://dait.interno.gov.it/documenti/trasparenza/POLITICHE_20220925/Documenti/7/(7_progr_2_)-programma_azione-italia_viva-calenda.pdf"
+          }
+        },
+        {
+          "affermazioneId": "ambiente-001",
+          "valore": -2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "\"Includere il nucleare nel mix energetico per arrivare a emissioni zero nel 2050\"",
+            "url": "https://dait.interno.gov.it/documenti/trasparenza/POLITICHE_20220925/Documenti/7/(7_progr_2_)-programma_azione-italia_viva-calenda.pdf"
+          }
+        },
+        {
+          "affermazioneId": "immigrazione-001",
+          "valore": -2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "\"Superare il trattato di Dublino... rifiutiamo i controlli anticipati della procedura di asilo alle frontiere esterne\"",
+            "url": "https://dait.interno.gov.it/documenti/trasparenza/POLITICHE_20220925/Documenti/7/(7_progr_2_)-programma_azione-italia_viva-calenda.pdf"
+          }
+        },
+        {
+          "affermazioneId": "lavoro-001",
+          "valore": 1,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Favorevole a un salario minimo tramite legge sulla rappresentanza delle parti sociali e un \"minimo di ultima istanza\", non una soglia fissa per legge",
+            "url": "https://dait.interno.gov.it/documenti/trasparenza/POLITICHE_20220925/Documenti/7/(7_progr_2_)-programma_azione-italia_viva-calenda.pdf"
+          }
+        },
+        {
+          "affermazioneId": "sanita-001",
+          "valore": 0,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Nessuna posizione esplicita reperita sull'eliminazione della sanità privata; il programma parla genericamente di potenziare il sistema sanitario pubblico",
+            "url": "https://dait.interno.gov.it/documenti/trasparenza/POLITICHE_20220925/Documenti/7/(7_progr_2_)-programma_azione-italia_viva-calenda.pdf"
+          }
+        },
+        {
+          "affermazioneId": "europa-001",
+          "valore": 2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Programma costruito integralmente attorno al rilancio del ruolo dell'Italia nell'Unione Europea",
+            "url": "https://dait.interno.gov.it/documenti/trasparenza/POLITICHE_20220925/Documenti/7/(7_progr_2_)-programma_azione-italia_viva-calenda.pdf"
+          }
+        },
+        {
+          "affermazioneId": "ambiente-002",
+          "valore": 1,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "\"Investire 8 miliardi di euro per integrare le reti ferroviarie\" e completare l'Alta Velocità",
+            "url": "https://dait.interno.gov.it/documenti/trasparenza/POLITICHE_20220925/Documenti/7/(7_progr_2_)-programma_azione-italia_viva-calenda.pdf"
+          }
+        },
+        {
+          "affermazioneId": "lavoro-002",
+          "valore": 2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "\"Compiuta attuazione della parità scolastica... spetta alla famiglia scegliere la scuola migliore\"",
+            "url": "https://dait.interno.gov.it/documenti/trasparenza/POLITICHE_20220925/Documenti/7/(7_progr_2_)-programma_azione-italia_viva-calenda.pdf"
+          }
+        },
+        {
+          "affermazioneId": "diritti-001",
+          "valore": 2,
+          "fonte": {
+            "tipo": "dichiarazione",
+            "citazione": "Calenda: \"sì matrimonio egualitario, adozione, registrazione figli\"",
+            "url": "https://www.civonline.it/news/italia-e-mondo/1189295/lgbt-calenda-si-matrimonio-egualitario-adozione-registrazione-figli-ma-no-a-gpa.html"
+          }
+        },
+        {
+          "affermazioneId": "fisco-002",
+          "valore": 0,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Propone una legge sulla rappresentanza sindacale contro i \"contratti pirata\", non un aumento generico del potere sindacale nella contrattazione",
+            "url": "https://dait.interno.gov.it/documenti/trasparenza/POLITICHE_20220925/Documenti/7/(7_progr_2_)-programma_azione-italia_viva-calenda.pdf"
+          }
+        },
+        {
+          "affermazioneId": "istituzionale-001",
+          "valore": 0,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Nessuna posizione esplicita reperita sul presidenzialismo o l'elezione diretta del Presidente della Repubblica nel programma 2022",
+            "url": "https://dait.interno.gov.it/documenti/trasparenza/POLITICHE_20220925/Documenti/7/(7_progr_2_)-programma_azione-italia_viva-calenda.pdf"
+          }
+        },
+        {
+          "affermazioneId": "immigrazione-002",
+          "valore": 2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Propone corsi intensivi obbligatori di lingua italiana e cultura civica per i nuovi arrivati",
+            "url": "https://dait.interno.gov.it/documenti/trasparenza/POLITICHE_20220925/Documenti/7/(7_progr_2_)-programma_azione-italia_viva-calenda.pdf"
+          }
+        }
+      ]
+    },
+    {
+      "id": "iv",
+      "nome": "Italia Viva",
+      "sigla": "IV",
+      "colore": "#E4177B",
+      "posizioni": [
+        {
+          "affermazioneId": "fisco-001",
+          "valore": -1,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Programma comune Azione-IV 2022: 'minimo esente' e 'imposta negativa', non un'aliquota unica forfettaria",
+            "url": "https://dait.interno.gov.it/documenti/trasparenza/POLITICHE_20220925/Documenti/7/(7_progr_2_)-programma_azione-italia_viva-calenda.pdf"
+          }
+        },
+        {
+          "affermazioneId": "ambiente-001",
+          "valore": -2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Programma comune Azione-IV 2022: \"includere il nucleare nel mix energetico\" per arrivare a emissioni zero nel 2050",
+            "url": "https://dait.interno.gov.it/documenti/trasparenza/POLITICHE_20220925/Documenti/7/(7_progr_2_)-programma_azione-italia_viva-calenda.pdf"
+          }
+        },
+        {
+          "affermazioneId": "immigrazione-001",
+          "valore": -2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Programma comune Azione-IV 2022: superare Dublino, rifiuto dei controlli anticipati alle frontiere esterne",
+            "url": "https://dait.interno.gov.it/documenti/trasparenza/POLITICHE_20220925/Documenti/7/(7_progr_2_)-programma_azione-italia_viva-calenda.pdf"
+          }
+        },
+        {
+          "affermazioneId": "lavoro-001",
+          "valore": 1,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Programma comune Azione-IV 2022: salario minimo tramite legge sulla rappresentanza delle parti sociali, non soglia fissa per legge",
+            "url": "https://dait.interno.gov.it/documenti/trasparenza/POLITICHE_20220925/Documenti/7/(7_progr_2_)-programma_azione-italia_viva-calenda.pdf"
+          }
+        },
+        {
+          "affermazioneId": "sanita-001",
+          "valore": 0,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Nessuna posizione esplicita reperita sull'eliminazione della sanità privata nel programma comune 2022",
+            "url": "https://dait.interno.gov.it/documenti/trasparenza/POLITICHE_20220925/Documenti/7/(7_progr_2_)-programma_azione-italia_viva-calenda.pdf"
+          }
+        },
+        {
+          "affermazioneId": "europa-001",
+          "valore": 2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Programma comune Azione-IV 2022 costruito attorno al rilancio del ruolo dell'Italia nell'UE",
+            "url": "https://dait.interno.gov.it/documenti/trasparenza/POLITICHE_20220925/Documenti/7/(7_progr_2_)-programma_azione-italia_viva-calenda.pdf"
+          }
+        },
+        {
+          "affermazioneId": "ambiente-002",
+          "valore": 1,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Programma comune Azione-IV 2022: investimenti su reti ferroviarie e Alta Velocità",
+            "url": "https://dait.interno.gov.it/documenti/trasparenza/POLITICHE_20220925/Documenti/7/(7_progr_2_)-programma_azione-italia_viva-calenda.pdf"
+          }
+        },
+        {
+          "affermazioneId": "lavoro-002",
+          "valore": 2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Programma comune Azione-IV 2022: \"parità scolastica\" e libertà di scelta educativa delle famiglie",
+            "url": "https://dait.interno.gov.it/documenti/trasparenza/POLITICHE_20220925/Documenti/7/(7_progr_2_)-programma_azione-italia_viva-calenda.pdf"
+          }
+        },
+        {
+          "affermazioneId": "diritti-001",
+          "valore": 1,
+          "fonte": {
+            "tipo": "dichiarazione",
+            "citazione": "Renzi ha sostenuto l'approvazione delle unioni civili (legge Cirinnà 2016); posizione specifica di IV sul matrimonio egualitario dopo la scissione da Azione (2023) meno esplicita",
+            "url": "https://it.wikipedia.org/wiki/Legge_Cirinn%C3%A0"
+          }
+        },
+        {
+          "affermazioneId": "fisco-002",
+          "valore": 0,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Programma comune Azione-IV 2022: legge sulla rappresentanza sindacale contro i \"contratti pirata\", non un aumento generico del potere sindacale",
+            "url": "https://dait.interno.gov.it/documenti/trasparenza/POLITICHE_20220925/Documenti/7/(7_progr_2_)-programma_azione-italia_viva-calenda.pdf"
+          }
+        },
+        {
+          "affermazioneId": "istituzionale-001",
+          "valore": 0,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Nessuna posizione esplicita reperita sul presidenzialismo nel programma comune 2022",
+            "url": "https://dait.interno.gov.it/documenti/trasparenza/POLITICHE_20220925/Documenti/7/(7_progr_2_)-programma_azione-italia_viva-calenda.pdf"
+          }
+        },
+        {
+          "affermazioneId": "immigrazione-002",
+          "valore": 2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Programma comune Azione-IV 2022: corsi intensivi obbligatori di lingua italiana e cultura civica per i nuovi arrivati",
+            "url": "https://dait.interno.gov.it/documenti/trasparenza/POLITICHE_20220925/Documenti/7/(7_progr_2_)-programma_azione-italia_viva-calenda.pdf"
+          }
+        }
+      ]
+    },
+    {
+      "id": "piueuropa",
+      "nome": "+Europa",
+      "sigla": "+EU",
+      "colore": "#1C8FE0",
+      "posizioni": [
+        {
+          "affermazioneId": "fisco-001",
+          "valore": -2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Sistema IRPEF a tre aliquote (23%-28%-38%) con no-tax-area fino a 10.000 euro, non una flat tax",
+            "url": "https://www.money.it/programma-elettorale-piu-europa-elezioni-politiche-2022"
+          }
+        },
+        {
+          "affermazioneId": "ambiente-001",
+          "valore": -1,
+          "fonte": {
+            "tipo": "dichiarazione",
+            "citazione": "Magi: \"La nostra posizione non è pro-nucleare a prescindere, il tema va discusso con analisi costi-benefici\"; il programma propone ricerca su mini-reattori e fusione nucleare",
+            "url": "https://www.ohga.it/magi-presidente-europa-a-ohga-la-nostra-posizione-non-e-pro-nucleare-a-prescindere-il-tema-va-discusso-con-analisi-costi-benefici/"
+          }
+        },
+        {
+          "affermazioneId": "immigrazione-001",
+          "valore": -2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Partito storicamente favorevole a ius scholae e vie di accesso legali e sicure per i migranti, contrario a un approccio di soli respingimenti",
+            "url": "https://www.piueuropa.eu/una_generazione_avanti_il_programma_elettorale_di_europa"
+          }
+        },
+        {
+          "affermazioneId": "lavoro-001",
+          "valore": 1,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Propone un salario minimo \"mobile\" definito in accordo con le parti sociali, non una soglia fissa uguale per tutti",
+            "url": "https://www.money.it/programma-elettorale-piu-europa-elezioni-politiche-2022"
+          }
+        },
+        {
+          "affermazioneId": "sanita-001",
+          "valore": 0,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Nessuna posizione esplicita reperita sull'eliminazione della sanità privata",
+            "url": "https://www.piueuropa.eu/una_generazione_avanti_il_programma_elettorale_di_europa"
+          }
+        },
+        {
+          "affermazioneId": "europa-001",
+          "valore": 2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Il nome e l'identità del partito nascono sul rilancio del progetto di integrazione europea",
+            "url": "https://www.piueuropa.eu/una_generazione_avanti_il_programma_elettorale_di_europa"
+          }
+        },
+        {
+          "affermazioneId": "ambiente-002",
+          "valore": 0,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Nessuna posizione esplicita reperita sulla priorità ferro/mobilità sostenibile rispetto alle strade",
+            "url": "https://www.piueuropa.eu/una_generazione_avanti_il_programma_elettorale_di_europa"
+          }
+        },
+        {
+          "affermazioneId": "lavoro-002",
+          "valore": 0,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Nessuna posizione esplicita reperita sul finanziamento paritario della scuola privata",
+            "url": "https://www.piueuropa.eu/una_generazione_avanti_il_programma_elettorale_di_europa"
+          }
+        },
+        {
+          "affermazioneId": "diritti-001",
+          "valore": 2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Riforma del diritto di famiglia con introduzione del matrimonio egualitario ed estensione del diritto di adozione alle coppie omosessuali",
+            "url": "https://www.gay.it/europa-programma-lgbtqia-donne-disabilita-e-immigrazione"
+          }
+        },
+        {
+          "affermazioneId": "fisco-002",
+          "valore": 0,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Nessuna posizione esplicita reperita sul potere dei sindacati nella contrattazione",
+            "url": "https://www.piueuropa.eu/una_generazione_avanti_il_programma_elettorale_di_europa"
+          }
+        },
+        {
+          "affermazioneId": "istituzionale-001",
+          "valore": 2,
+          "fonte": {
+            "tipo": "dichiarazione",
+            "citazione": "Magi (segretario +Europa): \"assolutamente favorevole a soluzioni come il semi-presidenzialismo o il presidenzialismo\"",
+            "url": "https://www.ilriformista.it/intervista-a-riccardo-magi-polo-liberale-si-ma-solo-con-una-riforma-radicale-della-politica-268072/"
+          }
+        },
+        {
+          "affermazioneId": "immigrazione-002",
+          "valore": 1,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Propone lo ius scholae, che presuppone un percorso scolastico e di integrazione completato in Italia",
+            "url": "https://www.piueuropa.eu/una_generazione_avanti_il_programma_elettorale_di_europa"
+          }
+        }
+      ]
+    },
+    {
+      "id": "noimoderati",
+      "nome": "Noi Moderati",
+      "sigla": "NM",
+      "colore": "#16305C",
+      "posizioni": [
+        {
+          "affermazioneId": "fisco-001",
+          "valore": 2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Il programma include l'impegno a ridurre le tasse e introdurre la flat tax",
+            "url": "https://www.money.it/noi-moderati-programma-elettorale-elezioni-politiche-2022"
+          }
+        },
+        {
+          "affermazioneId": "ambiente-001",
+          "valore": -2,
+          "fonte": {
+            "tipo": "dichiarazione",
+            "citazione": "Lupi propone un mix di fonti energetiche che includa nucleare pulito di terza e quarta generazione, oltre a rinnovabili e gas",
+            "url": "https://www.ilriformista.it/le-proposte-di-lupi-per-rilanciare-la-manifattura-meno-burocrazia-nucleare-e-spazio-ai-giovani-480165/"
+          }
+        },
+        {
+          "affermazioneId": "immigrazione-001",
+          "valore": 2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Sostegno ai decreti sicurezza contro l'immigrazione illegale: controllo dei confini e blocco degli sbarchi",
+            "url": "https://www.agi.it/politica/news/2022-09-21/lavoro-scuola-fisco-programma-moderati-maurizio-lupi-18158576/"
+          }
+        },
+        {
+          "affermazioneId": "lavoro-001",
+          "valore": -2,
+          "fonte": {
+            "tipo": "dichiarazione",
+            "citazione": "Lupi si è dichiarato fermamente contrario al salario minimo per legge, ritenuto pericoloso per le piccole imprese",
+            "url": "https://www.agi.it/politica/news/2022-09-21/lavoro-scuola-fisco-programma-moderati-maurizio-lupi-18158576/"
+          }
+        },
+        {
+          "affermazioneId": "sanita-001",
+          "valore": 0,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Nessuna posizione esplicita reperita sull'eliminazione della sanità privata; il programma propone un fascicolo sanitario elettronico unico",
+            "url": "https://www.money.it/noi-moderati-programma-elettorale-elezioni-politiche-2022"
+          }
+        },
+        {
+          "affermazioneId": "europa-001",
+          "valore": 2,
+          "fonte": {
+            "tipo": "dichiarazione",
+            "citazione": "Lupi: \"Siamo in Europa e siamo Europa\"; il partito è entrato ufficialmente nel PPE (Partito Popolare Europeo) nel gennaio 2025",
+            "url": "https://opinione.it/politica/2025/01/14/michele-perseni-noi-moderati-centro-ppe-maurizio-lupi-bruxelles-parlamento-europeo/"
+          }
+        },
+        {
+          "affermazioneId": "ambiente-002",
+          "valore": 0,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Nessuna posizione esplicita reperita sulla priorità ferro/mobilità sostenibile rispetto alle strade",
+            "url": "https://www.money.it/noi-moderati-programma-elettorale-elezioni-politiche-2022"
+          }
+        },
+        {
+          "affermazioneId": "lavoro-002",
+          "valore": 2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Propone un contributo fino a 1.500 euro per studente per le famiglie a basso reddito che scelgono la scuola privata, per garantire \"vera libertà di educazione\"",
+            "url": "https://www.tempi.it/elezioni-lupi-noi-moderati-serve-una-vera-liberta-di-educazione/"
+          }
+        },
+        {
+          "affermazioneId": "diritti-001",
+          "valore": -2,
+          "fonte": {
+            "tipo": "dichiarazione",
+            "citazione": "Mara Carfagna, esponente di rilievo del partito, si è dichiarata contraria al matrimonio egualitario e alle adozioni per le coppie omosessuali",
+            "url": "https://www.gay.it/gelmini-matrimonio-egualitario-adozioni-gay-pride"
+          }
+        },
+        {
+          "affermazioneId": "fisco-002",
+          "valore": 0,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Nessuna posizione esplicita reperita sul potere dei sindacati nella contrattazione",
+            "url": "https://www.money.it/noi-moderati-programma-elettorale-elezioni-politiche-2022"
+          }
+        },
+        {
+          "affermazioneId": "istituzionale-001",
+          "valore": 2,
+          "fonte": {
+            "tipo": "dichiarazione",
+            "citazione": "Lupi sostiene il presidenzialismo come storica proposta del centrodestra, realtà in molte democrazie",
+            "url": "https://lentepubblica.it/personale-e-previdenza/presidenzialismo-proposte-partiti/"
+          }
+        },
+        {
+          "affermazioneId": "immigrazione-002",
+          "valore": 0,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Nessuna posizione esplicita reperita su percorsi di integrazione obbligatori per gli immigrati",
+            "url": "https://www.money.it/noi-moderati-programma-elettorale-elezioni-politiche-2022"
+          }
+        }
       ]
     }
   ]
