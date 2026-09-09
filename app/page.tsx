@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import FeedSection from '@/components/FeedSection';
-import AgenziaStampa from '@/components/AgenziaStampa';
+import UltimOraTicker from '@/components/UltimOraTicker';
 import Logo from '@/components/Logo';
 
 export default function Home() {
@@ -20,9 +20,9 @@ export default function Home() {
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          className="mb-10"
+          className="mb-6"
         >
-          <AgenziaStampa limite={3} />
+          <UltimOraTicker limite={5} />
         </motion.div>
 
         {/* Logo */}
