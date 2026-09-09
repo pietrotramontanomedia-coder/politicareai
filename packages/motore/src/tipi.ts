@@ -90,27 +90,53 @@ export interface Classifica {
 }
 
 /** Quiz settimanale su fatti politici correnti. */
+export type DifficoltaQuiz = 'facile' | 'media' | 'difficile';
+
+/** Raggruppamento tematico delle domande, es. "italia" / "estero". */
+export interface SezioneQuiz {
+  id: string;
+  titolo: string;
+  /** Emoji o simbolo mostrato accanto al titolo. */
+  icona: string;
+  descrizione?: string;
+}
+
 export interface DomandaQuiz {
   id: string;
+  /** Riferimento a `SezioneQuiz.id`. */
+  sezione: string;
+  difficolta: DifficoltaQuiz;
   testo: string;
-  /** Risposte possibili (3-4 opzioni) */
+  /** Risposte possibili (3-4 opzioni), nell'ordine editoriale: la UI le mescola a runtime. */
   opzioni: string[];
-  /** Indice della risposta corretta (0-3) */
+  /** Indice della risposta corretta in `opzioni`. */
   rispostaCorretta: number;
-  /** Spiegazione della risposta corretta */
+  /** Spiegazione della risposta corretta, con il contesto necessario. */
   spiegazione: string;
+  /** Ogni domanda è un fatto verificabile: la fonte è obbligatoria. */
   fonte: Fonte;
-  /** Difficoltà: 'facile' | 'media' | 'difficile' */
-  difficolta: 'facile' | 'media' | 'difficile';
+}
+
+export interface VoceChangelogQuiz {
+  versione: string;
+  data: string;
+  note: string;
 }
 
 export interface QuizSettimanale {
   id: string;
-  settimana: number;
-  anno: number;
+  versione: string;
+  /** Numero progressivo del quiz (1 = primo quiz pubblicato). */
+  numero: number;
+  /** Data di pubblicazione, ISO 8601. */
   data: string;
+  /** Intervallo di date coperto dalle domande. */
+  periodo: { dal: string; al: string };
   titolo: string;
+  sottotitolo: string;
   descrizione: string;
   autori: string[];
+  changelog: VoceChangelogQuiz[];
+  sezioni: SezioneQuiz[];
   domande: DomandaQuiz[];
 }

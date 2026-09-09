@@ -1,12 +1,13 @@
 import QuizSettimanale from '@/components/quiz-settimanale/QuizSettimanale';
-import quizData from '@/content/quiz/2026-w37.json';
-import type { QuizSettimanale as QuizSettimanaleType } from '@politicare/motore';
+import { caricaQuizCorrente, formattaData } from '@/lib/quiz';
+
+const quiz = caricaQuizCorrente();
 
 export const metadata = {
-  title: 'Quiz Settimanale — Politicare',
-  description: 'Domande settimanali su fatti politici attuali in Italia.',
+  title: `${quiz.titolo} · ${quiz.sottotitolo} — Politicare`,
+  description: `${quiz.descrizione} Fatti dal ${formattaData(quiz.periodo.dal)} al ${formattaData(quiz.periodo.al)}.`,
 };
 
-export default function QuizSettimanalePageComponent() {
-  return <QuizSettimanale quiz={quizData as QuizSettimanaleType} />;
+export default function QuizSettimanalePage() {
+  return <QuizSettimanale quiz={quiz} />;
 }

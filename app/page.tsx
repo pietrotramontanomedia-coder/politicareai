@@ -125,7 +125,7 @@ export default function Home() {
                   </div>
                   <h3 className="text-2xl sm:text-3xl font-bold">Quiz Settimanale</h3>
                   <p className="mt-3 text-base" style={{ color: 'var(--fg-muta)' }}>
-                    Domande su fatti politici attuali. Testa la tua cultura politica e rimani aggiornato sugli avvenimenti della settimana.
+                    Sette domande sui fatti politici della settimana, divise fra Italia ed estero. Ogni risposta ha spiegazione e fonte.
                   </p>
                   <div className="mt-6 flex items-center gap-2 text-sm font-medium" style={{ color: 'var(--accento)' }}>
                     Fai il quiz <span className="group-hover:translate-x-1 transition-transform">→</span>
