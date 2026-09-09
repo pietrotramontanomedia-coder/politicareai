@@ -83,7 +83,7 @@ export default async function NotiziaPage({ params }: Props) {
           <img
             src={notizia.immagine}
             alt=""
-            className="w-full max-h-[28rem] object-cover rounded-2xl border mb-6"
+            className="block w-full max-w-md mx-auto aspect-[4/5] object-cover rounded-2xl border mb-6"
             style={{ borderColor: 'var(--bordo)', background: 'var(--bg-card)' }}
           />
         )}

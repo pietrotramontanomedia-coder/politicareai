@@ -69,7 +69,7 @@ export default function InstagramFeed() {
             viewport={{ once: true }}
             transition={{ delay: idx * 0.05 }}
             whileHover={{ scale: 1.03 }}
-            className="group relative aspect-square overflow-hidden rounded-xl border"
+            className="group relative aspect-[4/5] overflow-hidden rounded-xl border"
             style={{ borderColor: 'var(--bordo)', background: 'var(--bg-card)' }}
             title={p.titolo}
           >
