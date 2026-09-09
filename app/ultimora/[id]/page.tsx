@@ -1,29 +1,31 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { leggiPostSingolo } from '@/lib/instagram-server';
+import { leggiNotizia, type FonteUltimOra } from '@/lib/ultimora-server';
+import { CANALE_TELEGRAM } from '@/lib/telegram-server';
 import { formattaDataEstesa } from '@/lib/data-ora';
 import flashData from '@/content/agenzia/flash.json';
 
 export const revalidate = 900;
 
-const PROFILO_INSTAGRAM = 'https://www.instagram.com/politicareit/';
+const FONTI: Record<FonteUltimOra, { etichetta: string; url: string }> = {
+  instagram: { etichetta: 'profilo ufficiale @politicareit', url: 'https://www.instagram.com/politicareit/' },
+  telegram: { etichetta: `canale ufficiale Telegram @${CANALE_TELEGRAM}`, url: `https://t.me/${CANALE_TELEGRAM}` },
+};
 
 interface Notizia {
   titolo: string;
   testo: string;
   data: string;
   immagine?: string;
-  daInstagram: boolean;
+  fonte?: FonteUltimOra;
 }
 
 async function caricaNotizia(id: string): Promise<Notizia | null> {
-  const post = await leggiPostSingolo(id);
-  if (post) {
-    return { titolo: post.titolo, testo: post.testo, data: post.data, immagine: post.immagine, daInstagram: true };
-  }
+  const notizia = await leggiNotizia(id);
+  if (notizia) return notizia;
   const flash = flashData.voci.find((v) => v.id === id);
-  if (flash) return { titolo: flash.titolo, testo: flash.testo, data: flash.orario, daInstagram: false };
+  if (flash) return { titolo: flash.titolo, testo: flash.testo, data: flash.orario };
   return null;
 }
 
@@ -44,6 +46,8 @@ export default async function NotiziaPage({ params }: Props) {
     .split('\n')
     .map((p) => p.trim())
     .filter(Boolean);
+
+  const fonte = notizia.fonte ? FONTI[notizia.fonte] : null;
 
   return (
     <main className="min-h-dvh px-4 py-8 sm:px-6">
@@ -83,7 +87,9 @@ export default async function NotiziaPage({ params }: Props) {
           <img
             src={notizia.immagine}
             alt=""
-            className="block w-full max-w-md mx-auto aspect-[4/5] object-cover rounded-2xl border mb-6"
+            className={`block w-full max-w-md mx-auto rounded-2xl border mb-6 ${
+              notizia.fonte === 'instagram' ? 'aspect-[4/5] object-cover' : 'h-auto'
+            }`}
             style={{ borderColor: 'var(--bordo)', background: 'var(--bg-card)' }}
           />
         )}
@@ -98,17 +104,17 @@ export default async function NotiziaPage({ params }: Props) {
           </div>
         )}
 
-        {notizia.daInstagram && (
+        {fonte && (
           <p className="mt-10 text-xs" style={{ color: 'var(--fg-muta)' }}>
             Fonte:{' '}
             <a
-              href={PROFILO_INSTAGRAM}
+              href={fonte.url}
               target="_blank"
               rel="noopener noreferrer"
               className="font-semibold underline hover:no-underline"
               style={{ color: 'var(--fg)' }}
             >
-              profilo ufficiale @politicareit
+              {fonte.etichetta}
             </a>
           </p>
         )}

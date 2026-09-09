@@ -1,3 +1,5 @@
+import { titoloETesto } from '@/lib/testo-notizia';
+
 interface MediaInstagram {
   id: string;
   caption?: string;
@@ -20,47 +22,14 @@ export interface PostInstagram {
 
 const CAMPI = 'id,caption,media_type,media_url,thumbnail_url,permalink,timestamp';
 const LIMITE = 12;
-const MAX_TITOLO = 110;
 const REVALIDATE_S = 900;
-
-function troncaAParola(testo: string, max: number): string {
-  if (testo.length <= max) return testo;
-  const taglio = testo.lastIndexOf(' ', max);
-  return testo.substring(0, taglio > max / 2 ? taglio : max).replace(/[,;:\s]+$/, '') + '…';
-}
-
-function pulisci(testo: string): string {
-  return testo.replace(/#(\p{L})/gu, '$1').replace(/[ \t]+/g, ' ').trim();
-}
-
-function senzaEmojiIniziali(testo: string): string {
-  return testo.replace(/^[\p{Extended_Pictographic}\p{Regional_Indicator}️‍\s]+/u, '');
-}
-
-/** Stile agenzia: la prima frase diventa il titolo, il resto della didascalia il testo. */
-function spezzaDidascalia(caption: string): { titolo: string; testo: string } {
-  const righe = caption
-    .split('\n')
-    .map((r) => pulisci(r))
-    .filter(Boolean);
-  const prima = righe[0] ?? '';
-
-  const frase = prima.match(/^(.{20,}?[.!?:])(?:\s+(.*))?$/s);
-  const titoloGrezzo = senzaEmojiIniziali(frase ? frase[1] : prima).replace(/[.:]$/, '');
-  const restoPrima = frase?.[2] ?? '';
-  const troncato = titoloGrezzo.length > MAX_TITOLO;
-
-  const testo = [troncato ? prima : restoPrima, ...righe.slice(1)].filter(Boolean).join('\n');
-
-  return { titolo: troncaAParola(titoloGrezzo, MAX_TITOLO), testo };
-}
 
 function normalizza(m: MediaInstagram): PostInstagram {
   return {
     id: m.id,
     immagine: m.media_type === 'VIDEO' ? (m.thumbnail_url ?? m.media_url) : m.media_url,
     link: m.permalink,
-    ...spezzaDidascalia(m.caption ?? ''),
+    ...titoloETesto(m.caption ?? ''),
     tipo: m.media_type,
     data: m.timestamp,
   };

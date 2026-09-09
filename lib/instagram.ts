@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import flashData from '@/content/agenzia/flash.json';
 import type { PostInstagram } from '@/lib/instagram-server';
+import type { NotiziaUltimOra } from '@/lib/ultimora-server';
 
 export type { PostInstagram };
 
@@ -14,45 +15,60 @@ export interface VoceUltimOra {
   href: string;
 }
 
-let richiesta: Promise<PostInstagram[]> | null = null;
-
-function caricaPost(): Promise<PostInstagram[]> {
-  if (!richiesta) {
-    richiesta = fetch('/api/instagram')
-      .then((r) => r.json())
-      .then((d) => (d.post ?? []) as PostInstagram[])
-      .catch(() => []);
+function usaRichiestaCondivisa<T>(url: string, estrai: (d: unknown) => T[]) {
+  const cache = richieste as Map<string, Promise<T[]>>;
+  if (!cache.has(url)) {
+    cache.set(
+      url,
+      fetch(url)
+        .then((r) => r.json())
+        .then(estrai)
+        .catch(() => []),
+    );
   }
-  return richiesta;
+  return cache.get(url)!;
 }
+
+const richieste = new Map<string, Promise<unknown[]>>();
 
 export function useInstagram() {
   const [post, setPost] = useState<PostInstagram[]>([]);
   const [caricamento, setCaricamento] = useState(true);
 
   useEffect(() => {
-    caricaPost().then((p) => {
-      setPost(p);
-      setCaricamento(false);
-    });
+    usaRichiestaCondivisa<PostInstagram>('/api/instagram', (d) => (d as { post?: PostInstagram[] }).post ?? []).then(
+      (p) => {
+        setPost(p);
+        setCaricamento(false);
+      },
+    );
   }, []);
 
   return { post, caricamento };
 }
 
-/** Ultim'ora dai post Instagram; se il feed non è disponibile usa il flash redazionale. */
+/** Ultim'ora da Instagram e Telegram; se nessuna fonte risponde usa il flash redazionale. */
 export function useUltimOra() {
-  const { post, caricamento } = useInstagram();
+  const [voci, setVoci] = useState<VoceUltimOra[]>([]);
+  const [caricamento, setCaricamento] = useState(true);
 
-  const voci: VoceUltimOra[] = post
-    .filter((p) => p.titolo)
-    .map((p) => ({ id: p.id, orario: p.data, titolo: p.titolo, testo: p.testo, href: `/ultimora/${p.id}` }));
+  useEffect(() => {
+    usaRichiestaCondivisa<NotiziaUltimOra>('/api/ultimora', (d) => (d as { voci?: NotiziaUltimOra[] }).voci ?? []).then(
+      (notizie) => {
+        const daFonti = notizie.map((n) => ({
+          id: n.id,
+          orario: n.data,
+          titolo: n.titolo,
+          testo: n.testo,
+          href: `/ultimora/${n.id}`,
+        }));
+        setVoci(
+          daFonti.length > 0 ? daFonti : flashData.voci.map((v) => ({ ...v, href: `/ultimora/${v.id}` })),
+        );
+        setCaricamento(false);
+      },
+    );
+  }, []);
 
-  if (voci.length === 0 && !caricamento) {
-    return {
-      voci: flashData.voci.map((v) => ({ ...v, href: `/ultimora/${v.id}` })),
-      caricamento,
-    };
-  }
   return { voci, caricamento };
 }
