@@ -10,7 +10,8 @@ export type Valore = -2 | -1 | 0 | 1 | 2;
 /** +1 se l'affermazione propone un cambiamento, -1 se difende l'assetto vigente. */
 export type Verso = 1 | -1;
 
-export type TipoFonte = 'questionario' | 'programma' | 'voto';
+/** 'stampa' è usato solo dal quiz settimanale (articoli di agenzie e testate). */
+export type TipoFonte = 'questionario' | 'programma' | 'voto' | 'stampa';
 
 export interface Fonte {
   tipo: TipoFonte;
