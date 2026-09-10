@@ -69,7 +69,7 @@ export default function Home() {
             <span className="occhiello">Strumenti</span>
             <h2 className="mt-3 text-2xl sm:text-3xl font-bold">Mettiti alla prova</h2>
             <p className="mt-2 text-base" style={{ color: 'var(--fg-muta)' }}>
-              Due modi per capire dove stai e quanto ne sai. Tutto resta sul tuo dispositivo.
+              Capire dove stai tu, dove stanno i partiti e come i voti diventano seggi. Tutto resta sul tuo dispositivo.
             </p>
           </motion.div>
 
@@ -137,6 +137,54 @@ export default function Home() {
                 />
               </motion.div>
             </Link>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true, margin: '-40px' }}
+            transition={{ duration: 0.4, delay: 0.15 }}
+            className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6"
+          >
+            {[
+              {
+                href: '/confronta',
+                etichetta: '⚖️ Confronta',
+                titolo: 'Dove stanno i partiti',
+                testo: 'Tema per tema, chi è favorevole, chi è contrario e da quale fonte lo sappiamo. Senza punteggi.',
+                azione: 'Confronta i partiti',
+              },
+              {
+                href: '/simulatore',
+                etichetta: '🏛️ Simulatore',
+                titolo: 'Dai voti ai seggi',
+                testo: 'Inserisci le percentuali e guarda come diventano seggi con la nuova legge elettorale, premio al 42% compreso.',
+                azione: 'Apri il simulatore',
+              },
+            ].map((card) => (
+              <Link key={card.href} href={card.href}>
+                <motion.div
+                  whileHover={{ y: -4 }}
+                  whileTap={{ y: 0 }}
+                  className="group relative h-full cursor-pointer overflow-hidden rounded-2xl border p-6 sm:p-8 transition-all hover:shadow-xl"
+                  style={{ borderColor: 'var(--bordo)', background: 'var(--bg-card)' }}
+                >
+                  <div
+                    className="mb-3 inline-flex items-center gap-2 rounded-lg px-3 py-1 text-sm font-semibold"
+                    style={{ background: 'rgba(255,221,0,0.1)', color: 'var(--accento)' }}
+                  >
+                    {card.etichetta}
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-bold">{card.titolo}</h3>
+                  <p className="mt-2 text-base" style={{ color: 'var(--fg-muta)' }}>
+                    {card.testo}
+                  </p>
+                  <div className="mt-5 flex items-center gap-2 text-sm font-medium" style={{ color: 'var(--accento)' }}>
+                    {card.azione} <span className="transition-transform group-hover:translate-x-1">→</span>
+                  </div>
+                </motion.div>
+              </Link>
+            ))}
           </motion.div>
         </div>
       </section>

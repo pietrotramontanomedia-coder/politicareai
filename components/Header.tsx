@@ -24,6 +24,12 @@ export default function Header() {
             <Link href="/test-partito" className="hover:opacity-70 transition-opacity">
               Test Partiti
             </Link>
+            <Link href="/confronta" className="hover:opacity-70 transition-opacity">
+              Confronta
+            </Link>
+            <Link href="/simulatore" className="hover:opacity-70 transition-opacity">
+              Simulatore
+            </Link>
             <Link href="/quiz-settimanale" className="hover:opacity-70 transition-opacity">
               Quiz
             </Link>
