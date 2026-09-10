@@ -7,6 +7,7 @@ const ITEMS = [
   { href: '/', label: 'Home', icon: HomeIcon },
   { href: '/test-partito', label: 'Test', icon: TestIcon },
   { href: '/quiz-settimanale', label: 'Quiz', icon: QuizIcon },
+  { href: '/gioco', label: 'Gioco', icon: GiocoIcon },
   { href: '/metodologia', label: 'Info', icon: InfoIcon },
 ];
 
@@ -66,6 +67,15 @@ function QuizIcon({ active }: { active: boolean }) {
       <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
       <line x1="12" y1="17" x2="12.01" y2="17" />
       <circle cx="12" cy="12" r="9" />
+    </svg>
+  );
+}
+
+function GiocoIcon({ active }: { active: boolean }) {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active ? 2.2 : 1.8} strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="6" width="11" height="15" rx="2" transform="rotate(-10 8.5 13.5)" />
+      <rect x="10" y="3" width="11" height="15" rx="2" transform="rotate(8 15.5 10.5)" />
     </svg>
   );
 }
