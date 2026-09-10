@@ -2164,7 +2164,7 @@
           "fonte": {
             "tipo": "dichiarazione",
             "citazione": "Renzi: «Patrimoniale? Solo slogan»: funziona sui social ma non nella realtà; se si alzano le tasse ai ricchi questi lasciano il Paese; «l'obiettivo non è far fuggire i ricchi» ma far pagare meno tasse ai più poveri",
-            "url": "https://www.quotidiano.net/politica/renzi-patrimoniale-solo-slogan-obiettivo-non-e-far-fuggire-i-ricchi-meno-tasse--poveri-f8arxnv4",
+            "url": "https://www.blitzquotidiano.it/politica/renzi-patrimoniale-solo-slogan-se-litalia-aumenta-le-tasse-ai-ricchi-i-ricchi-se-ne-vanno-dallitalia-3786944/",
             "data": "2026-06-01"
           },
           "confidenza": "media",
@@ -2316,7 +2316,7 @@
           "valore": 2,
           "fonte": {
             "tipo": "voto",
-            "citazione": "Camera, via libera definitivo al decreto che proroga al 31 dicembre 2025 l'invio di armi a Kiev: 192 sì, 41 no. PD, Italia Viva e Azione votano a favore, M5S e AVS contro",
+            "citazione": "Camera, 22 gennaio 2025: approvata con 181 sì la risoluzione di maggioranza sul decreto che proroga al 31 dicembre 2025 l'invio di armi a Kiev; PD, Italia Viva e Azione votano a favore, M5S e AVS contro",
             "url": "https://www.ilfattoquotidiano.it/2025/01/22/invio-armi-ucraina-voto-pd-decreto-centrodestra-risoluzione-dem/7847380/",
             "data": "2025-01-22"
           },
@@ -2482,12 +2482,12 @@
           "valore": 1,
           "fonte": {
             "tipo": "dichiarazione",
-            "citazione": "Magi (+Europa): 'Ius scholae, ius Italiae? In Parlamento ius niente'; e sulla versione di Tajani: usa lo ius scholae 'come merce di scambio ai tavoli della destra', in un testo ancora più regressivo della legge attuale.",
-            "url": "https://www.gazzettamatin.com/2025/06/09/cittadinanza-magi-ius-scholae-ius-italiae-in-parlamento-ius-niente/",
-            "data": "2025-06-09"
+            "citazione": "Magi: la proposta di ius scholae di Tajani è «persino più regressiva della legge attuale» e usata «come merce di scambio ai tavoli del centrodestra»; +Europa «è pronta a votare in Parlamento qualsiasi proposta, purché migliorativa» della legge sulla cittadinanza",
+            "url": "https://www.piueuropa.eu/cittadinanza_magi_tajani_usa_ius_scholae_come_merce_di_scambio_a_tavoli_destra",
+            "data": "2025-07-05"
           },
           "confidenza": "media",
-          "nota": "+Europa è promotore del referendum sulla cittadinanza (residenza da 10 a 5 anni, giugno 2025) e chiede una riforma più ampia dello ius scholae; Magi critica il fatto che lo ius scholae non arrivi mai in Aula e la versione 'regressiva' di FI (comunicato luglio 2025: https://www.piueuropa.eu/cittadinanza_magi_tajani_usa_ius_scholae_come_merce_di_scambio_a_tavoli_destra). Favorevole alla cittadinanza per i minori scolarizzati ma come misura minima e non come proposta propria: +1."
+          "nota": "+Europa chiede una riforma più ampia dello ius scholae (ha promosso il referendum 2025 sui 5 anni di residenza): favorevole alla cittadinanza per i minori che studiano in Italia, contraria alla versione restrittiva di Tajani."
         },
         {
           "affermazioneId": "istituzionale-premierato",
@@ -2708,9 +2708,9 @@
           "valore": -1,
           "fonte": {
             "tipo": "dichiarazione",
-            "citazione": "Lupi: in un Paese con 14 milioni di pensionati, che spende il 70% delle risorse per le pensioni e l'1% per natalità e famiglia, è impensabile destinare risorse ai pensionamenti anticipati come quota 41 o 42.",
-            "url": "https://noimoderati.it/lupi-i-nostri-elettori-chiedono-unita-ci-sono-priorita-evitiamo-la-politica-degli-slogan/",
-            "data": "2024-08-01"
+            "citazione": "Lupi: «In un Paese che ha 14 milioni di pensionati e spende il 70% delle risorse per la previdenza e l'1% per natalità e famiglia, è impensabile destinare risorse ai pensionamenti anticipati, che siano quota 41 o 42»",
+            "url": "https://www.mondoprofessionisti.it/politica/manovra-coi-fichi-secchi/",
+            "data": "2024-08-30"
           },
           "confidenza": "media",
           "nota": "Canale ufficiale del partito. La data non compare nel riassunto: approssimata al mese sulla base del contesto (dibattito su ius scholae e priorità della manovra, agosto 2024). Da verificare sull'articolo."

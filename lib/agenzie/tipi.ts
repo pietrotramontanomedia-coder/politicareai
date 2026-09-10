@@ -26,7 +26,7 @@ export const DESCRIZIONI_AGENZIE: Record<Agenzia, DescrizioneAgenzia> = {
     sigla: 'ANSA',
     colore: '#2f6fed',
     sito: 'https://www.ansa.it/sito/notizie/politica/politica.shtml',
-    feedPredefinito: 'https://www.ansa.it/sito/notizie/politica/politica.rss',
+    feedPredefinito: 'https://www.ansa.it/sito/notizie/politica/politica_rss.xml',
     variabileAmbiente: 'AGENZIE_FEED_ANSA',
   },
   adnkronos: {
