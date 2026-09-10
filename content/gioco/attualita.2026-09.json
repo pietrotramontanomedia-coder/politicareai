@@ -1,0 +1,134 @@
+{
+  "id": "gioco-attualita-2026-09",
+  "mazzo": "attualita",
+  "versione": "1.0.0",
+  "data": "2026-09-10",
+  "titolo": "Attualità · settembre 2026",
+  "descrizione": "Carte sui fatti delle ultime settimane. Ogni carta cita un fatto verificabile con la sua fonte: si gioca sulle notizie, non sulle persone.",
+  "autori": ["Redazione Politicare"],
+  "carte": [
+    {
+      "id": "att-2609-001",
+      "tipo": "tutti",
+      "titolo": "Sassonia-Anhalt",
+      "testo": "Alle regionali tedesche del 6 settembre AfD ha preso circa il 44%. Ognuno scrive la sua stima su un foglio: chi si avvicina di più non paga, tutti gli altri sì.",
+      "penalita": 1,
+      "fonte": {
+        "citazione": "ANSA, 6 settembre 2026: AfD trionfa con oltre il 44% in Sassonia-Anhalt",
+        "url": "https://www.ansa.it/sito/notizie/mondo/2026/09/06/elezioni-in-germania-exit-poll-ard-in-sassonia-anhalt-afd-trionfa-con_243aead0-87e3-4c0c-aebc-18a1cdcd76be.html"
+      }
+    },
+    {
+      "id": "att-2609-002",
+      "tipo": "tutti",
+      "titolo": "Fine vita in Veneto",
+      "testo": "Il 2 settembre il Veneto ha approvato la legge sul fine vita: quarta regione, prima guidata dal centrodestra. Chi sapeva che era la prima del centrodestra non paga.",
+      "penalita": 1,
+      "fonte": {
+        "citazione": "ANSA, 2 settembre 2026: il Consiglio regionale del Veneto approva la legge sul fine vita",
+        "url": "https://www.ansa.it/sito/notizie/topnews/2026/09/02/il-consiglio-regionale-del-veneto-approva-la-legge-sul-fine-vita_d9cc4e9e-2783-4142-bb0d-4fc24cbfccd5.html"
+      }
+    },
+    {
+      "id": "att-2609-003",
+      "tipo": "sfida",
+      "titolo": "Non stiamo a fare i record",
+      "testo": "Salvini ha detto che si voterà a fine legislatura, «autunno 2027», e che i record «li fa Kimi Antonelli». {g1} spiega in dieci secondi cosa c'entra un pilota di Formula 1 con la legge elettorale. Se non convince, paga.",
+      "penalita": 2,
+      "secondi": 10,
+      "fonte": {
+        "citazione": "ANSA, 7 settembre 2026: Salvini, si voterà a fine legislatura in autunno 2027",
+        "url": "https://www.ansa.it/sito/notizie/topnews/2026/09/07/salvini-si-votera-a-fine-legislatura-in-autunno-2027-non-stiamo-qui-a-fare_b7785281-65af-49ff-a28e-a80f80ceda62.html"
+      }
+    },
+    {
+      "id": "att-2609-004",
+      "tipo": "votazione",
+      "titolo": "Dodici Paesi, uno no",
+      "testo": "L'8 settembre dodici Paesi hanno fermato l'acquisto di beni dalle colonie in Cisgiordania; l'Italia non ha aderito perché, dice Tajani, «le decisioni vanno prese a livello europeo». Al tre, tutti indicano chi al tavolo rimanda sempre le decisioni. Il più votato paga.",
+      "penalita": 2,
+      "fonte": {
+        "citazione": "Il Post, 8 settembre 2026: le sanzioni contro le colonie israeliane in Cisgiordania",
+        "url": "https://www.ilpost.it/2026/09/08/regno-unito-francia-canada-sanzioni-insediamenti-israeliani-cisgiordania/"
+      }
+    },
+    {
+      "id": "att-2609-005",
+      "tipo": "sfida",
+      "titolo": "Aggiornamento professionale",
+      "testo": "Un convegno con Vannacci era stato accreditato come formazione per gli agenti, poi il Viminale ha fatto marcia indietro. {g1} inventa il titolo di un corso di aggiornamento che nessuna categoria vorrebbe mai seguire. Se il gruppo non ride, paga.",
+      "penalita": 1,
+      "fonte": {
+        "citazione": "ANSA, 8 settembre 2026: gli agenti a lezione da Vannacci, un caso l'evento a Torino",
+        "url": "https://www.ansa.it/sito/notizie/politica/2026/09/08/e-bufera-sul-convegno-con-vannacci-a-torino-il-silp-cgil-chiede-lo-stop_a5be0d1c-8d60-43f7-a267-c27ac8ed3a52.html"
+      }
+    },
+    {
+      "id": "att-2609-006",
+      "tipo": "duello",
+      "titolo": "Alleati scomodi",
+      "testo": "Nel campo largo si discute su chi tenere in coalizione. {g1} e {g2} hanno venti secondi per convincere il tavolo di essere l'alleato più affidabile. Chi prende meno voti paga.",
+      "penalita": 2,
+      "secondi": 20,
+      "fonte": {
+        "citazione": "Festa nazionale di AVS «Terra!», 8-9 settembre 2026: i leader del campo largo a confronto sul programma",
+        "url": "https://www.instagram.com/politicareit/"
+      }
+    },
+    {
+      "id": "att-2609-007",
+      "tipo": "tutti",
+      "titolo": "Modello di inclusione",
+      "testo": "La ministra Locatelli si è smarcata dalla proposta di AfD sulle classi separate: «l'Italia è un modello di inclusione dagli anni '70». Chi sa dire in che decennio l'Italia ha chiuso le classi differenziali non paga.",
+      "penalita": 1,
+      "fonte": {
+        "citazione": "Intervista alla ministra Locatelli a «24 Mattino» (Radio 24), 8 settembre 2026",
+        "url": "https://www.napolimagazine.com/attualita/articolo/on-air-la-ministra-locatelli-sul-ddl-caregiver-spero-venga-approvato-entro-settembre-no-alle-classi-08-09-2026"
+      }
+    },
+    {
+      "id": "att-2609-008",
+      "tipo": "sfida",
+      "titolo": "Menzogna totale",
+      "testo": "Un'inchiesta di Haaretz sostiene che Netanyahu fosse stato avvertito prima del 7 ottobre; lui parla di «menzogna totale» e annuncia querela. {g1} smentisce con la massima solennità una cosa vera detta stasera. Se ride, paga.",
+      "penalita": 2,
+      "fonte": {
+        "citazione": "ANSA, 8 settembre 2026: «Gli Emirati avvertirono Netanyahu dell'attacco del 7 ottobre». Lui: «Menzogna totale»",
+        "url": "https://www.ansa.it/sito/notizie/mondo/2026/09/08/gli-emirati-avvertirono-netanyahu-dellattacco-del-7-ottobre.-lui-menzogna-totale_ba81122c-b804-48e1-b88e-998c3dc87b7d.html"
+      }
+    },
+    {
+      "id": "att-2609-009",
+      "tipo": "votazione",
+      "titolo": "Discesa in campo",
+      "testo": "Ogni tanto qualcuno annuncia un nuovo partito. Al tre, tutti indicano chi al tavolo fonderebbe un partito domani mattina. Il più votato dice il nome del suo partito e la lista dei ministri: se esita, paga.",
+      "penalita": 2
+    },
+    {
+      "id": "att-2609-010",
+      "tipo": "tutti",
+      "titolo": "Cinque milioni in meno",
+      "testo": "Alla Festa dell'Unità di Torino si è ricordato che nel 2040 l'Italia avrà circa cinque milioni di persone in età da lavoro in meno. Chi indovina l'ordine di grandezza (migliaia, milioni, decine di milioni) non paga.",
+      "penalita": 1,
+      "fonte": {
+        "citazione": "Intervento di Pier Luigi Bersani alla Festa dell'Unità di Torino, 9 settembre 2026",
+        "url": "https://www.instagram.com/politicareit/"
+      }
+    },
+    {
+      "id": "att-2609-011",
+      "tipo": "legge",
+      "titolo": "Par condicio",
+      "testo": "Per quattro carte è vietato nominare partiti e leader reali: si parla solo per ruoli («il premier», «l'opposizione»). Chi sfugge paga.",
+      "penalita": 1,
+      "durataCarte": 4
+    },
+    {
+      "id": "att-2609-012",
+      "tipo": "minigioco",
+      "titolo": "Rassegna stampa",
+      "testo": "A turno, ognuno dice un fatto politico successo questa settimana. Chi si blocca o ne inventa uno falso — e viene smascherato con una ricerca al volo — paga.",
+      "penalita": 2
+    }
+  ]
+}

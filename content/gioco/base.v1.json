@@ -1,0 +1,404 @@
+{
+  "id": "gioco-base",
+  "mazzo": "base",
+  "versione": "1.0.0",
+  "data": "2026-09-10",
+  "titolo": "Mazzo base",
+  "descrizione": "Archetipi e riti della politica italiana: nessun nome reale, solo ruoli e situazioni d'aula.",
+  "autori": ["Redazione Politicare"],
+  "carte": [
+    {
+      "id": "base-001",
+      "tipo": "sfida",
+      "titolo": "Question time",
+      "testo": "{g1} risponde alle domande del gruppo per 30 secondi senza mai dire «sì» né «no». Alla prima scivolata, paga.",
+      "penalita": 2
+    },
+    {
+      "id": "base-002",
+      "tipo": "sfida",
+      "titolo": "Ostruzionismo",
+      "testo": "{g1} parla di un tema qualsiasi per 30 secondi senza fermarsi e senza ripetere due volte la stessa parola. Se si blocca, paga.",
+      "penalita": 2,
+      "secondi": 30
+    },
+    {
+      "id": "base-003",
+      "tipo": "sfida",
+      "titolo": "Discorso d'insediamento",
+      "testo": "{g1} è appena diventato premier: pronuncia il discorso alla nazione in dieci parole. Se il gruppo non applaude, paga.",
+      "penalita": 1
+    },
+    {
+      "id": "base-004",
+      "tipo": "sfida",
+      "titolo": "Promessa elettorale",
+      "testo": "{g1} promette tre cose irrealizzabili entro le prossime elezioni, una dopo l'altra, senza esitare. Se si ferma, paga.",
+      "penalita": 2
+    },
+    {
+      "id": "base-005",
+      "tipo": "sfida",
+      "titolo": "Smentita",
+      "testo": "{g1} nega con assoluta serietà l'ultima cosa che ha detto stasera. Se sorride, paga.",
+      "penalita": 1
+    },
+    {
+      "id": "base-006",
+      "tipo": "sfida",
+      "titolo": "Rimpasto",
+      "testo": "{g1} assegna a ogni giocatore un ministero inventato, motivandolo in tre parole. Chi si offende paga.",
+      "penalita": 1
+    },
+    {
+      "id": "base-007",
+      "tipo": "sfida",
+      "titolo": "Bagno di folla",
+      "testo": "{g1} stringe la mano a tutti guardandoli negli occhi e dicendo «conti su di me». Chi ride per primo paga.",
+      "penalita": 1
+    },
+    {
+      "id": "base-008",
+      "tipo": "sfida",
+      "titolo": "Conflitto d'interessi",
+      "testo": "{g1} confessa un conflitto d'interessi credibile sulla serata (chi ha scelto la musica, chi ha portato da bere...). Se non convince, paga.",
+      "penalita": 1
+    },
+    {
+      "id": "base-009",
+      "tipo": "sfida",
+      "titolo": "Dichiarazione di voto",
+      "testo": "{g1} spiega in 15 secondi perché voterà contro qualcosa che in realtà gli piace molto. Se non regge la parte, paga.",
+      "penalita": 2,
+      "secondi": 15
+    },
+    {
+      "id": "base-010",
+      "tipo": "sfida",
+      "titolo": "Vitalizio",
+      "testo": "{g1} sceglie un giocatore che stasera non pagherà mai per colpa sua. Il beneficiato, per ringraziare, paga adesso.",
+      "penalita": 1
+    },
+    {
+      "id": "base-011",
+      "tipo": "sfida",
+      "titolo": "Emendamento",
+      "testo": "{g1} cambia una regola della serata aggiungendo tre parole. Se il gruppo la boccia a maggioranza, paga.",
+      "penalita": 2
+    },
+    {
+      "id": "base-012",
+      "tipo": "sfida",
+      "titolo": "Aula deserta",
+      "testo": "{g1} conta quante persone lo stanno davvero guardando. Se sono meno della metà, paga il gruppo: tutti gli altri.",
+      "penalita": 1
+    },
+    {
+      "id": "base-013",
+      "tipo": "sfida",
+      "titolo": "Auto blu",
+      "testo": "{g1} si fa portare qualcosa da un altro giocatore a scelta senza alzarsi. Se nessuno si muove entro dieci secondi, paga.",
+      "penalita": 2
+    },
+    {
+      "id": "base-014",
+      "tipo": "sfida",
+      "titolo": "Talk show",
+      "testo": "{g1} interrompe la prossima persona che parla e continua la frase al posto suo. Se non ci riesce entro un minuto, paga.",
+      "penalita": 1
+    },
+    {
+      "id": "base-015",
+      "tipo": "sfida",
+      "titolo": "Slogan",
+      "testo": "{g1} inventa uno slogan di tre parole con il proprio nome dentro. Da adesso è il suo: chi lo dimentica paga.",
+      "penalita": 1
+    },
+    {
+      "id": "base-016",
+      "tipo": "sfida",
+      "titolo": "Fact-checking",
+      "testo": "{g1} dice tre cose su di sé: due vere e una falsa. Chi indovina la falsa non paga, tutti gli altri sì.",
+      "penalita": 1
+    },
+    {
+      "id": "base-017",
+      "tipo": "duello",
+      "titolo": "Ballottaggio",
+      "testo": "{g1} e {g2} si sfidano a braccio di ferro, morra cinese o sguardo fisso: decide il gruppo. Chi perde paga.",
+      "penalita": 2
+    },
+    {
+      "id": "base-018",
+      "tipo": "duello",
+      "titolo": "Confronto TV",
+      "testo": "{g1} e {g2} si contendono lo stesso argomento parlando insieme. Al «basta» del gruppo, chi si è fermato per primo paga.",
+      "penalita": 2
+    },
+    {
+      "id": "base-019",
+      "tipo": "duello",
+      "titolo": "Accordo di coalizione",
+      "testo": "{g1} e {g2} sono alleati fino alla prossima carta: se uno dei due paga, paga anche l'altro.",
+      "penalita": 0
+    },
+    {
+      "id": "base-020",
+      "tipo": "duello",
+      "titolo": "Scissione",
+      "testo": "{g1} e {g2} non possono più rivolgersi la parola per tre carte. Al primo scambio, pagano entrambi.",
+      "penalita": 2,
+      "durataCarte": 3
+    },
+    {
+      "id": "base-021",
+      "tipo": "duello",
+      "titolo": "Voto di scambio",
+      "testo": "{g1} offre qualcosa a {g2} in cambio di un favore. Se {g2} rifiuta, paga {g1}; se accetta, paga {g2}.",
+      "penalita": 1
+    },
+    {
+      "id": "base-022",
+      "tipo": "duello",
+      "titolo": "Par condicio",
+      "testo": "{g1} e {g2} hanno trenta secondi ciascuno per convincere il gruppo di una tesi assurda. Chi prende meno voti paga.",
+      "penalita": 2,
+      "secondi": 30
+    },
+    {
+      "id": "base-023",
+      "tipo": "duello",
+      "titolo": "Cambio di gruppo",
+      "testo": "{g1} passa dalla parte di {g2}: da ora ripete l'ultima parola di ogni sua frase. Vale per due carte, poi torna libero.",
+      "penalita": 1,
+      "durataCarte": 2
+    },
+    {
+      "id": "base-024",
+      "tipo": "duello",
+      "titolo": "Commissione d'inchiesta",
+      "testo": "{g1} interroga {g2} con tre domande scomode. Se {g2} esita anche una volta, paga; se risponde a tutte, paga {g1}.",
+      "penalita": 2
+    },
+    {
+      "id": "base-025",
+      "tipo": "votazione",
+      "titolo": "Mozione di sfiducia",
+      "testo": "Al tre, tutti indicano il giocatore che secondo loro non arriverebbe a fine legislatura. Il più votato paga.",
+      "penalita": 2
+    },
+    {
+      "id": "base-026",
+      "tipo": "votazione",
+      "titolo": "Fiducia",
+      "testo": "Al tre, tutti indicano chi vorrebbero al governo stasera. Il più votato è Presidente del Consiglio fino alla prossima votazione: può assegnare una penalità a testa, ma una sola volta.",
+      "penalita": 0
+    },
+    {
+      "id": "base-027",
+      "tipo": "votazione",
+      "titolo": "Voto segreto",
+      "testo": "Tutti scrivono un nome sul telefono e lo mostrano insieme, alla domanda: chi stasera sta esagerando? Il più votato beve acqua, gli altri pagano.",
+      "penalita": 1
+    },
+    {
+      "id": "base-028",
+      "tipo": "votazione",
+      "titolo": "Consultazioni",
+      "testo": "Al tre, tutti indicano chi ha più probabilità di addormentarsi per primo. Il più votato paga.",
+      "penalita": 1
+    },
+    {
+      "id": "base-029",
+      "tipo": "votazione",
+      "titolo": "Referendum",
+      "testo": "{g1} propone una regola per il resto della serata. Si vota: se passa, entra in vigore; se non passa, {g1} paga.",
+      "penalita": 2
+    },
+    {
+      "id": "base-030",
+      "tipo": "votazione",
+      "titolo": "Sondaggio",
+      "testo": "Al tre, tutti indicano chi ha detto la cosa più fuori luogo da quando è iniziata la partita. Il più votato paga.",
+      "penalita": 2
+    },
+    {
+      "id": "base-031",
+      "tipo": "votazione",
+      "titolo": "Elezioni anticipate",
+      "testo": "Al tre, tutti indicano il giocatore più affidabile del tavolo. Il più votato sceglie chi paga.",
+      "penalita": 2
+    },
+    {
+      "id": "base-032",
+      "tipo": "votazione",
+      "titolo": "Astensionismo",
+      "testo": "Chi in questo giro non se la sente di votare lo dice ad alta voce: è legittimo, e paga solo un sorso simbolico. Tutti gli altri votano chi ha parlato di più.",
+      "penalita": 1
+    },
+    {
+      "id": "base-033",
+      "tipo": "legge",
+      "titolo": "Decreto legge",
+      "testo": "Da ora e per cinque carte è vietato dire «io». Chi lo dice paga.",
+      "penalita": 1,
+      "durataCarte": 5
+    },
+    {
+      "id": "base-034",
+      "tipo": "legge",
+      "titolo": "Portavoce",
+      "testo": "Per quattro carte {g1} parla solo in terza persona. Ogni dimenticanza si paga.",
+      "penalita": 1,
+      "durataCarte": 4
+    },
+    {
+      "id": "base-035",
+      "tipo": "legge",
+      "titolo": "Cerimoniale",
+      "testo": "Per cinque carte ci si rivolge a tutti con «onorevole» prima del nome. Chi lo salta paga.",
+      "penalita": 1,
+      "durataCarte": 5
+    },
+    {
+      "id": "base-036",
+      "tipo": "legge",
+      "titolo": "Segreto istruttorio",
+      "testo": "Per quattro carte è vietato nominare chi non è al tavolo. Chi lo fa paga.",
+      "penalita": 1,
+      "durataCarte": 4
+    },
+    {
+      "id": "base-037",
+      "tipo": "legge",
+      "titolo": "Question time permanente",
+      "testo": "Per quattro carte si può parlare solo facendo domande. Chi risponde con un'affermazione paga.",
+      "penalita": 2,
+      "durataCarte": 4
+    },
+    {
+      "id": "base-038",
+      "tipo": "legge",
+      "titolo": "Tetto di spesa",
+      "testo": "Per cinque carte nessuno può nominare cifre o numeri. Chi lo fa paga.",
+      "penalita": 1,
+      "durataCarte": 5
+    },
+    {
+      "id": "base-039",
+      "tipo": "legge",
+      "titolo": "Codice etico",
+      "testo": "Per quattro carte è vietato bestemmiare, imprecare e alzare la voce. Chi cede paga.",
+      "penalita": 1,
+      "durataCarte": 4
+    },
+    {
+      "id": "base-040",
+      "tipo": "legge",
+      "titolo": "Immunità",
+      "testo": "{g1} è coperto da immunità per tre carte: non paga nulla, qualsiasi cosa succeda. Al termine, per ringraziare, offre da bere a chi vuole.",
+      "penalita": 0,
+      "durataCarte": 3
+    },
+    {
+      "id": "base-041",
+      "tipo": "minigioco",
+      "titolo": "Appello nominale",
+      "testo": "A turno, ognuno dice il nome di un ministero esistente. Chi si blocca o ripete, paga.",
+      "penalita": 2
+    },
+    {
+      "id": "base-042",
+      "tipo": "minigioco",
+      "titolo": "Legge di bilancio",
+      "testo": "A turno si dice una voce di spesa pubblica, sempre più assurda. Chi non regge il crescendo paga.",
+      "penalita": 2
+    },
+    {
+      "id": "base-043",
+      "tipo": "minigioco",
+      "titolo": "Trasformismo",
+      "testo": "A turno, ognuno cambia idea sull'ultima cosa detta dal giocatore precedente, motivandola. Chi resta coerente paga.",
+      "penalita": 2
+    },
+    {
+      "id": "base-044",
+      "tipo": "minigioco",
+      "titolo": "Comunicato stampa",
+      "testo": "Il gruppo detta una parola a testa: {g1} deve costruirci un comunicato di una frase sola. Se non ci sta, paga.",
+      "penalita": 2
+    },
+    {
+      "id": "base-045",
+      "tipo": "minigioco",
+      "titolo": "Filibuster",
+      "testo": "{g1} conta alla rovescia da 30 mentre gli altri provano a distrarlo senza toccarlo. Se sbaglia numero, paga.",
+      "penalita": 2,
+      "secondi": 30
+    },
+    {
+      "id": "base-046",
+      "tipo": "minigioco",
+      "titolo": "Talk show a tre",
+      "testo": "{g1}, {g2} e chi è alla loro destra parlano insieme per dieci secondi. Chi si arrende per primo paga.",
+      "penalita": 1,
+      "secondi": 10
+    },
+    {
+      "id": "base-047",
+      "tipo": "tutti",
+      "titolo": "Aula",
+      "testo": "Chi stasera ha già parlato di politica almeno una volta, paga.",
+      "penalita": 1
+    },
+    {
+      "id": "base-048",
+      "tipo": "tutti",
+      "titolo": "Seduta comune",
+      "testo": "Chi ha votato alle ultime elezioni non paga. Tutti gli altri sì.",
+      "penalita": 1
+    },
+    {
+      "id": "base-049",
+      "tipo": "tutti",
+      "titolo": "Manovra correttiva",
+      "testo": "Chi ha il telefono in mano in questo momento paga.",
+      "penalita": 1
+    },
+    {
+      "id": "base-050",
+      "tipo": "tutti",
+      "titolo": "Rimborsi",
+      "testo": "Chi stasera non ha ancora offerto niente a nessuno paga.",
+      "penalita": 1
+    },
+    {
+      "id": "base-051",
+      "tipo": "tutti",
+      "titolo": "Crisi di governo",
+      "testo": "Tutti cambiano posto. L'ultimo a sedersi paga.",
+      "penalita": 2
+    },
+    {
+      "id": "base-052",
+      "tipo": "tutti",
+      "titolo": "Fiducia posta",
+      "testo": "Tutti insieme, un brindisi alla legislatura. Chi non lo fa, paga doppio.",
+      "penalita": 1
+    },
+    {
+      "id": "base-053",
+      "tipo": "tutti",
+      "titolo": "Astensione",
+      "testo": "Promemoria: in qualsiasi momento chiunque può astenersi da una carta senza spiegazioni. Nessuno paga per un'astensione.",
+      "penalita": 0
+    },
+    {
+      "id": "base-054",
+      "tipo": "tutti",
+      "titolo": "Pausa dei lavori",
+      "testo": "Sospensione: un bicchiere d'acqua a testa prima di riprendere. Chi salta il giro d'acqua paga.",
+      "penalita": 0
+    }
+  ]
+}

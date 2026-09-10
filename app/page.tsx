@@ -141,6 +141,35 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Gioco da tavolo */}
+      <section className="banda banda-gioco px-4 sm:px-6 py-14">
+        <div className="mx-auto max-w-6xl w-full">
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true, margin: '-40px' }}
+            transition={{ duration: 0.4 }}
+            className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between"
+          >
+            <div className="max-w-xl">
+              <span className="occhiello">Per il gruppo</span>
+              <h2 className="mt-3 text-2xl sm:text-3xl font-bold">Crisi di Governo</h2>
+              <p className="mt-2 text-base" style={{ color: 'var(--fg-muta)' }}>
+                Il gioco di società della politica italiana: mozioni di sfiducia, ostruzionismo e leggi che restano
+                in vigore. Si passa il telefono e si gioca. Riservato ai maggiorenni, con modalità analcolica.
+              </p>
+            </div>
+            <Link
+              href="/gioco"
+              className="shrink-0 inline-flex items-center gap-2 rounded-xl px-8 py-4 text-base font-bold transition-transform hover:-translate-y-0.5"
+              style={{ background: 'var(--accento)', color: '#000' }}
+            >
+              Apri la seduta →
+            </Link>
+          </motion.div>
+        </div>
+      </section>
+
       {/* Notizie e Ultim'ora */}
       <FeedSection />
 

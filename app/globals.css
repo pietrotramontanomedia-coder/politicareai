@@ -197,6 +197,16 @@ body {
   background: linear-gradient(90deg, #ef4444 0%, rgba(239, 68, 68, 0.25) 40%, transparent 100%);
 }
 
+/* Gioco: tono da serata, fuori dal registro istituzionale delle altre bande */
+.banda-gioco {
+  background:
+    radial-gradient(60% 50% at 15% 20%, rgba(167, 139, 250, 0.16), transparent 70%),
+    radial-gradient(55% 45% at 85% 80%, rgba(240, 171, 252, 0.12), transparent 70%),
+    var(--bg);
+  border-top: 1px solid var(--bordo);
+  border-bottom: 1px solid var(--bordo);
+}
+
 .banda-footer {
   background:
     linear-gradient(180deg, transparent, rgba(254, 220, 1, 0.03)),
