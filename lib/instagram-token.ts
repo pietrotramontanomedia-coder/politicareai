@@ -45,9 +45,17 @@ export async function leggiToken(): Promise<string | null> {
   return salvato?.token ?? process.env.INSTAGRAM_ACCESS_TOKEN ?? null;
 }
 
+/** Sotto questo intervallo un nuovo rinnovo non serve: Instagram non allunga la scadenza e troppi rinnovi insospettiscono. */
+export const INTERVALLO_MINIMO_RINNOVO_MS = 24 * 60 * 60 * 1000;
+
 /** Chiede a Instagram un token nuovo (valido altri 60 giorni) e lo salva. Non espone mai il token. */
-export async function rinnovaToken(): Promise<{ scadeIl: string; partitoDa: 'storage' | 'ambiente' }> {
+export async function rinnovaToken(
+  adesso: Date = new Date(),
+): Promise<{ scadeIl: string; partitoDa: 'storage' | 'ambiente'; saltato?: boolean }> {
   const salvato = await leggiDaStorage();
+  if (salvato && adesso.getTime() - Date.parse(salvato.rinnovatoIl) < INTERVALLO_MINIMO_RINNOVO_MS) {
+    return { scadeIl: salvato.scadeIl, partitoDa: 'storage', saltato: true };
+  }
   const attuale = salvato?.token ?? process.env.INSTAGRAM_ACCESS_TOKEN;
   if (!attuale) throw new Error('nessun token Instagram configurato');
 
@@ -65,7 +73,6 @@ export async function rinnovaToken(): Promise<{ scadeIl: string; partitoDa: 'sto
     throw new Error(`rinnovo rifiutato da Instagram: ${dati.error?.message ?? `HTTP ${risposta.status}`}`);
   }
 
-  const adesso = new Date();
   const nuovo: TokenSalvato = {
     token: dati.access_token,
     rinnovatoIl: adesso.toISOString(),

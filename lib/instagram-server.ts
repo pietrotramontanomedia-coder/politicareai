@@ -23,7 +23,19 @@ export interface PostInstagram {
 
 const CAMPI = 'id,caption,media_type,media_url,thumbnail_url,permalink,timestamp';
 const LIMITE = 12;
-const REVALIDATE_S = 900;
+/** Lista dei post: al massimo una chiamata ogni 30 minuti, condivisa da tutte le pagine. */
+const REVALIDATE_LISTA_S = 1800;
+/** Un post singolo non cambia: la sua chiamata vale un giorno. */
+const REVALIDATE_SINGOLO_S = 86_400;
+
+/**
+ * Instagram si chiama solo dal server di produzione, sempre con lo stesso token e dallo
+ * stesso posto: chiamate da altre reti (per esempio lo sviluppo in locale) possono sembrare
+ * sospette a Meta. In sviluppo serve INSTAGRAM_IN_SVILUPPO=1 per attivarle.
+ */
+export function chiamateInstagramAttive(): boolean {
+  return process.env.NODE_ENV === 'production' || process.env.INSTAGRAM_IN_SVILUPPO === '1';
+}
 
 function normalizza(m: MediaInstagram): PostInstagram {
   return {
@@ -36,7 +48,8 @@ function normalizza(m: MediaInstagram): PostInstagram {
   };
 }
 
-async function chiamaGraph(percorso: string): Promise<unknown | null> {
+async function chiamaGraph(percorso: string, revalidate: number): Promise<unknown | null> {
+  if (!chiamateInstagramAttive()) return null;
   const token = await leggiToken();
   if (!token) return null;
 
@@ -45,20 +58,23 @@ async function chiamaGraph(percorso: string): Promise<unknown | null> {
   url.searchParams.set('access_token', token);
   if (percorso.endsWith('/media')) url.searchParams.set('limit', String(LIMITE));
 
-  const response = await fetch(url, { next: { revalidate: REVALIDATE_S } });
+  const response = await fetch(url, { next: { revalidate } });
   if (!response.ok) return null;
   return response.json();
 }
 
 export async function leggiPost(): Promise<PostInstagram[]> {
-  const risposta = (await chiamaGraph('me/media')) as { data?: MediaInstagram[] } | null;
+  const risposta = (await chiamaGraph('me/media', REVALIDATE_LISTA_S)) as { data?: MediaInstagram[] } | null;
   if (!risposta?.data) return [];
   return risposta.data.filter((m) => m.media_url || m.thumbnail_url).map(normalizza);
 }
 
+/** Cerca prima fra i post già in cache; chiama Instagram solo per i post più vecchi. */
 export async function leggiPostSingolo(id: string): Promise<PostInstagram | null> {
   if (!/^\d+$/.test(id)) return null;
-  const media = (await chiamaGraph(id)) as MediaInstagram | null;
+  const inElenco = (await leggiPost()).find((p) => p.id === id);
+  if (inElenco) return inElenco;
+  const media = (await chiamaGraph(id, REVALIDATE_SINGOLO_S)) as MediaInstagram | null;
   if (!media?.id) return null;
   return normalizza(media);
 }
