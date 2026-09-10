@@ -1,3 +1,4 @@
+import { leggiToken } from '@/lib/instagram-token';
 import { titoloETesto } from '@/lib/testo-notizia';
 
 interface MediaInstagram {
@@ -36,7 +37,7 @@ function normalizza(m: MediaInstagram): PostInstagram {
 }
 
 async function chiamaGraph(percorso: string): Promise<unknown | null> {
-  const token = process.env.INSTAGRAM_ACCESS_TOKEN;
+  const token = await leggiToken();
   if (!token) return null;
 
   const url = new URL(`https://graph.instagram.com/v21.0/${percorso}`);
