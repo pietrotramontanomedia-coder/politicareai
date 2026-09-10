@@ -3,7 +3,7 @@
  * e per il pannello del menu in basso: nome, colore e numeri restano coerenti ovunque.
  */
 
-export type IdStrumento = 'test' | 'quiz' | 'confronta' | 'simulatore' | 'gioco' | 'metodologia';
+export type IdStrumento = 'profilo' | 'test' | 'quiz' | 'confronta' | 'simulatore' | 'gioco' | 'metodologia';
 
 export interface Strumento {
   id: IdStrumento;
@@ -24,6 +24,17 @@ export interface Strumento {
 export const NUMERI = { affermazioni: 20, partiti: 13, temi: 10, domandeQuiz: 7 } as const;
 
 export const STRUMENTI: Record<IdStrumento, Strumento> = {
+  profilo: {
+    id: 'profilo',
+    href: '/profilo',
+    nome: 'Il tuo profilo',
+    breve: 'Quiz, traguardi e preferenze',
+    titolo: 'Il tuo profilo',
+    descrizione: 'Storico dei quiz, traguardi, temi che segui e il tuo gruppo per il gioco.',
+    azione: 'Apri il profilo',
+    meta: [],
+    colore: '#FB923C',
+  },
   test: {
     id: 'test',
     href: '/test-partito',
@@ -94,7 +105,7 @@ export const STRUMENTI: Record<IdStrumento, Strumento> = {
 };
 
 /** Ordine delle voci nel pannello "Strumenti" del menu in basso. */
-export const ORDINE_PANNELLO: IdStrumento[] = ['test', 'quiz', 'confronta', 'simulatore', 'gioco', 'metodologia'];
+export const ORDINE_PANNELLO: IdStrumento[] = ['profilo', 'test', 'quiz', 'confronta', 'simulatore', 'gioco', 'metodologia'];
 
 export const TESTI_STRUMENTI = {
   occhiello: 'Strumenti',

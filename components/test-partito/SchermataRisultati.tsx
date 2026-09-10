@@ -6,6 +6,7 @@ import type { Classifica, TestPartitoPack } from '@politicare/motore';
 import { SOGLIA_COPERTURA } from '@politicare/motore';
 import RigaClassifica from './RigaClassifica';
 import { CondividiTest } from '@/components/condivisione/Condivisioni';
+import SalvaRisultatoTest from '@/components/profilo/SalvaRisultatoTest';
 import { TESTI_CONDIVISIONE } from '@/lib/condivisione/testi';
 
 interface Props {
@@ -69,6 +70,8 @@ export default function SchermataRisultati({
           <CondividiTest pack={pack} classifica={classifica} numeroRisposte={numeroRisposte} />
         </div>
       )}
+
+      {classifica.risultati.length > 0 && <SalvaRisultatoTest pack={pack} classifica={classifica} numeroRisposte={numeroRisposte} />}
 
       <ol className="mt-8 space-y-3">
         {classifica.risultati.map((risultato, indice) => (

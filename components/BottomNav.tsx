@@ -22,7 +22,7 @@ const DESTRA: Voce[] = [
   { href: STRUMENTI.gioco.href, etichetta: T.gioco, icona: 'gioco' },
 ];
 /** Pagine raggiungibili solo dal pannello: quando ci sei, il pulsante centrale lo segnala. */
-const ROTTE_PANNELLO = [STRUMENTI.confronta.href, STRUMENTI.simulatore.href, STRUMENTI.metodologia.href];
+const ROTTE_PANNELLO = [STRUMENTI.profilo.href, STRUMENTI.confronta.href, STRUMENTI.simulatore.href, STRUMENTI.metodologia.href];
 
 const VETRO = {
   borderColor: 'rgba(255,255,255,0.08)',
@@ -119,11 +119,15 @@ export default function BottomNav() {
               animate="visibile"
               variants={{ visibile: { transition: { staggerChildren: 0.04 } } }}
             >
-              {ORDINE_PANNELLO.map((id) => {
+              {ORDINE_PANNELLO.map((id, i) => {
                 const s = STRUMENTI[id];
                 const qui = pathname.startsWith(s.href);
                 return (
-                  <motion.li key={id} variants={{ nascosto: { opacity: 0, y: 12 }, visibile: { opacity: 1, y: 0 } }}>
+                  <motion.li
+                    key={id}
+                    className={i === 0 && ORDINE_PANNELLO.length % 2 === 1 ? 'col-span-2' : undefined}
+                    variants={{ nascosto: { opacity: 0, y: 12 }, visibile: { opacity: 1, y: 0 } }}
+                  >
                     <Link
                       href={s.href}
                       onClick={chiudi}

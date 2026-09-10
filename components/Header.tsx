@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import Logo from './Logo';
 import NotificationBell from './NotificationBell';
+import PulsanteProfilo from './profilo/PulsanteProfilo';
 
 export default function Header() {
   return (
@@ -42,6 +43,7 @@ export default function Header() {
           </nav>
 
           <NotificationBell />
+          <PulsanteProfilo />
         </div>
       </div>
     </header>

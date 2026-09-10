@@ -1,11 +1,14 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { motion, useReducedMotion } from 'framer-motion';
 import type { DifficoltaQuiz, QuizSettimanale, RiepilogoGruppo, RispostaQuiz } from '@politicare/motore';
 import { riepilogaQuiz } from '@politicare/motore';
 import { ETICHETTE_DIFFICOLTA, TESTI_QUIZ } from '@/lib/quiz';
 import { CondividiQuiz } from '@/components/condivisione/Condivisioni';
+import { useProfilo } from '@/components/profilo/ProfiloProvider';
+import { TESTI_PROFILO } from '@/lib/profilo/testi';
 
 interface Props {
   quiz: QuizSettimanale;
@@ -56,6 +59,15 @@ export default function SchermataRisultatiQuiz({ quiz, risposte, onRicomincia }:
   const rispostaDi = new Map(risposte.map((r) => [r.domandaId, r]));
   const sezioneDi = new Map(quiz.sezioni.map((s) => [s.id, s]));
 
+  // Ogni volta che si arriva ai risultati il tentativo entra nello storico del profilo.
+  const { registraQuiz } = useProfilo();
+  const registrato = useRef(false);
+  useEffect(() => {
+    if (registrato.current) return;
+    registrato.current = true;
+    registraQuiz({ numero: quiz.numero, percentuale: riepilogo.percentuale, corrette: riepilogo.corrette, totale: riepilogo.totale });
+  }, [registraQuiz, quiz.numero, riepilogo.percentuale, riepilogo.corrette, riepilogo.totale]);
+
   return (
     <motion.div
       initial={riduciMovimento ? undefined : { opacity: 0, y: 12 }}
@@ -77,6 +89,12 @@ export default function SchermataRisultatiQuiz({ quiz, risposte, onRicomincia }:
         <div className="mt-6 flex justify-center">
           <CondividiQuiz quiz={quiz} risposte={risposte} percorso={`/quiz-settimanale/${quiz.numero}`} />
         </div>
+        <p className="mt-3 text-xs" style={{ color: 'var(--fg-muta)' }}>
+          ✓ {TESTI_PROFILO.salvataggio.quiz} ·{' '}
+          <Link href="/profilo" className="font-semibold underline underline-offset-2" style={{ color: 'var(--accento)' }}>
+            {TESTI_PROFILO.salvataggio.vediProfilo}
+          </Link>
+        </p>
       </header>
 
       {/* Dettaglio per sezione e per difficoltà */}

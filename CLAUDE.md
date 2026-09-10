@@ -51,6 +51,10 @@ Conseguenze architetturali:
 - il modulo test partito non ha backend e non ha account
 - il quiz settimanale, che ha bisogno di persistenza, usa storage e identità
   **separati** — nessuna chiave in comune, nessun join possibile
+- il profilo utente (con o senza login) conserva solo nome, storico dei quiz, temi
+  seguiti e giocatori del gioco. Il risultato del test partiti, se l'utente lo salva,
+  resta solo sul dispositivo in un archivio separato e non entra mai nell'account
+  (architettura e passi per collegare il login: `docs/PROFILO.md`)
 - analytics privacy-first e self-hosted (Plausible o Umami). Mai GA.
 
 ### 3. Il risultato non è un verdetto

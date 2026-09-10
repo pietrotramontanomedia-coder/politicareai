@@ -27,6 +27,12 @@ export function IconaStrumento({ id, className = 'h-5 w-5', spessore = 1.8 }: Pr
 }
 
 const TRATTI: Record<IdIcona, React.ReactNode> = {
+  profilo: (
+    <>
+      <circle cx="12" cy="8" r="4" />
+      <path d="M4 21a8 8 0 0 1 16 0" />
+    </>
+  ),
   home: <path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V9.5Z" />,
   test: (
     <>

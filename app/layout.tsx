@@ -3,6 +3,7 @@ import localFont from 'next/font/local';
 import Header from '@/components/Header';
 import BottomNav from '@/components/BottomNav';
 import ServiceWorkerRegistration from '@/components/ServiceWorkerRegistration';
+import { ProfiloProvider } from '@/components/profilo/ProfiloProvider';
 import './globals.css';
 
 const googleSans = localFont({
@@ -48,9 +49,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="it" className={googleSans.variable}>
       <body className="min-h-dvh antialiased">
         <ServiceWorkerRegistration />
-        <Header />
-        <div style={{ paddingBottom: 'var(--spazio-barra)' }}>{children}</div>
-        <BottomNav />
+        <ProfiloProvider>
+          <Header />
+          <div style={{ paddingBottom: 'var(--spazio-barra)' }}>{children}</div>
+          <BottomNav />
+        </ProfiloProvider>
       </body>
     </html>
   );
