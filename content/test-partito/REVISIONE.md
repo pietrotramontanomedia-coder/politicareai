@@ -77,3 +77,4 @@ Bilanciamento: 11 affermazioni propongono un cambiamento, 9 difendono l'assetto 
 - aprire ogni link e confermare la citazione; correggere le date approssimate al mese
 - inviare il questionario ai partiti: la risposta diretta sostituisce le dichiarazioni
 - rivalutare le caselle vuote di Futuro Nazionale e +Europa quando pubblicano documenti
+
