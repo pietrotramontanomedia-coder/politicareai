@@ -279,7 +279,7 @@ export function presetPartitiDiOggi(partiti: { id: string; nome: string; colore:
   return {
     id: 'partiti-oggi',
     nome: 'Partiti di oggi',
-    descrizione: 'Gli 11 partiti del test, tutti a zero e senza coalizioni: scegli tu voti e alleanze.',
+    descrizione: `I ${partiti.length} partiti del test, tutti a zero e senza coalizioni: scegli tu voti e alleanze.`,
     coalizioni: { a: 'Coalizione A', b: 'Coalizione B', c: 'Coalizione C' },
     liste: [
       ...partiti.map((p) => ({ id: p.id, nome: p.nome, percentuale: 0, coalizione: null, colore: p.colore })),

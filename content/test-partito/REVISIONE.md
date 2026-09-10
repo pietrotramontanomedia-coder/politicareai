@@ -1,34 +1,57 @@
-# Revisione del pack test-partito-2027 — versione 2.0.0
+# Revisione del pack test-partito-2027 — versione 3.0.0
 
-**Data**: 9 settembre 2026
+**Data**: 10 settembre 2026
 **Autori**: Pietro Tramontano, Redazione Politicare (ricerca assistita)
 
-Sostituisce la revisione del 2 settembre 2026 (v1.0.2), che aveva 18 affermazioni,
-10 partiti e nessun URL nelle fonti.
+Aggiorna la revisione del 9 settembre 2026 (v2.0.0, 11 partiti). Le 20 affermazioni
+restano invariate; cambiano i partiti e alcune fonti.
 
-## Metodo
+## Cosa cambia nella 3.0.0
 
-1. Le 20 affermazioni sono state riformulate sullo stato delle cose a settembre 2026
-   (fact-check con fonti datate: esito del referendum sulla separazione delle carriere,
-   soglia del premio nella legge elettorale al Senato, richiesta SAFE di agosto 2026,
-   revisione dello stop auto 2035, leggi regionali sul fine vita, ecc.).
-2. Per ogni coppia partito/affermazione si è cercata una fonte secondo la gerarchia
-   voto > programma > dichiarazione del leader con data. Nessuna posizione è dedotta:
-   senza fonte il valore è `null`.
-3. Rubrica meccanica: ±2 solo con voto o programma esplicito; ±1 con condizioni o solo
-   per dichiarazione; 0 solo per neutralità o spaccatura documentate. Ogni posizione ha
-   una `confidenza`; con confidenza bassa mai ±2.
-4. Ogni URL è stato verificato contro i risultati di ricerca registrati: 199 su 199.
-   L'accesso diretto ai siti non era possibile dall'ambiente di lavoro, quindi le
-   citazioni derivano dai riassunti dei risultati di ricerca: **prima della pubblicazione
-   vanno aperti i link** (elenco completo su `/metodologia/fonti`).
-5. Voci scartate dal comitato perché indirette o datate: IV su premio di maggioranza,
-   FN su premierato (il programma propone un'altra forma di presidenzialismo), M5S su
-   auto 2035 (fonte del 2020), Lega su sanità privata (fonte del 2018).
+1. **Entrano due partiti**: Partito Liberaldemocratico (Luigi Marattin) e Ora!
+   (Michele Boldrin). Il test passa da 11 a 13 partiti.
+2. **Sud chiama Nord è stato valutato ma resta fuori**: si arriva a 6 posizioni
+   documentate su 20, sotto la copertura minima del 50%. Le sei trovate, pronte per
+   quando il partito pubblicherà un programma aggiornato:
+   - premierato favorevole (programma politiche 2022, depositato al Viminale)
+   - premio di maggioranza favorevole con riserva (stesso programma: maggioranza
+     «rafforzata da un premio elettorale»)
+   - separazione delle carriere: voto favorevole di Francesco Gallo alla Camera
+     (18/9/2025)
+   - SAFE e riarmo contrario: Laura Castelli, «Follia spendere 800 mld in armi» (marzo 2025)
+   - salario minimo a 9 euro contrario: Castelli, «proposte irrealistiche come il
+     salario minimo presentato dalla Schlein» (3/9/2025)
+   - nucleare neutro: astensione di Gallo sulla legge delega (4/6/2026)
+3. **Fonti più recenti** per i partiti già presenti:
+   - salario minimo: FdI, Lega, FI, NM, PD, M5S e AVS ora citano il voto
+     definitivo del Senato sulla delega (23/9/2025) al posto dei voti del 2022-2023
+   - autonomia differenziata: PD, AVS e IV citano il voto del Senato sulle
+     pre-intese (16/7/2026), NM quello della Camera (21/7/2026)
+   - la fonte precedente resta riportata nella `nota` di ogni posizione
+4. **Voti nominali dai dati aperti della Camera** (dati.camera.it) per i deputati
+   dei partiti senza gruppo proprio: così sono documentati il sì di Marattin alla
+   separazione delle carriere e alla legge delega sul nucleare. Dove il voto è segreto
+   (legge elettorale del 16/7/2026) o il deputato non ha votato, non si deduce nulla.
+
+## Metodo (invariato)
+
+- Gerarchia delle fonti: voto > programma o documento ufficiale > dichiarazione datata
+  del leader. Senza fonte il valore è `null`, mai `0`.
+- Rubrica: ±2 solo con voto o programma esplicito; ±1 con condizioni o solo per
+  dichiarazione; 0 solo per neutralità documentata. Con confidenza bassa mai ±2.
+- Priorità alle fonti degli ultimi dodici mesi. Si tiene una fonte più vecchia solo se
+  sul tema non c'è un fatto più recente: per esempio il referendum dell'8-9 giugno 2025
+  resta l'ultimo pronunciamento su Jobs Act e cittadinanza, e il premierato è fermo in
+  commissione alla Camera da luglio 2024.
+- Dichiarazioni ambigue scartate invece che interpretate. Per esempio sul SAFE, Marattin
+  dice che l'Europa «deve sapere badare alla propria sicurezza», ma critica anche un
+  governo che «si indebita per comprare armi»: la casella resta vuota.
 
 ## Copertura
 
-Posizioni documentate: 199 su 220. Per tipo: {'dichiarazione': 105, 'voto': 61, 'programma': 33}. Per confidenza: {'media': 110, 'alta': 80, 'bassa': 9}.
+Posizioni documentate: 224 su 260. Per tipo: dichiarazione 112, voto 69, programma 43.
+Per confidenza: media 121, alta 91, bassa 12. Fonti datate più vecchie di dodici mesi: 83
+(erano 91 su 199 nella 2.0.0).
 
 | Partito | Documentate | Caselle vuote |
 |---|---|---|
@@ -43,6 +66,20 @@ Posizioni documentate: 199 su 220. Per tipo: {'dichiarazione': 105, 'voto': 61, 
 | IV | 18/20 | istituzionale-premio, europa-euro-patto |
 | +EU | 15/20 | fisco-banche, lavoro-jobs-act, europa-euro-patto, ambiente-auto-2035, sanita-privata |
 | NM | 18/20 | fisco-flat-tax, ambiente-auto-2035 |
+| PLD | 13/20 | fisco-patrimoniale, fisco-banche, immigrazione-albania, istituzionale-premierato, europa-safe, ambiente-auto-2035, diritti-fine-vita |
+| Ora! | 12/20 | fisco-flat-tax, fisco-banche, lavoro-jobs-act, istituzionale-premierato, istituzionale-autonomia, giustizia-carriere, europa-euro-patto, ambiente-auto-2035 |
+
+Concordanza: nessuna affermazione supera l'85% di partiti con lo stesso valore; la più
+alta è sanita-privata (78% dei partiti con posizione sono dallo stesso lato).
+
+### Le fonti dei nuovi partiti
+
+- **PLD**: documenti programmatici su fisco, riforme istituzionali, sanità e immigrazione
+  (partitoliberaldemocratico.com), voti nominali di Marattin alla Camera e sue
+  dichiarazioni datate 2025-2026.
+- **Ora!**: pagina ufficiale «Le nostre posizioni politiche», che riassume le tesi
+  programmatiche votate dal partito, e il comunicato sullo Stabilicum del 23 luglio 2026.
+  Ora! non ha parlamentari, quindi non ci sono voti.
 
 ## Le 20 affermazioni
 
@@ -70,11 +107,12 @@ Posizioni documentate: 199 su 220. Per tipo: {'dichiarazione': 105, 'voto': 61, 
 | 20 | sanita-privata | assetto vigente | Il ruolo della sanità privata convenzionata nel Servizio sanitario nazionale va mantenuto e non ridotto |
 
 Bilanciamento: 11 affermazioni propongono un cambiamento, 9 difendono l'assetto vigente
-(squilibrio 5%, entro il 10%). Nessuna affermazione supera l'85% di partiti concordi.
+(squilibrio 5%, entro il 10%).
 
 ## Da fare prima del lancio
 
 - aprire ogni link e confermare la citazione; correggere le date approssimate al mese
-- inviare il questionario ai partiti: la risposta diretta sostituisce le dichiarazioni
-- rivalutare le caselle vuote di Futuro Nazionale e +Europa quando pubblicano documenti
-
+- inviare il questionario ai partiti, compresi PLD, Ora! e Sud chiama Nord: la risposta
+  diretta sostituisce le dichiarazioni e può far entrare Sud chiama Nord
+- rinnovare le fonti di Azione, IV e +Europa, che hanno ancora 10-12 posizioni con fonti
+  anteriori a settembre 2025

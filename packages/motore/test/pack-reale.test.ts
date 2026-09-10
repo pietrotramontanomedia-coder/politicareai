@@ -14,9 +14,10 @@ describe('content pack reale politiche-2027', () => {
     expect(errori.map((e) => e.messaggio)).toEqual([]);
   });
 
-  it('ha 20 affermazioni e 11 partiti, compreso Futuro Nazionale', () => {
+  it('ha 20 affermazioni e 13 partiti, compresi Futuro Nazionale, PLD e Ora!', () => {
     expect(tipizzato.affermazioni).toHaveLength(20);
-    expect(tipizzato.partiti).toHaveLength(11);
+    expect(tipizzato.partiti).toHaveLength(13);
+    expect(tipizzato.partiti.map((p) => p.id)).toEqual(expect.arrayContaining(['futuronazionale', 'pld', 'ora']));
     expect(tipizzato.partiti.map((p) => p.id)).toContain('futuronazionale');
   });
 

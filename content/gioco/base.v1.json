@@ -1,7 +1,7 @@
 {
   "id": "gioco-base",
   "mazzo": "base",
-  "versione": "1.3.0",
+  "versione": "1.4.0",
   "data": "2026-09-10",
   "titolo": "Mazzo base",
   "descrizione": "Archetipi, riti e vizi della politica italiana, più tre carte su misura per ogni partito: frasi e momenti pubblici, presi in giro con affetto e in parti uguali.",
@@ -1163,6 +1163,58 @@
       "penalita": 1,
       "riguarda": "noimoderati",
       "secondi": 20
+    },
+    {
+      "id": "base-154",
+      "tipo": "sfida",
+      "titolo": "Lezione di economia",
+      "testo": "Luigi Marattin, segretario del Partito Liberaldemocratico, è un economista. {g1} ha venti secondi per spiegare lo spread a {g2} senza usare la parola «soldi». Se {g2} non ha capito, paga {g1}.",
+      "penalita": 1,
+      "riguarda": "pld",
+      "secondi": 20
+    },
+    {
+      "id": "base-155",
+      "tipo": "legge",
+      "titolo": "Doppio turno",
+      "testo": "Marattin ha detto che in Italia funzionano solo due leggi elettorali: «un proporzionale puro con preferenze o un doppio turno di collegio». Per tre carte chi deve pagare può chiedere il ballottaggio: sfida a pari o dispari un giocatore a scelta, e chi perde paga.",
+      "penalita": 1,
+      "riguarda": "pld",
+      "durataCarte": 3
+    },
+    {
+      "id": "base-156",
+      "tipo": "votazione",
+      "titolo": "Metterci la faccia",
+      "testo": "Per il referendum sulla giustizia del 2026 il Partito Liberaldemocratico ha lanciato il comitato «Giustizia Sì», rivendicando di essere il primo partito a metterci la faccia. Al tre, tutti indicano chi al tavolo ci mette sempre la faccia. Il più votato paga.",
+      "penalita": 1,
+      "riguarda": "pld"
+    },
+    {
+      "id": "base-157",
+      "tipo": "legge",
+      "titolo": "Drin Drin",
+      "testo": "Prima di diventare il partito Ora!, il progetto di Michele Boldrin si chiamava Drin Drin. Per tre carte, prima di parlare si dice «drin drin»: chi se ne dimentica paga.",
+      "penalita": 1,
+      "riguarda": "ora",
+      "durataCarte": 3
+    },
+    {
+      "id": "base-158",
+      "tipo": "votazione",
+      "titolo": "Estremo centro",
+      "testo": "Boldrin definisce Ora! un partito di «estremo centro». Al tre, tutti indicano il giocatore più estremista nella sua moderazione. Il più votato paga.",
+      "penalita": 1,
+      "riguarda": "ora"
+    },
+    {
+      "id": "base-159",
+      "tipo": "sfida",
+      "titolo": "È ora!",
+      "testo": "Il partito di Boldrin e Forchielli si chiama Ora!, con il punto esclamativo. {g1} ha dieci secondi per elencare cinque cose da fare subito, gridando «ora!» dopo ognuna. Se si ferma, paga.",
+      "penalita": 1,
+      "riguarda": "ora",
+      "secondi": 10
     }
   ]
 }

@@ -1,12 +1,13 @@
 {
   "id": "test-partito-2027",
-  "versione": "2.0.0",
-  "data": "2026-09-09",
+  "versione": "3.0.0",
+  "data": "2026-09-10",
   "autori": [
     "Pietro Tramontano",
     "Redazione Politicare"
   ],
   "changelog": [
+    "2026-09-10 — v3.0.0: entrano Partito Liberaldemocratico e Ora! (13 partiti); fonti del salario minimo aggiornate al voto definitivo del Senato (23/9/2025) e dell'autonomia alle pre-intese (luglio 2026); Sud chiama Nord valutato ma escluso per copertura insufficiente (6 affermazioni su 20)",
     "2026-09-09 — v2.0.0: 20 affermazioni aggiornate a settembre 2026, 11 partiti con Futuro Nazionale, ogni posizione con fonte, URL, data e confidenza; rubrica di codifica meccanica; copertura minima per partito",
     "2026-09-02 — v1.0.2: revisione accurata dai programmi 2022 ufficiali + posizioni dichiarate 2024-2025",
     "2026-09-02 — v1.0.1: posizioni affinate da lettura attentissima dei programmi 2022"
@@ -195,12 +196,12 @@
           "valore": -2,
           "fonte": {
             "tipo": "voto",
-            "citazione": "La Camera ha approvato con i voti di FdI, Lega e FI una mozione che respinge l'introduzione di un salario minimo legale (163 favorevoli, 121 contrari, 19 astenuti), bocciando la mozione M5S per una soglia non inferiore a 9 euro lordi l'ora.",
-            "url": "https://pagellapolitica.it/articoli/salario-minimo-mozioni-camera-opposizione",
-            "data": "2022-11-30"
+            "citazione": "Il Senato ha approvato in via definitiva la legge delega sul salario minimo il 23 settembre 2025 con 78 voti favorevoli e 52 contrari: a favore Fratelli d'Italia, Lega, Forza Italia e Noi Moderati, contrari tutti i partiti di opposizione. La delega non fissa la soglia di 9 euro l'ora chiesta dalla proposta unitaria delle opposizioni.",
+            "url": "https://pagellapolitica.it/articoli/parlamento-approva-delega-governo-salario-minimo",
+            "data": "2025-09-23"
           },
           "confidenza": "alta",
-          "nota": "Data desunta dall'articolo di Pagella Politica (mozioni del 30 novembre 2022), da verificare sul resoconto camera.it. Posizione confermata in seguito: nel dicembre 2024 il centrodestra ha trasformato in commissione la pdl delle opposizioni sui 9 euro in una legge delega senza salario minimo (Pagella Politica: https://pagellapolitica.it/articoli/parlamento-approva-delega-governo-salario-minimo). Pagella Politica ricorda che Meloni in passato non si era detta contraria al salario minimo."
+          "nota": "Voto più recente: la maggioranza sostituisce la soglia legale con una delega sulla contrattazione collettiva. Fonte precedente: La Camera ha approvato con i voti di FdI, Lega e FI una mozione che respinge l'introduzione di un salario minimo legale (163 favorevoli, 121 contrari, 19 astenuti), bocciando la mozione M5S per una soglia non inferiore a 9 euro lordi l'ora. (https://pagellapolitica.it/articoli/salario-minimo-mozioni-camera-opposizione, 2022-11-30)."
         },
         {
           "affermazioneId": "lavoro-jobs-act",
@@ -444,13 +445,13 @@
           "affermazioneId": "lavoro-salario-minimo",
           "valore": 2,
           "fonte": {
-            "tipo": "programma",
-            "citazione": "Pd, M5S e Avs depositano alla Camera la proposta di legge di iniziativa popolare per l'introduzione di un salario minimo legale di 9 euro l'ora (dicembre 2024).",
-            "url": "https://www.deputatipd.it/news/salario-minimo-pd-m5s-e-avs-depositeranno-domani-alla-camera-la-proposta-di-legge-di-0",
-            "data": "2024-12-01"
+            "tipo": "voto",
+            "citazione": "Il Senato ha approvato in via definitiva la legge delega sul salario minimo il 23 settembre 2025 con 78 voti favorevoli e 52 contrari: a favore Fratelli d'Italia, Lega, Forza Italia e Noi Moderati, contrari tutti i partiti di opposizione. La delega non fissa la soglia di 9 euro l'ora chiesta dalla proposta unitaria delle opposizioni.",
+            "url": "https://pagellapolitica.it/articoli/parlamento-approva-delega-governo-salario-minimo",
+            "data": "2025-09-23"
           },
           "confidenza": "alta",
-          "nota": "Data approssimata al mese (dicembre 2024). Precedente: nel novembre 2023 la maggioranza riscrisse la pdl unitaria delle opposizioni sul salario minimo a 9 euro e i firmatari, Schlein compresa, ritirarono la firma (Pagella Politica). La proposta di legge depositata è un atto ufficiale, quindi confidenza alta."
+          "nota": "Voto contrario alla delega che ha preso il posto della proposta dei 9 euro, di cui il partito è firmatario; durante l'esame alla Camera Schlein e Conte avevano ritirato la firma dal testo trasformato in delega (Pagella Politica). Fonte precedente: Pd, M5S e Avs depositano alla Camera la proposta di legge di iniziativa popolare per l'introduzione di un salario minimo legale di 9 euro l'ora (dicembre 2024). (https://www.deputatipd.it/news/salario-minimo-pd-m5s-e-avs-depositeranno-domani-alla-camera-la-proposta-di-legge-di-0, 2024-12-01)."
         },
         {
           "affermazioneId": "lavoro-jobs-act",
@@ -528,13 +529,13 @@
           "affermazioneId": "istituzionale-autonomia",
           "valore": -2,
           "fonte": {
-            "tipo": "programma",
-            "citazione": "Il Pd è tra i soggetti che hanno depositato il quesito per il referendum abrogativo della legge 86/2024 (legge Calderoli) insieme a M5S, Avs, +Europa, Italia viva, Cgil e Uil; Pd e M5S si sono espressi a favore della richiesta di referendum, il centrodestra contro.",
-            "url": "https://www.fanpage.it/politica/autonomia-differenziata-arriva-il-quesito-del-referendum-per-labrogazione-della-legge-cosa-dice-il-testo/",
-            "data": "2024-07-01"
+            "tipo": "voto",
+            "citazione": "Senato, 16 luglio 2026: approvate le risoluzioni sulle pre-intese di autonomia differenziata con Liguria, Lombardia, Piemonte e Veneto con 84 sì e 59 no; le opposizioni protestano in Aula con i cartelli «No allo spacca Italia».",
+            "url": "https://tg24.sky.it/politica/2026/07/16/autonomia-differenziata-approvato-senato-protesta-opposizioni",
+            "data": "2026-07-16"
           },
           "confidenza": "alta",
-          "nota": "Data approssimata al mese (deposito del quesito, luglio 2024). Tipo 'programma' usato per un atto ufficiale del partito (promozione del referendum abrogativo), non un voto parlamentare. Il referendum è stato dichiarato inammissibile dalla Corte costituzionale (sent. 10/2025, 7 febbraio 2025) dopo la sent. 192/2024 che ha svuotato la legge."
+          "nota": "Voto contrario delle opposizioni alle pre-intese. Il capogruppo Pd Francesco Boccia ha definito le pre-intese illegittime e incostituzionali. Fonte precedente: Il Pd è tra i soggetti che hanno depositato il quesito per il referendum abrogativo della legge 86/2024 (legge Calderoli) insieme a M5S, Avs, +Europa, Italia viva, Cgil e Uil; Pd e M5S si sono espressi a favore della richiesta di referendum, il centrodestra contro. (https://www.fanpage.it/politica/autonomia-differenziata-arriva-il-quesito-del-referendum-per-labrogazione-della-legge-cosa-dice-il-testo/, 2024-07-01)."
         },
         {
           "affermazioneId": "giustizia-carriere",
@@ -694,13 +695,13 @@
           "affermazioneId": "lavoro-salario-minimo",
           "valore": 2,
           "fonte": {
-            "tipo": "programma",
-            "citazione": "Manovra 2025: le opposizioni rilanciano il salario minimo a 9 euro l'ora, riammesso l'emendamento a firma Conte; nel dicembre 2024 Pd, M5S e Avs depositano alla Camera la proposta di legge di iniziativa popolare per il salario minimo di 9 euro l'ora.",
-            "url": "https://www.fanpage.it/politica/manovra-2025-opposizioni-rilanciano-il-salario-minimo-a-9-euro-riammesso-emendamento-a-firma-di-conte/",
-            "data": "2024-12-01"
+            "tipo": "voto",
+            "citazione": "Il Senato ha approvato in via definitiva la legge delega sul salario minimo il 23 settembre 2025 con 78 voti favorevoli e 52 contrari: a favore Fratelli d'Italia, Lega, Forza Italia e Noi Moderati, contrari tutti i partiti di opposizione. La delega non fissa la soglia di 9 euro l'ora chiesta dalla proposta unitaria delle opposizioni.",
+            "url": "https://pagellapolitica.it/articoli/parlamento-approva-delega-governo-salario-minimo",
+            "data": "2025-09-23"
           },
           "confidenza": "alta",
-          "nota": "Data approssimata al mese. Il M5S è cofirmatario della pdl unitaria del 2023 (firma ritirata quando la maggioranza riscrisse il testo, novembre 2023) e della pdl di iniziativa popolare depositata nel dicembre 2024 (deputatipd.it, ItaliaOggi)."
+          "nota": "Voto contrario alla delega che ha preso il posto della proposta dei 9 euro, di cui il partito è firmatario; durante l'esame alla Camera Schlein e Conte avevano ritirato la firma dal testo trasformato in delega (Pagella Politica). Fonte precedente: Manovra 2025: le opposizioni rilanciano il salario minimo a 9 euro l'ora, riammesso l'emendamento a firma Conte; nel dicembre 2024 Pd, M5S e Avs depositano alla Camera la proposta di legge di iniziativa popolare per il salario minimo di 9 euro l'ora. (https://www.fanpage.it/politica/manovra-2025-opposizioni-rilanciano-il-salario-minimo-a-9-euro-riammesso-emendamento-a-firma-di-conte/, 2024-12-01)."
         },
         {
           "affermazioneId": "lavoro-jobs-act",
@@ -943,12 +944,12 @@
           "valore": -2,
           "fonte": {
             "tipo": "voto",
-            "citazione": "La Camera ha approvato con i voti di FdI, Lega e FI una mozione che respinge l'introduzione di un salario minimo legale, bocciando la mozione M5S per una soglia non inferiore a 9 euro lordi l'ora.",
-            "url": "https://pagellapolitica.it/articoli/salario-minimo-mozioni-camera-opposizione",
-            "data": "2022-11-30"
+            "citazione": "Il Senato ha approvato in via definitiva la legge delega sul salario minimo il 23 settembre 2025 con 78 voti favorevoli e 52 contrari: a favore Fratelli d'Italia, Lega, Forza Italia e Noi Moderati, contrari tutti i partiti di opposizione. La delega non fissa la soglia di 9 euro l'ora chiesta dalla proposta unitaria delle opposizioni.",
+            "url": "https://pagellapolitica.it/articoli/parlamento-approva-delega-governo-salario-minimo",
+            "data": "2025-09-23"
           },
           "confidenza": "alta",
-          "nota": "Data desunta dall'articolo di Pagella Politica (mozioni del 30 novembre 2022), da verificare sul resoconto camera.it. Confermato il 6 dicembre 2023: la maggioranza (FdI, FI, Lega) ha trasformato la pdl delle opposizioni sui 9 euro in una legge delega senza soglia minima (153 sì, 118 no; https://www.quotidiano.net/politica/salario-minimo-legge-cosa-prevede-jzaxcsxj; Pagella Politica: https://pagellapolitica.it/articoli/parlamento-approva-delega-governo-salario-minimo)."
+          "nota": "Voto più recente: la maggioranza sostituisce la soglia legale con una delega sulla contrattazione collettiva. Fonte precedente: La Camera ha approvato con i voti di FdI, Lega e FI una mozione che respinge l'introduzione di un salario minimo legale, bocciando la mozione M5S per una soglia non inferiore a 9 euro lordi l'ora. (https://pagellapolitica.it/articoli/salario-minimo-mozioni-camera-opposizione, 2022-11-30)."
         },
         {
           "affermazioneId": "lavoro-jobs-act",
@@ -1191,12 +1192,12 @@
           "valore": -2,
           "fonte": {
             "tipo": "voto",
-            "citazione": "Camera, novembre 2023: FI vota con la maggioranza (FdI, Lega, FI, NM) la delega al governo che sostituisce la proposta delle opposizioni di un salario minimo legale a 9 euro l'ora; le opposizioni votano contro. Tajani: 'In Italia non serve il salario minimo'.",
+            "citazione": "Il Senato ha approvato in via definitiva la legge delega sul salario minimo il 23 settembre 2025 con 78 voti favorevoli e 52 contrari: a favore Fratelli d'Italia, Lega, Forza Italia e Noi Moderati, contrari tutti i partiti di opposizione. La delega non fissa la soglia di 9 euro l'ora chiesta dalla proposta unitaria delle opposizioni.",
             "url": "https://pagellapolitica.it/articoli/parlamento-approva-delega-governo-salario-minimo",
-            "data": "2023-11-01"
+            "data": "2025-09-23"
           },
           "confidenza": "alta",
-          "nota": "Data approssimata al mese (voto finale Camera nel novembre 2023; il Senato ha poi confermato la delega). La dichiarazione di Tajani è riportata da avvenire.it ('Salario minimo, slitta il voto. Tajani: non siamo in Urss'). Nessuna evoluzione recente in senso favorevole."
+          "nota": "Voto più recente: la maggioranza sostituisce la soglia legale con una delega sulla contrattazione collettiva. Fonte precedente: Camera, novembre 2023: FI vota con la maggioranza (FdI, Lega, FI, NM) la delega al governo che sostituisce la proposta delle opposizioni di un salario minimo legale a 9 euro l'ora; le opposizioni votano contro. Tajani: 'In Italia non serve il salario minimo'. (https://pagellapolitica.it/articoli/parlamento-approva-delega-governo-salario-minimo, 2023-11-01)."
         },
         {
           "affermazioneId": "lavoro-jobs-act",
@@ -1440,13 +1441,13 @@
           "affermazioneId": "lavoro-salario-minimo",
           "valore": 2,
           "fonte": {
-            "tipo": "programma",
-            "citazione": "Al Senato M5S, PD, Verdi e Azione hanno firmato emendamenti che ripropongono la legge sul salario minimo legale (trattamento minimo orario non inferiore a 9 euro lordi) già bocciata dalla maggioranza",
-            "url": "https://www.linkiesta.it/2025/06/salario-minimo-opposizioni/",
-            "data": "2025-06-01"
+            "tipo": "voto",
+            "citazione": "Il Senato ha approvato in via definitiva la legge delega sul salario minimo il 23 settembre 2025 con 78 voti favorevoli e 52 contrari: a favore Fratelli d'Italia, Lega, Forza Italia e Noi Moderati, contrari tutti i partiti di opposizione. La delega non fissa la soglia di 9 euro l'ora chiesta dalla proposta unitaria delle opposizioni.",
+            "url": "https://pagellapolitica.it/articoli/parlamento-approva-delega-governo-salario-minimo",
+            "data": "2025-09-23"
           },
           "confidenza": "alta",
-          "nota": "Data approssimata al mese (URL datato giugno 2025). AVS è co-firmataria anche della proposta di legge unitaria delle opposizioni depositata il 30 giugno 2023 e dell'emendamento 9 euro respinto alla Camera (148 no, 111 sì; il manifesto)."
+          "nota": "Voto contrario alla delega che ha preso il posto della proposta dei 9 euro, di cui il partito è firmatario; durante l'esame alla Camera Schlein e Conte avevano ritirato la firma dal testo trasformato in delega (Pagella Politica). Fonte precedente: Al Senato M5S, PD, Verdi e Azione hanno firmato emendamenti che ripropongono la legge sul salario minimo legale (trattamento minimo orario non inferiore a 9 euro lordi) già bocciata dalla maggioranza (https://www.linkiesta.it/2025/06/salario-minimo-opposizioni/, 2025-06-01)."
         },
         {
           "affermazioneId": "lavoro-jobs-act",
@@ -1524,13 +1525,13 @@
           "affermazioneId": "istituzionale-autonomia",
           "valore": -2,
           "fonte": {
-            "tipo": "programma",
-            "citazione": "La raccolta firme per il referendum abrogativo della legge Calderoli è stata promossa da tutte le opposizioni tranne Azione, insieme a Cgil, Uil e associazioni",
-            "url": "https://www.agi.it/politica/news/2024-07-20/referendum-autonomia-opposizioni-27179603/",
-            "data": "2024-07-20"
+            "tipo": "voto",
+            "citazione": "Senato, 16 luglio 2026: approvate le risoluzioni sulle pre-intese di autonomia differenziata con Liguria, Lombardia, Piemonte e Veneto con 84 sì e 59 no; le opposizioni protestano in Aula con i cartelli «No allo spacca Italia».",
+            "url": "https://tg24.sky.it/politica/2026/07/16/autonomia-differenziata-approvato-senato-protesta-opposizioni",
+            "data": "2026-07-16"
           },
           "confidenza": "alta",
-          "nota": "AVS ha votato contro la legge (Camera 19 giugno 2024, 172 sì / 99 no) e ha promosso il referendum abrogativo, poi dichiarato inammissibile dalla Consulta (sent. 10/2025)."
+          "nota": "Voto contrario delle opposizioni alle pre-intese. Il capogruppo AVS Filiberto Zaratti ha denunciato una violazione della Costituzione. Fonte precedente: La raccolta firme per il referendum abrogativo della legge Calderoli è stata promossa da tutte le opposizioni tranne Azione, insieme a Cgil, Uil e associazioni (https://www.agi.it/politica/news/2024-07-20/referendum-autonomia-opposizioni-27179603/, 2024-07-20)."
         },
         {
           "affermazioneId": "giustizia-carriere",
@@ -2268,13 +2269,13 @@
           "affermazioneId": "istituzionale-autonomia",
           "valore": -2,
           "fonte": {
-            "tipo": "programma",
-            "citazione": "La raccolta firme per il referendum abrogativo della legge Calderoli ha visto la partecipazione di Cgil, Uil, associazioni e quasi tutte le opposizioni, da Italia Viva ad AVS, tranne Azione",
-            "url": "https://www.italiaoggi.it/le-guide-per-tutti/referendum-autonomia-differenziata-cosa-chiedono-i-firmatari-e-cosa-dice-la-legge-calderoli-va81oi9i",
-            "data": "2024-07-01"
+            "tipo": "voto",
+            "citazione": "Senato, 16 luglio 2026: approvate le risoluzioni sulle pre-intese di autonomia differenziata con Liguria, Lombardia, Piemonte e Veneto con 84 sì e 59 no; le opposizioni protestano in Aula con i cartelli «No allo spacca Italia».",
+            "url": "https://tg24.sky.it/politica/2026/07/16/autonomia-differenziata-approvato-senato-protesta-opposizioni",
+            "data": "2026-07-16"
           },
           "confidenza": "alta",
-          "nota": "Data approssimata al mese (comitato referendario, luglio 2024). IV ha votato contro la legge in Parlamento e promosso il referendum (poi inammissibile, Consulta sent. 10/2025)."
+          "nota": "Voto contrario delle opposizioni alle pre-intese. Italia Viva, con AVS, ha accusato la maggioranza di uno scambio fra autonomia e legge elettorale. Fonte precedente: La raccolta firme per il referendum abrogativo della legge Calderoli ha visto la partecipazione di Cgil, Uil, associazioni e quasi tutte le opposizioni, da Italia Viva ad AVS, tranne Azione (https://www.italiaoggi.it/le-guide-per-tutti/referendum-autonomia-differenziata-cosa-chiedono-i-firmatari-e-cosa-dice-la-legge-calderoli-va81oi9i, 2024-07-01)."
         },
         {
           "affermazioneId": "giustizia-carriere",
@@ -2684,12 +2685,12 @@
           "valore": -2,
           "fonte": {
             "tipo": "voto",
-            "citazione": "Senato/Camera 2023: FdI, Lega, FI e Noi Moderati votano la delega al governo che respinge la proposta delle opposizioni di un salario minimo legale a 9 euro. Lupi: 'Il salario minimo è un obbrobrio, dobbiamo lottare per il salario giusto'.",
+            "citazione": "Il Senato ha approvato in via definitiva la legge delega sul salario minimo il 23 settembre 2025 con 78 voti favorevoli e 52 contrari: a favore Fratelli d'Italia, Lega, Forza Italia e Noi Moderati, contrari tutti i partiti di opposizione. La delega non fissa la soglia di 9 euro l'ora chiesta dalla proposta unitaria delle opposizioni.",
             "url": "https://pagellapolitica.it/articoli/parlamento-approva-delega-governo-salario-minimo",
-            "data": "2023-11-01"
+            "data": "2025-09-23"
           },
           "confidenza": "alta",
-          "nota": "Data approssimata al mese (iter parlamentare novembre-dicembre 2023). La dichiarazione di Lupi è riportata da agenzianova.com ('Lupi: il salario minimo è un obbrobrio'); NM sostiene la contrattazione collettiva e il taglio del cuneo come alternativa. Coerente con la linea 2022."
+          "nota": "Voto più recente: la maggioranza sostituisce la soglia legale con una delega sulla contrattazione collettiva. Fonte precedente: Senato/Camera 2023: FdI, Lega, FI e Noi Moderati votano la delega al governo che respinge la proposta delle opposizioni di un salario minimo legale a 9 euro. Lupi: 'Il salario minimo è un obbrobrio, dobbiamo lottare per il salario giusto'. (https://pagellapolitica.it/articoli/parlamento-approva-delega-governo-salario-minimo, 2023-11-01)."
         },
         {
           "affermazioneId": "lavoro-jobs-act",
@@ -2768,12 +2769,12 @@
           "valore": 2,
           "fonte": {
             "tipo": "voto",
-            "citazione": "Camera, 19 giugno 2024: approvata la legge sull'autonomia differenziata (172 sì, 99 no); Martina Semenzato (Noi Moderati) in dichiarazione di voto: 'votare a favore di questo provvedimento significa fare una scelta di coraggio e lungimiranza'.",
-            "url": "https://www.quotidiano.net/politica/ddl-autonomia-differenziata-voto-bt4v35ij",
-            "data": "2024-06-19"
+            "citazione": "Autonomia differenziata, il sì della Camera alle pre-intese (21 luglio 2026): la maggioranza approva le quattro pre-intese sulle materie 'non LEP' previste dalla legge Calderoli; i comitati protestano parlando di 'ricatto della Lega a FdI dopo il sì alla legge elettorale'.",
+            "url": "https://www.open.online/2026/07/21/autonomia-differenziata-protesta-montecitorio-ricatto-fdi-lega-video/",
+            "data": "2026-07-21"
           },
           "confidenza": "alta",
-          "nota": "Più recentemente Lupi ha dichiarato che l'autonomia differenziata era nel programma di governo e sarà attuata, con le correzioni indicate dalla Corte costituzionale (sentenza 192/2024). Favorevole al mantenimento e all'attuazione: +2."
+          "nota": "Noi Moderati fa parte della maggioranza che ha approvato le pre-intese. Fonte precedente: Camera, 19 giugno 2024: approvata la legge sull'autonomia differenziata (172 sì, 99 no); Martina Semenzato (Noi Moderati) in dichiarazione di voto: 'votare a favore di questo provvedimento significa fare una scelta di coraggio e lungimiranza'. (https://www.quotidiano.net/politica/ddl-autonomia-differenziata-voto-bt4v35ij, 2024-06-19)."
         },
         {
           "affermazioneId": "giustizia-carriere",
@@ -2882,6 +2883,476 @@
           },
           "confidenza": "media",
           "nota": "Favorevole alla collaborazione pubblico-privato nel SSN (sussidiarietà); nessun riferimento esplicito ad ampliare le convenzioni: +1."
+        }
+      ]
+    },
+    {
+      "id": "pld",
+      "nome": "Partito Liberaldemocratico",
+      "sigla": "PLD",
+      "leader": "Luigi Marattin",
+      "sito": "https://partitoliberaldemocratico.com",
+      "colore": "#00A3E0",
+      "posizioni": [
+        {
+          "affermazioneId": "fisco-flat-tax",
+          "valore": -1,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Una “vera” riforma del fisco e della giustizia tributaria, puntando sull’alleggerimento delle imposte (in particolare dell’Irpef, attraverso un graduale allargamento degli scaglioni, la revisione dei “gradini” della scala delle aliquote e lo scambio tra sfoltimento delle tax expenditures e riduzione delle aliquote).",
+            "url": "https://partitoliberaldemocratico.com/fisco/"
+          },
+          "confidenza": "media",
+          "nota": "Il PLD propone di alleggerire e semplificare l'Irpef mantenendo scaglioni e aliquote, non un'aliquota unica per dipendenti e pensionati: contrario con riserva (-1). Pagina programmatica consultata il 10 settembre 2026."
+        },
+        {
+          "affermazioneId": "fisco-patrimoniale",
+          "valore": null,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "nessuna fonte verificabile trovata",
+            "url": ""
+          },
+          "confidenza": "bassa",
+          "nota": "Nessuna presa di posizione esplicita trovata. Il documento fiscale del PLD propone un 'concordato fiscale preventivo successorio' per sterilizzare futuri aggravi sulle successioni, ma non parla di un'imposta sul patrimonio netto."
+        },
+        {
+          "affermazioneId": "fisco-banche",
+          "valore": null,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "nessuna fonte verificabile trovata",
+            "url": ""
+          },
+          "confidenza": "bassa",
+          "nota": "Nessuna fonte verificabile trovata negli ultimi dodici mesi né nei documenti del partito."
+        },
+        {
+          "affermazioneId": "lavoro-salario-minimo",
+          "valore": -1,
+          "fonte": {
+            "tipo": "dichiarazione",
+            "citazione": "Marattin: la soglia di 9 euro corrisponderebbe al 75% del salario mediano, oltre il 60% indicato come massimo dalle organizzazioni internazionali; come alternative propone «l’imposta negativa» e «la detassazione completa della contrattazione territoriale e/o aziendale».",
+            "url": "https://www.luigimarattin.it/2023/07/01/salario-minimo-10-domande-e-risposte-per-far-chiarezza/",
+            "data": "2023-07-01"
+          },
+          "confidenza": "media",
+          "nota": "Posizione espressa nel 2023, da deputato di Italia Viva, prima della nascita del PLD. Confermata dalla linea del 2026: ai contratti nazionali restano solo 'salario minimo e recupero inflazione programmata', tutto il resto va alla contrattazione territoriale (Quotidiano Nazionale, 24/4/2026: https://partitoliberaldemocratico.com/parlano-di-noi-luigi-marattin-quotidiano-nazionale-24-04-2026/)."
+        },
+        {
+          "affermazioneId": "lavoro-jobs-act",
+          "valore": 1,
+          "fonte": {
+            "tipo": "dichiarazione",
+            "citazione": "«Si è detto che votandolo si abolisce il Jobs act e si torna al reintegro, ma non è così». Il quesito sui licenziamenti «è quello su cui si è più concentrato il furore ideologico ed è quello che danneggerebbe di più i lavoratori».",
+            "url": "https://www.luigimarattin.it/2025/06/07/marattin-il-mio-si-solo-alla-cittadinanza-sul-lavoro-vedo-furore-ideologico/",
+            "data": "2025-06-07"
+          },
+          "confidenza": "media",
+          "nota": "Al referendum dell'8-9 giugno 2025 Marattin non ha ritirato le schede sui quesiti del lavoro. Difende le regole vigenti per dichiarazione: +1."
+        },
+        {
+          "affermazioneId": "lavoro-pensioni",
+          "valore": -1,
+          "fonte": {
+            "tipo": "dichiarazione",
+            "citazione": "Riforma pensioni 2026, Marattin contro blocco aumento dei requisiti (titolo dell'articolo).",
+            "url": "https://www.ilsussidiario.net/news/riforma-pensioni-2026-marattin-contro-blocco-aumento-dei-requisiti-ultime-notizie-20-agosto/2991372/",
+            "data": "2026-08-20"
+          },
+          "confidenza": "bassa",
+          "nota": "Il segretario del PLD contesta il blocco dell'adeguamento dei requisiti pensionistici all'aspettativa di vita e cita la riforma tedesca con capitalizzazione parziale: linea opposta ad anticipare l'uscita. Quota 41 non è citata esplicitamente, da cui la confidenza bassa. Il documento fiscale del PLD propone di 'liberare una quota di contribuzione obbligatoria a favore dei fondi complementari privati' (https://partitoliberaldemocratico.com/fisco/)."
+        },
+        {
+          "affermazioneId": "immigrazione-albania",
+          "valore": null,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "nessuna fonte verificabile trovata",
+            "url": ""
+          },
+          "confidenza": "bassa",
+          "nota": "Nessuna fonte verificabile trovata negli ultimi dodici mesi né nei documenti del partito."
+        },
+        {
+          "affermazioneId": "immigrazione-cittadinanza",
+          "valore": 1,
+          "fonte": {
+            "tipo": "dichiarazione",
+            "citazione": "«Vado, ritiro la scheda sulla cittadinanza e voto sì. Le altre non le ritiro».",
+            "url": "https://www.luigimarattin.it/2025/06/07/marattin-il-mio-si-solo-alla-cittadinanza-sul-lavoro-vedo-furore-ideologico/",
+            "data": "2025-06-07"
+          },
+          "confidenza": "media",
+          "nota": "Il quesito del 2025 riduceva da 10 a 5 anni la residenza richiesta per chiedere la cittadinanza e non riguarda direttamente lo ius scholae, da cui +1. Il documento del PLD sull'immigrazione osserva che l'allungamento dei percorsi di cittadinanza non ha prodotto più rimpatri ma ha ampliato l'irregolarità (https://partitoliberaldemocratico.com/immigrazione/)."
+        },
+        {
+          "affermazioneId": "istituzionale-premierato",
+          "valore": null,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "nessuna fonte verificabile trovata",
+            "url": ""
+          },
+          "confidenza": "bassa",
+          "nota": "Il documento sulle riforme istituzionali propone due possibili sistemi elettorali (doppio turno di collegio o proporzionale con preferenze) ma non si esprime sull'elezione diretta del Presidente del Consiglio."
+        },
+        {
+          "affermazioneId": "istituzionale-premio",
+          "valore": -2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Sosteniamo che la scelta del nuovo sistema elettorale debba essere presa con un larghissimo accordo tra le forze politiche, ma che possa oscillare solo tra due modelli: 1. Un sistema maggioritario a doppio turno, sul modello di quello in vigore in Francia [...] 2. Un sistema interamente proporzionale con sbarramento e con preferenze.",
+            "url": "https://partitoliberaldemocratico.com/riformeistituzionali/"
+          },
+          "confidenza": "alta",
+          "nota": "Nessuno dei due modelli prevede un premio alla coalizione sopra soglia. Sulla riforma approvata alla Camera il 16 luglio 2026 Marattin ha parlato di «una legge sbagliata», che costringe a stare insieme partiti diversi, e ha presentato emendamenti per il proporzionale con preferenze (luigimarattin.it, 18/7/2026: https://www.luigimarattin.it/2026/07/18/marattin-una-legge-sbagliata/)."
+        },
+        {
+          "affermazioneId": "istituzionale-autonomia",
+          "valore": -2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "La Corte Costituzionale a nostro giudizio ha lodevolmente bocciato molto aspetti rilevanti della cosiddetta “Riforma Calderoli” sull’Autonomia Differenziata delle regioni.",
+            "url": "https://partitoliberaldemocratico.com/riformeistituzionali/"
+          },
+          "confidenza": "alta",
+          "nota": "Il documento propone un federalismo 'con una impostazione però completamente differente rispetto alla riforma delle autonomie regionali c.d. Riforma Calderoli', definita 'tanto improvvidamente confusa e ideologica'."
+        },
+        {
+          "affermazioneId": "giustizia-carriere",
+          "valore": -2,
+          "fonte": {
+            "tipo": "voto",
+            "citazione": "Camera, 18 settembre 2025, seconda deliberazione della legge costituzionale sulla separazione delle carriere (243 sì, 109 no, 6 astenuti): Luigi Marattin, segretario del PLD, vota a favore.",
+            "url": "https://dati.camera.it/ocd/votazione.rdf/vs19_531_001",
+            "data": "2025-09-18"
+          },
+          "confidenza": "alta",
+          "nota": "Voto nominale dai dati aperti della Camera. Marattin: «L'ho già votata alla Camera e sono pronto a rifarlo. È la naturale prosecuzione, con 35 anni di ritardo, del passaggio da sistema inquisitorio a quello accusatorio» (27/6/2025, https://www.luigimarattin.it/2025/06/27/marattin-libdem-alternativi-a-destra-e-sinistra-i-pm-la-riforma-e-ok/). Al referendum del marzo 2026 il PLD ha promosso il comitato «Giustizia Sì» (Il Messaggero)."
+        },
+        {
+          "affermazioneId": "europa-safe",
+          "valore": null,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "nessuna fonte verificabile trovata",
+            "url": ""
+          },
+          "confidenza": "bassa",
+          "nota": "Dichiarazioni non univoche: Marattin sostiene che «l'Europa deve sapere badare alla propria sicurezza» (27/6/2025) ma critica un governo che deve spiegare «perché ci indebitiamo per comprare armi e non per abbassare le bollette» (24/4/2026). Nessuna posizione esplicita sui prestiti SAFE."
+        },
+        {
+          "affermazioneId": "europa-euro-patto",
+          "valore": 1,
+          "fonte": {
+            "tipo": "dichiarazione",
+            "citazione": "«Se la situazione internazionale volgerà al peggio, sarà la UE a sospendere le regole fiscali, come già successo con Covid e Ucraina». «Poiché ci accingiamo a diventare il paese più indebitato d'Europa, eviterei di essere noi a fare fughe in avanti».",
+            "url": "https://www.luigimarattin.it/2026/04/29/marattin-non-si-risolve-tutto-ricorrendo-al-debito/",
+            "data": "2026-04-29"
+          },
+          "confidenza": "media",
+          "nota": "Contrario a chiedere per primi deroghe alle regole fiscali europee. Il PLD è europeista: il manifesto 'Europa We Want' propone anche un debito comune europeo permanente (https://partitoliberaldemocratico.com/europawewant/). Favorevole con condizioni: +1."
+        },
+        {
+          "affermazioneId": "esteri-ucraina",
+          "valore": 1,
+          "fonte": {
+            "tipo": "dichiarazione",
+            "citazione": "«Continuando a sostenere l'Ucraina senza se e senza ma».",
+            "url": "https://www.luigimarattin.it/2025/10/11/marattin-con-calenda-sfidiamo-la-politica-degli-ultra-forza-italia-ci-segua/",
+            "data": "2025-10-11"
+          },
+          "confidenza": "media",
+          "nota": "Dichiarazione del leader senza riferimento specifico all'invio di armi: +1. Sulla conversione del decreto di proroga (Camera, 11/2/2026) i dati aperti della Camera registrano Marattin come non votante."
+        },
+        {
+          "affermazioneId": "esteri-palestina",
+          "valore": -1,
+          "fonte": {
+            "tipo": "dichiarazione",
+            "citazione": "Riconoscere ora lo Stato di Palestina sarebbe «un ovvio premio ad Hamas e alle sue azioni criminali»: serve «la giusta sequenza di eventi», con rilascio degli ostaggi, fine delle operazioni militari israeliane a Gaza e una governance palestinese «assolutamente libera da Hamas».",
+            "url": "https://www.luigimarattin.it/2025/09/25/palestina-la-linea-di-meloni-e-buonsenso-la-versione-di-marattin/",
+            "data": "2025-09-25"
+          },
+          "confidenza": "media",
+          "nota": "Favorevole al riconoscimento solo a condizioni, come la mozione di maggioranza che il PLD ha annunciato di votare («sì a Palestina senza Hamas», Il Riformista). Contrario al riconoscimento senza condizioni: -1."
+        },
+        {
+          "affermazioneId": "ambiente-nucleare",
+          "valore": 2,
+          "fonte": {
+            "tipo": "voto",
+            "citazione": "Camera, 4 giugno 2026, voto finale sulla legge delega sul nucleare sostenibile (155 sì, 86 no, 8 astenuti): Luigi Marattin vota a favore.",
+            "url": "https://dati.camera.it/ocd/votazione.rdf/vs19_669_001",
+            "data": "2026-06-04"
+          },
+          "confidenza": "alta",
+          "nota": "Voto nominale dai dati aperti della Camera; Il Sole 24 Ore riporta il sì 'anche di Azione e della componente Pld-misto'. Il PLD aveva depositato emendamenti 'per far sì che sul nucleare si passi davvero dalle parole ai fatti' (23/4/2026, https://partitoliberaldemocratico.com/energia/)."
+        },
+        {
+          "affermazioneId": "ambiente-auto-2035",
+          "valore": null,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "nessuna fonte verificabile trovata",
+            "url": ""
+          },
+          "confidenza": "bassa",
+          "nota": "Nessuna fonte verificabile trovata negli ultimi dodici mesi né nei documenti del partito."
+        },
+        {
+          "affermazioneId": "diritti-fine-vita",
+          "valore": null,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "nessuna fonte verificabile trovata",
+            "url": ""
+          },
+          "confidenza": "bassa",
+          "nota": "Nessuna fonte verificabile trovata negli ultimi dodici mesi né nei documenti del partito."
+        },
+        {
+          "affermazioneId": "sanita-privata",
+          "valore": 1,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Che esista un ufficio di controllo di appropriatezza delle prestazioni erogate dai privati convenzionati con controlli a campione, e che periodicamente si mettano a gara quote di prestazioni, al miglior rapporto qualità/prezzo.",
+            "url": "https://partitoliberaldemocratico.com/sanita/"
+          },
+          "confidenza": "media",
+          "nota": "Il PLD mantiene il ruolo dei privati convenzionati, con più controlli e gare periodiche sulle prestazioni: favorevole con condizioni (+1). Il documento propone anche 'forme standardizzate di collaborazione con le RSA pubbliche e private'."
+        }
+      ]
+    },
+    {
+      "id": "ora",
+      "nome": "Ora!",
+      "sigla": "Ora!",
+      "leader": "Michele Boldrin",
+      "sito": "https://ora-italia.it",
+      "colore": "#D4A20B",
+      "posizioni": [
+        {
+          "affermazioneId": "fisco-flat-tax",
+          "valore": null,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "nessuna fonte verificabile trovata",
+            "url": ""
+          },
+          "confidenza": "bassa",
+          "nota": "Il programma chiede di 'semplificare il numero di imposte e aliquote' e di spostare il carico dal lavoro a patrimoni e rendite, ma non si esprime su un'aliquota unica."
+        },
+        {
+          "affermazioneId": "fisco-patrimoniale",
+          "valore": 1,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Per ripartire bisogna alleggerire il carico su chi lavora e fa impresa, far pagare il giusto ai grandi patrimoni improduttivi aggiornando un catasto fermo a decenni fa, e rendere fiscalmente più conveniente investire in crescita e innovazione che accumulare rendita.",
+            "url": "https://ora-italia.it/le-nostre-posizioni-politiche/"
+          },
+          "confidenza": "bassa",
+          "nota": "Pagina ufficiale 'Le nostre posizioni politiche', con le tesi programmatiche approvate dal partito, consultata il 10 settembre 2026. Ora! chiede 'meno imposte sul lavoro e più contributo da patrimoni e rendite', ma attraverso la revisione del catasto e non con un'imposta sul patrimonio netto sopra i 5 milioni; nel giugno 2026 Boldrin ha definito 'una bufala' la patrimoniale proposta da Schlein (Radio 24, https://www.youtube.com/watch?v=wbiEmV13g9Y). Favorevole solo in parte: +1 con confidenza bassa."
+        },
+        {
+          "affermazioneId": "fisco-banche",
+          "valore": null,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "nessuna fonte verificabile trovata",
+            "url": ""
+          },
+          "confidenza": "bassa",
+          "nota": "Nessuna fonte verificabile trovata negli ultimi dodici mesi né nei documenti del partito."
+        },
+        {
+          "affermazioneId": "lavoro-salario-minimo",
+          "valore": -1,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "I salari non si alzano per decreto. Si alzano quando le imprese crescono, innovano e competono.",
+            "url": "https://ora-italia.it/le-nostre-posizioni-politiche/"
+          },
+          "confidenza": "media",
+          "nota": "Pagina ufficiale 'Le nostre posizioni politiche', con le tesi programmatiche approvate dal partito, consultata il 10 settembre 2026. Boldrin, 7/3/2025: «Il salario minimo non serve. Ci interessa il salario medio, il salario alto» (Il Fatto Quotidiano, https://www.ilfattoquotidiano.it/2025/03/07/al-centro-manca-un-partito-credibile-boldrin-ci-riprova-insieme-a-forchielli-con-drin-drin-sulle-armi-ci-serve-deterrenza-nucleare/7903628/). Contrario, senza riferimento esplicito ai 9 euro: -1."
+        },
+        {
+          "affermazioneId": "lavoro-jobs-act",
+          "valore": null,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "nessuna fonte verificabile trovata",
+            "url": ""
+          },
+          "confidenza": "bassa",
+          "nota": "Nessuna fonte verificabile trovata negli ultimi dodici mesi né nei documenti del partito."
+        },
+        {
+          "affermazioneId": "lavoro-pensioni",
+          "valore": -1,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Per garantire equità tra generazioni e un welfare sostenibile per i nostri figli serve un sistema pensionistico unico, trasparente, dove i contributi versati corrispondano alle prestazioni ricevute.",
+            "url": "https://ora-italia.it/le-nostre-posizioni-politiche/"
+          },
+          "confidenza": "media",
+          "nota": "Pagina ufficiale 'Le nostre posizioni politiche', con le tesi programmatiche approvate dal partito, consultata il 10 settembre 2026. Ora! chiede di 'riformare le pensioni per equità e sostenibilità' e di ridurre la spesa pensionistica: linea opposta all'uscita con 41 anni di contributi a qualsiasi età, che però non è citata esplicitamente (-1)."
+        },
+        {
+          "affermazioneId": "immigrazione-albania",
+          "valore": -2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "La destra ha sottoscritto impegni di spesa per 680 milioni (su orizzonte 5 anni) per costruire e gestire i centri in Albania che in un anno hanno visto transitare solo 219 persone. Un monumento allo spreco pagato dai contribuenti.",
+            "url": "https://ora-italia.it/le-nostre-posizioni-politiche/"
+          },
+          "confidenza": "alta",
+          "nota": "Pagina ufficiale 'Le nostre posizioni politiche', con le tesi programmatiche approvate dal partito, consultata il 10 settembre 2026. Contrarietà esplicita ai centri in Albania."
+        },
+        {
+          "affermazioneId": "immigrazione-cittadinanza",
+          "valore": 2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Accelerare procedure cittadinanza (5+5 max); adozione ius soli italiano: nati in Italia acquisiscono cittadinanza al primo anno di scuola elementare. [...] Attraverso lo ius scholae la scuola diventa strumento di integrazione.",
+            "url": "https://ora-italia.it/le-nostre-posizioni-politiche/"
+          },
+          "confidenza": "alta",
+          "nota": "Pagina ufficiale 'Le nostre posizioni politiche', con le tesi programmatiche approvate dal partito, consultata il 10 settembre 2026. Proposta esplicita, che va oltre lo ius scholae."
+        },
+        {
+          "affermazioneId": "istituzionale-premierato",
+          "valore": null,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "nessuna fonte verificabile trovata",
+            "url": ""
+          },
+          "confidenza": "bassa",
+          "nota": "Nessuna fonte verificabile trovata negli ultimi dodici mesi né nei documenti del partito."
+        },
+        {
+          "affermazioneId": "istituzionale-premio",
+          "valore": -2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "ORA! esprime la propria contrarietà allo Stabilicum, la proposta di legge elettorale A.C. 2822 approvata dalla Camera il 16 luglio 2026. [...] La stabilità non si ottiene alterando il risultato del voto.",
+            "url": "https://ora-italia.it/stabilicum-ora-la-stabilita-non-si-costruisce-togliendo-ai-cittadini-il-diritto-di-scegliere/",
+            "data": "2026-07-23"
+          },
+          "confidenza": "alta",
+          "nota": "Comunicato programmatico ufficiale del partito. Il testo contesta il premio di 70 seggi alla Camera e 35 al Senato sopra il 42% e chiede preferenze e il divieto di candidature multiple."
+        },
+        {
+          "affermazioneId": "istituzionale-autonomia",
+          "valore": null,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "nessuna fonte verificabile trovata",
+            "url": ""
+          },
+          "confidenza": "bassa",
+          "nota": "Nessuna fonte verificabile trovata negli ultimi dodici mesi né nei documenti del partito."
+        },
+        {
+          "affermazioneId": "giustizia-carriere",
+          "valore": null,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "nessuna fonte verificabile trovata",
+            "url": ""
+          },
+          "confidenza": "bassa",
+          "nota": "Ora! non ha dato un'indicazione ufficiale sul referendum del marzo 2026: la sezione veneta ha organizzato un confronto fra le ragioni del Sì e del No (vipiu.it, 21/2/2026: https://www.vipiu.it/leggi/referendum-giustizia-2026-vicenza-dibattito-ora-veneto/)."
+        },
+        {
+          "affermazioneId": "europa-safe",
+          "valore": 1,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Portare la spesa per la difesa al 2% reale del PIL con risorse vere, pianificando investimenti in satelliti, missili ballistici, electronic warfare, droni cybersecurity.",
+            "url": "https://ora-italia.it/le-nostre-posizioni-politiche/"
+          },
+          "confidenza": "media",
+          "nota": "Pagina ufficiale 'Le nostre posizioni politiche', con le tesi programmatiche approvate dal partito, consultata il 10 settembre 2026. Favorevole ad aumentare la spesa militare e a una difesa comune europea; il programma non cita i prestiti SAFE e accusa il governo di truccare la spesa militare 'con riclassificazioni contabili'. Favorevole con condizioni: +1."
+        },
+        {
+          "affermazioneId": "europa-euro-patto",
+          "valore": null,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "nessuna fonte verificabile trovata",
+            "url": ""
+          },
+          "confidenza": "bassa",
+          "nota": "Il programma è europeista ('ORA crede nell'Europa') e chiede di ridurre il debito, ma non si esprime sulle regole del Patto di stabilità."
+        },
+        {
+          "affermazioneId": "esteri-ucraina",
+          "valore": 2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Sostenere l'Ucraina militarmente, economicamente e nel percorso di adesione a UE e NATO.",
+            "url": "https://ora-italia.it/le-nostre-posizioni-politiche/"
+          },
+          "confidenza": "alta",
+          "nota": "Pagina ufficiale 'Le nostre posizioni politiche', con le tesi programmatiche approvate dal partito, consultata il 10 settembre 2026. Sostegno militare esplicito."
+        },
+        {
+          "affermazioneId": "esteri-palestina",
+          "valore": 2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Riconoscere lo Stato di Palestina entro i confini del 1967, imporre sanzioni e cessare le forniture di armi a Israele in accordo con il diritto internazionale.",
+            "url": "https://ora-italia.it/le-nostre-posizioni-politiche/"
+          },
+          "confidenza": "alta",
+          "nota": "Pagina ufficiale 'Le nostre posizioni politiche', con le tesi programmatiche approvate dal partito, consultata il 10 settembre 2026. Riconoscimento esplicito."
+        },
+        {
+          "affermazioneId": "ambiente-nucleare",
+          "valore": 2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "ORA! è per la reintroduzione immediata del nucleare in Italia.",
+            "url": "https://ora-italia.it/le-nostre-posizioni-politiche/"
+          },
+          "confidenza": "alta",
+          "nota": "Pagina ufficiale 'Le nostre posizioni politiche', con le tesi programmatiche approvate dal partito, consultata il 10 settembre 2026. Proposta esplicita."
+        },
+        {
+          "affermazioneId": "ambiente-auto-2035",
+          "valore": null,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "nessuna fonte verificabile trovata",
+            "url": ""
+          },
+          "confidenza": "bassa",
+          "nota": "Nessuna fonte verificabile trovata negli ultimi dodici mesi né nei documenti del partito."
+        },
+        {
+          "affermazioneId": "diritti-fine-vita",
+          "valore": 2,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Legge organica sul fine vita che integri le leggi 38/2010 e 219/2017 e recepisca la sentenza 242/2019 della Corte Costituzionale, permettendo la registrazione delle volontà presso gli uffici comunali.",
+            "url": "https://ora-italia.it/le-nostre-posizioni-politiche/"
+          },
+          "confidenza": "alta",
+          "nota": "Pagina ufficiale 'Le nostre posizioni politiche', con le tesi programmatiche approvate dal partito, consultata il 10 settembre 2026. La sentenza 242/2019 è quella che ha indicato i casi di accesso al suicidio medicalmente assistito."
+        },
+        {
+          "affermazioneId": "sanita-privata",
+          "valore": 1,
+          "fonte": {
+            "tipo": "programma",
+            "citazione": "Se il pubblico non riesce a garantire una prestazione nei tempi dovuti, il cittadino non debba essere lasciato solo.",
+            "url": "https://ora-italia.it/le-nostre-posizioni-politiche/"
+          },
+          "confidenza": "bassa",
+          "nota": "Pagina ufficiale 'Le nostre posizioni politiche', con le tesi programmatiche approvate dal partito, consultata il 10 settembre 2026. Ora! chiede 'più risorse stabili al Servizio sanitario nazionale' e che il cittadino non resti senza cure quando il pubblico non rispetta i tempi; non parla esplicitamente della sanità privata convenzionata, da cui +1 con confidenza bassa."
         }
       ]
     }

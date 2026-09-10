@@ -21,6 +21,9 @@ const mappaLoghi: Record<string, string> = {
   'Italia Viva': '/loghi-partiti/iv.png',
   '+Europa': '/loghi-partiti/piueuropa.png',
   'Noi Moderati': '/loghi-partiti/noimoderati.png',
+  'Futuro Nazionale': '/loghi-partiti/futuronazionale.png',
+  'Partito Liberaldemocratico': '/loghi-partiti/pld.png',
+  'Ora!': '/loghi-partiti/ora.png',
 };
 
 export function LogoPartito({ nome, sigla, colore, className = 'w-10 h-10' }: Props) {
