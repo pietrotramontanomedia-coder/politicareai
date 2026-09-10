@@ -14,6 +14,8 @@ import {
   type PosizionePartito,
   type Schieramento,
 } from '@/lib/confronta';
+import { datiConfronto } from '@/lib/condivisione/dati';
+import { CondividiConfronto } from '@/components/condivisione/Condivisioni';
 
 type Props = { params: Promise<{ tema: string }> };
 
@@ -100,9 +102,12 @@ export default async function PaginaTema({ params }: Props) {
             className="mt-10 scroll-mt-24 rounded-3xl border p-5 sm:p-7"
             style={{ borderColor: 'var(--bordo)', background: 'var(--bg-elevated)' }}
           >
-            <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--fg-muta)' }}>
-              {i + 1} di {tema.affermazioni.length} · {T.verso(affermazione.verso)}
-            </p>
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--fg-muta)' }}>
+                {i + 1} di {tema.affermazioni.length} · {T.verso(affermazione.verso)}
+              </p>
+              <CondividiConfronto dati={datiConfronto(pack, affermazione)} />
+            </div>
             <h2 className="mt-2 text-xl font-semibold leading-snug sm:text-2xl">{affermazione.testo}</h2>
 
             <div className="mt-5 grid gap-3 md:grid-cols-3">

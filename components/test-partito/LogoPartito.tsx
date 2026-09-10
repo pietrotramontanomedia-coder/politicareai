@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import { LOGHI_PARTITI } from '@/lib/loghi-partiti';
 
 interface Props {
   nome: string;
@@ -10,24 +11,8 @@ interface Props {
   className?: string;
 }
 
-const mappaLoghi: Record<string, string> = {
-  "Fratelli d'Italia": '/loghi-partiti/fdi.png',
-  'Partito Democratico': '/loghi-partiti/pd.png',
-  'Movimento 5 Stelle': '/loghi-partiti/m5s.png',
-  Lega: '/loghi-partiti/lega.png',
-  'Alleanza Verdi e Sinistra': '/loghi-partiti/avs.png',
-  'Forza Italia': '/loghi-partiti/fi.png',
-  Azione: '/loghi-partiti/azione.png',
-  'Italia Viva': '/loghi-partiti/iv.png',
-  '+Europa': '/loghi-partiti/piueuropa.png',
-  'Noi Moderati': '/loghi-partiti/noimoderati.png',
-  'Futuro Nazionale': '/loghi-partiti/futuronazionale.png',
-  'Partito Liberaldemocratico': '/loghi-partiti/pld.png',
-  'Ora!': '/loghi-partiti/ora.png',
-};
-
 export function LogoPartito({ nome, sigla, colore, className = 'w-10 h-10' }: Props) {
-  const src = mappaLoghi[nome];
+  const src = LOGHI_PARTITI[nome];
 
   if (!src) {
     // Nessun file: segnaposto con la sigla nel colore del partito, così il partito resta riconoscibile.

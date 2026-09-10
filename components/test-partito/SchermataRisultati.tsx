@@ -5,6 +5,8 @@ import { motion } from 'framer-motion';
 import type { Classifica, TestPartitoPack } from '@politicare/motore';
 import { SOGLIA_COPERTURA } from '@politicare/motore';
 import RigaClassifica from './RigaClassifica';
+import { CondividiTest } from '@/components/condivisione/Condivisioni';
+import { TESTI_CONDIVISIONE } from '@/lib/condivisione/testi';
 
 interface Props {
   pack: TestPartitoPack;
@@ -50,6 +52,21 @@ export default function SchermataRisultati({
         >
           <strong>Pari merito.</strong> {primo.nome} e {secondo.nome} sono a meno di 3 punti
           percentuali di distanza: consideriamoli appaiati, non c&apos;è un primo classificato netto.
+        </div>
+      )}
+
+      {classifica.risultati.length > 0 && (
+        <div
+          className="mt-6 flex flex-col gap-4 rounded-2xl border p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5"
+          style={{ borderColor: 'rgba(254,220,1,0.3)', background: 'radial-gradient(120% 120% at 100% 0%, rgba(254,220,1,0.12), transparent 60%), var(--bg-card)' }}
+        >
+          <div>
+            <p className="font-semibold">{TESTI_CONDIVISIONE.test.richiamo}</p>
+            <p className="mt-1 text-sm leading-relaxed" style={{ color: 'var(--fg-muta)' }}>
+              {TESTI_CONDIVISIONE.test.spiegazione}
+            </p>
+          </div>
+          <CondividiTest pack={pack} classifica={classifica} numeroRisposte={numeroRisposte} />
         </div>
       )}
 

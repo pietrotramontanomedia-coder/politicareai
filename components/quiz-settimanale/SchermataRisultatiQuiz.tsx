@@ -5,6 +5,7 @@ import { motion, useReducedMotion } from 'framer-motion';
 import type { DifficoltaQuiz, QuizSettimanale, RiepilogoGruppo, RispostaQuiz } from '@politicare/motore';
 import { riepilogaQuiz } from '@politicare/motore';
 import { ETICHETTE_DIFFICOLTA, TESTI_QUIZ } from '@/lib/quiz';
+import { CondividiQuiz } from '@/components/condivisione/Condivisioni';
 
 interface Props {
   quiz: QuizSettimanale;
@@ -73,6 +74,9 @@ export default function SchermataRisultatiQuiz({ quiz, risposte, onRicomincia }:
         <p className="mt-1 text-sm" style={{ color: 'var(--fg-muta)' }}>
           {TESTI_QUIZ.risultati.commento(riepilogo.percentuale)}
         </p>
+        <div className="mt-6 flex justify-center">
+          <CondividiQuiz quiz={quiz} risposte={risposte} percorso={`/quiz-settimanale/${quiz.numero}`} />
+        </div>
       </header>
 
       {/* Dettaglio per sezione e per difficoltà */}

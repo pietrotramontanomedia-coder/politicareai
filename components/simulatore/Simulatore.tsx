@@ -13,6 +13,7 @@ import {
   type ListaInput,
   type Preset,
 } from '@/lib/simulatore-elettorale';
+import { CondividiSimulazione } from '@/components/condivisione/Condivisioni';
 
 const DA_SOLA = '';
 const PUNTI_CAMERA = puntiEmiciclo(REGOLE.camera.totale, 12);
@@ -249,6 +250,9 @@ function Risultato({ esito }: { esito: Esito }) {
 
   return (
     <div className="rounded-3xl border p-4 sm:p-5" style={{ borderColor: 'var(--bordo)', background: 'var(--bg-elevated)' }}>
+      <div className="mb-3 flex justify-end">
+        <CondividiSimulazione esito={esito} />
+      </div>
       <p
         className="rounded-2xl px-3 py-2 text-sm font-semibold"
         style={
