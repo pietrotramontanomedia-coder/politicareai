@@ -27,9 +27,6 @@ export default function Header() {
             <Link href="/quiz-settimanale" className="hover:opacity-70 transition-opacity">
               Quiz
             </Link>
-            <Link href="/agenzie" className="hover:opacity-70 transition-opacity">
-              Agenzie
-            </Link>
             <Link href="/metodologia" className="hover:opacity-70 transition-opacity" style={{ color: 'var(--fg-muta)' }}>
               Metodologia
             </Link>

@@ -4,7 +4,6 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import FeedSection from '@/components/FeedSection';
 import UltimOraTicker from '@/components/UltimOraTicker';
-import LanciAgenzie from '@/components/agenzie/LanciAgenzie';
 import PostCarousel from '@/components/PostCarousel';
 import Logo from '@/components/Logo';
 
@@ -26,9 +25,6 @@ export default function Home() {
             className="mb-8"
           >
             <UltimOraTicker limite={5} />
-            <div className="mt-3">
-              <LanciAgenzie limite={3} />
-            </div>
           </motion.div>
 
           <motion.div
