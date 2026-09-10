@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest';
+import packPartiti from '@/content/test-partito/politiche-2027.v1.json';
 import {
   aggiornaLeggi,
   componiCarta,
   generatore,
   mescola,
+  nomiRealiNelTesto,
   nomiValidi,
   PACCO_ATTUALITA,
   PACCO_BASE,
@@ -11,9 +13,11 @@ import {
   preparaPartita,
   validaPacco,
   type Carta,
+  type PartitoGioco,
 } from '@/lib/gioco';
 
 const GIOCATORI = ['Anna', 'Bruno', 'Carla', 'Dario'];
+const PARTITI: PartitoGioco[] = packPartiti.partiti.map(({ nome, sigla, leader }) => ({ nome, sigla, leader }));
 
 function carta(parziale: Partial<Carta> = {}): Carta {
   return { id: 'x-1', tipo: 'sfida', titolo: 'Prova', testo: '{g1} fa una cosa.', penalita: 1, ...parziale };
@@ -43,6 +47,10 @@ describe('pacchi di carte pubblicati', () => {
     const ids = [...PACCO_BASE.carte, ...PACCO_ATTUALITA.carte].map((c) => c.id);
     expect(new Set(ids).size).toBe(ids.length);
   });
+
+  it('il mazzo base non scrive nomi di partiti o leader: solo segnaposto estratti a caso', () => {
+    expect(nomiRealiNelTesto(PACCO_BASE, PARTITI)).toEqual([]);
+  });
 });
 
 describe('validaPacco', () => {
@@ -65,6 +73,26 @@ describe('validaPacco', () => {
     const pacco = { ...PACCO_BASE, carte: [carta(), carta()] };
     expect(validaPacco(pacco).join()).toContain('duplicato');
   });
+
+  it('segnala un segnaposto sconosciuto', () => {
+    const pacco = { ...PACCO_BASE, carte: [carta({ testo: '{g1} imita {ministro}.' })] };
+    expect(validaPacco(pacco).join()).toContain('{ministro}');
+  });
+});
+
+describe('nomiRealiNelTesto', () => {
+  it('trova un leader scritto per esteso e ignora i segnaposto', () => {
+    const pacco = {
+      ...PACCO_BASE,
+      carte: [carta({ id: 'a', testo: '{g1} imita Salvini.' }), carta({ id: 'b', testo: '{g1} imita {leader}.' })],
+    };
+    expect(nomiRealiNelTesto(pacco, PARTITI)).toEqual([`${PACCO_BASE.id}/a: Salvini`]);
+  });
+
+  it('riconosce entrambi i leader quando un partito ne ha due', () => {
+    const pacco = { ...PACCO_BASE, carte: [carta({ testo: 'Bonelli e Fratoianni ballano.' })] };
+    expect(nomiRealiNelTesto(pacco, PARTITI)).toHaveLength(2);
+  });
 });
 
 describe('componiCarta', () => {
@@ -85,17 +113,51 @@ describe('componiCarta', () => {
     const c = carta({ testo: '{g1} parla.' });
     expect(componiCarta(c, GIOCATORI, generatore(7)).testo).toBe(componiCarta(c, GIOCATORI, generatore(7)).testo);
   });
+
+  it('usa nome e leader dello stesso partito', () => {
+    const c = carta({ testo: '{partito}|{leader}' });
+    const [nome, leader] = componiCarta(c, GIOCATORI, generatore(4), PARTITI).testo.split('|');
+    expect(PARTITI.find((p) => p.nome === nome)?.leader).toBe(leader);
+  });
+
+  it('estrae due partiti diversi quando la carta ne chiede due', () => {
+    const c = carta({ testo: '{partito}|{partito2}' });
+    for (let seme = 0; seme < 30; seme++) {
+      const [a, b] = componiCarta(c, GIOCATORI, generatore(seme), PARTITI).testo.split('|');
+      expect(a).not.toBe(b);
+    }
+  });
+
+  it('su molte partite estrae ogni partito, senza favorirne uno', () => {
+    const c = carta({ testo: '{partito}' });
+    const conteggi = new Map<string, number>();
+    const prove = 11 * 400;
+    for (let seme = 0; seme < prove; seme++) {
+      const nome = componiCarta(c, GIOCATORI, generatore(seme), PARTITI).testo;
+      conteggi.set(nome, (conteggi.get(nome) ?? 0) + 1);
+    }
+    expect(conteggi.size).toBe(PARTITI.length);
+    for (const volte of conteggi.values()) {
+      expect(volte).toBeGreaterThan(400 * 0.75);
+      expect(volte).toBeLessThan(400 * 1.25);
+    }
+  });
 });
 
 describe('preparaPartita', () => {
-  it('unisce i pacchi e non perde carte quando i giocatori bastano', () => {
-    const carte = preparaPartita([PACCO_BASE, PACCO_ATTUALITA], GIOCATORI, generatore(3));
+  it('unisce i pacchi e non perde carte quando giocatori e partiti bastano', () => {
+    const carte = preparaPartita([PACCO_BASE, PACCO_ATTUALITA], GIOCATORI, generatore(3), PARTITI);
     expect(carte).toHaveLength(PACCO_BASE.carte.length + PACCO_ATTUALITA.carte.length);
   });
 
   it('scarta i duelli quando c’è un solo giocatore', () => {
-    const carte = preparaPartita([PACCO_BASE], ['Anna'], generatore(3));
+    const carte = preparaPartita([PACCO_BASE], ['Anna'], generatore(3), PARTITI);
     expect(carte.every((c) => !c.testo.includes('{g2}'))).toBe(true);
+  });
+
+  it('scarta le carte sui partiti se l’elenco dei partiti manca', () => {
+    const carte = preparaPartita([PACCO_BASE], GIOCATORI, generatore(3));
+    expect(carte.every((c) => !/\{(partito|sigla|leader)/.test(c.testo))).toBe(true);
   });
 });
 

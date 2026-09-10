@@ -13,7 +13,7 @@ export interface Carta {
   id: string;
   tipo: TipoCarta;
   titolo: string;
-  /** Testo con i segnaposto {g1} e {g2}, sostituiti con i nomi dei giocatori. */
+  /** Testo con i segnaposto di SEGNAPOSTI, sostituiti con giocatori e partiti. */
   testo: string;
   /** Sorsi (o penitenze) in gioco: da 0 a 3. Mai oltre 3. */
   penalita: number;
@@ -36,6 +36,13 @@ export interface PaccoCarte {
   carte: Carta[];
 }
 
+/** Un partito come compare nelle carte: preso dal pacchetto del test, estratto a caso. */
+export interface PartitoGioco {
+  nome: string;
+  sigla?: string;
+  leader?: string;
+}
+
 /** Una carta pescata, con i nomi già inseriti al posto dei segnaposto. */
 export interface CartaInGioco {
   carta: Carta;
@@ -51,6 +58,12 @@ export interface LeggeInVigore {
   testo: string;
   carteRimaste: number;
 }
+
+/**
+ * Segnaposto ammessi nel testo delle carte. I partiti si citano solo così:
+ * vengono estratti a caso fra tutti, quindi nessuno è preso di mira più degli altri.
+ */
+export const SEGNAPOSTI = ['g1', 'g2', 'partito', 'sigla', 'leader', 'partito2', 'sigla2', 'leader2'] as const;
 
 export const PENALITA_MASSIMA = 3;
 export const GIOCATORI_MINIMO = 2;

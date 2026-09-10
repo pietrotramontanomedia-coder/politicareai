@@ -12,6 +12,7 @@ import {
   TESTI_GIOCO,
   type CartaInGioco,
   type LeggeInVigore,
+  type PartitoGioco,
 } from '@/lib/gioco';
 import SchermataSetup, { type Impostazioni } from './SchermataSetup';
 import SchermataCarta from './SchermataCarta';
@@ -20,7 +21,7 @@ type Fase = 'setup' | 'gioco' | 'fine';
 
 const T = TESTI_GIOCO;
 
-export default function Gioco() {
+export default function Gioco({ partiti }: { partiti: PartitoGioco[] }) {
   const [fase, setFase] = useState<Fase>('setup');
   const [impostazioni, setImpostazioni] = useState<Impostazioni | null>(null);
   const [seme, setSeme] = useState(0);
@@ -31,9 +32,9 @@ export default function Gioco() {
   const partita = useMemo<CartaInGioco[]>(() => {
     if (!impostazioni) return [];
     const rnd = generatore(seme);
-    const carte = preparaPartita(pacchiScelti(impostazioni.conAttualita), impostazioni.giocatori, rnd);
-    return carte.map((carta) => componiCarta(carta, impostazioni.giocatori, rnd));
-  }, [impostazioni, seme]);
+    const carte = preparaPartita(pacchiScelti(impostazioni.conAttualita), impostazioni.giocatori, rnd, partiti);
+    return carte.map((carta) => componiCarta(carta, impostazioni.giocatori, rnd, partiti));
+  }, [impostazioni, seme, partiti]);
 
   const inizia = useCallback((scelte: Impostazioni) => {
     setImpostazioni(scelte);

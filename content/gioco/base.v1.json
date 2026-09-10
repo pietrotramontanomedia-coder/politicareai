@@ -1,10 +1,10 @@
 {
   "id": "gioco-base",
   "mazzo": "base",
-  "versione": "1.1.0",
+  "versione": "1.2.0",
   "data": "2026-09-10",
   "titolo": "Mazzo base",
-  "descrizione": "Archetipi, riti e vizi della politica italiana: nessun nome reale, solo ruoli e situazioni d'aula.",
+  "descrizione": "Archetipi, riti e vizi della politica italiana. I partiti compaiono solo estratti a caso fra tutti: si scherza su ognuno allo stesso modo.",
   "autori": [
     "Redazione Politicare"
   ],
@@ -678,6 +678,211 @@
       "titolo": "Sigle",
       "testo": "A turno si dice la sigla di un partito, italiano o straniero. Chi si blocca o la inventa paga.",
       "penalita": 2
+    },
+    {
+      "id": "base-093",
+      "tipo": "sfida",
+      "titolo": "Imitazione d'autore",
+      "testo": "{g1} fa un discorso di dieci secondi con lo stile di {leader}, con affetto e senza offendere. Se il gruppo non riconosce almeno un tic, paga {g1}.",
+      "penalita": 2,
+      "secondi": 10
+    },
+    {
+      "id": "base-094",
+      "tipo": "sfida",
+      "titolo": "Slogan di scorta",
+      "testo": "{g1} inventa in cinque parole un nuovo slogan per {partito}. Se il gruppo non applaude, paga.",
+      "penalita": 1
+    },
+    {
+      "id": "base-095",
+      "tipo": "sfida",
+      "titolo": "Portavoce d'ufficio",
+      "testo": "{g1} difende {partito} per venti secondi, qualunque cosa ne pensi davvero. Se esce dal personaggio, paga.",
+      "penalita": 2,
+      "secondi": 20
+    },
+    {
+      "id": "base-096",
+      "tipo": "sfida",
+      "titolo": "Tessera onoraria",
+      "testo": "{g1} dice tre cose che sa di {partito}, una dopo l'altra. Se si ferma prima della terza, paga.",
+      "penalita": 2
+    },
+    {
+      "id": "base-097",
+      "tipo": "sfida",
+      "titolo": "Il leader sei tu",
+      "testo": "Fino alla prossima carta {g1} parla e gesticola come {leader} in un talk show. Se se ne dimentica, paga.",
+      "penalita": 1
+    },
+    {
+      "id": "base-098",
+      "tipo": "sfida",
+      "titolo": "Selfie da manifesto",
+      "testo": "{g1} scatta un selfie di gruppo con la posa da manifesto elettorale di {partito}. Chi viene male paga.",
+      "penalita": 1
+    },
+    {
+      "id": "base-099",
+      "tipo": "sfida",
+      "titolo": "Ritorno alle origini",
+      "testo": "{g1} indovina in che anno è nato {partito}, con cinque anni di tolleranza. Il gruppo controlla al volo: se sbaglia, paga.",
+      "penalita": 2
+    },
+    {
+      "id": "base-100",
+      "tipo": "duello",
+      "titolo": "Coalizione impossibile",
+      "testo": "{g1} e {g2} hanno dieci secondi per inventare il nome di una coalizione fra {partito} e {partito2}. Se il gruppo non ride, pagano entrambi.",
+      "penalita": 1,
+      "secondi": 10
+    },
+    {
+      "id": "base-101",
+      "tipo": "duello",
+      "titolo": "Faccia a faccia",
+      "testo": "{g1} fa {leader}, {g2} fa {leader2}: trenta secondi di confronto TV sul prezzo della pizza. Chi riceve meno applausi paga.",
+      "penalita": 2,
+      "secondi": 30
+    },
+    {
+      "id": "base-102",
+      "tipo": "duello",
+      "titolo": "Tavolo delle trattative",
+      "testo": "{g1} rappresenta {partito}, {g2} rappresenta {partito2}: venti secondi per mettersi d'accordo su chi sparecchia a fine serata. Senza accordo, pagano entrambi.",
+      "penalita": 1,
+      "secondi": 20
+    },
+    {
+      "id": "base-103",
+      "tipo": "votazione",
+      "titolo": "Sondaggio lampo",
+      "testo": "Al tre, tutti dicono una parola che associano a {partito}, senza insulti: si scherza su tutti allo stesso modo. Chi ripete la parola di un altro paga.",
+      "penalita": 1
+    },
+    {
+      "id": "base-104",
+      "tipo": "votazione",
+      "titolo": "Candidato perfetto",
+      "testo": "Al tre, tutti indicano chi al tavolo sarebbe il candidato ideale di {partito}. Il più votato fa un comizio di dieci secondi, oppure paga.",
+      "penalita": 2,
+      "secondi": 10
+    },
+    {
+      "id": "base-105",
+      "tipo": "votazione",
+      "titolo": "Governo di coalizione",
+      "testo": "Al tre, pollice su o giù: {partito} e {partito2} potrebbero governare insieme? Chi resta in minoranza paga.",
+      "penalita": 1
+    },
+    {
+      "id": "base-106",
+      "tipo": "votazione",
+      "titolo": "Ministro per un giorno",
+      "testo": "Al tre, tutti indicano chi al tavolo sarebbe ministro dell'Economia in un governo guidato da {leader}. Il più votato paga.",
+      "penalita": 1
+    },
+    {
+      "id": "base-107",
+      "tipo": "tutti",
+      "titolo": "Iscritti",
+      "testo": "Chi sa dire chi guida {partito} non paga, gli altri sì. Soluzione per chi legge: {leader}.",
+      "penalita": 1
+    },
+    {
+      "id": "base-108",
+      "tipo": "tutti",
+      "titolo": "Festa di partito",
+      "testo": "Chi è stato almeno una volta a una festa di partito, un comizio o una manifestazione non paga. Gli altri sì.",
+      "penalita": 1
+    },
+    {
+      "id": "base-109",
+      "tipo": "tutti",
+      "titolo": "Emiciclo",
+      "testo": "Chi sa dire quattro partiti oggi in Parlamento, senza esitare, non paga. Gli altri sì.",
+      "penalita": 1
+    },
+    {
+      "id": "base-110",
+      "tipo": "tutti",
+      "titolo": "Primarie",
+      "testo": "Chi ha votato almeno una volta alle primarie di un partito non paga. Gli altri sì.",
+      "penalita": 1
+    },
+    {
+      "id": "base-111",
+      "tipo": "tutti",
+      "titolo": "Scommessa elettorale",
+      "testo": "Tutti scrivono se {partito} alle prossime elezioni prenderà più o meno del 10%. Si controlla l'ultimo sondaggio: chi sbaglia paga.",
+      "penalita": 1
+    },
+    {
+      "id": "base-112",
+      "tipo": "tutti",
+      "titolo": "Sigla del talk show",
+      "testo": "Tutti canticchiano la sigla di un talk show politico. Chi non ne conosce nessuna paga.",
+      "penalita": 1
+    },
+    {
+      "id": "base-113",
+      "tipo": "legge",
+      "titolo": "Linea di partito",
+      "testo": "Per quattro carte {g1} deve iniziare ogni frase con «Come insegna {partito}...». Ogni dimenticanza si paga.",
+      "penalita": 1,
+      "durataCarte": 4
+    },
+    {
+      "id": "base-114",
+      "tipo": "legge",
+      "titolo": "Disciplina di gruppo",
+      "testo": "Per tre carte, in ogni votazione tutti votano come {g1}. Chi vota diversamente paga.",
+      "penalita": 1,
+      "durataCarte": 3
+    },
+    {
+      "id": "base-115",
+      "tipo": "legge",
+      "titolo": "Silenzio elettorale",
+      "testo": "Per quattro carte è vietato parlare di politica. Chi ci casca paga: sì, vale anche per questo gioco.",
+      "penalita": 1,
+      "durataCarte": 4
+    },
+    {
+      "id": "base-116",
+      "tipo": "minigioco",
+      "titolo": "Giro dei leader",
+      "testo": "A turno, ognuno dice il nome di un leader di partito italiano, di oggi o del passato. Chi si blocca o ripete paga.",
+      "penalita": 2
+    },
+    {
+      "id": "base-117",
+      "tipo": "minigioco",
+      "titolo": "Partiti scomparsi",
+      "testo": "A turno, ognuno dice il nome di un partito italiano che non esiste più. Chi si blocca paga.",
+      "penalita": 2
+    },
+    {
+      "id": "base-118",
+      "tipo": "minigioco",
+      "titolo": "Totocoalizione",
+      "testo": "A turno, ognuno propone un'alleanza fra due partiti e la difende in una frase. Chi ride della propria proposta paga.",
+      "penalita": 1
+    },
+    {
+      "id": "base-119",
+      "tipo": "minigioco",
+      "titolo": "Tormentoni",
+      "testo": "A turno, ognuno cita un modo di dire famoso di un politico senza dire di chi è: gli altri indovinano. Chi non ne trova uno paga.",
+      "penalita": 2
+    },
+    {
+      "id": "base-120",
+      "tipo": "minigioco",
+      "titolo": "Programma in una parola",
+      "testo": "A turno, ognuno riassume in una parola il programma di {partito}. Chi ripete o esita paga.",
+      "penalita": 1
     }
   ]
 }
