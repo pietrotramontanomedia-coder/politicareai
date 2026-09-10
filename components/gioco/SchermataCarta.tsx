@@ -21,8 +21,8 @@ const SOGLIA_SCARTO = 110;
 
 export default function SchermataCarta({ pescata, indice, totale, leggi, analcolico, onProssima, onEsci }: Props) {
   return (
-    /* Altezza utile: tolti l'header (5,25rem) e, su mobile, la barra in basso (4rem). */
-    <div className="tavolo flex min-h-[calc(100dvh-9.25rem)] flex-col px-4 py-5 sm:min-h-[calc(100dvh-5.25rem)] sm:px-6">
+    /* Altezza utile: tolti l'header (5,25rem) e, su mobile, lo spazio della barra flottante in basso. */
+    <div className="tavolo flex min-h-[calc(100dvh-5.25rem-var(--spazio-barra))] flex-col px-4 py-5 sm:px-6">
       {/* Testata: avanzamento e uscita */}
       <div className="mx-auto flex w-full max-w-md items-center justify-between gap-4">
         <span className="text-sm font-medium tabular-nums" style={{ color: 'var(--fg-muta)' }}>

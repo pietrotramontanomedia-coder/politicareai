@@ -49,7 +49,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-dvh antialiased">
         <ServiceWorkerRegistration />
         <Header />
-        <div className="pb-16 sm:pb-0">{children}</div>
+        <div style={{ paddingBottom: 'var(--spazio-barra)' }}>{children}</div>
         <BottomNav />
       </body>
     </html>
