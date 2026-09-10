@@ -115,31 +115,13 @@ export function partitaAvviabile(nomi: readonly string[]): boolean {
   return nomiValidi(nomi).length >= GIOCATORI_MINIMO;
 }
 
-/**
- * Nomi reali scritti direttamente nelle carte: nel mazzo base i partiti si citano
- * solo con i segnaposto. Controlla nomi dei partiti e cognomi dei leader.
- */
-export function nomiRealiNelTesto(pacco: PaccoCarte, partiti: readonly PartitoGioco[]): string[] {
-  const nomi = new Set<string>();
-  for (const p of partiti) {
-    nomi.add(p.nome);
-    for (const persona of (p.leader ?? '').split(/\s+e\s+/)) {
-      const cognome = persona.trim().split(/\s+/).pop();
-      if (cognome) nomi.add(cognome);
-    }
-  }
-
-  const trovati: string[] = [];
+/** Quante carte su misura ha ogni partito: devono essere lo stesso numero per tutti. */
+export function cartePerPartito(pacco: PaccoCarte): Map<string, number> {
+  const conteggi = new Map<string, number>();
   for (const carta of pacco.carte) {
-    const testo = `${carta.titolo} ${carta.testo}`;
-    for (const nome of nomi) {
-      const escaped = nome.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      if (new RegExp(`(^|[^\\p{L}])${escaped}([^\\p{L}]|$)`, 'u').test(testo)) {
-        trovati.push(`${pacco.id}/${carta.id}: ${nome}`);
-      }
-    }
+    if (carta.riguarda) conteggi.set(carta.riguarda, (conteggi.get(carta.riguarda) ?? 0) + 1);
   }
-  return trovati;
+  return conteggi;
 }
 
 /**

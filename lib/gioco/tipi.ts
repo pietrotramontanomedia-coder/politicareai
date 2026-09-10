@@ -23,6 +23,8 @@ export interface Carta {
   secondi?: number;
   /** Obbligatoria sulle carte del mazzo attualità, che citano fatti reali. */
   fonte?: FonteCarta;
+  /** Id del partito del test a cui è dedicata la carta: serve a verificare che ogni partito abbia lo stesso numero di carte. */
+  riguarda?: string;
 }
 
 export interface PaccoCarte {

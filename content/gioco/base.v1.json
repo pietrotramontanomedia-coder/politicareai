@@ -1,10 +1,10 @@
 {
   "id": "gioco-base",
   "mazzo": "base",
-  "versione": "1.2.0",
+  "versione": "1.3.0",
   "data": "2026-09-10",
   "titolo": "Mazzo base",
-  "descrizione": "Archetipi, riti e vizi della politica italiana. I partiti compaiono solo estratti a caso fra tutti: si scherza su ognuno allo stesso modo.",
+  "descrizione": "Archetipi, riti e vizi della politica italiana, più tre carte su misura per ogni partito: frasi e momenti pubblici, presi in giro con affetto e in parti uguali.",
   "autori": [
     "Redazione Politicare"
   ],
@@ -883,6 +883,286 @@
       "titolo": "Programma in una parola",
       "testo": "A turno, ognuno riassume in una parola il programma di {partito}. Chi ripete o esita paga.",
       "penalita": 1
+    },
+    {
+      "id": "base-121",
+      "tipo": "sfida",
+      "titolo": "Io sono Giorgia",
+      "testo": "Nel 2019, in piazza San Giovanni, Giorgia Meloni disse «Io sono Giorgia, sono una donna, sono una madre…» e diventò un remix virale. {g1} si presenta al tavolo con lo stesso ritmo: «Io sono…, sono…, sono…». Se esita, paga.",
+      "penalita": 1,
+      "riguarda": "fdi"
+    },
+    {
+      "id": "base-122",
+      "tipo": "tutti",
+      "titolo": "Pronti",
+      "testo": "«Pronti» era lo slogan di Fratelli d'Italia alle elezioni del 2022. Quando chi legge grida «Pronti!», tutti alzano il bicchiere: l'ultimo paga.",
+      "penalita": 1,
+      "riguarda": "fdi"
+    },
+    {
+      "id": "base-123",
+      "tipo": "votazione",
+      "titolo": "Prima volta a Palazzo Chigi",
+      "testo": "Nel 2022 Giorgia Meloni è diventata la prima donna presidente del Consiglio. Al tre, tutti indicano chi al tavolo batterà per primo un record. Il più votato dice quale, oppure paga.",
+      "penalita": 1,
+      "riguarda": "fdi"
+    },
+    {
+      "id": "base-124",
+      "tipo": "legge",
+      "titolo": "Non ci hanno visti arrivare",
+      "testo": "Elly Schlein vinse le primarie del PD nel 2023 dicendo «Non ci hanno visti arrivare». Entro tre carte {g1} deve fare una sorpresa al tavolo senza farsi scoprire prima: se ci riesce sceglie chi paga, se viene scoperto paga lui.",
+      "penalita": 1,
+      "riguarda": "pd",
+      "durataCarte": 3
+    },
+    {
+      "id": "base-125",
+      "tipo": "tutti",
+      "titolo": "Gazebo",
+      "testo": "Il PD sceglie i segretari con le primarie. Per alzata di mano si elegge il segretario della serata: chi non prende nemmeno un voto paga.",
+      "penalita": 1,
+      "riguarda": "pd"
+    },
+    {
+      "id": "base-126",
+      "tipo": "duello",
+      "titolo": "Campo largo",
+      "testo": "Il «campo largo» è l'alleanza che il PD cerca nel centrosinistra. {g1} e {g2} hanno venti secondi per convincere un terzo giocatore a unirsi a loro. Se nessuno accetta, pagano entrambi.",
+      "penalita": 1,
+      "riguarda": "pd",
+      "secondi": 20
+    },
+    {
+      "id": "base-127",
+      "tipo": "sfida",
+      "titolo": "Avvocato del popolo",
+      "testo": "Nel 2018 Giuseppe Conte si presentò come «avvocato difensore del popolo italiano». {g1} difende per venti secondi l'ultimo giocatore che ha pagato. Se il tavolo non lo assolve, paga {g1}.",
+      "penalita": 2,
+      "riguarda": "m5s",
+      "secondi": 20
+    },
+    {
+      "id": "base-128",
+      "tipo": "duello",
+      "titolo": "Gialloverde e giallorosso",
+      "testo": "Conte ha guidato due governi con alleati opposti: prima la Lega, poi il PD. {g1} fa un complimento a {g2} e poi lo stesso complimento al giocatore più lontano. Se il tavolo lo trova incoerente, paga.",
+      "penalita": 1,
+      "riguarda": "m5s"
+    },
+    {
+      "id": "base-129",
+      "tipo": "votazione",
+      "titolo": "Cinque stelle",
+      "testo": "Omaggio al Movimento 5 Stelle: al tre, tutti danno un voto da una a cinque stelle all'ultima carta giocata. Chi dà il voto più basso paga.",
+      "penalita": 1,
+      "riguarda": "m5s"
+    },
+    {
+      "id": "base-130",
+      "tipo": "tutti",
+      "titolo": "Pontida",
+      "testo": "Ogni anno la Lega si ritrova sul pratone di Pontida. Tutti in piedi per trenta secondi di raduno: chi si siede per primo paga.",
+      "penalita": 1,
+      "riguarda": "lega",
+      "secondi": 30
+    },
+    {
+      "id": "base-131",
+      "tipo": "legge",
+      "titolo": "Prima gli italiani",
+      "testo": "«Prima gli italiani» è lo slogan della Lega di Matteo Salvini. Per tre carte, prima di parlare si dice il nome di chi siede alla propria destra. Chi dimentica paga.",
+      "penalita": 1,
+      "riguarda": "lega",
+      "durataCarte": 3
+    },
+    {
+      "id": "base-132",
+      "tipo": "sfida",
+      "titolo": "I record li fa Kimi Antonelli",
+      "testo": "Salvini ha detto che si vota a fine legislatura perché «i record li fa Kimi Antonelli». {g1} fa il giro del tavolo toccando ogni sedia mentre il gruppo cronometra: oltre dieci secondi, paga.",
+      "penalita": 1,
+      "riguarda": "lega",
+      "secondi": 10
+    },
+    {
+      "id": "base-133",
+      "tipo": "sfida",
+      "titolo": "Discesa in campo",
+      "testo": "Il 26 gennaio 1994 Silvio Berlusconi annunciò la discesa in campo con un videomessaggio: «L'Italia è il Paese che amo». {g1} fa un videomessaggio di dieci secondi alla nazione che inizi con «Questo è il tavolo che amo». Se sbaglia l'attacco, paga.",
+      "penalita": 1,
+      "riguarda": "fi",
+      "secondi": 10
+    },
+    {
+      "id": "base-134",
+      "tipo": "sfida",
+      "titolo": "Presidente d'Europa",
+      "testo": "Nel 2017 Antonio Tajani è stato eletto presidente del Parlamento europeo. {g1} saluta il tavolo in tre lingue diverse. Se si ferma a due, paga.",
+      "penalita": 1,
+      "riguarda": "fi"
+    },
+    {
+      "id": "base-135",
+      "tipo": "votazione",
+      "titolo": "Nome da stadio",
+      "testo": "Forza Italia ha un nome da coro da stadio. Al tre, tutti indicano il capitano della serata e gli dedicano un coro: chi non canta paga.",
+      "penalita": 1,
+      "riguarda": "fi"
+    },
+    {
+      "id": "base-136",
+      "tipo": "duello",
+      "titolo": "Doppia leadership",
+      "testo": "AVS ha due leader, Angelo Bonelli e Nicola Fratoianni. {g1} e {g2} dicono insieme la stessa frase, parola per parola, senza essersi messi d'accordo. Se si separano, pagano entrambi.",
+      "penalita": 2,
+      "riguarda": "avs"
+    },
+    {
+      "id": "base-137",
+      "tipo": "tutti",
+      "titolo": "Terra!",
+      "testo": "La festa nazionale di AVS si chiama «Terra!». Quando chi legge grida «Terra!», tutti toccano il pavimento: l'ultimo paga.",
+      "penalita": 1,
+      "riguarda": "avs"
+    },
+    {
+      "id": "base-138",
+      "tipo": "legge",
+      "titolo": "Verdi e rossi",
+      "testo": "AVS mette insieme ecologisti e sinistra. Per quattro carte, prima di pagare si dice «per il pianeta». Chi lo dimentica paga ancora.",
+      "penalita": 1,
+      "riguarda": "avs",
+      "durataCarte": 4
+    },
+    {
+      "id": "base-139",
+      "tipo": "legge",
+      "titolo": "Il mondo al contrario",
+      "testo": "Nel 2023 il generale Roberto Vannacci ha pubblicato «Il mondo al contrario». Per tre carte si dice «no» per dire «sì» e viceversa. Chi sbaglia paga.",
+      "penalita": 1,
+      "riguarda": "futuronazionale",
+      "durataCarte": 3
+    },
+    {
+      "id": "base-140",
+      "tipo": "sfida",
+      "titolo": "Signorsì",
+      "testo": "Vannacci è un generale dell'Esercito. {g1} dà un ordine da caserma a ogni giocatore: chi non esegue paga, ma se {g1} ride mentre dà gli ordini paga lui.",
+      "penalita": 1,
+      "riguarda": "futuronazionale"
+    },
+    {
+      "id": "base-141",
+      "tipo": "votazione",
+      "titolo": "Nessuna trattativa",
+      "testo": "Presentando Futuro Nazionale, Vannacci ha detto «nessuna trattativa sui nostri principi». Al tre, tutti indicano chi al tavolo non cede mai in una discussione. Il più votato paga.",
+      "penalita": 1,
+      "riguarda": "futuronazionale"
+    },
+    {
+      "id": "base-142",
+      "tipo": "sfida",
+      "titolo": "Torniamo seri",
+      "testo": "Carlo Calenda ha commentato: «Mentre ci perdiamo dietro a Belén e Corona, l'AfD prende il 44,5%». {g1} prova a parlare di un tema serio per venti secondi mentre gli altri parlano di gossip. Se cede, paga.",
+      "penalita": 1,
+      "riguarda": "azione",
+      "secondi": 20
+    },
+    {
+      "id": "base-143",
+      "tipo": "duello",
+      "titolo": "Federazione",
+      "testo": "Nel 2022 Azione si è federata con +Europa. Fino alla prossima carta {g1} e {g2} rispondono in coppia: uno comincia la frase, l'altro la finisce. Chi la lascia a metà paga.",
+      "penalita": 1,
+      "riguarda": "azione"
+    },
+    {
+      "id": "base-144",
+      "tipo": "votazione",
+      "titolo": "Ciak, Azione!",
+      "testo": "Omaggio ad Azione: al tre, tutti indicano il regista della serata. Il più votato dirige una scena di dieci secondi con gli altri attori: chi non recita paga.",
+      "penalita": 1,
+      "riguarda": "azione",
+      "secondi": 10
+    },
+    {
+      "id": "base-145",
+      "tipo": "sfida",
+      "titolo": "Shish",
+      "testo": "Nel 2014 l'inglese di Matteo Renzi a Digital Venice diventò un remix virale. {g1} racconta la serata in inglese per quindici secondi, senza una parola di italiano. Se si blocca, paga.",
+      "penalita": 2,
+      "riguarda": "iv",
+      "secondi": 15
+    },
+    {
+      "id": "base-146",
+      "tipo": "legge",
+      "titolo": "Stai sereno",
+      "testo": "«Enrico stai sereno» disse Renzi a Letta nel gennaio 2014, poco prima di prenderne il posto. Per tre carte chi dice «stai sereno» a qualcuno può chiedergli di scambiarsi di posto: chi rifiuta paga.",
+      "penalita": 1,
+      "riguarda": "iv",
+      "durataCarte": 3
+    },
+    {
+      "id": "base-147",
+      "tipo": "votazione",
+      "titolo": "Il rottamatore",
+      "testo": "Renzi era chiamato «il rottamatore». Al tre, tutti indicano chi al tavolo rottamerebbe per primo le vecchie regole. Il più votato cancella una legge in vigore, oppure paga.",
+      "penalita": 1,
+      "riguarda": "iv"
+    },
+    {
+      "id": "base-148",
+      "tipo": "tutti",
+      "titolo": "Sempre di più",
+      "testo": "+Europa ha un segno più nel nome. Al tre, tutti dicono un numero: chi dice il più basso paga, perché qui si vuole sempre di più.",
+      "penalita": 1,
+      "riguarda": "piueuropa"
+    },
+    {
+      "id": "base-149",
+      "tipo": "sfida",
+      "titolo": "Raccolta firme",
+      "testo": "+Europa ha promosso il referendum del 2025 sulla cittadinanza. {g1} ha quindici secondi per raccogliere le «firme» del tavolo su una proposta assurda: chi non firma paga, ma se non firma nessuno paga {g1}.",
+      "penalita": 1,
+      "riguarda": "piueuropa",
+      "secondi": 15
+    },
+    {
+      "id": "base-150",
+      "tipo": "duello",
+      "titolo": "Capitali d'Europa",
+      "testo": "Omaggio a +Europa: {g1} e {g2} dicono a turno una capitale europea, senza ripetere. Chi si blocca per primo paga.",
+      "penalita": 1,
+      "riguarda": "piueuropa"
+    },
+    {
+      "id": "base-151",
+      "tipo": "legge",
+      "titolo": "Toni moderati",
+      "testo": "Noi Moderati ha la moderazione nel nome. Per quattro carte si parla solo sottovoce: chi alza la voce paga.",
+      "penalita": 1,
+      "riguarda": "noimoderati",
+      "durataCarte": 4
+    },
+    {
+      "id": "base-152",
+      "tipo": "sfida",
+      "titolo": "Quattordici milioni",
+      "testo": "Maurizio Lupi ha ricordato che l'Italia ha «14 milioni di pensionati». {g1} conta alla rovescia da 14 a 0 dicendo per ogni numero una cosa da fare in pensione. Se si blocca, paga.",
+      "penalita": 1,
+      "riguarda": "noimoderati"
+    },
+    {
+      "id": "base-153",
+      "tipo": "duello",
+      "titolo": "Infrastrutture e trasporti",
+      "testo": "Lupi è stato ministro delle Infrastrutture e dei Trasporti dal 2013 al 2015. {g1} ha venti secondi per spiegare come «trasporterebbe» {g2} dall'altra parte della stanza senza sollevarlo. Se il gruppo boccia il progetto, pagano entrambi.",
+      "penalita": 1,
+      "riguarda": "noimoderati",
+      "secondi": 20
     }
   ]
 }

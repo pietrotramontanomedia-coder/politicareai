@@ -2,10 +2,10 @@ import { describe, expect, it } from 'vitest';
 import packPartiti from '@/content/test-partito/politiche-2027.v1.json';
 import {
   aggiornaLeggi,
+  cartePerPartito,
   componiCarta,
   generatore,
   mescola,
-  nomiRealiNelTesto,
   nomiValidi,
   PACCO_ATTUALITA,
   PACCO_BASE,
@@ -18,6 +18,7 @@ import {
 
 const GIOCATORI = ['Anna', 'Bruno', 'Carla', 'Dario'];
 const PARTITI: PartitoGioco[] = packPartiti.partiti.map(({ nome, sigla, leader }) => ({ nome, sigla, leader }));
+const ID_PARTITI = packPartiti.partiti.map((p) => p.id);
 
 function carta(parziale: Partial<Carta> = {}): Carta {
   return { id: 'x-1', tipo: 'sfida', titolo: 'Prova', testo: '{g1} fa una cosa.', penalita: 1, ...parziale };
@@ -47,9 +48,17 @@ describe('pacchi di carte pubblicati', () => {
     const ids = [...PACCO_BASE.carte, ...PACCO_ATTUALITA.carte].map((c) => c.id);
     expect(new Set(ids).size).toBe(ids.length);
   });
+});
 
-  it('il mazzo base non scrive nomi di partiti o leader: solo segnaposto estratti a caso', () => {
-    expect(nomiRealiNelTesto(PACCO_BASE, PARTITI)).toEqual([]);
+describe('carte su misura per i partiti', () => {
+  const conteggi = cartePerPartito(PACCO_BASE);
+
+  it('ogni partito del test ha le sue carte, e nessuna riguarda partiti sconosciuti', () => {
+    expect([...conteggi.keys()].sort()).toEqual([...ID_PARTITI].sort());
+  });
+
+  it('tutti i partiti hanno lo stesso numero di carte', () => {
+    expect(new Set(conteggi.values()).size).toBe(1);
   });
 });
 
@@ -77,21 +86,6 @@ describe('validaPacco', () => {
   it('segnala un segnaposto sconosciuto', () => {
     const pacco = { ...PACCO_BASE, carte: [carta({ testo: '{g1} imita {ministro}.' })] };
     expect(validaPacco(pacco).join()).toContain('{ministro}');
-  });
-});
-
-describe('nomiRealiNelTesto', () => {
-  it('trova un leader scritto per esteso e ignora i segnaposto', () => {
-    const pacco = {
-      ...PACCO_BASE,
-      carte: [carta({ id: 'a', testo: '{g1} imita Salvini.' }), carta({ id: 'b', testo: '{g1} imita {leader}.' })],
-    };
-    expect(nomiRealiNelTesto(pacco, PARTITI)).toEqual([`${PACCO_BASE.id}/a: Salvini`]);
-  });
-
-  it('riconosce entrambi i leader quando un partito ne ha due', () => {
-    const pacco = { ...PACCO_BASE, carte: [carta({ testo: 'Bonelli e Fratoianni ballano.' })] };
-    expect(nomiRealiNelTesto(pacco, PARTITI)).toHaveLength(2);
   });
 });
 
@@ -155,7 +149,7 @@ describe('preparaPartita', () => {
     expect(carte.every((c) => !c.testo.includes('{g2}'))).toBe(true);
   });
 
-  it('scarta le carte sui partiti se l’elenco dei partiti manca', () => {
+  it('scarta le carte con segnaposto di partito se l’elenco dei partiti manca', () => {
     const carte = preparaPartita([PACCO_BASE], GIOCATORI, generatore(3));
     expect(carte.every((c) => !/\{(partito|sigla|leader)/.test(c.testo))).toBe(true);
   });
