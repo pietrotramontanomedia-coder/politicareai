@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import flashData from '@/content/agenzia/flash.json';
 import type { PostInstagram } from '@/lib/instagram-server';
 import type { FonteUltimOra, NotiziaUltimOra } from '@/lib/ultimora-server';
+import { scegliPostRecenti, type PostRecente } from '@/lib/post-recenti';
 
 export type { PostInstagram };
 
@@ -44,6 +45,24 @@ export function useInstagram() {
         setCaricamento(false);
       },
     );
+  }, []);
+
+  return { post, caricamento };
+}
+
+/** Ultimi post con immagine per il carosello della home (Instagram, altrimenti Telegram). */
+export function usePostRecenti() {
+  const [post, setPost] = useState<PostRecente[]>([]);
+  const [caricamento, setCaricamento] = useState(true);
+
+  useEffect(() => {
+    Promise.all([
+      usaRichiestaCondivisa<PostInstagram>('/api/instagram', (d) => (d as { post?: PostInstagram[] }).post ?? []),
+      usaRichiestaCondivisa<NotiziaUltimOra>('/api/ultimora', (d) => (d as { voci?: NotiziaUltimOra[] }).voci ?? []),
+    ]).then(([instagram, notizie]) => {
+      setPost(scegliPostRecenti(instagram, notizie));
+      setCaricamento(false);
+    });
   }, []);
 
   return { post, caricamento };

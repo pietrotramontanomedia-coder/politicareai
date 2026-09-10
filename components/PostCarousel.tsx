@@ -3,7 +3,9 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import Link from 'next/link';
-import { useInstagram } from '@/lib/instagram';
+import { usePostRecenti } from '@/lib/instagram';
+import { FONTI_ULTIMORA } from '@/lib/ultimora-testi';
+import { IconaFonte } from './ultimora/IconaFonte';
 import { formattaDataRelativa } from '@/lib/data-ora';
 import { useSwipe } from '@/lib/useSwipe';
 
@@ -12,7 +14,7 @@ const PER_GRUPPO = 2;
 const INTERVALLO_MS = 5000;
 
 export default function PostCarousel() {
-  const { post: tutti } = useInstagram();
+  const { post: tutti } = usePostRecenti();
   const post = tutti.slice(0, MAX_POST);
 
   const gruppi: typeof post[] = [];
@@ -107,11 +109,11 @@ export default function PostCarousel() {
                   />
                 </div>
                 <div className="min-w-0 flex-1 flex flex-col">
-                  <span
-                    className="text-xs font-mono font-bold tabular-nums"
-                    style={{ color: 'var(--accento)' }}
-                  >
+                  <span className="flex items-center gap-2 text-xs font-mono font-bold tabular-nums" style={{ color: 'var(--accento)' }}>
                     {formattaDataRelativa(p.data)}
+                    <span style={{ color: FONTI_ULTIMORA[p.fonte].colore }} title={FONTI_ULTIMORA[p.fonte].nome}>
+                      <IconaFonte fonte={p.fonte} className="h-3.5 w-3.5" />
+                    </span>
                   </span>
                   <h3 className="mt-2 font-bold text-lg sm:text-xl leading-snug line-clamp-4">
                     {p.titolo}
