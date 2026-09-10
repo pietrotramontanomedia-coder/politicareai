@@ -1,0 +1,172 @@
+{
+  "id": "quiz-settimana-01",
+  "versione": "1.0.0",
+  "numero": 1,
+  "data": "2026-09-09",
+  "periodo": {
+    "dal": "2026-08-19",
+    "al": "2026-08-25"
+  },
+  "titolo": "Quiz settimanale",
+  "sottotitolo": "Quiz 1",
+  "descrizione": "Sette domande sui fatti politici della settimana, quattro sull'Italia e tre sull'estero. Ogni risposta ha una spiegazione e una fonte verificabile.",
+  "autori": [
+    "Redazione Politicare"
+  ],
+  "changelog": [
+    {
+      "versione": "1.0.0",
+      "data": "2026-09-09",
+      "note": "Prima pubblicazione, a recupero della settimana 19-25 agosto."
+    }
+  ],
+  "sezioni": [
+    {
+      "id": "italia",
+      "titolo": "Italia",
+      "icona": "🇮🇹",
+      "descrizione": "Banche, tensioni nella Lega, carburanti e Meeting di Rimini."
+    },
+    {
+      "id": "estero",
+      "titolo": "Estero",
+      "icona": "🌍",
+      "descrizione": "Stati Uniti fra Hormuz, Canada e sondaggi."
+    }
+  ],
+  "domande": [
+    {
+      "id": "q1",
+      "sezione": "italia",
+      "difficolta": "facile",
+      "testo": "Il 21 agosto Monte dei Paschi di Siena ha lanciato una doppia offerta da 34 miliardi per resistere all'offerta di Intesa Sanpaolo. Su quali due istituti?",
+      "opzioni": [
+        "UniCredit e Mediobanca",
+        "Banco BPM e Banca Generali",
+        "BPER e Popolare di Sondrio",
+        "Fineco e Banca Ifis"
+      ],
+      "rispostaCorretta": 1,
+      "spiegazione": "L'offerta vale 25,3 miliardi per Banco BPM e 8,7 per Banca Generali. È la contromossa di Mps all'offerta di Intesa da 30,6 miliardi annunciata due mesi prima: per l'amministratore delegato Luigi Lovaglio l'obiettivo è \"creare valore con l'integrazione\" invece dello spezzatino della rete. Le offerte vanno approvate dai soci Mps con i due terzi in assemblea il 29 ottobre.",
+      "fonte": {
+        "tipo": "stampa",
+        "citazione": "ANSA, 21 agosto 2026: \"La mossa di Mps, doppia offerta da 34 miliardi per Bpm e Banca Generali\"",
+        "url": "https://www.ansa.it/sito/notizie/economia/aziende/2026/08/21/mps-lancia-offerte-su-banco-bpm-e-banca-generali-per-complessivi-34-miliardi_fdeb6455-ab43-41bd-8e06-a7bac6ac937e.html"
+      }
+    },
+    {
+      "id": "q2",
+      "sezione": "italia",
+      "difficolta": "media",
+      "testo": "Il 20 agosto, dal palco della Versiliana, il presidente della Lombardia Attilio Fontana e il capogruppo al Senato Massimiliano Romeo hanno detto che \"la Lega così non va\". Che cosa hanno chiesto?",
+      "opzioni": [
+        "Le dimissioni immediate di Salvini da segretario",
+        "Una leadership allargata a governatori e sindaci, da definire prima di Pontida",
+        "L'uscita della Lega dal governo Meloni",
+        "Un congresso straordinario entro settembre"
+      ],
+      "rispostaCorretta": 1,
+      "spiegazione": "Fontana e Romeo hanno lasciato aperto il dialogo con Salvini, ma chiedono \"una nuova struttura\" per rilanciare il partito: l'idea è una guida allargata, con dentro governatori o sindaci, da trovare prima del raduno di Pontida. Dal pubblico alcuni militanti li hanno contestati al grido di \"Salvini non si tocca\".",
+      "fonte": {
+        "tipo": "stampa",
+        "citazione": "ANSA, 20 agosto 2026: \"La fronda del Nord: 'La Lega così non va, soluzione prima di Pontida'\"",
+        "url": "https://www.ansa.it/sito/notizie/politica/2026/08/20/la-fronda-del-nord-la-lega-cosi-non-va-soluzione-prima-di-pontida_16f364ac-ed3e-480b-b172-f1efa95e2fa3.html"
+      }
+    },
+    {
+      "id": "q3",
+      "sezione": "italia",
+      "difficolta": "media",
+      "testo": "Il 25 agosto Meloni, Tajani, Salvini, Lupi e Giorgetti si sono riuniti sul caro carburanti. Che cosa hanno deciso sul taglio delle accise in vigore da marzo?",
+      "opzioni": [
+        "Di prorogarlo per tutti fino a fine anno",
+        "Di abolirlo subito per finanziare la legge di bilancio",
+        "Di prorogarlo di pochi giorni e poi sostituirlo con aiuti mirati ai redditi bassi",
+        "Di estenderlo anche al gas e all'elettricità"
+      ],
+      "rispostaCorretta": 2,
+      "spiegazione": "Il Consiglio dei ministri del 26 agosto ha prorogato di alcuni giorni lo sconto esistente. Nel frattempo il governo studia una misura \"più concentrata sulle fasce di reddito che hanno più bisogno del sostegno dello Stato\", cioè aiuti selettivi al posto del taglio generalizzato.",
+      "fonte": {
+        "tipo": "stampa",
+        "citazione": "ANSA, 25 agosto 2026: \"Taglio delle accise verso la proroga, 'poi aiuti ai redditi bassi'\"",
+        "url": "https://www.ansa.it/sito/notizie/politica/2026/08/25/taglio-delle-accise-verso-la-proroga-poi-aiuti-ai-redditi-bassi_fb725722-357f-4d7f-b1c6-fa89004ea853.html"
+      }
+    },
+    {
+      "id": "q4",
+      "sezione": "italia",
+      "difficolta": "difficile",
+      "testo": "Cinque giorni dopo lo strappo della Versiliana, il 25 agosto Salvini ha risposto alla fronda: \"Nessun passo di lato\". Con Fontana si è limitato a una foto. In quale occasione?",
+      "opzioni": [
+        "Al raduno di Pontida",
+        "Al Meeting di Rimini",
+        "Alla Festa della Lega di Pinzolo",
+        "In Consiglio federale a Milano"
+      ],
+      "rispostaCorretta": 1,
+      "spiegazione": "Salvini è intervenuto al Meeting di Rimini all'incontro \"Il Paese che si muove\", con l'amministratore delegato di Ferrovie dello Stato Gianpiero Strisciuglio. Ha escluso di farsi da parte, ricordando che davanti c'è \"più di un anno\" di governo. Con il presidente della Lombardia solo una foto, nessun chiarimento pubblico.",
+      "fonte": {
+        "tipo": "stampa",
+        "citazione": "ANSA, 25 agosto 2026: \"Salvini: 'Nessun passo di lato'. Con Fontana solo una foto al meeting\"",
+        "url": "https://www.ansa.it/sito/notizie/politica/2026/08/25/il-paese-che-si-muove-lincontro-al-meeting-di-rimini-con-salvini_540f01dd-1fb0-48ce-85bd-7508f2cf250a.html"
+      }
+    },
+    {
+      "id": "q5",
+      "sezione": "estero",
+      "difficolta": "facile",
+      "testo": "Il 22 agosto Donald Trump ha definito \"territorio americano\" uno stretto strategico per il traffico di petrolio, dopo notizie di stampa su un dispositivo militare USA per far transitare le petroliere. Quale?",
+      "opzioni": [
+        "Lo Stretto di Hormuz",
+        "Il Bosforo",
+        "Lo Stretto di Malacca",
+        "Il Canale di Suez"
+      ],
+      "rispostaCorretta": 0,
+      "spiegazione": "Trump ha rivendicato lo Stretto di Hormuz e ribadito che non può \"permettere all'Iran di avere un'arma nucleare\", mentre Washington annunciava nuove sanzioni. Teheran ha risposto rivendicando il controllo dello stretto e annunciando il rafforzamento del proprio arsenale.",
+      "fonte": {
+        "tipo": "stampa",
+        "citazione": "ANSA, 22 agosto 2026: \"Trump rivendica Hormuz, Teheran annuncia il rafforzamento dell'arsenale\"",
+        "url": "https://www.ansa.it/sito/notizie/mondo/2026/08/22/trump-rivendica-hormuz-teheran-annuncia-il-rafforzamento-dellarsenale_038f5f38-b5db-4bad-9ab7-552b5dec514b.html"
+      }
+    },
+    {
+      "id": "q6",
+      "sezione": "estero",
+      "difficolta": "media",
+      "testo": "Il 22 agosto sono falliti i negoziati fra Stati Uniti e Canada e sono entrati in vigore dazi USA del 50% su circa 20 miliardi di dollari di prodotti canadesi. Come ha reagito il governo di Mark Carney?",
+      "opzioni": [
+        "Ha accettato le condizioni americane per evitare un'escalation",
+        "Ha annunciato dazi del 50% sui prodotti americani dall'8 settembre",
+        "Ha portato il caso all'Organizzazione mondiale del commercio senza contromisure",
+        "Ha sospeso le esportazioni di petrolio verso gli Stati Uniti"
+      ],
+      "rispostaCorretta": 1,
+      "spiegazione": "Ottawa ha annunciato dazi del 50% dall'8 settembre su acciaio, elettronica, latticini, carta e elettrodomestici americani. Secondo Carney l'amministrazione Trump ha posto all'ultimo momento condizioni \"inique\", fra cui limiti al bilinguismo sulle etichette e ai sussidi alle industrie culturali. \"Si è in guerra quando si viene attaccati, e noi siamo stati attaccati\", ha detto.",
+      "fonte": {
+        "tipo": "stampa",
+        "citazione": "Il Post, 22 agosto 2026: \"Il Canada imporrà dazi agli Stati Uniti in risposta ai dazi di Trump, dopo il fallimento dei negoziati\"",
+        "url": "https://www.ilpost.it/2026/08/22/canada-stati-uniti-nuovi-dazi-negoziati-falliti/"
+      }
+    },
+    {
+      "id": "q7",
+      "sezione": "estero",
+      "difficolta": "difficile",
+      "testo": "Il 24 agosto un sondaggio YouGov per The Economist ha misurato il gradimento di Trump stato per stato. In quanti stati su 50 chi boccia il suo operato supera chi lo approva?",
+      "opzioni": [
+        "27",
+        "37",
+        "47",
+        "50"
+      ],
+      "rispostaCorretta": 2,
+      "spiegazione": "In 47 stati su 50 il saldo è negativo. Solo in Wyoming, Idaho e Virginia la maggioranza degli intervistati promuove il presidente. Il dato segue il sondaggio Reuters del 17 agosto, secondo cui un americano su tre approva l'operato di Trump.",
+      "fonte": {
+        "tipo": "stampa",
+        "citazione": "ANSA, 24 agosto 2026: \"Sondaggio, Trump in difficoltà in 47 stati Usa su 50\"",
+        "url": "https://www.ansa.it/sito/notizie/mondo/2026/08/24/sondaggio-trump-in-difficolta-in-47-stati-usa-su-50_d8fd73de-990f-40d9-a698-23c755112a53.html"
+      }
+    }
+  ]
+}

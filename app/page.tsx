@@ -96,7 +96,7 @@ export default function Home() {
                   </div>
                   <h3 className="text-2xl sm:text-3xl font-bold">Con quale partito sei allineato?</h3>
                   <p className="mt-3 text-base" style={{ color: 'var(--fg-muta)' }}>
-                    18 affermazioni concrete. Scopri quale partito rispecchia meglio le tue posizioni su economia, diritti, giustizia, ambiente e altro.
+                    20 affermazioni concrete e 11 partiti. Scopri quale partito rispecchia meglio le tue posizioni su economia, diritti, giustizia, ambiente e altro.
                   </p>
                   <div className="mt-6 flex items-center gap-2 text-sm font-medium" style={{ color: 'var(--accento)' }}>
                     Inizia il test <span className="group-hover:translate-x-1 transition-transform">→</span>
@@ -125,7 +125,7 @@ export default function Home() {
                   </div>
                   <h3 className="text-2xl sm:text-3xl font-bold">Quiz Settimanale</h3>
                   <p className="mt-3 text-base" style={{ color: 'var(--fg-muta)' }}>
-                    Domande su fatti politici attuali. Testa la tua cultura politica e rimani aggiornato sugli avvenimenti della settimana.
+                    Sette domande sui fatti politici della settimana, divise fra Italia ed estero. Ogni risposta ha spiegazione e fonte.
                   </p>
                   <div className="mt-6 flex items-center gap-2 text-sm font-medium" style={{ color: 'var(--accento)' }}>
                     Fai il quiz <span className="group-hover:translate-x-1 transition-transform">→</span>

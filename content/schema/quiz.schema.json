@@ -1,0 +1,103 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://politicare.it/schema/quiz.schema.json",
+  "title": "Content pack — quiz settimanale di cultura politica",
+  "type": "object",
+  "required": [
+    "id", "versione", "numero", "data", "periodo", "titolo", "sottotitolo",
+    "descrizione", "autori", "changelog", "sezioni", "domande"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "pattern": "^quiz-settimana-[0-9]{2,}$" },
+    "versione": { "type": "string", "minLength": 1 },
+    "numero": { "type": "integer", "minimum": 1 },
+    "data": { "type": "string", "format": "date" },
+    "periodo": {
+      "type": "object",
+      "required": ["dal", "al"],
+      "additionalProperties": false,
+      "properties": {
+        "dal": { "type": "string", "format": "date" },
+        "al": { "type": "string", "format": "date" }
+      }
+    },
+    "titolo": { "type": "string", "minLength": 1 },
+    "sottotitolo": { "type": "string", "minLength": 1 },
+    "descrizione": { "type": "string", "minLength": 1 },
+    "autori": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "changelog": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["versione", "data", "note"],
+        "additionalProperties": false,
+        "properties": {
+          "versione": { "type": "string", "minLength": 1 },
+          "data": { "type": "string", "format": "date" },
+          "note": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "sezioni": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/sezione" }
+    },
+    "domande": {
+      "type": "array",
+      "minItems": 7,
+      "maxItems": 7,
+      "items": { "$ref": "#/$defs/domanda" }
+    }
+  },
+  "$defs": {
+    "sezione": {
+      "type": "object",
+      "required": ["id", "titolo", "icona"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+        "titolo": { "type": "string", "minLength": 1 },
+        "icona": { "type": "string", "minLength": 1 },
+        "descrizione": { "type": "string" }
+      }
+    },
+    "fonte": {
+      "type": "object",
+      "required": ["tipo", "citazione", "url"],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": { "type": "string", "enum": ["stampa", "voto", "programma", "questionario"] },
+        "citazione": { "type": "string", "minLength": 1 },
+        "url": { "type": "string", "format": "uri", "pattern": "^https?://" }
+      }
+    },
+    "domanda": {
+      "type": "object",
+      "required": ["id", "sezione", "difficolta", "testo", "opzioni", "rispostaCorretta", "spiegazione", "fonte"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^q[0-9]+$" },
+        "sezione": { "type": "string", "minLength": 1 },
+        "difficolta": { "type": "string", "enum": ["facile", "media", "difficile"] },
+        "testo": { "type": "string", "minLength": 1 },
+        "opzioni": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 4,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "rispostaCorretta": { "type": "integer", "minimum": 0, "maximum": 3 },
+        "spiegazione": { "type": "string", "minLength": 1 },
+        "fonte": { "$ref": "#/$defs/fonte" }
+      }
+    }
+  }
+}

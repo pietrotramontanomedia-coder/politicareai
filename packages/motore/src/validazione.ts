@@ -1,5 +1,10 @@
 import type { TestPartitoPack } from './tipi';
 
+const TIPI_FONTE_AMMESSI = new Set(['questionario', 'programma', 'voto', 'dichiarazione']);
+const DATA_ISO = /^\d{4}-\d{2}-\d{2}$/;
+/** Ogni partito deve avere una posizione documentata su almeno questa quota di affermazioni. */
+export const COPERTURA_MINIMA_PACK = 0.5;
+
 export interface ErroreValidazione {
   regola: string;
   messaggio: string;
@@ -9,22 +14,90 @@ export interface ErroreValidazione {
 const SOGLIA_SBILANCIAMENTO_VERSO = 0.1; // 10%
 const SOGLIA_NON_DISCRIMINANTE = 0.85; // 85%
 
-/** Ogni posizione deve avere una fonte non vuota (citazione + url). */
+/**
+ * Ogni posizione ha una fonte con citazione. Se il valore è documentato (non
+ * null) servono anche URL http(s) e tipo ammesso; una dichiarazione deve avere
+ * la data; con confidenza bassa il valore non può essere ±2.
+ */
 function validaFonti(pack: TestPartitoPack): ErroreValidazione[] {
   const errori: ErroreValidazione[] = [];
   for (const partito of pack.partiti) {
     for (const posizione of partito.posizioni) {
-      const fonteValida =
-        posizione.fonte &&
-        posizione.fonte.citazione.trim().length > 0 &&
-        posizione.fonte.url.trim().length > 0;
-      if (!fonteValida) {
-        errori.push({
-          regola: 'fonte-obbligatoria',
-          messaggio: `Posizione di "${partito.nome}" su "${posizione.affermazioneId}" senza fonte valida.`,
-          affermazioneId: posizione.affermazioneId,
-        });
+      const dove = `Posizione di "${partito.nome}" su "${posizione.affermazioneId}"`;
+      const fonte = posizione.fonte;
+      if (!fonte || typeof fonte.citazione !== 'string' || fonte.citazione.trim().length === 0) {
+        errori.push({ regola: 'fonte-obbligatoria', messaggio: `${dove} senza citazione.`, affermazioneId: posizione.affermazioneId });
+        continue;
       }
+      if (fonte.data !== undefined && !DATA_ISO.test(fonte.data)) {
+        errori.push({ regola: 'fonte-obbligatoria', messaggio: `${dove}: data "${fonte.data}" non in formato YYYY-MM-DD.`, affermazioneId: posizione.affermazioneId });
+      }
+      if (posizione.valore === null) continue;
+
+      if (!TIPI_FONTE_AMMESSI.has(fonte.tipo)) {
+        errori.push({ regola: 'fonte-obbligatoria', messaggio: `${dove}: tipo di fonte "${fonte.tipo}" non ammesso nel test partito.`, affermazioneId: posizione.affermazioneId });
+      }
+      if (typeof fonte.url !== 'string' || !/^https?:\/\/\S+$/.test(fonte.url.trim())) {
+        errori.push({ regola: 'fonte-obbligatoria', messaggio: `${dove} senza URL verificabile.`, affermazioneId: posizione.affermazioneId });
+      }
+      if (fonte.tipo === 'dichiarazione' && !fonte.data) {
+        errori.push({ regola: 'fonte-obbligatoria', messaggio: `${dove}: una dichiarazione deve avere la data.`, affermazioneId: posizione.affermazioneId });
+      }
+      if (posizione.confidenza === 'bassa' && Math.abs(posizione.valore) === 2) {
+        errori.push({ regola: 'confidenza-valore', messaggio: `${dove}: con confidenza bassa il valore non può essere ±2.`, affermazioneId: posizione.affermazioneId });
+      }
+    }
+  }
+  return errori;
+}
+
+/**
+ * Ogni partito deve avere una voce per ogni affermazione (anche null, con la
+ * spiegazione di cosa si è cercato) e nessuna voce su affermazioni inesistenti.
+ */
+function validaCompletezza(pack: TestPartitoPack): ErroreValidazione[] {
+  const errori: ErroreValidazione[] = [];
+  const ids = new Set(pack.affermazioni.map((a) => a.id));
+  const idsAffermazioni = pack.affermazioni.map((a) => a.id);
+  if (new Set(idsAffermazioni).size !== idsAffermazioni.length) {
+    errori.push({ regola: 'posizioni-complete', messaggio: 'Id di affermazione duplicati.' });
+  }
+  for (const partito of pack.partiti) {
+    const viste = new Set<string>();
+    for (const posizione of partito.posizioni) {
+      if (!ids.has(posizione.affermazioneId)) {
+        errori.push({ regola: 'posizioni-complete', messaggio: `"${partito.nome}" ha una posizione su "${posizione.affermazioneId}", che non esiste.`, affermazioneId: posizione.affermazioneId });
+      }
+      if (viste.has(posizione.affermazioneId)) {
+        errori.push({ regola: 'posizioni-complete', messaggio: `"${partito.nome}" ha due posizioni su "${posizione.affermazioneId}".`, affermazioneId: posizione.affermazioneId });
+      }
+      viste.add(posizione.affermazioneId);
+    }
+    for (const id of ids) {
+      if (!viste.has(id)) {
+        errori.push({ regola: 'posizioni-complete', messaggio: `"${partito.nome}" non ha alcuna voce su "${id}".`, affermazioneId: id });
+      }
+    }
+  }
+  return errori;
+}
+
+/**
+ * Un partito con troppe posizioni non documentate non è confrontabile con gli
+ * altri: sotto COPERTURA_MINIMA_PACK il pack non passa. Meglio cercare ancora
+ * o togliere il partito, che classificarlo su pochi punti.
+ */
+function validaCoperturaPartiti(pack: TestPartitoPack): ErroreValidazione[] {
+  const errori: ErroreValidazione[] = [];
+  const totale = pack.affermazioni.length;
+  if (totale === 0) return errori;
+  for (const partito of pack.partiti) {
+    const documentate = partito.posizioni.filter((p) => p.valore !== null).length;
+    if (documentate / totale < COPERTURA_MINIMA_PACK) {
+      errori.push({
+        regola: 'copertura-minima',
+        messaggio: `"${partito.nome}" ha posizioni documentate su ${documentate}/${totale} affermazioni, sotto il ${COPERTURA_MINIMA_PACK * 100}%.`,
+      });
     }
   }
   return errori;
@@ -136,7 +209,9 @@ function validaMetadati(pack: TestPartitoPack): ErroreValidazione[] {
 export function validaPack(pack: TestPartitoPack): ErroreValidazione[] {
   return [
     ...validaMetadati(pack),
+    ...validaCompletezza(pack),
     ...validaFonti(pack),
+    ...validaCoperturaPartiti(pack),
     ...validaBilanciamentoVerso(pack),
     ...validaPotereDiscriminante(pack),
     ...validaQuotePerArea(pack),

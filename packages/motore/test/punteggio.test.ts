@@ -163,3 +163,60 @@ describe('principaliDivergenze / principaliConvergenze', () => {
     expect(principaliConvergenze(risultato, 1)[0].affermazioneId).toBe('a1');
   });
 });
+
+describe('copertura, aree ed esclusi', () => {
+  const affermazioni = [
+    { id: 'a1', testo: 'A1', area: 'fisco', verso: 1 as const },
+    { id: 'a2', testo: 'A2', area: 'fisco', verso: -1 as const },
+    { id: 'a3', testo: 'A3', area: 'lavoro', verso: 1 as const },
+    { id: 'a4', testo: 'A4', area: 'lavoro', verso: -1 as const },
+  ];
+  const risposte: Risposta[] = [
+    { affermazioneId: 'a1', valore: 2, importante: false },
+    { affermazioneId: 'a2', valore: 2, importante: false },
+    { affermazioneId: 'a3', valore: -2, importante: false },
+    { affermazioneId: 'a4', valore: null, importante: false },
+  ];
+
+  it('calcola copertura e confrontate sulle sole risposte date', () => {
+    const completo = partito('c', 'Completo', [['a1', 2], ['a2', 2], ['a3', -2], ['a4', 0]]);
+    const r = calcolaPunteggio(risposte, completo, { affermazioni });
+    expect(r.copertura).toBe(1);
+    expect(r.confrontate).toBe(3);
+
+    const parziale = partito('p', 'Parziale', [['a1', 2]]);
+    const q = calcolaPunteggio(risposte, parziale, { affermazioni });
+    expect(q.copertura).toBeCloseTo(1 / 3);
+    expect(q.punteggio).toBe(1); // su un'unica affermazione coincide: è proprio il caso che la soglia deve neutralizzare
+  });
+
+  it('calcola il punteggio per area solo dove c\'è almeno un confronto', () => {
+    const p = partito('x', 'X', [['a1', 2], ['a2', -2], ['a3', 2]]);
+    const r = calcolaPunteggio(risposte, p, { affermazioni });
+    expect(r.perArea.fisco).toBeCloseTo((1 + 0) / 2);
+    expect(r.perArea.lavoro).toBe(0);
+    expect(r.perArea.ambiente).toBeUndefined();
+  });
+
+  it('senza affermazioni perArea resta vuoto', () => {
+    const p = partito('x', 'X', [['a1', 2]]);
+    expect(calcolaPunteggio(risposte, p).perArea).toEqual({});
+  });
+
+  it('mette a parte i partiti sotto la soglia di copertura, senza farli concorrere al pari merito', () => {
+    const completo = partito('c', 'Completo', [['a1', 0], ['a2', 0], ['a3', 0]]); // accordo 0.5 ovunque
+    const quasi = partito('q', 'Quasi', [['a1', 0], ['a2', 0]]); // copertura 2/3
+    const parziale = partito('p', 'Parziale', [['a1', 2]]); // copertura 1/3, punteggio 1
+    const c = calcolaClassifica(risposte, [parziale, completo, quasi], { affermazioni });
+    expect(c.risultati.map((r) => r.partitoId)).toEqual(['completo', 'quasi'].map((n) => n[0]));
+    expect(c.esclusi.map((r) => r.partitoId)).toEqual(['p']);
+    expect(c.pariMerito).toBe(true);
+  });
+
+  it('la soglia è configurabile', () => {
+    const parziale = partito('p', 'Parziale', [['a1', 2]]);
+    const c = calcolaClassifica(risposte, [parziale], { sogliaCopertura: 0.3 });
+    expect(c.risultati).toHaveLength(1);
+    expect(c.esclusi).toHaveLength(0);
+  });
+});

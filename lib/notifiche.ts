@@ -38,6 +38,8 @@ export function useNotifiche() {
   const [idratato, setIdratato] = useState(false);
 
   useEffect(() => {
+    // Lettura da localStorage dopo il mount, per non divergere dal markup del server.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLette(leggiLette());
     setIdratato(true);
   }, []);

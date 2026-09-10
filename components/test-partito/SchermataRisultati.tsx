@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import type { Classifica, TestPartitoPack } from '@politicare/motore';
+import { SOGLIA_COPERTURA } from '@politicare/motore';
 import RigaClassifica from './RigaClassifica';
 
 interface Props {
@@ -21,6 +22,7 @@ export default function SchermataRisultati({
   onRicomincia,
 }: Props) {
   const affermazioniPerId = new Map(pack.affermazioni.map((a) => [a.id, a]));
+  const partitiPerId = new Map(pack.partiti.map((p) => [p.id, p]));
   const [primo, secondo] = classifica.risultati;
 
   return (
@@ -37,13 +39,14 @@ export default function SchermataRisultati({
       <p className="mt-3 text-base" style={{ color: 'var(--fg-muta)' }}>
         Hai risposto a {numeroRisposte} affermazioni su {pack.affermazioni.length}
         {numeroSaltate > 0 ? ` (${numeroSaltate} saltate)` : ''}. Il numero è il grado di accordo, non
-        un voto: apri ogni partito per vedere su cosa converge e su cosa diverge davvero da te.
+        un voto: apri ogni partito per vedere, affermazione per affermazione, la sua posizione, la fonte da cui
+        l&apos;abbiamo presa e su cosa converge o diverge da te.
       </p>
 
       {classifica.pariMerito && primo && secondo && (
         <div
           className="mt-6 rounded-2xl border p-4 text-sm"
-          style={{ borderColor: 'var(--accento)', background: 'var(--accento-chiaro)', color: 'var(--color-inchiostro)' }}
+          style={{ borderColor: 'var(--accento)', background: 'rgba(254,220,1,0.08)', color: 'var(--fg)' }}
         >
           <strong>Pari merito.</strong> {primo.nome} e {secondo.nome} sono a meno di 3 punti
           percentuali di distanza: consideriamoli appaiati, non c&apos;è un primo classificato netto.
@@ -55,18 +58,44 @@ export default function SchermataRisultati({
           <RigaClassifica
             key={risultato.partitoId}
             risultato={risultato}
+            partito={partitiPerId.get(risultato.partitoId)!}
             posizione={indice + 1}
             affermazioniPerId={affermazioniPerId}
+            risposteDate={numeroRisposte}
           />
         ))}
       </ol>
+
+      {classifica.esclusi.length > 0 && (
+        <section className="mt-10" aria-labelledby="esclusi">
+          <h2 id="esclusi" className="text-lg font-semibold">Dati insufficienti per il confronto</h2>
+          <p className="mt-2 text-sm" style={{ color: 'var(--fg-muta)' }}>
+            Per questi partiti abbiamo una posizione documentata su meno del {Math.round(SOGLIA_COPERTURA * 100)}% delle
+            affermazioni a cui hai risposto. Il punteggio poggia su troppi pochi punti per stare in classifica con gli
+            altri: lo mostriamo a parte, con le affermazioni che abbiamo potuto confrontare.
+          </p>
+          <ol className="mt-4 space-y-3">
+            {classifica.esclusi.map((risultato, indice) => (
+              <RigaClassifica
+                key={risultato.partitoId}
+                risultato={risultato}
+                partito={partitiPerId.get(risultato.partitoId)!}
+                posizione={classifica.risultati.length + indice + 1}
+                affermazioniPerId={affermazioniPerId}
+                risposteDate={numeroRisposte}
+                escluso
+              />
+            ))}
+          </ol>
+        </section>
+      )}
 
       <div className="mt-10 flex flex-wrap gap-3">
         <button
           type="button"
           onClick={onRicomincia}
           className="inline-flex items-center justify-center rounded-lg px-6 py-3 text-base font-semibold text-gray-900 transition-all hover:shadow-lg active:scale-[0.98]"
-          style={{ background: 'var(--accento-bright)' }}
+          style={{ background: 'var(--accento)' }}
         >
           Rifai il test
         </button>

@@ -1,7 +1,6 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import Image from 'next/image';
 import type { TestPartitoPack } from '@politicare/motore';
 import { etichettaArea } from '@/lib/aree';
 import Logo from '@/components/Logo';

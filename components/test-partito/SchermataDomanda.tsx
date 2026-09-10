@@ -38,7 +38,7 @@ export default function SchermataDomanda({
         exit={riduciMovimento ? undefined : { opacity: 0, x: -24 }}
         transition={{ duration: 0.25, ease: 'easeOut' }}
         className="rounded-3xl border p-6 sm:p-8"
-        style={{ borderColor: 'var(--bordo)', background: 'var(--bg-alta)' }}
+        style={{ borderColor: 'var(--bordo)', background: 'var(--bg-card)' }}
       >
         <span
           className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium"
