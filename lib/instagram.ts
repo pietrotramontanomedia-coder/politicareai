@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import flashData from '@/content/agenzia/flash.json';
 import type { PostInstagram } from '@/lib/instagram-server';
-import type { NotiziaUltimOra } from '@/lib/ultimora-server';
+import type { FonteUltimOra, NotiziaUltimOra } from '@/lib/ultimora-server';
 
 export type { PostInstagram };
 
@@ -13,6 +13,8 @@ export interface VoceUltimOra {
   titolo: string;
   testo: string;
   href: string;
+  immagine?: string;
+  fonte?: FonteUltimOra;
 }
 
 function usaRichiestaCondivisa<T>(url: string, estrai: (d: unknown) => T[]) {
@@ -61,6 +63,8 @@ export function useUltimOra() {
           titolo: n.titolo,
           testo: n.testo,
           href: `/ultimora/${n.id}`,
+          immagine: n.immagine,
+          fonte: n.fonte,
         }));
         setVoci(
           daFonti.length > 0 ? daFonti : flashData.voci.map((v) => ({ ...v, href: `/ultimora/${v.id}` })),

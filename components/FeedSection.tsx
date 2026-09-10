@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import NewsCarousel from './NewsCarousel';
 import ArticoliWidget from './ArticoliWidget';
-import AgenziaStampa from './AgenziaStampa';
+import NotiziarioLive from './ultimora/NotiziarioLive';
 import FeedSkeleton from './FeedSkeleton';
 
 interface FeedArticle {
@@ -72,9 +72,9 @@ export default function FeedSection() {
         </section>
       )}
 
-      <section className="banda banda-live px-4 sm:px-6 py-14">
+      <section id="ultimora" className="banda banda-live scroll-mt-24 px-4 sm:px-6 py-14">
         <div className="mx-auto max-w-6xl w-full">
-          <AgenziaStampa />
+          <NotiziarioLive />
         </div>
       </section>
     </>

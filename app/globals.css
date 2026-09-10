@@ -202,7 +202,15 @@ body {
   right: 0;
   top: 0;
   height: 2px;
-  background: linear-gradient(90deg, #ef4444 0%, rgba(239, 68, 68, 0.25) 40%, transparent 100%);
+  background: linear-gradient(90deg, transparent 0%, #ef4444 35%, #ef4444 65%, transparent 100%);
+  background-size: 200% 100%;
+  animation: filo 6s linear infinite;
+}
+
+/* Avanzamento a segmenti del ticker delle ultim'ora, come nelle storie */
+@keyframes riempi {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
 }
 
 /* Tavolo da gioco: fondo scuro con alone, per far risaltare la carta */
