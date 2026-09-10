@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { motion, useReducedMotion } from 'framer-motion';
+import { useEffect, useRef, useState } from 'react';
+import { motion, useMotionValue, useReducedMotion, useTransform, type PanInfo } from 'framer-motion';
+import Logo from '@/components/Logo';
 import { ETICHETTE_TIPO, TESTI_GIOCO, type CartaInGioco, type LeggeInVigore } from '@/lib/gioco';
-import { useSwipe } from '@/lib/useSwipe';
 
 interface Props {
   pescata: CartaInGioco;
@@ -16,23 +16,15 @@ interface Props {
 }
 
 const T = TESTI_GIOCO;
+/** Oltre questa distanza il trascinamento scarta la carta. */
+const SOGLIA_SCARTO = 110;
 
 export default function SchermataCarta({ pescata, indice, totale, leggi, analcolico, onProssima, onEsci }: Props) {
-  const riduciMovimento = useReducedMotion();
-  const { carta, testo } = pescata;
-  const stile = ETICHETTE_TIPO[carta.tipo];
-  const swipe = useSwipe({ avanti: onProssima, indietro: onProssima });
-
   return (
-    <div
-      /* Su mobile il layout aggiunge 4rem di barra in basso: la carta resta in una videata. */
-      className="flex min-h-[calc(100dvh-4rem)] flex-col px-4 py-6 sm:min-h-dvh sm:px-6"
-      style={swipe.style}
-      onTouchStart={swipe.onTouchStart}
-      onTouchEnd={swipe.onTouchEnd}
-    >
+    /* Altezza utile: tolti l'header (5,25rem) e, su mobile, la barra in basso (4rem). */
+    <div className="tavolo flex min-h-[calc(100dvh-9.25rem)] flex-col px-4 py-5 sm:min-h-[calc(100dvh-5.25rem)] sm:px-6">
       {/* Testata: avanzamento e uscita */}
-      <div className="mx-auto flex w-full max-w-2xl items-center justify-between gap-4">
+      <div className="mx-auto flex w-full max-w-md items-center justify-between gap-4">
         <span className="text-sm font-medium tabular-nums" style={{ color: 'var(--fg-muta)' }}>
           {T.gioco.carta(indice + 1, totale)}
         </span>
@@ -46,67 +38,22 @@ export default function SchermataCarta({ pescata, indice, totale, leggi, analcol
         </button>
       </div>
 
-      <div className="mx-auto mt-2 h-1 w-full max-w-2xl overflow-hidden rounded-full" style={{ background: 'var(--bordo)' }}>
+      <div className="mx-auto mt-2 h-1 w-full max-w-md overflow-hidden rounded-full" style={{ background: 'var(--bordo)' }}>
         <div
           className="h-full rounded-full transition-all duration-300"
           style={{ width: `${((indice + 1) / totale) * 100}%`, background: 'var(--accento)' }}
         />
       </div>
 
-      {/* Carta */}
-      <div className="mx-auto flex w-full max-w-2xl flex-1 items-center py-6">
-        {/* La carta si rimonta a ogni indice: niente animazione di uscita, così
-            tocchi rapidi non accodano transizioni e la carta è sempre quella giusta. */}
-        <motion.article
-          key={indice}
-          initial={riduciMovimento ? false : { opacity: 0, y: 16, scale: 0.99 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.18, ease: 'easeOut' }}
-          className="w-full rounded-3xl border p-6 sm:p-10"
-          style={{ borderColor: stile.colore, background: 'var(--bg-card)' }}
-        >
-            <div className="flex flex-wrap items-center gap-2">
-              <span
-                className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide"
-                style={{ background: stile.sfondo, color: stile.colore }}
-              >
-                <span aria-hidden>{stile.icona}</span>
-                {stile.label}
-              </span>
-              {carta.penalita > 0 && (
-                <span
-                  className="rounded-full px-3 py-1 text-xs font-bold"
-                  style={{ background: 'rgba(254,220,1,0.12)', color: 'var(--accento)' }}
-                >
-                  {T.penalita.etichetta(carta.penalita, analcolico)}
-                </span>
-              )}
-              {carta.secondi && (
-                <span className="rounded-full px-3 py-1 text-xs font-bold" style={{ background: 'var(--bordo)' }}>
-                  ⏱ {T.gioco.tempo(carta.secondi)}
-                </span>
-              )}
-            </div>
-
-            <h1 className="mt-5 text-3xl font-bold tracking-tight sm:text-4xl">{carta.titolo}</h1>
-            <p className="mt-4 text-lg leading-relaxed sm:text-xl">{testo}</p>
-
-            {carta.secondi && <Cronometro key={indice} secondi={carta.secondi} />}
-
-            {carta.fonte && (
-              <p className="mt-6 border-t pt-4 text-xs leading-relaxed" style={{ borderColor: 'var(--bordo)', color: 'var(--fg-muta)' }}>
-                <span className="font-semibold">{T.gioco.fonte}:</span>{' '}
-                <a href={carta.fonte.url} target="_blank" rel="noopener noreferrer" className="underline hover:no-underline">
-                  {carta.fonte.citazione}
-                </a>
-              </p>
-            )}
-        </motion.article>
+      {/* Mazzo */}
+      <div className="relative mx-auto flex min-h-0 w-full max-w-md flex-1 items-center justify-center py-4">
+        <PilaDiCarte />
+        <CartaGiocata key={indice} pescata={pescata} analcolico={analcolico} onScarta={onProssima} />
       </div>
 
       {/* Leggi ancora in vigore */}
       {leggi.length > 0 && (
-        <div className="mx-auto w-full max-w-2xl">
+        <div className="mx-auto w-full max-w-md">
           <h2 className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--fg-muta)' }}>
             {T.gioco.leggiInVigore}
           </h2>
@@ -115,13 +62,13 @@ export default function SchermataCarta({ pescata, indice, totale, leggi, analcol
               <li
                 key={legge.id}
                 className="flex items-start justify-between gap-3 rounded-xl border px-3 py-2 text-sm"
-                style={{ borderColor: 'var(--bordo)', background: 'var(--bg-card)' }}
+                style={{ borderColor: 'var(--bordo)', background: 'rgba(0,0,0,0.35)' }}
               >
                 <span className="min-w-0">
                   <span className="font-semibold">{legge.titolo}</span>{' '}
                   <span style={{ color: 'var(--fg-muta)' }}>{legge.testo}</span>
                 </span>
-                <span className="shrink-0 tabular-nums text-xs" style={{ color: 'var(--accento)' }}>
+                <span className="shrink-0 text-xs tabular-nums" style={{ color: 'var(--accento)' }}>
                   {T.gioco.restano(legge.carteRimaste)}
                 </span>
               </li>
@@ -130,7 +77,7 @@ export default function SchermataCarta({ pescata, indice, totale, leggi, analcol
         </div>
       )}
 
-      <div className="mx-auto w-full max-w-2xl pt-5">
+      <div className="mx-auto w-full max-w-md pt-4">
         <button
           type="button"
           onClick={onProssima}
@@ -139,11 +86,134 @@ export default function SchermataCarta({ pescata, indice, totale, leggi, analcol
         >
           {T.gioco.prossima} →
         </button>
-        <p className="mt-3 text-center text-xs" style={{ color: 'var(--fg-muta)' }}>
-          {T.gioco.astensione} · {T.penalita.spiegazione(analcolico)}
+        <p className="mt-2.5 text-center text-xs" style={{ color: 'var(--fg-muta)' }}>
+          {T.gioco.trascina} · {T.penalita.spiegazione(analcolico)}
         </p>
       </div>
     </div>
+  );
+}
+
+/** Le carte ancora da pescare, appena visibili sotto quella in gioco. */
+function PilaDiCarte() {
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-0 flex items-center justify-center">
+      {[
+        { rotate: -4, scale: 0.94, opacity: 0.25 },
+        { rotate: 3, scale: 0.97, opacity: 0.4 },
+      ].map((stile, i) => (
+        <div
+          key={i}
+          className="absolute h-full max-h-[30rem] min-h-[20rem] w-full rounded-3xl border"
+          style={{
+            borderColor: 'var(--bordo)',
+            background: 'linear-gradient(160deg, #16161a, #0b0b0d)',
+            transform: `rotate(${stile.rotate}deg) scale(${stile.scale})`,
+            opacity: stile.opacity,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+function CartaGiocata({
+  pescata,
+  analcolico,
+  onScarta,
+}: {
+  pescata: CartaInGioco;
+  analcolico: boolean;
+  onScarta: () => void;
+}) {
+  const riduciMovimento = useReducedMotion();
+  const { carta, testo } = pescata;
+  const stile = ETICHETTE_TIPO[carta.tipo];
+
+  const x = useMotionValue(0);
+  const rotate = useTransform(x, [-260, 0, 260], [-16, 0, 16]);
+  const opacity = useTransform(x, [-260, -120, 0, 120, 260], [0.2, 1, 1, 1, 0.2]);
+  const trascinato = useRef(false);
+
+  const fineTrascinamento = (_: unknown, info: PanInfo) => {
+    if (Math.abs(info.offset.x) > SOGLIA_SCARTO) onScarta();
+    else x.set(0);
+    setTimeout(() => (trascinato.current = false), 0);
+  };
+
+  return (
+    <motion.article
+      drag="x"
+      dragSnapToOrigin
+      dragElastic={0.5}
+      onDragStart={() => (trascinato.current = true)}
+      onDragEnd={fineTrascinamento}
+      onClick={() => {
+        if (!trascinato.current) onScarta();
+      }}
+      style={{ x, rotate, opacity, borderColor: stile.colore, boxShadow: `0 24px 60px -20px ${stile.colore}55` }}
+      initial={riduciMovimento ? false : { y: 40, scale: 0.9, opacity: 0, rotate: -6 }}
+      animate={{ y: 0, scale: 1, opacity: 1, rotate: 0 }}
+      transition={{ duration: 0.22, ease: 'easeOut' }}
+      whileTap={{ scale: 0.99 }}
+      className="carta-gioco relative flex h-full max-h-[30rem] min-h-[20rem] w-full cursor-pointer touch-pan-y select-none flex-col rounded-3xl border-2 p-5 sm:p-7"
+    >
+      {/* Intestazione: seme del tipo e logo */}
+      <header className="flex items-start justify-between gap-3">
+        <span
+          className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider"
+          style={{ background: stile.sfondo, color: stile.colore }}
+        >
+          <span aria-hidden className="text-sm">
+            {stile.icona}
+          </span>
+          {stile.label}
+        </span>
+        <span className="opacity-45">
+          <Logo size="md" />
+        </span>
+      </header>
+
+      {/* Corpo */}
+      <div className="flex flex-1 flex-col justify-center overflow-y-auto py-5">
+        <h1 className="text-3xl font-bold leading-tight tracking-tight sm:text-4xl">{carta.titolo}</h1>
+        <p className="mt-3 text-lg leading-relaxed sm:text-xl">{testo}</p>
+
+        {carta.secondi && <Cronometro secondi={carta.secondi} />}
+
+        {carta.fonte && (
+          <p className="mt-5 border-t pt-3 text-xs leading-relaxed" style={{ borderColor: 'var(--bordo)', color: 'var(--fg-muta)' }}>
+            <span className="font-semibold">{T.gioco.fonte}:</span>{' '}
+            <a
+              href={carta.fonte.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="underline hover:no-underline"
+            >
+              {carta.fonte.citazione}
+            </a>
+          </p>
+        )}
+      </div>
+
+      {/* Piede: penalità e seme rovesciato, come nelle carte da gioco */}
+      <footer className="flex items-end justify-between gap-3">
+        <span
+          className="rounded-full px-3 py-1 text-sm font-bold"
+          style={
+            carta.penalita > 0
+              ? { background: 'rgba(254,220,1,0.14)', color: 'var(--accento)' }
+              : { background: 'rgba(255,255,255,0.06)', color: 'var(--fg-muta)' }
+          }
+        >
+          {T.penalita.etichetta(carta.penalita, analcolico)}
+        </span>
+        <span aria-hidden className="text-lg opacity-30" style={{ transform: 'rotate(180deg)' }}>
+          {stile.icona}
+        </span>
+      </footer>
+    </motion.article>
   );
 }
 
@@ -162,8 +232,11 @@ function Cronometro({ secondi }: { secondi: number }) {
     return (
       <button
         type="button"
-        onClick={() => setRimasti(secondi)}
-        className="mt-5 rounded-xl border px-4 py-2 text-sm font-semibold transition-colors hover:border-[var(--accento)]"
+        onClick={(e) => {
+          e.stopPropagation();
+          setRimasti(secondi);
+        }}
+        className="mt-5 self-start rounded-xl border px-4 py-2 text-sm font-semibold transition-colors hover:border-[var(--accento)]"
         style={{ borderColor: 'var(--bordo)' }}
       >
         ⏱ Avvia {secondi} secondi

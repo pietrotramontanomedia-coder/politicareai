@@ -1,11 +1,13 @@
 {
   "id": "gioco-base",
   "mazzo": "base",
-  "versione": "1.0.0",
+  "versione": "1.1.0",
   "data": "2026-09-10",
   "titolo": "Mazzo base",
-  "descrizione": "Archetipi e riti della politica italiana: nessun nome reale, solo ruoli e situazioni d'aula.",
-  "autori": ["Redazione Politicare"],
+  "descrizione": "Archetipi, riti e vizi della politica italiana: nessun nome reale, solo ruoli e situazioni d'aula.",
+  "autori": [
+    "Redazione Politicare"
+  ],
   "carte": [
     {
       "id": "base-001",
@@ -399,6 +401,283 @@
       "titolo": "Pausa dei lavori",
       "testo": "Sospensione: un bicchiere d'acqua a testa prima di riprendere. Chi salta il giro d'acqua paga.",
       "penalita": 0
+    },
+    {
+      "id": "base-055",
+      "tipo": "sfida",
+      "titolo": "Manifesto elettorale",
+      "testo": "{g1} tiene la posa da manifesto elettorale — sorriso e braccia conserte — per dieci secondi. Se ride, paga.",
+      "penalita": 1,
+      "secondi": 10
+    },
+    {
+      "id": "base-056",
+      "tipo": "sfida",
+      "titolo": "Tribuna politica",
+      "testo": "{g1} imita un politico senza dire chi è. Se nessuno indovina il ruolo, paga {g1}; se qualcuno indovina, paga chi ha indovinato per ultimo.",
+      "penalita": 2
+    },
+    {
+      "id": "base-057",
+      "tipo": "sfida",
+      "titolo": "Gaffe in diretta",
+      "testo": "{g1} racconta la figuraccia più recente della sua vita. Se si rifiuta, paga doppio.",
+      "penalita": 2
+    },
+    {
+      "id": "base-058",
+      "tipo": "sfida",
+      "titolo": "Governo tecnico",
+      "testo": "Per tre carte {g1} parla solo con paroloni da economista. Chiunque non capisca può chiedere spiegazioni: se {g1} spiega in modo semplice, paga.",
+      "penalita": 1,
+      "durataCarte": 3
+    },
+    {
+      "id": "base-059",
+      "tipo": "sfida",
+      "titolo": "Mani in tasca",
+      "testo": "Per tre carte {g1} non può gesticolare. Ogni gesto si paga.",
+      "penalita": 1,
+      "durataCarte": 3
+    },
+    {
+      "id": "base-060",
+      "tipo": "sfida",
+      "titolo": "Delegazione",
+      "testo": "{g1} può passare a chi vuole la prossima penalità che riceve. Una volta sola: usala bene.",
+      "penalita": 0
+    },
+    {
+      "id": "base-061",
+      "tipo": "sfida",
+      "titolo": "Preferenze",
+      "testo": "{g1} indica chi paga al posto suo per questa carta. Chi viene indicato può rifiutare, ma allora {g1} paga doppio.",
+      "penalita": 1
+    },
+    {
+      "id": "base-062",
+      "tipo": "sfida",
+      "titolo": "Il piano segreto",
+      "testo": "{g1} sussurra all'orecchio di {g2} un segreto di Stato inventato. Se {g2} non riesce a trattenersi dal ridere, paga {g2}; se resta impassibile, paga {g1}.",
+      "penalita": 2
+    },
+    {
+      "id": "base-063",
+      "tipo": "sfida",
+      "titolo": "Nomina a sorpresa",
+      "testo": "{g1} nomina qualcuno «ministro dell'acqua»: quella persona beve solo acqua fino alla prossima carta.",
+      "penalita": 1
+    },
+    {
+      "id": "base-064",
+      "tipo": "sfida",
+      "titolo": "Autodifesa",
+      "testo": "{g1} si difende da un'accusa inventata dal gruppo, in venti secondi, senza dire «non è vero». Se sbaglia, paga.",
+      "penalita": 2,
+      "secondi": 20
+    },
+    {
+      "id": "base-065",
+      "tipo": "duello",
+      "titolo": "Corridoi del potere",
+      "testo": "{g1} e {g2} devono mettersi d'accordo su una parola in codice senza dirla ad alta voce. Se il gruppo la indovina, pagano entrambi.",
+      "penalita": 2
+    },
+    {
+      "id": "base-066",
+      "tipo": "duello",
+      "titolo": "Coalizione a rischio",
+      "testo": "{g1} sceglie {g2} come alleato. Se entro tre carte {g2} paga, paga anche {g1}.",
+      "penalita": 1,
+      "durataCarte": 3
+    },
+    {
+      "id": "base-067",
+      "tipo": "duello",
+      "titolo": "Botta e risposta",
+      "testo": "{g1} e {g2} si rispondono a turno solo con domande. Chi si ferma o afferma qualcosa, paga.",
+      "penalita": 2
+    },
+    {
+      "id": "base-068",
+      "tipo": "duello",
+      "titolo": "Fuori dal coro",
+      "testo": "{g1} e {g2} cantano insieme l'inno di Mameli. Chi sbaglia le parole per primo paga.",
+      "penalita": 2
+    },
+    {
+      "id": "base-069",
+      "tipo": "votazione",
+      "titolo": "Chi ha più probabilità di candidarsi",
+      "testo": "Al tre, tutti indicano chi si candiderebbe davvero un giorno. Il più votato tiene un comizio di dieci secondi; se non lo fa, paga.",
+      "penalita": 2,
+      "secondi": 10
+    },
+    {
+      "id": "base-070",
+      "tipo": "votazione",
+      "titolo": "Chi ha più probabilità di fare una gaffe",
+      "testo": "Al tre, tutti indicano chi farebbe la figuraccia più memorabile in diretta TV. Il più votato paga.",
+      "penalita": 2
+    },
+    {
+      "id": "base-071",
+      "tipo": "votazione",
+      "titolo": "Chi ha più probabilità di cambiare partito",
+      "testo": "Al tre, tutti indicano chi cambierebbe idea tre volte in una legislatura. Il più votato paga.",
+      "penalita": 2
+    },
+    {
+      "id": "base-072",
+      "tipo": "votazione",
+      "titolo": "Chi ha più probabilità di dormire in aula",
+      "testo": "Al tre, tutti indicano chi si addormenterebbe durante una seduta notturna. Il più votato paga.",
+      "penalita": 1
+    },
+    {
+      "id": "base-073",
+      "tipo": "votazione",
+      "titolo": "Chi ha più probabilità di litigare online",
+      "testo": "Al tre, tutti indicano chi ha già litigato di politica sui social. Il più votato paga; se ammette di averlo fatto davvero, paga il gruppo.",
+      "penalita": 2
+    },
+    {
+      "id": "base-074",
+      "tipo": "votazione",
+      "titolo": "Ministro dell'acqua",
+      "testo": "Al tre, tutti indicano chi stasera dovrebbe rallentare. Il più votato beve un bicchiere d'acqua e nessun sorso.",
+      "penalita": 0
+    },
+    {
+      "id": "base-075",
+      "tipo": "tutti",
+      "titolo": "Standing ovation",
+      "testo": "Tutti in piedi ad applaudire. L'ultimo ad alzarsi paga.",
+      "penalita": 1
+    },
+    {
+      "id": "base-076",
+      "tipo": "tutti",
+      "titolo": "Bagarre",
+      "testo": "Al via, tutti urlano il proprio slogan insieme. Il più silenzioso paga.",
+      "penalita": 1
+    },
+    {
+      "id": "base-077",
+      "tipo": "tutti",
+      "titolo": "Aula sorda e grigia",
+      "testo": "Silenzio assoluto per venti secondi. Il primo che fiata paga.",
+      "penalita": 2,
+      "secondi": 20
+    },
+    {
+      "id": "base-078",
+      "tipo": "tutti",
+      "titolo": "Emendamento canguro",
+      "testo": "Tutti fanno un salto sul posto. Chi resta seduto paga.",
+      "penalita": 1
+    },
+    {
+      "id": "base-079",
+      "tipo": "tutti",
+      "titolo": "Ultimo banco",
+      "testo": "L'ultima persona che ha parlato prima di questa carta paga.",
+      "penalita": 1
+    },
+    {
+      "id": "base-080",
+      "tipo": "tutti",
+      "titolo": "Mani sul tavolo",
+      "testo": "Tutti mani sul tavolo, l'ultimo paga.",
+      "penalita": 2
+    },
+    {
+      "id": "base-081",
+      "tipo": "tutti",
+      "titolo": "Voto all'estero",
+      "testo": "Chi è stato all'estero nell'ultimo anno non paga. Tutti gli altri sì.",
+      "penalita": 1
+    },
+    {
+      "id": "base-082",
+      "tipo": "tutti",
+      "titolo": "Prima Repubblica",
+      "testo": "Chi sa dire il nome di un partito della Prima Repubblica non paga. Gli altri sì.",
+      "penalita": 2
+    },
+    {
+      "id": "base-083",
+      "tipo": "tutti",
+      "titolo": "Scheda bianca",
+      "testo": "Chi stasera non ha ancora pagato nemmeno una volta paga adesso.",
+      "penalita": 2
+    },
+    {
+      "id": "base-084",
+      "tipo": "tutti",
+      "titolo": "Astensionisti",
+      "testo": "Chi non ha votato all'ultima occasione utile paga. Sul tuo onore.",
+      "penalita": 1
+    },
+    {
+      "id": "base-085",
+      "tipo": "legge",
+      "titolo": "Whip di partito",
+      "testo": "Per tre carte {g1} è il capogruppo: può ordinare a chiunque di alzarsi in piedi, quando vuole. Chi non obbedisce paga.",
+      "penalita": 1,
+      "durataCarte": 3
+    },
+    {
+      "id": "base-086",
+      "tipo": "legge",
+      "titolo": "Dietrofront",
+      "testo": "Per quattro carte è vietato dire «no». Chi lo dice paga.",
+      "penalita": 1,
+      "durataCarte": 4
+    },
+    {
+      "id": "base-087",
+      "tipo": "legge",
+      "titolo": "Doppio cognome",
+      "testo": "Per quattro carte ognuno aggiunge «detto il Riformista» al proprio nome quando parla di sé. Chi lo dimentica paga.",
+      "penalita": 1,
+      "durataCarte": 4
+    },
+    {
+      "id": "base-088",
+      "tipo": "legge",
+      "titolo": "Vietato indicare",
+      "testo": "Per quattro carte è vietato puntare il dito contro qualcuno. Chi lo fa paga.",
+      "penalita": 1,
+      "durataCarte": 4
+    },
+    {
+      "id": "base-089",
+      "tipo": "minigioco",
+      "titolo": "Il pacco",
+      "testo": "Passatevi un oggetto in cerchio il più in fretta possibile. Quando qualcuno grida «crisi!», chi ce l'ha in mano paga.",
+      "penalita": 2
+    },
+    {
+      "id": "base-090",
+      "tipo": "minigioco",
+      "titolo": "Question time a raffica",
+      "testo": "Tutti, uno alla volta e velocissimi, fanno una domanda a {g1}, che deve rispondere a tutte. Alla prima esitazione paga.",
+      "penalita": 2
+    },
+    {
+      "id": "base-091",
+      "tipo": "minigioco",
+      "titolo": "Toto-ministri",
+      "testo": "A turno si dice il nome di un ministero, senza ripetere. Chi si blocca paga.",
+      "penalita": 2
+    },
+    {
+      "id": "base-092",
+      "tipo": "minigioco",
+      "titolo": "Sigle",
+      "testo": "A turno si dice la sigla di un partito, italiano o straniero. Chi si blocca o la inventa paga.",
+      "penalita": 2
     }
   ]
 }

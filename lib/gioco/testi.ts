@@ -37,6 +37,7 @@ export const TESTI_GIOCO = {
     fonte: 'Fonte',
     tempo: (secondi: number) => `${secondi} secondi`,
     astensione: 'Chiunque può astenersi da una carta, senza spiegazioni.',
+    trascina: 'Tocca la carta o trascinala di lato',
     esci: 'Chiudi la seduta',
   },
 
