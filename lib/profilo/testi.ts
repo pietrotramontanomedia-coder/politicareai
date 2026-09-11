@@ -123,6 +123,7 @@ export const TESTI_PROFILO = {
     senzaPassword: 'Nessuna password: ti mandiamo un link per entrare.',
     linkInviato: (email: string) => `Ti abbiamo mandato un link a ${email}: aprilo da questo dispositivo per entrare.`,
     errore: 'Non è stato possibile inviare il link. Riprova tra poco.',
+    erroreRitorno: "L'accesso non è andato a buon fine. Riprova, oppure usa il link via email.",
     oppure: 'oppure',
     google: 'Continua con Google',
     salviamo: "Cosa salviamo con l'account",

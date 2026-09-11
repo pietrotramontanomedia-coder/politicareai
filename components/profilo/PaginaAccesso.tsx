@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { FORNITORE_ACCESSO } from '@/lib/profilo/accesso';
 import { TESTI_PROFILO } from '@/lib/profilo/testi';
@@ -17,6 +17,21 @@ export default function PaginaAccesso() {
   const dentro = pronto && sessione.stato === 'autenticato';
   const [email, setEmail] = useState('');
   const [stato, setStato] = useState<'pronto' | 'invio' | 'inviato' | 'errore'>('pronto');
+  /** Errore rimandato indietro da Google o dal link via email (per esempio accesso annullato). */
+  const [erroreRitorno, setErroreRitorno] = useState<string | null>(null);
+
+  // Al ritorno dal fornitore: si legge l'eventuale errore e si ripulisce l'indirizzo dai parametri tecnici.
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    const daHash = new URLSearchParams(url.hash.replace(/^#/, ''));
+    const errore = url.searchParams.get('error_description') ?? url.searchParams.get('error') ?? daHash.get('error_description') ?? daHash.get('error');
+    if (errore) {
+      // Lettura dell'indirizzo possibile solo dopo il mount: il server non conosce la query.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setErroreRitorno(errore);
+    }
+    if (url.search || url.hash) window.history.replaceState(null, '', url.pathname);
+  }, []);
 
   async function invia(e: React.FormEvent) {
     e.preventDefault();
@@ -43,6 +58,12 @@ export default function PaginaAccesso() {
         <p className="mt-2 text-base" style={{ color: 'var(--fg-muta)' }}>
           {T.sottotitolo}
         </p>
+
+        {erroreRitorno && !dentro && (
+          <div className="mt-6 rounded-2xl border p-4" style={{ borderColor: 'rgba(239,68,68,0.4)', background: 'rgba(239,68,68,0.08)' }} role="alert">
+            <p className="text-sm">{T.erroreRitorno}</p>
+          </div>
+        )}
 
         {dentro && (
           <div className="mt-6 rounded-2xl border p-4" style={{ borderColor: 'rgba(34,197,94,0.35)', background: 'rgba(34,197,94,0.08)' }} role="status">
