@@ -6,6 +6,10 @@ import type { RisultatoTestLocale } from './risultato-test-locale';
 export const COLORI_AVATAR = ['#FEDC01', '#60A5FA', '#34D399', '#A78BFA', '#F472B6', '#FB923C'] as const;
 export const MAX_GIOCATORI = 12;
 export const MAX_NOME = 40;
+export const MAX_CITTA = 60;
+export const ANNO_MINIMO = 1900;
+/** Sotto i 14 anni in Italia serve il consenso di chi esercita la responsabilità genitoriale (GDPR art. 8). */
+export const ETA_MINIMA_AUTONOMA = 14;
 
 export function profiloVuoto(adesso: Date = new Date()): Profilo {
   const iso = adesso.toISOString();
@@ -13,6 +17,8 @@ export function profiloVuoto(adesso: Date = new Date()): Profilo {
     versione: VERSIONE_PROFILO,
     nome: '',
     colore: COLORI_AVATAR[0],
+    annoNascita: null,
+    citta: '',
     creatoIl: iso,
     aggiornatoIl: iso,
     temiSeguiti: [],
@@ -95,6 +101,33 @@ export function traguardi(storico: RisultatoQuizSalvato[]): { id: IdTraguardo; o
   ];
 }
 
+/** Età compiuta a partire dall'anno di nascita: approssimata all'anno, non chiediamo il giorno. */
+export function etaDa(annoNascita: number | null, adesso: Date = new Date()): number | null {
+  if (!annoNascita) return null;
+  const eta = adesso.getFullYear() - annoNascita;
+  return eta >= 0 && eta <= 120 ? eta : null;
+}
+
+export function annoNascitaValido(anno: number, adesso: Date = new Date()): boolean {
+  return Number.isInteger(anno) && anno >= ANNO_MINIMO && anno <= adesso.getFullYear();
+}
+
+/** Anno di nascita e città: entrambi facoltativi, vuoti se non validi. */
+export function impostaAnagrafica(
+  profilo: Profilo,
+  dati: { annoNascita?: number | null; citta?: string },
+  adesso: Date = new Date(),
+): Profilo {
+  const annoNascita =
+    dati.annoNascita === undefined
+      ? profilo.annoNascita
+      : dati.annoNascita !== null && annoNascitaValido(dati.annoNascita, adesso)
+        ? dati.annoNascita
+        : null;
+  const citta = dati.citta === undefined ? profilo.citta : dati.citta.trim().replace(/\s+/g, ' ').slice(0, MAX_CITTA);
+  return { ...profilo, annoNascita, citta, aggiornatoIl: adesso.toISOString() };
+}
+
 export function alternaTema(profilo: Profilo, area: string, adesso: Date = new Date()): Profilo {
   const temiSeguiti = profilo.temiSeguiti.includes(area)
     ? profilo.temiSeguiti.filter((t) => t !== area)
@@ -149,6 +182,8 @@ export function normalizzaProfilo(grezzo: unknown): Profilo | null {
     colore: TESTO(p.colore) && (COLORI_AVATAR as readonly string[]).includes(p.colore) ? p.colore : COLORI_AVATAR[0],
     creatoIl: p.creatoIl,
     aggiornatoIl: TESTO(p.aggiornatoIl) ? p.aggiornatoIl : p.creatoIl,
+    annoNascita: NUMERO(p.annoNascita) && annoNascitaValido(p.annoNascita) ? p.annoNascita : null,
+    citta: TESTO(p.citta) ? p.citta.slice(0, MAX_CITTA) : '',
     temiSeguiti: elenco(p.temiSeguiti),
     storicoQuiz: (Array.isArray(p.storicoQuiz) ? p.storicoQuiz : [])
       .map(normalizzaQuiz)
@@ -186,6 +221,8 @@ export function unisciProfili(dispositivo: Profilo, account: Profilo, adesso: Da
     ...account,
     nome: account.nome || dispositivo.nome,
     colore: account.nome ? account.colore : dispositivo.colore,
+    annoNascita: account.annoNascita ?? dispositivo.annoNascita,
+    citta: account.citta || dispositivo.citta,
     creatoIl: Date.parse(dispositivo.creatoIl) < Date.parse(account.creatoIl) ? dispositivo.creatoIl : account.creatoIl,
     aggiornatoIl: adesso.toISOString(),
     temiSeguiti: [...new Set([...account.temiSeguiti, ...dispositivo.temiSeguiti])],

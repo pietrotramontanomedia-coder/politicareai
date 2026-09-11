@@ -4,8 +4,21 @@ import { useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { motion, MotionConfig } from 'framer-motion';
 import { ETICHETTE_AREA } from '@/lib/aree';
-import { FORNITORE_ACCESSO } from '@/lib/profilo/accesso';
-import { alternaTema, COLORI_AVATAR, esportaDati, impostaGiocatori, MAX_NOME, serieQuiz, statisticheQuiz, traguardi } from '@/lib/profilo/regole';
+import {
+  alternaTema,
+  ANNO_MINIMO,
+  COLORI_AVATAR,
+  esportaDati,
+  etaDa,
+  ETA_MINIMA_AUTONOMA,
+  impostaAnagrafica,
+  impostaGiocatori,
+  MAX_CITTA,
+  MAX_NOME,
+  serieQuiz,
+  statisticheQuiz,
+  traguardi,
+} from '@/lib/profilo/regole';
 import { cancellaRisultatoTest, leggiRisultatoTest } from '@/lib/profilo/risultato-test-locale';
 import { TESTI_PROFILO as T } from '@/lib/profilo/testi';
 import { conAlfa, STRUMENTI } from '@/lib/strumenti';
@@ -34,10 +47,75 @@ function Riquadro({ titolo, children, className = '', extra }: { titolo: string;
   );
 }
 
+/** Campo che si salva da solo poco dopo l'ultima battuta, e subito quando esce dal focus. */
+function CampoSalvato({
+  id,
+  etichetta,
+  valore,
+  segnaposto,
+  tipo = 'text',
+  min,
+  max,
+  aiuto,
+  onSalva,
+}: {
+  id: string;
+  etichetta: string;
+  valore: string;
+  segnaposto?: string;
+  tipo?: 'text' | 'number';
+  min?: number;
+  max?: number;
+  aiuto?: string;
+  onSalva: (valore: string) => void;
+}) {
+  const [bozza, setBozza] = useState<string | null>(null);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  function salva(v: string) {
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = null;
+    onSalva(v);
+  }
+
+  return (
+    <div className="min-w-0">
+      <label htmlFor={id} className="text-sm font-semibold">
+        {etichetta}
+      </label>
+      <input
+        id={id}
+        type={tipo}
+        inputMode={tipo === 'number' ? 'numeric' : undefined}
+        min={min}
+        max={tipo === 'number' ? max : undefined}
+        maxLength={tipo === 'text' ? max : undefined}
+        placeholder={segnaposto}
+        value={bozza ?? valore}
+        onChange={(e) => {
+          const v = e.target.value;
+          setBozza(v);
+          if (timer.current) clearTimeout(timer.current);
+          timer.current = setTimeout(() => salva(v), 500);
+        }}
+        onBlur={(e) => salva(e.target.value)}
+        className="mt-1 w-full rounded-xl border bg-transparent px-3 py-2 text-base outline-none focus:border-[var(--accento)]"
+        style={{ borderColor: 'rgba(255,255,255,0.12)' }}
+      />
+      {aiuto && (
+        <p className="mt-1 text-xs" style={{ color: 'var(--fg-muta)' }}>
+          {aiuto}
+        </p>
+      )}
+    </div>
+  );
+}
+
 export default function PaginaProfilo({ ultimoQuiz }: { ultimoQuiz: number }) {
-  const { pronto, profilo, sessione, dove, aggiorna, cancellaTutto } = useProfilo();
+  const { pronto, profilo, sessione, dove, inSincronia, aggiorna, cancellaTutto, esci, eliminaAccount } = useProfilo();
   const [versioneTest, setVersioneTest] = useState(0);
   const [confermaCancella, setConfermaCancella] = useState(false);
+  const [confermaAccount, setConfermaAccount] = useState(false);
   const [nuovoGiocatore, setNuovoGiocatore] = useState('');
   /** Nome mentre lo si scrive: si salva poco dopo l'ultima battuta e subito all'uscita dal campo. */
   const [bozzaNome, setBozzaNome] = useState<string | null>(null);
@@ -65,6 +143,8 @@ export default function PaginaProfilo({ ultimoQuiz }: { ultimoQuiz: number }) {
   const serie = serieQuiz(storico, ultimoQuiz);
   const elencoTraguardi = traguardi(storico);
   const ultimi = [...storico].sort((a, b) => a.numero - b.numero).slice(-8);
+  const annoCorrente = new Date().getFullYear();
+  const eta = etaDa(profilo?.annoNascita ?? null);
 
   function scaricaDati() {
     const blob = new Blob([esportaDati(profilo, leggiRisultatoTest())], { type: 'application/json' });
@@ -143,6 +223,11 @@ export default function PaginaProfilo({ ultimoQuiz }: { ultimoQuiz: number }) {
                 <span className="ml-2 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold" style={{ background: conAlfa(COLORE, 0.14), color: COLORE }}>
                   {dove === 'account' && sessione.stato === 'autenticato' ? T.conAccount(sessione.utente.email) : T.suDispositivo}
                 </span>
+                {inSincronia && (
+                  <span className="text-xs" style={{ color: 'var(--fg-muta)' }} aria-live="polite">
+                    {T.sincronia}
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -160,9 +245,36 @@ export default function PaginaProfilo({ ultimoQuiz }: { ultimoQuiz: number }) {
               </Link>
             </div>
           ) : (
-            <button type="button" onClick={() => void FORNITORE_ACCESSO.esci().then(() => location.reload())} className="mt-5 text-sm font-semibold underline underline-offset-2" style={{ color: 'var(--fg-muta)' }}>
-              {T.account.esci}
-            </button>
+            <div className="mt-6 rounded-2xl border p-4" style={{ borderColor: 'rgba(255,255,255,0.08)', background: 'rgba(0,0,0,0.25)' }}>
+              <p className="text-sm" style={{ color: 'var(--fg-muta)' }}>
+                {T.account.sincronizzato}
+              </p>
+              <div className="mt-3 flex flex-wrap items-center gap-3">
+                <button type="button" onClick={() => void esci()} className="rounded-full border px-4 py-2 text-sm font-semibold" style={{ borderColor: 'rgba(255,255,255,0.14)' }}>
+                  {T.account.esci}
+                </button>
+                {confermaAccount ? (
+                  <span className="flex flex-wrap items-center gap-2 text-sm" role="alert">
+                    <span style={{ color: '#f87171' }}>{T.account.avvisoElimina}</span>
+                    <button
+                      type="button"
+                      onClick={() => void eliminaAccount().then(() => setConfermaAccount(false))}
+                      className="rounded-full px-4 py-2 text-sm font-bold text-white"
+                      style={{ background: '#dc2626' }}
+                    >
+                      {T.account.confermaElimina}
+                    </button>
+                    <button type="button" onClick={() => setConfermaAccount(false)} className="font-semibold underline underline-offset-2">
+                      {T.dati.annulla}
+                    </button>
+                  </span>
+                ) : (
+                  <button type="button" onClick={() => setConfermaAccount(true)} className="text-sm font-semibold" style={{ color: '#f87171' }}>
+                    {T.account.elimina}
+                  </button>
+                )}
+              </div>
+            </div>
           )}
         </section>
 
@@ -310,6 +422,34 @@ export default function PaginaProfilo({ ultimoQuiz }: { ultimoQuiz: number }) {
                 </Link>
               </div>
             )}
+          </Riquadro>
+
+          {/* Chi sei: anno di nascita e città */}
+          <Riquadro titolo={T.anagrafica.titolo}>
+            <p className="mt-2 text-xs leading-relaxed" style={{ color: 'var(--fg-muta)' }}>
+              {T.anagrafica.spiegazione}
+            </p>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <CampoSalvato
+                id="anno-nascita"
+                etichetta={T.anagrafica.anno}
+                valore={profilo?.annoNascita ? String(profilo.annoNascita) : ''}
+                segnaposto={T.anagrafica.annoSegnaposto}
+                tipo="number"
+                min={ANNO_MINIMO}
+                max={annoCorrente}
+                aiuto={eta !== null ? (eta < ETA_MINIMA_AUTONOMA ? T.anagrafica.minorenne : T.anagrafica.eta(eta)) : undefined}
+                onSalva={(v) => aggiorna((p) => impostaAnagrafica(p, { annoNascita: v ? Number(v) : null }))}
+              />
+              <CampoSalvato
+                id="citta"
+                etichetta={T.anagrafica.citta}
+                valore={profilo?.citta ?? ''}
+                segnaposto={T.anagrafica.cittaSegnaposto}
+                max={MAX_CITTA}
+                onSalva={(v) => aggiorna((p) => impostaAnagrafica(p, { citta: v }))}
+              />
+            </div>
           </Riquadro>
 
           {/* Temi seguiti */}

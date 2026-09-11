@@ -1,14 +1,15 @@
 # Profilo utente e login
 
-Stato al 10 settembre 2026: **struttura completa, login non ancora collegato.**
-Il profilo funziona già in modalità ospite, salvato sul dispositivo. Quando si sceglie il
-servizio di login si implementa un solo modulo e il profilo passa sull'account.
+Stato all'11 settembre 2026: **login con Supabase implementato, in attesa delle chiavi del
+progetto.** Senza le variabili `NEXT_PUBLIC_SUPABASE_*` l'app resta in modalità ospite, con
+il profilo sul dispositivo; appena ci sono, l'accesso si attiva da solo.
 
 ## Il confine dei dati (non negoziabile)
 
 | Dato | Dove vive | Può andare sull'account? |
 |---|---|---|
 | Nome e colore del profilo | `Profilo` | sì |
+| Anno di nascita e città (facoltativi) | `Profilo.annoNascita`, `Profilo.citta` | sì |
 | Storico dei quiz, serie, traguardi | `Profilo.storicoQuiz` | sì |
 | Temi seguiti | `Profilo.temiSeguiti` | sì |
 | Gruppo per il gioco | `Profilo.giocatori` | sì |
@@ -32,7 +33,8 @@ lib/profilo/
 ├── tipi.ts                    Profilo, RisultatoQuizSalvato, EsitoQuiz
 ├── regole.ts                  funzioni pure: storico, serie, traguardi, unione al primo accesso, esportazione
 ├── archivio.ts                ArchivioProfilo + archivioDispositivo (localStorage)
-├── accesso.ts                 FornitoreAccesso + FORNITORE_ACCESSO (oggi: non configurato)
+├── accesso.ts                 FornitoreAccesso + FORNITORE_ACCESSO (Supabase se configurato, altrimenti ospite)
+├── accesso-supabase.ts        link via email, Google, lettura/scrittura tabelle, eliminazione account
 ├── risultato-test-locale.ts   classifica del test, solo dispositivo
 └── testi.ts                   testi di profilo e accesso
 components/profilo/
@@ -47,56 +49,42 @@ components/profilo/
 Agganci nell'app: avatar nell'header, voce nel pannello Strumenti, registrazione automatica
 di ogni quiz completato, pulsante "Salva il risultato" nei risultati del test.
 
-## Collegare il login
+## Accendere il login (3 passi, servono le tue credenziali)
 
-Scelta consigliata: **Supabase, regione UE (Francoforte)**, link magico via email e Google.
-Qualsiasi altro servizio va bene purché implementi `FornitoreAccesso`.
+1. **Creare il progetto Supabase**, regione *EU Central (Frankfurt)*. In *Authentication →
+   Providers* abilitare **Email** (magic link) e **Google**; in *URL Configuration* mettere
+   l'indirizzo del sito e `https://politicare-app.vercel.app/accedi` fra i redirect (in locale
+   anche `http://localhost:3000/accedi`).
+2. **Creare le tabelle**: incollare `supabase/schema.sql` nel SQL editor ed eseguirlo. Crea
+   `profili` e `storico_quiz` con row level security (ognuno vede solo i propri dati) e la
+   funzione `elimina_account()` per il diritto all'oblio. Nessuna tabella per il test partiti.
+3. **Mettere le due chiavi** (Project URL e anon key, da *Project Settings → API*) in Vercel e
+   in `.env.local`, come in `.env.example`:
+   `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
 
-1. Il titolare crea il progetto Supabase (regione EU Central) e abilita Email (magic link) e
-   Google. Nelle impostazioni di autenticazione: URL del sito e redirect verso `/accedi`.
-2. Variabili d'ambiente su Vercel: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
-3. Database (SQL editor di Supabase):
+Fatto questo: `/accedi` smette di essere disattivata, al primo accesso il profilo del
+dispositivo viene unito a quello dell'account (`unisciProfili`) e la copia locale cancellata.
 
-   ```sql
-   create table profili (
-     id uuid primary key references auth.users on delete cascade,
-     nome text not null default '',
-     colore text not null default '#FEDC01',
-     temi_seguiti text[] not null default '{}',
-     giocatori text[] not null default '{}',
-     creato_il timestamptz not null default now(),
-     aggiornato_il timestamptz not null default now()
-   );
+Restano da fare prima di aprirlo al pubblico: aggiornare l'informativa privacy (titolare,
+finalità, base giuridica, conservazione, Supabase come responsabile con DPA) e decidere la
+gestione dei minori di 14 anni, che l'interfaccia già segnala.
 
-   create table storico_quiz (
-     utente uuid not null references auth.users on delete cascade,
-     numero int not null,
-     percentuale int not null check (percentuale between 0 and 100),
-     corrette int not null,
-     totale int not null,
-     migliore_percentuale int not null,
-     tentativi int not null default 1,
-     completato_il timestamptz not null,
-     primary key (utente, numero)
-   );
+## Note sull'implementazione
 
-   alter table profili enable row level security;
-   alter table storico_quiz enable row level security;
-   create policy "profilo del proprietario" on profili
-     for all using (auth.uid() = id) with check (auth.uid() = id);
-   create policy "quiz del proprietario" on storico_quiz
-     for all using (auth.uid() = utente) with check (auth.uid() = utente);
-   -- Nessuna tabella per il test partiti: è voluto.
-   ```
+Il fornitore sta dietro l'interfaccia `FornitoreAccesso`: per cambiare servizio basta
+implementarla e assegnarla a `FORNITORE_ACCESSO`. Quello attuale (`accesso-supabase.ts`):
 
-4. Nuovo file `lib/profilo/accesso-supabase.ts` che implementa `FornitoreAccesso`:
-   `sessioneIniziale`, `inviaLinkEmail`, `accediConGoogle`, `esci`, `eliminaAccount` (route
-   server con service key che cancella l'utente: le tabelle cadono in cascata) e
-   `archivioAccount`, che legge e scrive le due tabelle passando da `datiSincronizzabili`.
-5. In `lib/profilo/accesso.ts` assegnare il nuovo fornitore a `FORNITORE_ACCESSO`.
-6. Al primo accesso, in `ProfiloProvider`: se esiste un profilo sul dispositivo, unirlo a
-   quello dell'account con `unisciProfili`, salvarlo sull'account e cancellare la copia locale.
-   Il risultato del test resta dov'è.
-7. Aggiornare l'informativa privacy (titolare, finalità, base giuridica, conservazione,
-   responsabile del trattamento Supabase con DPA) e aggiungere in `/profilo` "Elimina account".
-8. Test: un fornitore finto in `test/` per verificare unione al primo accesso ed eliminazione.
+- **Sessione**: `sessioneIniziale()` legge la sessione salvata, `osserva()` avvisa il
+  `ProfiloProvider` quando si entra o si esce, anche al ritorno dal link ricevuto via email.
+- **Profilo sull'account**: `archivioAccount()` legge e scrive `profili` e `storico_quiz`
+  passando sempre da `datiSincronizzabili`, l'unica porta verso il server.
+- **Primo accesso**: il provider unisce il profilo del dispositivo con quello dell'account
+  (`unisciProfili`), salva il risultato e cancella la copia locale. Il risultato del test
+  resta dov'è, sul dispositivo.
+- **Eliminazione account**: `eliminaAccount()` chiama la funzione SQL `elimina_account()`,
+  che cancella la riga in `auth.users`; profilo e storico cadono in cascata.
+- **Conversione fra righe e profilo**: `daRighe`, `aRigaProfilo` e `aRigheQuiz` sono funzioni
+  pure, verificate in `test/profilo.test.ts` con un giro completo andata e ritorno.
+
+Da fare quando il login sarà acceso: un fornitore finto nei test per coprire anche unione
+al primo accesso ed eliminazione dal lato interfaccia.

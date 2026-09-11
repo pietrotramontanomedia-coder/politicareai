@@ -1,9 +1,9 @@
 'use client';
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { archivioDispositivo } from '@/lib/profilo/archivio';
-import { FORNITORE_ACCESSO, type Sessione } from '@/lib/profilo/accesso';
-import { profiloVuoto, registraQuiz as registraQuizNelProfilo } from '@/lib/profilo/regole';
+import { archivioDispositivo, type ArchivioProfilo } from '@/lib/profilo/archivio';
+import { FORNITORE_ACCESSO, type Sessione, type UtenteAccesso } from '@/lib/profilo/accesso';
+import { profiloVuoto, registraQuiz as registraQuizNelProfilo, unisciProfili } from '@/lib/profilo/regole';
 import { cancellaRisultatoTest } from '@/lib/profilo/risultato-test-locale';
 import type { EsitoQuiz, Profilo } from '@/lib/profilo/tipi';
 
@@ -13,40 +13,82 @@ interface ContestoProfilo {
   profilo: Profilo | null;
   sessione: Sessione;
   dove: 'dispositivo' | 'account';
+  /** true mentre si sta leggendo o scrivendo sull'account. */
+  inSincronia: boolean;
   aggiorna: (modifica: (profilo: Profilo) => Profilo) => void;
   registraQuiz: (esito: EsitoQuiz) => void;
   cancellaTutto: () => Promise<void>;
+  esci: () => Promise<void>;
+  eliminaAccount: () => Promise<void>;
 }
 
 const Contesto = createContext<ContestoProfilo | null>(null);
 
-/** Carica il profilo dall'archivio giusto (dispositivo o account) e lo tiene salvato a ogni modifica. */
+function archivioPer(sessione: Sessione): ArchivioProfilo {
+  return sessione.stato === 'autenticato' ? FORNITORE_ACCESSO.archivioAccount(sessione.utente) : archivioDispositivo;
+}
+
+/**
+ * Carica il profilo dall'archivio giusto (dispositivo o account) e lo salva a ogni modifica.
+ * Al primo accesso unisce il profilo del dispositivo con quello dell'account e poi libera il dispositivo.
+ */
 export function ProfiloProvider({ children }: { children: React.ReactNode }) {
   const [pronto, setPronto] = useState(false);
   const [profilo, setProfilo] = useState<Profilo | null>(null);
   const [sessione, setSessione] = useState<Sessione>({ stato: 'ospite' });
+  const [inSincronia, setInSincronia] = useState(false);
   const daSalvare = useRef(false);
+  const utenteCorrente = useRef<string | null>(null);
 
-  const archivio = useMemo(
-    () => (sessione.stato === 'autenticato' ? FORNITORE_ACCESSO.archivioAccount(sessione.utente) : archivioDispositivo),
-    [sessione],
-  );
+  const archivio = useMemo(() => archivioPer(sessione), [sessione]);
 
+  const entra = useCallback(async (utente: UtenteAccesso) => {
+    setInSincronia(true);
+    try {
+      const account = FORNITORE_ACCESSO.archivioAccount(utente);
+      const [locale, remoto] = await Promise.all([archivioDispositivo.leggi(), account.leggi()]);
+      let unito = remoto;
+      if (locale) {
+        unito = unisciProfili(locale, remoto ?? profiloVuoto(new Date(locale.creatoIl)));
+        await account.salva(unito);
+        await archivioDispositivo.cancella();
+      }
+      setProfilo(unito ?? null);
+    } catch {
+      // Account non raggiungibile: si continua con quello che c'è, senza perdere dati locali.
+    } finally {
+      setInSincronia(false);
+    }
+  }, []);
+
+  // Primo caricamento e cambi di sessione (anche al ritorno dal link ricevuto via email).
   useEffect(() => {
     let attivo = true;
-    (async () => {
-      const iniziale = FORNITORE_ACCESSO.attivo ? await FORNITORE_ACCESSO.sessioneIniziale() : ({ stato: 'ospite' } as const);
-      const origine = iniziale.stato === 'autenticato' ? FORNITORE_ACCESSO.archivioAccount(iniziale.utente) : archivioDispositivo;
-      const letto = await origine.leggi();
+
+    const applica = async (nuova: Sessione) => {
       if (!attivo) return;
-      setSessione(iniziale);
-      setProfilo(letto);
-      setPronto(true);
+      const id = nuova.stato === 'autenticato' ? nuova.utente.id : null;
+      const cambiata = id !== utenteCorrente.current;
+      utenteCorrente.current = id;
+      setSessione(nuova);
+      if (!cambiata) return;
+      if (nuova.stato === 'autenticato') await entra(nuova.utente);
+      else setProfilo(await archivioDispositivo.leggi());
+      if (attivo) setPronto(true);
+    };
+
+    (async () => {
+      const iniziale = await FORNITORE_ACCESSO.sessioneIniziale();
+      await applica(iniziale);
+      if (attivo) setPronto(true);
     })();
+
+    const smetti = FORNITORE_ACCESSO.osserva((nuova) => void applica(nuova));
     return () => {
       attivo = false;
+      smetti();
     };
-  }, []);
+  }, [entra]);
 
   // Salva dopo ogni modifica fatta dall'utente (non al caricamento).
   useEffect(() => {
@@ -69,9 +111,20 @@ export function ProfiloProvider({ children }: { children: React.ReactNode }) {
     setProfilo(null);
   }, [archivio]);
 
+  const esci = useCallback(async () => {
+    await FORNITORE_ACCESSO.esci();
+  }, []);
+
+  const eliminaAccount = useCallback(async () => {
+    daSalvare.current = false;
+    await FORNITORE_ACCESSO.eliminaAccount();
+    cancellaRisultatoTest();
+    setProfilo(null);
+  }, []);
+
   const valore = useMemo<ContestoProfilo>(
-    () => ({ pronto, profilo, sessione, dove: archivio.dove, aggiorna, registraQuiz, cancellaTutto }),
-    [pronto, profilo, sessione, archivio.dove, aggiorna, registraQuiz, cancellaTutto],
+    () => ({ pronto, profilo, sessione, dove: archivio.dove, inSincronia, aggiorna, registraQuiz, cancellaTutto, esci, eliminaAccount }),
+    [pronto, profilo, sessione, archivio.dove, inSincronia, aggiorna, registraQuiz, cancellaTutto, esci, eliminaAccount],
   );
 
   return <Contesto.Provider value={valore}>{children}</Contesto.Provider>;

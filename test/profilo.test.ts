@@ -3,8 +3,12 @@ import { calcolaClassifica } from '@politicare/motore';
 import type { Risposta, TestPartitoPack } from '@politicare/motore';
 import packJson from '@/content/test-partito/politiche-2027.v1.json';
 import { AccessoNonAttivo, FORNITORE_ACCESSO, fornitoreNonConfigurato } from '@/lib/profilo/accesso';
+import { aRigaProfilo, aRigheQuiz, daRighe } from '@/lib/profilo/accesso-supabase';
 import {
   alternaTema,
+  annoNascitaValido,
+  etaDa,
+  impostaAnagrafica,
   datiSincronizzabili,
   esportaDati,
   impostaGiocatori,
@@ -67,11 +71,72 @@ describe('preferenze del profilo', () => {
   });
 });
 
+describe('anno di nascita e città', () => {
+  it("calcola l'età dall'anno e rifiuta anni impossibili", () => {
+    expect(etaDa(1990, ADESSO)).toBe(36);
+    expect(etaDa(null, ADESSO)).toBeNull();
+    expect(annoNascitaValido(1899, ADESSO)).toBe(false);
+    expect(annoNascitaValido(2027, ADESSO)).toBe(false);
+    expect(annoNascitaValido(2026, ADESSO)).toBe(true);
+  });
+
+  it('sono facoltativi: un valore non valido svuota il campo, la città viene ripulita', () => {
+    const p = impostaAnagrafica(profiloVuoto(ADESSO), { annoNascita: 1990, citta: '  Reggio   Calabria ' }, ADESSO);
+    expect(p).toMatchObject({ annoNascita: 1990, citta: 'Reggio Calabria' });
+    expect(impostaAnagrafica(p, { annoNascita: 3000 }, ADESSO).annoNascita).toBeNull();
+    expect(impostaAnagrafica(p, { citta: '' }, ADESSO).citta).toBe('');
+  });
+
+  it('al primo accesso i dati del dispositivo riempiono i campi vuoti dell’account', () => {
+    const dispositivo = impostaAnagrafica(profiloVuoto(ADESSO), { annoNascita: 1990, citta: 'Messina' }, ADESSO);
+    const unito = unisciProfili(dispositivo, profiloVuoto(ADESSO), ADESSO);
+    expect(unito).toMatchObject({ annoNascita: 1990, citta: 'Messina' });
+  });
+});
+
+describe('profilo sulle tabelle Supabase', () => {
+  it('va e torna dal database senza perdere nulla', () => {
+    const partenza = impostaAnagrafica(
+      registraQuiz(alternaTema({ ...profiloVuoto(ADESSO), nome: 'Pietro' }, 'esteri', ADESSO), esito(3, 86), ADESSO),
+      { annoNascita: 1990, citta: 'Messina' },
+      ADESSO,
+    );
+    const tornato = daRighe(aRigaProfilo('utente-1', partenza), aRigheQuiz('utente-1', partenza));
+    expect(tornato).toEqual(partenza);
+  });
+
+  it('nelle righe finiscono solo le colonne previste: niente test partiti', () => {
+    const riga = aRigaProfilo('utente-1', { ...profiloVuoto(ADESSO), nome: 'Pietro' });
+    expect(Object.keys(riga).sort()).toEqual([
+      'aggiornato_il',
+      'anno_nascita',
+      'citta',
+      'colore',
+      'creato_il',
+      'giocatori',
+      'id',
+      'nome',
+      'temi_seguiti',
+    ]);
+  });
+});
+
 describe('confine dei dati', () => {
   it('un profilo letto da uno storage tiene solo i campi ammessi', () => {
     const manomesso = { ...conQuiz([2, 57]), risultatoTest: { righe: [] }, risposte: { 'fisco-flat-tax': 2 } };
     const pulito = normalizzaProfilo(manomesso)!;
-    expect(Object.keys(pulito).sort()).toEqual(['aggiornatoIl', 'colore', 'creatoIl', 'giocatori', 'nome', 'storicoQuiz', 'temiSeguiti', 'versione']);
+    expect(Object.keys(pulito).sort()).toEqual([
+      'aggiornatoIl',
+      'annoNascita',
+      'citta',
+      'colore',
+      'creatoIl',
+      'giocatori',
+      'nome',
+      'storicoQuiz',
+      'temiSeguiti',
+      'versione',
+    ]);
     expect(JSON.stringify(datiSincronizzabili(manomesso as never))).not.toMatch(/risultatoTest|risposte|flat-tax/);
     expect(normalizzaProfilo('spazzatura')).toBeNull();
   });

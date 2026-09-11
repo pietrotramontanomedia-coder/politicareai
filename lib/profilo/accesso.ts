@@ -1,9 +1,10 @@
 import type { ArchivioProfilo } from './archivio';
+import { fornitoreSupabase, supabaseConfigurato } from './accesso-supabase';
 
 /*
- * Accesso con account, indipendente dal servizio scelto (Supabase, Clerk, Auth.js…).
- * Per collegare il login basta implementare FornitoreAccesso e assegnarlo a
- * FORNITORE_ACCESSO: pagine, profilo e navigazione non cambiano. Vedi docs/PROFILO.md.
+ * Accesso con account, indipendente dal servizio scelto.
+ * Oggi: Supabase (regione UE) se le variabili NEXT_PUBLIC_SUPABASE_* sono presenti,
+ * altrimenti l'app resta in modalità ospite, con il profilo sul dispositivo.
  */
 
 export interface UtenteAccesso {
@@ -16,9 +17,11 @@ export type Sessione = { stato: 'ospite' } | { stato: 'autenticato'; utente: Ute
 
 export interface FornitoreAccesso {
   readonly nome: string;
-  /** false finché il servizio di login non è collegato: l'interfaccia mostra "in arrivo". */
+  /** false se il servizio di login non è collegato: l'interfaccia mostra "in arrivo". */
   readonly attivo: boolean;
   sessioneIniziale(): Promise<Sessione>;
+  /** Avvisa quando l'utente entra o esce (anche al ritorno dal link via email). Restituisce la funzione per smettere. */
+  osserva(callback: (sessione: Sessione) => void): () => void;
   /** Link magico via email, senza password. */
   inviaLinkEmail(email: string): Promise<void>;
   accediConGoogle(): Promise<void>;
@@ -44,6 +47,7 @@ export const fornitoreNonConfigurato: FornitoreAccesso = {
   nome: 'non configurato',
   attivo: false,
   sessioneIniziale: async () => ({ stato: 'ospite' }),
+  osserva: () => () => undefined,
   inviaLinkEmail: nonAttivo,
   accediConGoogle: nonAttivo,
   esci: async () => undefined,
@@ -53,5 +57,4 @@ export const fornitoreNonConfigurato: FornitoreAccesso = {
   eliminaAccount: nonAttivo,
 };
 
-/** Punto unico da cambiare quando si sceglie il servizio di login. */
-export const FORNITORE_ACCESSO: FornitoreAccesso = fornitoreNonConfigurato;
+export const FORNITORE_ACCESSO: FornitoreAccesso = supabaseConfigurato ? fornitoreSupabase : fornitoreNonConfigurato;

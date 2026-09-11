@@ -24,6 +24,10 @@ export interface Profilo {
   colore: string;
   creatoIl: string;
   aggiornatoIl: string;
+  /** Anno di nascita: si chiede questo e non l'età, così il dato non invecchia. Facoltativo. */
+  annoNascita: number | null;
+  /** Città, come l'ha scritta la persona. Facoltativa. */
+  citta: string;
   /** Aree tematiche (chiavi di ETICHETTE_AREA) di cui ricevere notizie e quiz. */
   temiSeguiti: string[];
   /** Dal quiz più recente al più vecchio. */

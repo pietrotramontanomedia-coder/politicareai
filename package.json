@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@politicare/motore": "*",
+    "@supabase/supabase-js": "^2.116.0",
     "@vercel/blob": "^2.8.0",
     "cheerio": "^1.2.0",
     "framer-motion": "^12.0.0",

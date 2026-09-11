@@ -17,6 +17,24 @@ export const TESTI_PROFILO = {
     testo: "Con l'accesso il profilo si salva sul tuo account e lo ritrovi su tutti i dispositivi. Il risultato del test partiti resta comunque solo qui.",
     accedi: 'Accedi',
     esci: 'Esci',
+    sincronizzato: 'Profilo, quiz e preferenze sono salvati sul tuo account. Il risultato del test partiti resta solo su questo dispositivo.',
+    elimina: 'Elimina account',
+    avvisoElimina: 'Account e dati sul server verranno cancellati.',
+    confermaElimina: 'Sì, elimina',
+  },
+
+  sincronia: 'Sincronizzo…',
+
+  anagrafica: {
+    titolo: 'Chi sei',
+    spiegazione:
+      'Anno di nascita e città ci servono solo per capire, in forma aggregata, chi usa Politicare. Sono facoltativi e puoi cancellarli quando vuoi.',
+    anno: 'Anno di nascita',
+    annoSegnaposto: '1990',
+    eta: (anni: number) => `${anni} anni`,
+    minorenne: 'Sotto i 14 anni serve il consenso di un genitore per avere un account.',
+    citta: 'Città',
+    cittaSegnaposto: 'Roma',
   },
 
   quiz: {
@@ -97,6 +115,7 @@ export const TESTI_PROFILO = {
     titolo: 'Accedi a Politicare',
     sottotitolo: 'Ritrova profilo, quiz e traguardi su tutti i tuoi dispositivi.',
     inArrivo: 'Il login arriva a breve. Intanto il profilo funziona già e resta su questo dispositivo.',
+    entrato: (email?: string) => (email ? `Sei dentro come ${email}.` : 'Sei dentro.'),
     vaiAlProfilo: 'Vai al profilo',
     email: 'La tua email',
     emailSegnaposto: 'nome@esempio.it',

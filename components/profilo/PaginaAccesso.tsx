@@ -5,13 +5,16 @@ import Link from 'next/link';
 import { FORNITORE_ACCESSO } from '@/lib/profilo/accesso';
 import { TESTI_PROFILO } from '@/lib/profilo/testi';
 import { conAlfa, STRUMENTI } from '@/lib/strumenti';
+import { useProfilo } from './ProfiloProvider';
 
 const T = TESTI_PROFILO.accesso;
 const COLORE = STRUMENTI.profilo.colore;
 
 /** Pagina di accesso: pronta per il servizio di login, disattivata finché non è collegato. */
 export default function PaginaAccesso() {
+  const { sessione, pronto } = useProfilo();
   const attivo = FORNITORE_ACCESSO.attivo;
+  const dentro = pronto && sessione.stato === 'autenticato';
   const [email, setEmail] = useState('');
   const [stato, setStato] = useState<'pronto' | 'invio' | 'inviato' | 'errore'>('pronto');
 
@@ -40,6 +43,15 @@ export default function PaginaAccesso() {
         <p className="mt-2 text-base" style={{ color: 'var(--fg-muta)' }}>
           {T.sottotitolo}
         </p>
+
+        {dentro && (
+          <div className="mt-6 rounded-2xl border p-4" style={{ borderColor: 'rgba(34,197,94,0.35)', background: 'rgba(34,197,94,0.08)' }} role="status">
+            <p className="text-sm">{T.entrato(sessione.stato === 'autenticato' ? sessione.utente.email : undefined)}</p>
+            <Link href="/profilo" className="mt-2 inline-block text-sm font-bold" style={{ color: '#22c55e' }}>
+              {T.vaiAlProfilo} →
+            </Link>
+          </div>
+        )}
 
         {!attivo && (
           <div className="mt-6 rounded-2xl border p-4" style={{ borderColor: conAlfa(COLORE, 0.35), background: conAlfa(COLORE, 0.08) }} role="status">
