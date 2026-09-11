@@ -38,7 +38,10 @@ export function ProfiloProvider({ children }: { children: React.ReactNode }) {
   const [sessione, setSessione] = useState<Sessione>({ stato: 'ospite' });
   const [inSincronia, setInSincronia] = useState(false);
   const daSalvare = useRef(false);
-  const utenteCorrente = useRef<string | null>(null);
+  // undefined = profilo non ancora letto. Non può partire da null: null è anche l'ospite, e al
+  // primo caricamento l'ospite non risulterebbe "cambiato", quindi il profilo del dispositivo
+  // non verrebbe mai letto (e la modifica successiva lo sovrascriverebbe con uno vuoto).
+  const utenteCorrente = useRef<string | null | undefined>(undefined);
 
   const archivio = useMemo(() => archivioPer(sessione), [sessione]);
 
