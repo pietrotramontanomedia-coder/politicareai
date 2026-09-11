@@ -11,7 +11,7 @@ import {
   type Squadra,
 } from '@politicare/motore';
 import { useProfilo } from '@/components/profilo/ProfiloProvider';
-import { nomeProprio, TESTI_FANTA as T } from '@/lib/fantaparlamento/testi';
+import { formattaPunti, nomeProprio, TESTI_FANTA as T } from '@/lib/fantaparlamento/testi';
 import { impostaRosaFanta } from '@/lib/profilo/regole';
 import type { RosaFanta } from '@/lib/profilo/tipi';
 import { conAlfa, STRUMENTI } from '@/lib/strumenti';
@@ -44,18 +44,10 @@ const nomeCompleto = (d: DeputatoListone) => `${nomeProprio(d.nome)} ${nomePropr
 export default function PaginaFanta(props: Props) {
   const { pronto, profilo } = useProfilo();
 
-  if (!pronto) {
-    return (
-      <main className="mx-auto max-w-5xl px-4 py-10 sm:px-6" aria-busy="true">
-        <div className="skeleton-shimmer h-40 rounded-3xl" style={{ background: 'var(--bg-card)' }} />
-        <div className="skeleton-shimmer mt-4 h-96 rounded-3xl" style={{ background: 'var(--bg-card)' }} />
-      </main>
-    );
-  }
-
-  const salvata = profilo?.fanta?.stagione === props.stagione.id ? profilo.fanta : null;
-  // La chiave riallinea l'editor alla rosa salvata ogni volta che cambia.
-  return <Editor key={salvata?.aggiornataIl ?? 'nuova'} {...props} salvata={salvata} />;
+  const salvata = pronto && profilo?.fanta?.stagione === props.stagione.id ? profilo.fanta : null;
+  // Listone e regole si vedono subito, anche nell'HTML del server (SEO). La chiave riallinea
+  // l'editor alla rosa salvata quando il profilo è pronto e ogni volta che cambia.
+  return <Editor key={pronto ? (salvata?.aggiornataIl ?? 'nuova') : 'caricamento'} {...props} salvata={salvata} />;
 }
 
 function Editor({ stagione, regole, listone, giornata, etichettaGiornata, giornateValide, salvata }: Props & { salvata: RosaFanta | null }) {
@@ -69,12 +61,16 @@ function Editor({ stagione, regole, listone, giornata, etichettaGiornata, giorna
   const perId = useMemo(() => new Map(listone.map((d) => [d.id, d])), [listone]);
   const scelti = squadra.deputati.map((id) => perId.get(id)).filter((d): d is DeputatoListone => Boolean(d));
   const costo = costoSquadra(squadra, listone);
-  const errori = validaSquadra(squadra, listone, regole).filter((e) => e.regola !== 'numero');
   const mancano = regole.titolari - squadra.deputati.length;
-  const completa = mancano === 0 && errori.length === 0 && squadra.capitano !== null;
   const modificata = !salvata || salvata.capitano !== squadra.capitano || salvata.deputati.join('|') !== squadra.deputati.join('|');
   const maggioranza = scelti.filter((d) => d.schieramento === 'maggioranza').length;
   const opposizione = scelti.filter((d) => d.schieramento === 'opposizione').length;
+  // L'equilibrio si segnala solo quando i posti rimasti non bastano più a rispettarlo.
+  const servono = Math.max(0, regole.minMaggioranza - maggioranza) + Math.max(0, regole.minOpposizione - opposizione);
+  const errori = validaSquadra(squadra, listone, regole).filter(
+    (e) => e.regola !== 'numero' && (e.regola !== 'equilibrio' || servono > regole.titolari - squadra.deputati.length),
+  );
+  const completa = mancano === 0 && errori.length === 0 && squadra.capitano !== null;
 
   const visibili = useMemo(() => {
     const testo = ricerca.trim().toLowerCase();
@@ -221,7 +217,7 @@ function Editor({ stagione, regole, listone, giornata, etichettaGiornata, giorna
                 {puntiUltima ? (
                   <>
                     <p className="mt-2 text-3xl font-bold tabular-nums" style={{ color: COLORE }}>
-                      {puntiUltima.totale} <span className="text-sm font-semibold" style={{ color: 'var(--fg-muta)' }}>{T.giornata.punti}</span>
+                      {formattaPunti(puntiUltima.totale)} <span className="text-sm font-semibold" style={{ color: 'var(--fg-muta)' }}>{T.giornata.punti}</span>
                     </p>
                     <ul className="mt-2 grid grid-cols-1 gap-x-4 gap-y-1 text-xs sm:grid-cols-2">
                       {puntiUltima.perDeputato
@@ -235,7 +231,7 @@ function Editor({ stagione, regole, listone, giornata, etichettaGiornata, giorna
                                 {p.capitano ? '★ ' : ''}
                                 {d ? nomeProprio(d.cognome) : p.id}
                               </span>
-                              <span className="tabular-nums font-semibold">{p.punti}</span>
+                              <span className="tabular-nums font-semibold">{formattaPunti(p.punti)}</span>
                             </li>
                           );
                         })}
@@ -323,7 +319,7 @@ function Editor({ stagione, regole, listone, giornata, etichettaGiornata, giorna
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-sm font-semibold">{nomeCompleto(d)}</span>
                       <span className="text-xs" style={{ color: 'var(--fg-muta)' }}>
-                        {d.sigla} · {T.schieramento[d.schieramento]} · {T.listone.media} {d.mediaPunti}
+                        {d.sigla} · {T.schieramento[d.schieramento]} · {T.listone.media} {formattaPunti(d.mediaPunti)}
                       </span>
                     </span>
                     <span className="text-right">

@@ -69,3 +69,8 @@ export const TESTI_FANTA = {
 export function nomeProprio(testo: string): string {
   return testo.toLowerCase().replace(/(^|[\s'’-])(\p{L})/gu, (_, sep: string, lettera: string) => sep + lettera.toUpperCase());
 }
+
+/** Punti all'italiana: "122,1". */
+export function formattaPunti(n: number): string {
+  return n.toLocaleString('it-IT', { maximumFractionDigits: 1 });
+}
