@@ -1,0 +1,92 @@
+{
+  "id": "fanta-2026-autunno",
+  "versione": "1.0.0",
+  "data": "2026-09-11",
+  "nome": "Stagione autunno 2026",
+  "ramo": "Camera dei deputati",
+  "descrizione": "Rosa di 11 deputati con un budget di crediti. I punti arrivano dalle votazioni vere dell'Aula: ogni voto espresso vale un punto, le votazioni finali il doppio, le fiducie il triplo, e chi vota diversamente dalla linea del proprio gruppo prende un bonus. Chi non vota non perde punti: un'assenza può avere ragioni istituzionali.",
+  "autori": [
+    "Redazione Politicare"
+  ],
+  "changelog": [
+    "2026-09-11 — 1.0.0: prima stagione, solo Camera. Prezzi dalle 34 giornate fra dicembre 2025 e settembre 2026."
+  ],
+  "regole": {
+    "crediti": 350,
+    "titolari": 11,
+    "puntiPerVoto": 1,
+    "moltiplicatoreFinale": 2,
+    "moltiplicatoreFiducia": 3,
+    "puntiDissenso": 3,
+    "bonusPresenzaPiena": 5,
+    "sogliaPresenzaPiena": 0.9,
+    "moltiplicatoreCapitano": 1.5,
+    "minMaggioranza": 4,
+    "minOpposizione": 4,
+    "maxPerGruppo": 3,
+    "fattorePrezzo": 0.4,
+    "prezzoMinimo": 1
+  },
+  "schieramenti": [
+    {
+      "contiene": "FRATELLI D'ITALIA",
+      "schieramento": "maggioranza",
+      "sigla": "FdI"
+    },
+    {
+      "contiene": "LEGA",
+      "schieramento": "maggioranza",
+      "sigla": "Lega"
+    },
+    {
+      "contiene": "FORZA ITALIA",
+      "schieramento": "maggioranza",
+      "sigla": "FI"
+    },
+    {
+      "contiene": "NOI MODERATI",
+      "schieramento": "maggioranza",
+      "sigla": "NM"
+    },
+    {
+      "contiene": "PARTITO DEMOCRATICO",
+      "schieramento": "opposizione",
+      "sigla": "PD"
+    },
+    {
+      "contiene": "MOVIMENTO 5 STELLE",
+      "schieramento": "opposizione",
+      "sigla": "M5S"
+    },
+    {
+      "contiene": "ALLEANZA VERDI",
+      "schieramento": "opposizione",
+      "sigla": "AVS"
+    },
+    {
+      "contiene": "AZIONE",
+      "schieramento": "opposizione",
+      "sigla": "Azione"
+    },
+    {
+      "contiene": "ITALIA VIVA",
+      "schieramento": "opposizione",
+      "sigla": "IV"
+    },
+    {
+      "contiene": "MISTO",
+      "schieramento": "misto",
+      "sigla": "Misto"
+    }
+  ],
+  "fonti": [
+    {
+      "citazione": "Dati aperti della Camera dei deputati: votazioni elettroniche e voto di ogni deputato, XIX legislatura",
+      "url": "https://dati.camera.it/sparql"
+    },
+    {
+      "citazione": "Composizione del Governo, per distinguere i gruppi di maggioranza da quelli di opposizione",
+      "url": "https://www.governo.it/it/ministri-e-sottosegretari"
+    }
+  ]
+}

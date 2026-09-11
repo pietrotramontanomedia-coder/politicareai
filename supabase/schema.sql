@@ -8,10 +8,13 @@ create table if not exists profili (
   id uuid primary key references auth.users on delete cascade,
   nome text not null default '',
   colore text not null default '#FEDC01',
-  anno_nascita smallint check (anno_nascita between 1900 and extract(year from now())::int),
+  -- Limite fisso: nei vincoli Postgres non accetta funzioni come now(). Il controllo sull'anno
+  -- corrente lo fa l'app (annoNascitaValido in lib/profilo/regole.ts).
+  anno_nascita smallint check (anno_nascita between 1900 and 2100),
   citta text not null default '',
   temi_seguiti text[] not null default '{}',
   giocatori text[] not null default '{}',
+  fanta jsonb,
   creato_il timestamptz not null default now(),
   aggiornato_il timestamptz not null default now()
 );

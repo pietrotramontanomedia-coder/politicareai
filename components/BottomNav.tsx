@@ -22,7 +22,7 @@ const DESTRA: Voce[] = [
   { href: STRUMENTI.gioco.href, etichetta: T.gioco, icona: 'gioco' },
 ];
 /** Pagine raggiungibili solo dal pannello: quando ci sei, il pulsante centrale lo segnala. */
-const ROTTE_PANNELLO = [STRUMENTI.profilo.href, STRUMENTI.confronta.href, STRUMENTI.simulatore.href, STRUMENTI.metodologia.href];
+const ROTTE_PANNELLO = [STRUMENTI.profilo.href, STRUMENTI.confronta.href, STRUMENTI.simulatore.href, STRUMENTI.fanta.href, STRUMENTI.metodologia.href];
 
 const VETRO = {
   borderColor: 'rgba(255,255,255,0.08)',

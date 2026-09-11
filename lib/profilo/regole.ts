@@ -1,4 +1,4 @@
-import { VERSIONE_PROFILO, type EsitoQuiz, type Profilo, type RisultatoQuizSalvato } from './tipi';
+import { VERSIONE_PROFILO, type EsitoQuiz, type Profilo, type RisultatoQuizSalvato, type RosaFanta } from './tipi';
 import type { RisultatoTestLocale } from './risultato-test-locale';
 
 /* Regole del profilo: funzioni pure, senza storage né rete, verificabili nei test. */
@@ -10,6 +10,9 @@ export const MAX_CITTA = 60;
 export const ANNO_MINIMO = 1900;
 /** Sotto i 14 anni in Italia serve il consenso di chi esercita la responsabilità genitoriale (GDPR art. 8). */
 export const ETA_MINIMA_AUTONOMA = 14;
+
+const TESTO = (v: unknown): v is string => typeof v === 'string';
+const NUMERO = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v);
 
 export function profiloVuoto(adesso: Date = new Date()): Profilo {
   const iso = adesso.toISOString();
@@ -24,6 +27,7 @@ export function profiloVuoto(adesso: Date = new Date()): Profilo {
     temiSeguiti: [],
     storicoQuiz: [],
     giocatori: [],
+    fanta: null,
   };
 }
 
@@ -128,6 +132,27 @@ export function impostaAnagrafica(
   return { ...profilo, annoNascita, citta, aggiornatoIl: adesso.toISOString() };
 }
 
+/** Salva la rosa del Fantaparlamento (la validazione delle regole sta nel motore). */
+export function impostaRosaFanta(profilo: Profilo, rosa: Omit<RosaFanta, 'aggiornataIl'>, adesso: Date = new Date()): Profilo {
+  return {
+    ...profilo,
+    fanta: { ...rosa, deputati: [...new Set(rosa.deputati)], aggiornataIl: adesso.toISOString() },
+    aggiornatoIl: adesso.toISOString(),
+  };
+}
+
+function normalizzaRosa(grezzo: unknown): RosaFanta | null {
+  if (!grezzo || typeof grezzo !== 'object') return null;
+  const r = grezzo as Record<string, unknown>;
+  if (!TESTO(r.stagione) || !Array.isArray(r.deputati)) return null;
+  return {
+    stagione: r.stagione,
+    deputati: [...new Set(r.deputati.filter(TESTO))].slice(0, 30),
+    capitano: TESTO(r.capitano) ? r.capitano : null,
+    aggiornataIl: TESTO(r.aggiornataIl) ? r.aggiornataIl : new Date(0).toISOString(),
+  };
+}
+
 export function alternaTema(profilo: Profilo, area: string, adesso: Date = new Date()): Profilo {
   const temiSeguiti = profilo.temiSeguiti.includes(area)
     ? profilo.temiSeguiti.filter((t) => t !== area)
@@ -149,8 +174,6 @@ export function impostaGiocatori(profilo: Profilo, nomi: string[], adesso: Date 
   return { ...profilo, giocatori, aggiornatoIl: adesso.toISOString() };
 }
 
-const TESTO = (v: unknown): v is string => typeof v === 'string';
-const NUMERO = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v);
 
 function normalizzaQuiz(grezzo: unknown): RisultatoQuizSalvato | null {
   if (!grezzo || typeof grezzo !== 'object') return null;
@@ -190,6 +213,7 @@ export function normalizzaProfilo(grezzo: unknown): Profilo | null {
       .filter((q): q is RisultatoQuizSalvato => q !== null)
       .sort((a, b) => b.numero - a.numero),
     giocatori: elenco(p.giocatori).slice(0, MAX_GIOCATORI),
+    fanta: normalizzaRosa(p.fanta),
   };
 }
 
@@ -228,6 +252,11 @@ export function unisciProfili(dispositivo: Profilo, account: Profilo, adesso: Da
     temiSeguiti: [...new Set([...account.temiSeguiti, ...dispositivo.temiSeguiti])],
     storicoQuiz: [...perNumero.values()].sort((a, b) => b.numero - a.numero),
     giocatori: impostaGiocatori(account, [...account.giocatori, ...dispositivo.giocatori], adesso).giocatori,
+    // Fra due rose vince la più recente.
+    fanta:
+      [account.fanta, dispositivo.fanta]
+        .filter((r): r is RosaFanta => r !== null)
+        .sort((a, b) => b.aggiornataIl.localeCompare(a.aggiornataIl))[0] ?? null,
   };
 }
 

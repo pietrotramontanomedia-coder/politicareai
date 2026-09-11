@@ -36,6 +36,7 @@ export interface RigaProfilo {
   citta: string;
   temi_seguiti: string[];
   giocatori: string[];
+  fanta: unknown;
   creato_il: string;
   aggiornato_il: string;
 }
@@ -64,6 +65,7 @@ export function daRighe(riga: RigaProfilo | null, quiz: RigaQuiz[]): Profilo | n
     aggiornatoIl: riga.aggiornato_il,
     temiSeguiti: riga.temi_seguiti,
     giocatori: riga.giocatori,
+    fanta: riga.fanta,
     storicoQuiz: quiz.map((q) => ({
       numero: q.numero,
       percentuale: q.percentuale,
@@ -86,6 +88,7 @@ export function aRigaProfilo(id: string, profilo: Profilo): RigaProfilo {
     citta: p.citta,
     temi_seguiti: p.temiSeguiti,
     giocatori: p.giocatori,
+    fanta: p.fanta,
     creato_il: p.creatoIl,
     aggiornato_il: p.aggiornatoIl,
   };

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { motion, MotionConfig } from 'framer-motion';
 import { IconaStrumento } from './IconaStrumento';
-import { AnteprimaConfronta, AnteprimaGioco, AnteprimaQuiz, AnteprimaRisultato, AnteprimaSimulatore, AnteprimaTest } from './Anteprime';
+import { AnteprimaConfronta, AnteprimaFanta, AnteprimaGioco, AnteprimaQuiz, AnteprimaRisultato, AnteprimaSimulatore, AnteprimaTest } from './Anteprime';
 import { conAlfa, STRUMENTI, type Strumento } from '@/lib/strumenti';
 
 type Variante = 'grande' | 'compatta' | 'media' | 'larga';
@@ -41,8 +41,11 @@ export default function GrigliaStrumenti() {
         <Cella className="col-span-2">
           <CardStrumento strumento={STRUMENTI.simulatore} variante="media" anteprima={<AnteprimaSimulatore />} />
         </Cella>
-        <Cella className="col-span-2 lg:col-span-4">
-          <CardStrumento strumento={STRUMENTI.gioco} variante="larga" anteprima={<AnteprimaGioco />} />
+        <Cella className="col-span-2">
+          <CardStrumento strumento={STRUMENTI.fanta} variante="media" anteprima={<AnteprimaFanta />} />
+        </Cella>
+        <Cella className="col-span-2">
+          <CardStrumento strumento={STRUMENTI.gioco} variante="media" anteprima={<AnteprimaGioco />} />
         </Cella>
       </motion.div>
     </MotionConfig>

@@ -9,6 +9,7 @@ import {
   annoNascitaValido,
   etaDa,
   impostaAnagrafica,
+  impostaRosaFanta,
   datiSincronizzabili,
   esportaDati,
   impostaGiocatori,
@@ -113,11 +114,22 @@ describe('profilo sulle tabelle Supabase', () => {
       'citta',
       'colore',
       'creato_il',
+      'fanta',
       'giocatori',
       'id',
       'nome',
       'temi_seguiti',
     ]);
+  });
+});
+
+describe('rosa del Fantaparlamento nel profilo', () => {
+  it('si salva senza doppioni e fra due rose al primo accesso vince la più recente', () => {
+    const vecchia = impostaRosaFanta(profiloVuoto(ADESSO), { stagione: 's1', deputati: ['a', 'a', 'b'], capitano: 'a' }, new Date('2026-09-01T00:00:00Z'));
+    expect(vecchia.fanta).toMatchObject({ deputati: ['a', 'b'], capitano: 'a' });
+    const nuova = impostaRosaFanta(profiloVuoto(ADESSO), { stagione: 's1', deputati: ['c'], capitano: 'c' }, ADESSO);
+    expect(unisciProfili(nuova, vecchia, ADESSO).fanta?.deputati).toEqual(['c']);
+    expect(normalizzaProfilo({ ...nuova, fanta: 'spazzatura' })?.fanta).toBeNull();
   });
 });
 
@@ -131,6 +143,7 @@ describe('confine dei dati', () => {
       'citta',
       'colore',
       'creatoIl',
+      'fanta',
       'giocatori',
       'nome',
       'storicoQuiz',

@@ -3,7 +3,7 @@
  * e per il pannello del menu in basso: nome, colore e numeri restano coerenti ovunque.
  */
 
-export type IdStrumento = 'profilo' | 'test' | 'quiz' | 'confronta' | 'simulatore' | 'gioco' | 'metodologia';
+export type IdStrumento = 'profilo' | 'test' | 'quiz' | 'confronta' | 'simulatore' | 'fanta' | 'gioco' | 'metodologia';
 
 export interface Strumento {
   id: IdStrumento;
@@ -19,6 +19,10 @@ export interface Strumento {
   /** Colore identitario dello strumento, in esadecimale. */
   colore: string;
 }
+
+import stagioneFanta from '@/content/fantaparlamento/stagione.json';
+
+const REGOLE_FANTA = stagioneFanta.regole;
 
 /** Numeri citati nei testi: un test li confronta con i content pack. */
 export const NUMERI = { affermazioni: 20, partiti: 13, temi: 10, domandeQuiz: 7 } as const;
@@ -79,6 +83,17 @@ export const STRUMENTI: Record<IdStrumento, Strumento> = {
     meta: ['Camera e Senato', 'Premio al 42%'],
     colore: '#60A5FA',
   },
+  fanta: {
+    id: 'fanta',
+    href: '/fantaparlamento',
+    nome: 'Fantaparlamento',
+    breve: 'La tua rosa di deputati',
+    titolo: 'Fantaparlamento',
+    descrizione: `Scegli ${REGOLE_FANTA.titolari} deputati con un budget di crediti: i punti arrivano dalle votazioni vere della Camera.`,
+    azione: 'Fai la tua rosa',
+    meta: [`${REGOLE_FANTA.titolari} deputati`, `${REGOLE_FANTA.crediti} crediti`],
+    colore: '#22D3EE',
+  },
   gioco: {
     id: 'gioco',
     href: '/gioco',
@@ -105,7 +120,7 @@ export const STRUMENTI: Record<IdStrumento, Strumento> = {
 };
 
 /** Ordine delle voci nel pannello "Strumenti" del menu in basso. */
-export const ORDINE_PANNELLO: IdStrumento[] = ['profilo', 'test', 'quiz', 'confronta', 'simulatore', 'gioco', 'metodologia'];
+export const ORDINE_PANNELLO: IdStrumento[] = ['profilo', 'test', 'quiz', 'confronta', 'simulatore', 'fanta', 'gioco', 'metodologia'];
 
 export const TESTI_STRUMENTI = {
   occhiello: 'Strumenti',
@@ -124,6 +139,11 @@ export const TESTI_STRUMENTI = {
   anteprimaRisultato: { titolo: 'Il tuo risultato', nota: 'Classifica completa, mai un solo vincitore' },
   anteprimaConfronta: { favorevoli: 'Favorevoli', contrari: 'Contrari' },
   anteprimaSimulatore: { maggioranza: 'Maggioranza' },
+  anteprimaFanta: {
+    rosa: 'La tua rosa',
+    crediti: (spesi: number) => `${spesi} / ${REGOLE_FANTA.crediti}`,
+    creditiTotali: REGOLE_FANTA.crediti,
+  },
 };
 
 export const TESTI_NAV = {

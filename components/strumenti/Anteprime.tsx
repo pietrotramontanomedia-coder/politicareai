@@ -219,6 +219,67 @@ export function AnteprimaSimulatore() {
   );
 }
 
+/** Rosa che si riempie un deputato alla volta: cerchi pieni per la maggioranza, bordati per l'opposizione. */
+const ROSA_ANTEPRIMA = [
+  { prezzo: 38, maggioranza: true },
+  { prezzo: 41, maggioranza: false },
+  { prezzo: 29, maggioranza: true },
+  { prezzo: 44, maggioranza: false },
+  { prezzo: 22, maggioranza: true },
+  { prezzo: 35, maggioranza: false },
+  { prezzo: 18, maggioranza: true },
+  { prezzo: 31, maggioranza: false },
+  { prezzo: 26, maggioranza: true },
+  { prezzo: 33, maggioranza: false },
+  { prezzo: 12, maggioranza: false },
+];
+const CAPITANO_ANTEPRIMA = 3;
+
+export function AnteprimaFanta() {
+  const f = T.anteprimaFanta;
+  const scelti = useCiclo(ROSA_ANTEPRIMA.length + 3, 650);
+  const pieni = Math.min(scelti, ROSA_ANTEPRIMA.length);
+  const spesi = ROSA_ANTEPRIMA.slice(0, pieni).reduce((somma, d) => somma + d.prezzo, 0);
+  const colore = '#22D3EE';
+
+  return (
+    <div className="rounded-2xl border p-4" style={RIQUADRO} aria-hidden>
+      <div className="flex items-baseline justify-between text-[11px] font-semibold">
+        <span className="uppercase tracking-wider" style={{ color: 'var(--fg-muta)' }}>
+          {f.rosa}
+        </span>
+        <span className="tabular-nums">{f.crediti(spesi)}</span>
+      </div>
+      <div className="mt-2 h-1.5 overflow-hidden rounded-full" style={{ background: 'rgba(255,255,255,0.08)' }}>
+        <div className="h-full rounded-full transition-[width] duration-500" style={{ width: `${(spesi / f.creditiTotali) * 100}%`, background: colore }} />
+      </div>
+      <div className="mt-3 grid grid-cols-6 gap-1.5 sm:grid-cols-11">
+        {ROSA_ANTEPRIMA.map((d, i) => {
+          const pieno = i < pieni;
+          return (
+            <span key={i} className="relative flex aspect-square items-center justify-center">
+              <motion.span
+                className="h-full w-full rounded-full border-2"
+                animate={{ scale: pieno ? 1 : 0.55, opacity: pieno ? 1 : 0.35 }}
+                transition={{ type: 'spring', stiffness: 420, damping: 24 }}
+                style={{
+                  borderColor: pieno ? colore : 'rgba(255,255,255,0.25)',
+                  background: pieno && d.maggioranza ? colore : 'transparent',
+                }}
+              />
+              {pieno && i === CAPITANO_ANTEPRIMA && (
+                <span className="absolute -right-1 -top-1 text-[10px] leading-none" style={{ color: '#FEDC01' }}>
+                  ★
+                </span>
+              )}
+            </span>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 const CARTE = [
   { riposo: { rotate: -14, x: -30, y: 6 }, hover: { rotate: -24, x: -52, y: 4 }, colore: '#A78BFA' },
   { riposo: { rotate: 12, x: 30, y: 6 }, hover: { rotate: 22, x: 52, y: 4 }, colore: '#F472B6' },

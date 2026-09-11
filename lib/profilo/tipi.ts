@@ -34,6 +34,16 @@ export interface Profilo {
   storicoQuiz: RisultatoQuizSalvato[];
   /** Nomi del gruppo, per ritrovarli pronti nel gioco. */
   giocatori: string[];
+  /** Rosa del Fantaparlamento: id dei deputati scelti e capitano. */
+  fanta: RosaFanta | null;
+}
+
+export interface RosaFanta {
+  /** Stagione a cui si riferisce la rosa. */
+  stagione: string;
+  deputati: string[];
+  capitano: string | null;
+  aggiornataIl: string;
 }
 
 export interface EsitoQuiz {
