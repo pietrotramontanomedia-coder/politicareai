@@ -1,5 +1,5 @@
 import { CANALE_TELEGRAM } from '@/lib/telegram-server';
-import { componiTweet, contieneLink, estraiPostCanale, type PoliticaLink } from '@/lib/telegram-x';
+import { componiTweet, contieneLink, estraiPostCanale, opzioniFormato } from '@/lib/telegram-x';
 import { scaricaFotoTelegram, segretoTelegramValido } from '@/lib/telegram-bot-server';
 import { giaPubblicato, registraPubblicazione } from '@/lib/telegram-x-registro';
 import { pubblicaSuX, rifiutatoDaX, xConfigurato } from '@/lib/x-server';
@@ -14,17 +14,12 @@ export const maxDuration = 60;
 
 const SITO = process.env.SITO_URL ?? 'https://politicare-app.vercel.app';
 
-function politicaLink(): PoliticaLink {
-  const valore = process.env.X_LINK_NOTIZIE;
-  return valore === 'mai' || valore === 'sempre' ? valore : 'se-troncato';
-}
-
 export async function GET() {
   return Response.json({
     telegram: Boolean(process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_WEBHOOK_SECRET),
     x: xConfigurato(),
     canale: process.env.TELEGRAM_CANALE ?? CANALE_TELEGRAM,
-    link: politicaLink(),
+    formato: opzioniFormato(process.env),
   });
 }
 
@@ -46,7 +41,7 @@ export async function POST(request: Request) {
   const precedente = await giaPubblicato(post.numero);
   if (precedente) return Response.json({ ok: true, ignorato: 'già pubblicato', x: precedente.x });
 
-  const testo = componiTweet(post.testo, { link: `${SITO}/ultimora/tg-${post.numero}`, politicaLink: politicaLink() });
+  const testo = componiTweet(post.testo, { ...opzioniFormato(process.env), link: `${SITO}/ultimora/tg-${post.numero}` });
 
   try {
     const immagine = post.foto ? await scaricaFotoTelegram(post.foto) : undefined;

@@ -7,7 +7,7 @@
 export const LIMITE_X = 280;
 /** X accorcia ogni link con t.co: conta sempre 23 caratteri. */
 const PESO_URL = 23;
-const FIRMA = /\s*@politicare\s*$/i;
+const FIRMA_TELEGRAM = /\s*@politicare\s*$/i;
 const URL = /https?:\/\/\S+|(?<![\w@])[a-z0-9-]+(?:\.[a-z0-9-]+)*\.[a-z]{2,}(?:\/\S*)?/gi;
 
 export interface PostCanale {
@@ -68,9 +68,13 @@ export function contieneLink(testo: string): boolean {
   return new RegExp(URL.source, 'i').test(testo);
 }
 
+const EMOJI_INIZIALI = /^(?:(?:\p{Regional_Indicator}{2}|\p{Extended_Pictographic}\uFE0F?)(?:\u200D\p{Extended_Pictographic}\uFE0F?)*)+/u;
+
 function pulisciPerX(grezzo: string): string {
   return grezzo
-    .replace(FIRMA, '')
+    .replace(FIRMA_TELEGRAM, '')
+    .replace(/[\u200B-\u200D\uFEFF]/g, '')
+    .replace(EMOJI_INIZIALI, (emoji) => `${emoji} `)
     .replace(/[ \t]+/g, ' ')
     .replace(/ ?\n ?/g, '\n')
     .replace(/\n{3,}/g, '\n\n')
@@ -93,28 +97,51 @@ function troncaPerPeso(testo: string, budget: number): string {
 }
 
 export type PoliticaLink = 'mai' | 'se-troncato' | 'sempre';
+export type StileTitolo = 'normale' | 'maiuscolo' | 'nessuno';
 
 export interface OpzioniTweet {
-  /** Link alla notizia sul sito, aggiunto secondo `link`. */
+  /** Link alla notizia sul sito, aggiunto secondo `politicaLink`. */
   link?: string;
   politicaLink?: PoliticaLink;
+  /** La prima frase diventa un titolo su una riga a sé (stile agenzia). */
+  titolo?: StileTitolo;
+  /** Riga di chiusura, es. `#Politicare`. */
+  firma?: string;
   limite?: number;
+}
+
+/** Oltre questa lunghezza la prima frase non è un titolo: il post resta un paragrafo unico. */
+const MAX_TITOLO = 120;
+
+function separaTitolo(testo: string, stile: StileTitolo): { testa: string; corpo: string } {
+  if (stile === 'nessuno') return { testa: '', corpo: testo };
+  const [prima = '', ...altre] = testo.split('\n');
+  const frase = prima.match(/^(.{20,}?[.!?:])(?:\s+(.*))?$/s);
+  if (!frase) return { testa: '', corpo: testo };
+  const titolo = frase[1].replace(/[.:]$/, '');
+  const corpo = [frase[2] ?? '', ...altre].filter(Boolean).join('\n');
+  if (!corpo || titolo.length > MAX_TITOLO) return { testa: '', corpo: testo };
+  const corpoMaiuscolo = corpo.replace(/^\p{Ll}/u, (c) => c.toUpperCase());
+  return { testa: (stile === 'maiuscolo' ? titolo.toUpperCase() : titolo) + '\n\n', corpo: corpoMaiuscolo };
 }
 
 /** Trasforma il testo di un post Telegram nel testo del post su X, entro il limite. */
 export function componiTweet(grezzo: string, opzioni: OpzioniTweet = {}): string {
-  const { link, politicaLink = 'se-troncato', limite = LIMITE_X } = opzioni;
-  const testo = pulisciPerX(grezzo);
+  const { link, politicaLink = 'se-troncato', titolo = 'normale', firma = '', limite = LIMITE_X } = opzioni;
+  const { testa, corpo } = separaTitolo(pulisciPerX(grezzo), titolo);
+  const chiusura = firma ? `\n\n${firma}` : '';
   const coda = link ? `\n\n${link}` : '';
-  const pesoCoda = lunghezzaX(coda);
+  const fisso = lunghezzaX(testa) + lunghezzaX(chiusura);
 
   if (politicaLink === 'sempre' && link) {
-    if (lunghezzaX(testo) + pesoCoda <= limite) return testo + coda;
-    return troncaEntro(testo, limite - pesoCoda) + coda;
+    const spazio = limite - fisso - lunghezzaX(coda);
+    return testa + (lunghezzaX(corpo) <= spazio ? corpo : troncaEntro(corpo, spazio)) + coda + chiusura;
   }
-  if (lunghezzaX(testo) <= limite) return testo;
-  if (politicaLink === 'se-troncato' && link) return troncaEntro(testo, limite - pesoCoda) + coda;
-  return troncaEntro(testo, limite);
+  if (fisso + lunghezzaX(corpo) <= limite) return testa + corpo + chiusura;
+  if (politicaLink === 'se-troncato' && link) {
+    return testa + troncaEntro(corpo, limite - fisso - lunghezzaX(coda)) + coda + chiusura;
+  }
+  return testa + troncaEntro(corpo, limite - fisso) + chiusura;
 }
 
 function troncaEntro(testo: string, limite: number): string {
@@ -125,4 +152,24 @@ function troncaEntro(testo: string, limite: number): string {
     risultato = troncaPerPeso(testo, budget);
   }
   return risultato;
+}
+
+/**
+ * Formato regolabile dalle variabili d'ambiente senza toccare il codice:
+ *   X_TITOLO        normale | maiuscolo | nessuno   (prima frase su una riga a sé)
+ *   X_FIRMA         riga di chiusura, vuota per nessuna
+ *   X_LINK_NOTIZIE  mai | se-troncato | sempre
+ *   X_LIMITE        280 (predefinito); con X Premium si può alzare, fino a 25000
+ */
+export const FORMATO_PREDEFINITO = { titolo: 'normale', firma: '#Politicare', politicaLink: 'se-troncato' } as const;
+
+export function opzioniFormato(ambiente: Record<string, string | undefined>): Required<Pick<OpzioniTweet, 'titolo' | 'firma' | 'politicaLink' | 'limite'>> {
+  const titolo = ambiente.X_TITOLO;
+  const politicaLink = ambiente.X_LINK_NOTIZIE;
+  return {
+    titolo: titolo === 'maiuscolo' || titolo === 'nessuno' ? titolo : FORMATO_PREDEFINITO.titolo,
+    firma: ambiente.X_FIRMA ?? FORMATO_PREDEFINITO.firma,
+    politicaLink: politicaLink === 'mai' || politicaLink === 'sempre' ? politicaLink : FORMATO_PREDEFINITO.politicaLink,
+    limite: Number(ambiente.X_LIMITE) > 0 ? Number(ambiente.X_LIMITE) : LIMITE_X,
+  };
 }

@@ -13,12 +13,28 @@ chiama il sito su Vercel (`/api/telegram/x`) e il sito pubblica su X.
 4. I post pubblicati finiscono in un registro (`telegram-x/pubblicati.json` nello
    storage privato), così un aggiornamento rispedito da Telegram non esce due volte.
 
-Regole di testo (`lib/telegram-x.ts`):
+Formato del post su X (`lib/telegram-x.ts`), regolabile dalle variabili d'ambiente:
 
-- il post entra in 280 caratteri → esce uguale, senza link;
+```
+🇸🇪 Elezioni in Svezia, scarto minimo          ← prima frase del post = titolo (X_TITOLO: normale | maiuscolo | nessuno)
+
+Si dovrà aspettare mercoledì per il conteggio…  ← il resto del testo, tagliato se serve
+
+https://politicare-app.vercel.app/ultimora/tg-1212   ← solo se il testo è stato tagliato
+
+#Politicare                                     ← firma (X_FIRMA, vuota per nessuna)
+```
+
+Regole di testo:
+
+- la firma `@Politicare` di Telegram viene tolta; le bandiere iniziali vengono staccate dal testo;
+- la prima frase (fino al primo punto o ai due punti, se è lunga meno di 120 caratteri) diventa il titolo;
+- il post entra in 280 caratteri → esce intero, senza link;
 - è più lungo → viene tagliato a una parola intera con `…` e riceve il link alla notizia
   sul sito (`/ultimora/tg-<numero>`), dove si legge tutta;
-- `X_LINK_NOTIZIE=sempre` aggiunge il link a tutti i post, `mai` non lo aggiunge mai.
+- `X_LINK_NOTIZIE=sempre` aggiunge il link a tutti i post, `mai` non lo aggiunge mai;
+- con **X Premium** sull'account il limite sale (`X_LIMITE=25000`): i post escono interi e senza link,
+  cioè al prezzo base. Con i post attuali del canale (300-500 caratteri) è la via più economica.
   Attenzione: dal 2026 l'API di X fattura per singolo post, e un post **con link costa
   molto di più** di uno senza (nel 2026: 0,20 $ contro 0,015 $). `se-troncato`,
   il valore predefinito, tiene i costi bassi.

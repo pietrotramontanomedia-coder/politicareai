@@ -59,7 +59,7 @@ describe('webhook Telegram → X', () => {
 
     expect(await risposta.json()).toEqual({ ok: true, x: '999' });
     expect(scaricaFotoTelegram).toHaveBeenCalledWith('f1');
-    expect(pubblicaSuX).toHaveBeenCalledWith('Notizia con foto', { dati: Buffer.from('jpg'), tipo: 'image/jpeg' });
+    expect(pubblicaSuX).toHaveBeenCalledWith('Notizia con foto\n\n#Politicare', { dati: Buffer.from('jpg'), tipo: 'image/jpeg' });
     expect(registro.get(42)?.x).toBe('999');
 
     const ripetuta = await POST(richiesta({ channel_post: post }));

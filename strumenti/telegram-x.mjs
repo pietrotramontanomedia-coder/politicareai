@@ -10,7 +10,7 @@
  * Legge TELEGRAM_BOT_TOKEN e TELEGRAM_WEBHOOK_SECRET da .env.local (o dall'ambiente).
  */
 import { readFileSync } from 'node:fs';
-import { componiTweet, lunghezzaX } from '../lib/telegram-x.ts';
+import { componiTweet, lunghezzaX, opzioniFormato } from '../lib/telegram-x.ts';
 
 const SITO_PREDEFINITO = 'https://politicare-app.vercel.app';
 
@@ -72,9 +72,10 @@ switch (comando) {
     break;
   case 'prova': {
     if (!argomento) throw new Error('scrivi il testo da provare tra virgolette');
-    const testo = componiTweet(argomento, { link: `${SITO_PREDEFINITO}/ultimora/tg-0`, politicaLink: process.env.X_LINK_NOTIZIE ?? 'se-troncato' });
+    const formato = opzioniFormato(process.env);
+    const testo = componiTweet(argomento, { ...formato, link: `${SITO_PREDEFINITO}/ultimora/tg-0` });
     console.log(testo);
-    console.log(`\n— ${lunghezzaX(testo)} caratteri su 280`);
+    console.log(`\n— ${lunghezzaX(testo)} caratteri su ${formato.limite}`);
     break;
   }
   default:
