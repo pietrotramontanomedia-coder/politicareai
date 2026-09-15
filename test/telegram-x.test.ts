@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { componiTweet, componiTweetConRiscrittura, contieneLink, estraiPostCanale, lunghezzaX, opzioniFormato, type Riscrittore } from '@/lib/telegram-x';
+import { aggiungiHashtag, componiTweet, componiTweetConRiscrittura, contieneLink, estraiPostCanale, lunghezzaX, opzioniFormato, type Riscrittore } from '@/lib/telegram-x';
 
 /* Il ponte Telegram → X: solo i post nuovi del canale, testo entro 280 caratteri come li conta X. */
 
@@ -126,8 +126,9 @@ describe('componiTweetConRiscrittura', () => {
   });
 
   it('un post lungo viene riscritto entro il budget e poi formattato', async () => {
-    const riscrivi = vi.fn(async (_testo: string, massimo: number) => {
+    const riscrivi = vi.fn(async (_testo: string, massimo: number, hashtag: number) => {
       expect(massimo).toBe(280 - 13 - 4); // firma «\n\n#Politicare» pesa 13
+      expect(hashtag).toBe(0);
       return 'Titolo della notizia lunga: versione corta con gli stessi fatti.';
     });
     const testo = await componiTweetConRiscrittura(lungo, { firma: '#Politicare' }, riscrivi);
@@ -148,5 +149,49 @@ describe('componiTweetConRiscrittura', () => {
     const testo = await componiTweetConRiscrittura(lungo, { firma: '#Politicare' });
     expect(lunghezzaX(testo)).toBeLessThanOrEqual(280);
     expect(testo).toMatch(/dettagli\.\n\n#Politicare$/);
+  });
+
+  it('con gli hashtag richiesti il riscrittore viene chiamato anche per un post breve e sceglie lui le parole', async () => {
+    const riscrivi = vi.fn<Riscrittore>(async () => '#Meloni a #Bruxelles per il vertice.');
+    const testo = await componiTweetConRiscrittura('Meloni a Bruxelles per il vertice.', { hashtag: 2 }, riscrivi);
+    expect(riscrivi).toHaveBeenCalledWith(expect.any(String), 280 - 4 - 2, 2);
+    expect(testo).toBe('#Meloni a #Bruxelles per il vertice.');
+  });
+
+  it('se il riscrittore non mette hashtag, li aggiunge la regola automatica', async () => {
+    const riscrivi = vi.fn<Riscrittore>(async () => 'Meloni a Bruxelles per il vertice.');
+    expect(await componiTweetConRiscrittura('Meloni a Bruxelles per il vertice.', { hashtag: 2 }, riscrivi)).toBe('#Meloni a #Bruxelles per il vertice.');
+  });
+});
+
+describe('aggiungiHashtag', () => {
+  it('mette il cancelletto sui nomi propri più rilevanti, al massimo tre, sulla prima occorrenza', () => {
+    const testo = 'Elezioni in Svezia, scarto minimo: la coalizione guidata da Magdalena Andersson è in testa. Lo schieramento di Ulf Kristersson insegue. In Svezia si vota ogni quattro anni.';
+    expect(aggiungiHashtag(testo)).toBe(
+      'Elezioni in #Svezia, scarto minimo: la coalizione guidata da Magdalena #Andersson è in testa. Lo schieramento di Ulf #Kristersson insegue. In Svezia si vota ogni quattro anni.',
+    );
+  });
+
+  it('salta articoli, parole generiche, parole dopo apostrofo o con trattino', () => {
+    expect(aggiungiHashtag("Il governo ha deciso. Alla misura non ha aderito l'Italia. Vittoria in Sassonia-Anhalt.")).toBe(
+      "Il governo ha deciso. Alla misura non ha aderito l'Italia. Vittoria in Sassonia-Anhalt.",
+    );
+    expect(aggiungiHashtag('Fratoianni commenta la vittoria di AFD: "Salvini esulta".')).toBe('#Fratoianni commenta la vittoria di #AFD: "#Salvini esulta".');
+  });
+
+  it('riconosce i nomi composti nella forma usata su X e rispetta il massimo', () => {
+    expect(aggiungiHashtag('Dodici paesi, tra cui Regno Unito, Francia, Canada e Spagna, hanno imposto sanzioni.', 2)).toBe(
+      'Dodici paesi, tra cui #RegnoUnito, #Francia, Canada e Spagna, hanno imposto sanzioni.',
+    );
+    expect(aggiungiHashtag('Il Partito Democratico attacca Fratelli d’Italia sulla manovra.')).toBe('Il #PD attacca #FdI sulla manovra.');
+    expect(aggiungiHashtag('Meloni a Bruxelles.', 0)).toBe('Meloni a Bruxelles.');
+  });
+
+  it('gli hashtag entrano nel conteggio e il formato predefinito ne chiede tre senza firma', () => {
+    const opzioni = opzioniFormato({});
+    expect(opzioni).toMatchObject({ hashtag: 3, firma: '' });
+    expect(opzioniFormato({ X_HASHTAG: '0' }).hashtag).toBe(0);
+    const testo = componiTweet('Meloni a Bruxelles per il vertice.', opzioni);
+    expect(testo).toBe('#Meloni a #Bruxelles per il vertice.');
   });
 });

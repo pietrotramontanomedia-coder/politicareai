@@ -16,12 +16,16 @@ chiama il sito su Vercel (`/api/telegram/x`) e il sito pubblica su X.
 Formato del post su X (`lib/telegram-x.ts`), regolabile dalle variabili d'ambiente:
 
 ```
-🇸🇪 Elezioni in Svezia, scarto minimo          ← prima frase del post = titolo (X_TITOLO: normale | maiuscolo | nessuno)
+🇸🇪 Elezioni in #Svezia, scarto minimo         ← prima frase del post = titolo (X_TITOLO: normale | maiuscolo | nessuno)
 
-Si dovrà aspettare mercoledì per il conteggio…  ← il resto del testo, tagliato se serve
-
-#Politicare                                     ← firma (X_FIRMA, vuota per nessuna)
+Si dovrà aspettare mercoledì per il conteggio   ← il resto del testo; le parole più rilevanti
+dei voti: Magdalena #Andersson è in testa…         diventano hashtag (X_HASHTAG, predefinito 3)
 ```
+
+Gli hashtag stanno dentro il testo, mai in coda. Con `ANTHROPIC_API_KEY` li sceglie Claude
+(cognomi, partiti, luoghi, tema); senza, una regola automatica prende i nomi propri più
+frequenti e riconosce i nomi composti (Regno Unito → #RegnoUnito, Partito Democratico → #PD).
+Nessuna firma di default (`X_FIRMA` per aggiungerne una).
 
 Regole di testo:
 

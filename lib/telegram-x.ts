@@ -105,6 +105,85 @@ function troncaPerPeso(testo: string, budget: number): string {
   return testo.slice(0, spazio > taglio / 2 ? spazio : taglio).replace(/[,;:\s]+$/, '') + '…';
 }
 
+/** Parole con l'iniziale maiuscola che non sono nomi propri: mai hashtag. */
+const NON_HASHTAG = new Set(
+  `il lo la i gli le un uno una di del dello della dei degli delle da dal dallo dalla dai dagli dalle in nel nello nella nei negli nelle con col coi su sul sullo sulla sui sugli sulle per tra fra a al allo alla ai agli alle e ed o od ma però anche non che chi cui come dove quando quanto se sì no
+  questo questa questi queste quello quella quelli quelle qui qua là lì ora oggi ieri domani poi prima dopo intanto ancora già mai sempre solo tutto tutti tutta tutte altro altri altra altre ogni
+  sono è era erano sarà saranno stato stata stati state ha hanno aveva avevano avrà fa fanno faceva farà può possono deve devono va vanno viene vengono resta restano
+  secondo intanto inoltre infatti invece mentre perché quindi dunque così ecco lunedì martedì mercoledì giovedì venerdì sabato domenica
+  uno due tre quattro cinque sei sette otto nove dieci undici dodici venti trenta cento mille
+  ultim ultimora breaking flash notizia governo opposizione maggioranza elezioni voto voti legge decreto`
+    .split(/\s+/)
+    .filter(Boolean),
+);
+
+/** Nomi composti che diventano un hashtag unico, nella forma usata su X. */
+const COMPOSTI: [RegExp, string][] = [
+  [/\bRegno Unito\b/, 'RegnoUnito'],
+  [/\bStati Uniti\b/, 'StatiUniti'],
+  [/\bUnione [Ee]uropea\b/, 'UE'],
+  [/\bParlamento [Ee]uropeo\b/, 'ParlamentoEuropeo'],
+  [/\bCommissione [Ee]uropea\b/, 'CommissioneEuropea'],
+  [/\bConsiglio dei [Mm]inistri\b/, 'CdM'],
+  [/\bCorte dei [Cc]onti\b/, 'CorteDeiConti'],
+  [/\bCorte [Cc]ostituzionale\b/, 'Consulta'],
+  [/\bPalazzo Chigi\b/, 'PalazzoChigi'],
+  [/\bPartito Democratico\b/, 'PD'],
+  [/\bFratelli d['’]Italia\b/, 'FdI'],
+  [/\bForza Italia\b/, 'ForzaItalia'],
+  [/\bMovimento 5 Stelle\b/, 'M5S'],
+  [/\bAlleanza Verdi e Sinistra\b/, 'AVS'],
+];
+
+/**
+ * Trasforma in hashtag le parole più rilevanti del testo: nomi propri (persone, luoghi,
+ * partiti, istituzioni) scelti per frequenza e posizione. Al massimo `massimo` hashtag,
+ * ciascuno sulla prima occorrenza. Non tocca parole già hashtag, dopo un apostrofo o con trattino.
+ */
+export function aggiungiHashtag(testo: string, massimo = 3): string {
+  if (massimo <= 0) return testo;
+  const usati: string[] = [];
+  let risultato = testo;
+
+  for (const [composto, tag] of COMPOSTI) {
+    if (usati.length >= massimo) break;
+    const m = risultato.match(composto);
+    if (!m || m.index === undefined || risultato[m.index - 1] === '#') continue;
+    risultato = risultato.slice(0, m.index) + `#${tag}` + risultato.slice(m.index + m[0].length);
+    usati.push(tag);
+  }
+
+  const parola = /(?<![\p{L}\p{N}#'’@_-])(\p{Lu}[\p{L}\p{N}]{2,})(?![\p{L}\p{N}'’-])/gu;
+  const candidati = new Map<string, { conteggio: number; prima: number; inRun: boolean; soloInizio: boolean }>();
+  let m: RegExpExecArray | null;
+  while ((m = parola.exec(risultato))) {
+    const nome = m[1];
+    if (NON_HASHTAG.has(nome.toLowerCase()) || /^\p{Lu}+$/u.test(nome) && nome.length < 3) continue;
+    const precedente = risultato.slice(0, m.index).match(/(\p{Lu}[\p{L}\p{N}]*) $/u);
+    const inRun = Boolean(precedente && !NON_HASHTAG.has(precedente[1].toLowerCase()));
+    // A inizio frase la maiuscola non dice nulla: la parola conta solo se ricorre altrove (il primo termine del post fa eccezione).
+    const inizioFrase = m.index > 0 && /[.!?]\s*$|\n\s*$/.test(risultato.slice(0, m.index));
+    const voce = candidati.get(nome) ?? { conteggio: 0, prima: m.index, inRun, soloInizio: true };
+    voce.conteggio++;
+    if (!inizioFrase) voce.soloInizio = false;
+    candidati.set(nome, voce);
+  }
+  for (const [nome, voce] of candidati) if (voce.soloInizio && voce.conteggio < 2) candidati.delete(nome);
+  // In una coppia «Nome Cognome» l'hashtag va sul cognome: la prima parola della coppia esce.
+  for (const [nome, voce] of candidati) {
+    const seguito = new RegExp(`(?<![\\p{L}\\p{N}#])${nome} \\p{Lu}[\\p{L}\\p{N}]{2,}`, 'u').exec(risultato);
+    if (seguito && !voce.inRun) candidati.delete(nome);
+  }
+  const scelti = [...candidati.entries()]
+    .sort((a, b) => b[1].conteggio - a[1].conteggio || a[1].prima - b[1].prima)
+    .slice(0, Math.max(0, massimo - usati.length))
+    .map(([nome]) => nome);
+  for (const nome of scelti) {
+    risultato = risultato.replace(new RegExp(`(?<![\\p{L}\\p{N}#'’@_-])${nome}(?![\\p{L}\\p{N}'’-])`, 'u'), `#${nome}`);
+  }
+  return risultato;
+}
+
 export type PoliticaLink = 'mai' | 'se-troncato' | 'sempre';
 export type StileTitolo = 'normale' | 'maiuscolo' | 'nessuno';
 
@@ -114,8 +193,10 @@ export interface OpzioniTweet {
   politicaLink?: PoliticaLink;
   /** La prima frase diventa un titolo su una riga a sé (stile agenzia). */
   titolo?: StileTitolo;
-  /** Riga di chiusura, es. `#Politicare`. */
+  /** Riga di chiusura, es. `#Politicare`; vuota per nessuna. */
   firma?: string;
+  /** Quante parole rilevanti trasformare in hashtag nel testo (0 = nessuna). */
+  hashtag?: number;
   limite?: number;
 }
 
@@ -136,8 +217,8 @@ function separaTitolo(testo: string, stile: StileTitolo): { testa: string; corpo
 
 /** Trasforma il testo di un post Telegram nel testo del post su X, entro il limite. */
 export function componiTweet(grezzo: string, opzioni: OpzioniTweet = {}): string {
-  const { link, politicaLink = 'mai', titolo = 'normale', firma = '', limite = LIMITE_X } = opzioni;
-  const { testa, corpo } = separaTitolo(pulisciPerX(grezzo), titolo);
+  const { link, politicaLink = 'mai', titolo = 'normale', firma = '', hashtag = 0, limite = LIMITE_X } = opzioni;
+  const { testa, corpo } = separaTitolo(aggiungiHashtag(pulisciPerX(grezzo), hashtag), titolo);
   const chiusura = firma ? `\n\n${firma}` : '';
   const coda = link ? `\n\n${link}` : '';
   const fisso = lunghezzaX(testa) + lunghezzaX(chiusura);
@@ -157,26 +238,30 @@ function troncaEntro(testo: string, limite: number): string {
   return troncaPerPeso(testo, limite);
 }
 
-/** Un riscrittore riceve il testo e il numero massimo di caratteri (come li conta X) e restituisce una versione più corta. */
-export type Riscrittore = (testo: string, massimo: number) => Promise<string>;
+/** Un riscrittore riceve il testo, il numero massimo di caratteri (come li conta X) e quanti hashtag inserire; restituisce il testo pronto. */
+export type Riscrittore = (testo: string, massimo: number, hashtag: number) => Promise<string>;
 
 /**
- * Come `componiTweet`, ma se il post non entra nel limite lo fa riscrivere più corto
- * (stessi fatti, frasi intere) invece di tagliarlo. Il taglio per frasi intere resta
+ * Come `componiTweet`, ma passa dal riscrittore (Claude) quando serve: se il post non entra
+ * nel limite lo fa accorciare (stessi fatti, frasi intere) invece di tagliarlo, e se sono
+ * richiesti hashtag lascia a lui la scelta delle parole. Le regole automatiche restano
  * come ultima difesa se la riscrittura non basta o non è disponibile.
  */
 export async function componiTweetConRiscrittura(grezzo: string, opzioni: OpzioniTweet, riscrivi?: Riscrittore): Promise<string> {
-  const { titolo = 'normale', firma = '', limite = LIMITE_X } = opzioni;
+  const { titolo = 'normale', firma = '', hashtag = 0, limite = LIMITE_X } = opzioni;
   const pulito = pulisciPerX(grezzo);
   const chiusura = firma ? `\n\n${firma}` : '';
   const spazio = limite - lunghezzaX(chiusura);
   const { testa, corpo } = separaTitolo(pulito, titolo);
-  if (lunghezzaX(testa + corpo) <= spazio || !riscrivi) return componiTweet(grezzo, opzioni);
+  const troppoLungo = lunghezzaX(testa + corpo) > spazio;
+  if (!riscrivi || (!troppoLungo && hashtag <= 0)) return componiTweet(grezzo, opzioni);
 
-  let massimo = spazio - 4; // margine: la riga vuota fra titolo e corpo pesa 2
+  let massimo = spazio - 4 - hashtag; // margine: la riga vuota fra titolo e corpo pesa 2, ogni hashtag 1
   for (let tentativo = 0; tentativo < 2; tentativo++) {
-    const riscritto = pulisciPerX(await riscrivi(pulito, massimo));
-    if (riscritto && lunghezzaX(riscritto) <= massimo) return componiTweet(riscritto, { ...opzioni, politicaLink: 'mai' });
+    const riscritto = pulisciPerX(await riscrivi(pulito, massimo, hashtag));
+    if (riscritto && lunghezzaX(riscritto) <= massimo) {
+      return componiTweet(riscritto, { ...opzioni, politicaLink: 'mai', hashtag: riscritto.includes('#') ? 0 : hashtag });
+    }
     massimo -= 30;
   }
   return componiTweet(grezzo, opzioni);
@@ -185,18 +270,20 @@ export async function componiTweetConRiscrittura(grezzo: string, opzioni: Opzion
 /**
  * Formato regolabile dalle variabili d'ambiente senza toccare il codice:
  *   X_TITOLO        normale | maiuscolo | nessuno   (prima frase su una riga a sé)
- *   X_FIRMA         riga di chiusura, vuota per nessuna
+ *   X_FIRMA         riga di chiusura (predefinita: nessuna)
+ *   X_HASHTAG       quante parole rilevanti diventano hashtag nel testo (predefinito 3, 0 per nessuna)
  *   X_LINK_NOTIZIE  mai (predefinito) | se-troncato | sempre
  *   X_LIMITE        280 (predefinito); con X Premium si può alzare, fino a 25000
  */
-export const FORMATO_PREDEFINITO = { titolo: 'normale', firma: '#Politicare', politicaLink: 'mai' } as const;
+export const FORMATO_PREDEFINITO = { titolo: 'normale', firma: '', hashtag: 3, politicaLink: 'mai' } as const;
 
-export function opzioniFormato(ambiente: Record<string, string | undefined>): Required<Pick<OpzioniTweet, 'titolo' | 'firma' | 'politicaLink' | 'limite'>> {
+export function opzioniFormato(ambiente: Record<string, string | undefined>): Required<Pick<OpzioniTweet, 'titolo' | 'firma' | 'hashtag' | 'politicaLink' | 'limite'>> {
   const titolo = ambiente.X_TITOLO;
   const politicaLink = ambiente.X_LINK_NOTIZIE;
   return {
     titolo: titolo === 'maiuscolo' || titolo === 'nessuno' ? titolo : FORMATO_PREDEFINITO.titolo,
     firma: ambiente.X_FIRMA ?? FORMATO_PREDEFINITO.firma,
+    hashtag: ambiente.X_HASHTAG === undefined || Number.isNaN(Number(ambiente.X_HASHTAG)) ? FORMATO_PREDEFINITO.hashtag : Math.max(0, Number(ambiente.X_HASHTAG)),
     politicaLink: politicaLink === 'mai' || politicaLink === 'sempre' ? politicaLink : FORMATO_PREDEFINITO.politicaLink,
     limite: Number(ambiente.X_LIMITE) > 0 ? Number(ambiente.X_LIMITE) : LIMITE_X,
   };
