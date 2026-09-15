@@ -1,5 +1,6 @@
 import { CANALE_TELEGRAM } from '@/lib/telegram-server';
-import { componiTweet, contieneLink, estraiPostCanale, opzioniFormato } from '@/lib/telegram-x';
+import { componiTweetConRiscrittura, contieneLink, estraiPostCanale, opzioniFormato } from '@/lib/telegram-x';
+import { riscritturaDisponibile, riscriviPerX } from '@/lib/riscrittura-server';
 import { scaricaFotoTelegram, segretoTelegramValido } from '@/lib/telegram-bot-server';
 import { giaPubblicato, registraPubblicazione } from '@/lib/telegram-x-registro';
 import { pubblicaSuX, rifiutatoDaX, xConfigurato } from '@/lib/x-server';
@@ -20,6 +21,7 @@ export async function GET() {
     x: xConfigurato(),
     canale: process.env.TELEGRAM_CANALE ?? CANALE_TELEGRAM,
     formato: opzioniFormato(process.env),
+    riscrittura: riscritturaDisponibile(),
   });
 }
 
@@ -41,9 +43,10 @@ export async function POST(request: Request) {
   const precedente = await giaPubblicato(post.numero);
   if (precedente) return Response.json({ ok: true, ignorato: 'già pubblicato', x: precedente.x });
 
-  const testo = componiTweet(post.testo, { ...opzioniFormato(process.env), link: `${SITO}/ultimora/tg-${post.numero}` });
+  const opzioni = { ...opzioniFormato(process.env), link: `${SITO}/ultimora/tg-${post.numero}` };
 
   try {
+    const testo = await componiTweetConRiscrittura(post.testo, opzioni, riscritturaDisponibile() ? riscriviPerX : undefined);
     const immagine = post.foto ? await scaricaFotoTelegram(post.foto) : undefined;
     const { id } = await pubblicaSuX(testo, immagine);
     await registraPubblicazione(post.numero, id);

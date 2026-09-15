@@ -15,6 +15,10 @@ vi.mock('@/lib/telegram-bot-server', async (originale) => ({
   ...(await originale<typeof import('@/lib/telegram-bot-server')>()),
   scaricaFotoTelegram: (...args: unknown[]) => scaricaFotoTelegram(...(args as [])),
 }));
+vi.mock('@/lib/riscrittura-server', () => ({
+  riscritturaDisponibile: () => false,
+  riscriviPerX: vi.fn(),
+}));
 vi.mock('@/lib/telegram-x-registro', () => ({
   giaPubblicato: async (n: number) => registro.get(n) ?? null,
   registraPubblicazione: async (n: number, x: string) => void registro.set(n, { x, data: 'ora' }),

@@ -81,19 +81,28 @@ function pulisciPerX(grezzo: string): string {
     .trim();
 }
 
+/** Tiene solo le frasi intere che entrano nel budget; se nemmeno la prima entra, taglia a parola con «…». */
 function troncaPerPeso(testo: string, budget: number): string {
+  if (lunghezzaX(testo) <= budget) return testo;
+  const frasi = testo.match(/[^.!?\n]+(?:[.!?]+["»”)]?|\n+|$)/g) ?? [testo];
+  let accumulato = '';
+  for (const frase of frasi) {
+    const candidato = accumulato + frase;
+    if (lunghezzaX(candidato.trim()) > budget) break;
+    accumulato = candidato;
+  }
+  const intere = accumulato.trim();
+  if (intere) return intere;
+
   let peso = 0;
-  let fine = 0;
+  let taglio = 0;
   for (const carattere of testo) {
     peso += pesoCarattere(carattere.codePointAt(0) ?? 0);
-    if (peso > budget) break;
-    fine += carattere.length;
+    if (peso > budget - 2) break; // «…» pesa 2
+    taglio += carattere.length;
   }
-  if (fine >= testo.length) return testo;
-  const spazio = testo.lastIndexOf(' ', fine);
-  const aCapo = testo.lastIndexOf('\n', fine);
-  const taglio = Math.max(spazio, aCapo);
-  return testo.slice(0, taglio > fine / 2 ? taglio : fine).replace(/[,;:\s]+$/, '') + '…';
+  const spazio = testo.lastIndexOf(' ', taglio);
+  return testo.slice(0, spazio > taglio / 2 ? spazio : taglio).replace(/[,;:\s]+$/, '') + '…';
 }
 
 export type PoliticaLink = 'mai' | 'se-troncato' | 'sempre';
@@ -145,13 +154,32 @@ export function componiTweet(grezzo: string, opzioni: OpzioniTweet = {}): string
 }
 
 function troncaEntro(testo: string, limite: number): string {
-  let budget = limite - 2; // spazio per «…»
-  let risultato = troncaPerPeso(testo, budget);
-  while (lunghezzaX(risultato) > limite && budget > 20) {
-    budget -= 10;
-    risultato = troncaPerPeso(testo, budget);
+  return troncaPerPeso(testo, limite);
+}
+
+/** Un riscrittore riceve il testo e il numero massimo di caratteri (come li conta X) e restituisce una versione più corta. */
+export type Riscrittore = (testo: string, massimo: number) => Promise<string>;
+
+/**
+ * Come `componiTweet`, ma se il post non entra nel limite lo fa riscrivere più corto
+ * (stessi fatti, frasi intere) invece di tagliarlo. Il taglio per frasi intere resta
+ * come ultima difesa se la riscrittura non basta o non è disponibile.
+ */
+export async function componiTweetConRiscrittura(grezzo: string, opzioni: OpzioniTweet, riscrivi?: Riscrittore): Promise<string> {
+  const { titolo = 'normale', firma = '', limite = LIMITE_X } = opzioni;
+  const pulito = pulisciPerX(grezzo);
+  const chiusura = firma ? `\n\n${firma}` : '';
+  const spazio = limite - lunghezzaX(chiusura);
+  const { testa, corpo } = separaTitolo(pulito, titolo);
+  if (lunghezzaX(testa + corpo) <= spazio || !riscrivi) return componiTweet(grezzo, opzioni);
+
+  let massimo = spazio - 4; // margine: la riga vuota fra titolo e corpo pesa 2
+  for (let tentativo = 0; tentativo < 2; tentativo++) {
+    const riscritto = pulisciPerX(await riscrivi(pulito, massimo));
+    if (riscritto && lunghezzaX(riscritto) <= massimo) return componiTweet(riscritto, { ...opzioni, politicaLink: 'mai' });
+    massimo -= 30;
   }
-  return risultato;
+  return componiTweet(grezzo, opzioni);
 }
 
 /**

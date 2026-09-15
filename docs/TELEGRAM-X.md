@@ -9,7 +9,7 @@ chiama il sito su Vercel (`/api/telegram/x`) e il sito pubblica su X.
 1. Un bot Telegram è amministratore del canale: Telegram gli invia ogni post nuovo.
 2. Il bot ha un webhook che punta a `https://politicare-app.vercel.app/api/telegram/x`.
 3. Il sito controlla la firma segreta, scarta modifiche e post senza testo, toglie la
-   firma `@politicare`, taglia il testo a 280 caratteri (contati come li conta X) e pubblica.
+   firma `@politicare`, porta il testo entro 280 caratteri (contati come li conta X) e pubblica.
 4. I post pubblicati finiscono in un registro (`telegram-x/pubblicati.json` nello
    storage privato), così un aggiornamento rispedito da Telegram non esce due volte.
 
@@ -69,9 +69,11 @@ Nel progetto `politicare-app` → Settings → Environment Variables (ambiente P
 | `TELEGRAM_BOT_TOKEN` | token di BotFather |
 | `TELEGRAM_WEBHOOK_SECRET` | stringa casuale lunga (es. `openssl rand -hex 32`) |
 | `X_API_KEY`, `X_API_SECRET`, `X_ACCESS_TOKEN`, `X_ACCESS_SECRET` | dal portale X |
+| `ANTHROPIC_API_KEY` | chiave Claude da [console.anthropic.com](https://console.anthropic.com): riscrive i post troppo lunghi (pochi millesimi di dollaro a post) |
 | `X_LINK_NOTIZIE` | facoltativa: `mai` (predefinito), `se-troncato` o `sempre` |
 
-`BLOB_READ_WRITE_TOKEN` è già presente (serve al registro anti-duplicati).
+`BLOB_READ_WRITE_TOKEN` è già presente (serve al registro anti-duplicati). Senza `ANTHROPIC_API_KEY`
+il ponte funziona lo stesso, ma i post lunghi vengono accorciati per frasi intere invece che riscritti.
 Dopo aver salvato le variabili fai un **Redeploy** dell'ultimo deployment.
 
 ### 4. Collegare il webhook
@@ -92,6 +94,12 @@ npm run telegram-x stato
 `In attesa: 0` e nessun errore = tutto ok. Il post compare su X entro pochi secondi.
 Anche `https://politicare-app.vercel.app/api/telegram/x` (GET) dice se le chiavi sono
 configurate, senza mostrarle.
+
+Per vedere come uscirebbe un post, riscrittura compresa, con `ANTHROPIC_API_KEY` in `.env.local`:
+
+```bash
+npm run telegram-x prova "testo del post"
+```
 
 ## Comandi
 

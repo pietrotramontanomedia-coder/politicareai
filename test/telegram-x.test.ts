@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest';
-import { componiTweet, contieneLink, estraiPostCanale, lunghezzaX, opzioniFormato } from '@/lib/telegram-x';
+import { describe, expect, it, vi } from 'vitest';
+import { componiTweet, componiTweetConRiscrittura, contieneLink, estraiPostCanale, lunghezzaX, opzioniFormato, type Riscrittore } from '@/lib/telegram-x';
 
 /* Il ponte Telegram → X: solo i post nuovi del canale, testo entro 280 caratteri come li conta X. */
 
@@ -84,6 +84,12 @@ describe('componiTweet', () => {
     expect(testo).toMatch(/parola\d+…/);
   });
 
+  it('un post lungo viene accorciato per frasi intere, mai a metà frase', () => {
+    const frasi = ['Prima frase della notizia con qualche dettaglio.', 'Seconda frase con altri dettagli utili.', 'Terza frase ancora più lunga che spiega il contesto.', 'Quarta frase finale.'];
+    const testo = componiTweet(frasi.join(' '), { titolo: 'nessuno', limite: 100 });
+    expect(testo).toBe('Prima frase della notizia con qualche dettaglio. Seconda frase con altri dettagli utili.');
+  });
+
   it('con «mai» tronca senza link, con «sempre» aggiunge il link anche ai post brevi', () => {
     const lungo = 'a'.repeat(300);
     expect(componiTweet(lungo, { link: LINK, politicaLink: 'mai' })).toBe('a'.repeat(278) + '…');
@@ -106,5 +112,41 @@ describe('componiTweet', () => {
     const opzioni = opzioniFormato({ X_LIMITE: '25000', X_FIRMA: '' });
     expect(componiTweet(lungo, { ...opzioni, link: LINK })).toBe(lungo);
     expect(opzioniFormato({}).limite).toBe(280);
+  });
+
+});
+
+describe('componiTweetConRiscrittura', () => {
+  const lungo = 'Titolo della notizia lunga: ' + Array.from({ length: 50 }, (_, i) => `frase numero ${i} con dettagli.`).join(' ');
+
+  it('un post che entra non viene riscritto', async () => {
+    const riscrivi = vi.fn();
+    expect(await componiTweetConRiscrittura('Breve notizia.', { firma: '#Politicare' }, riscrivi)).toBe('Breve notizia.\n\n#Politicare');
+    expect(riscrivi).not.toHaveBeenCalled();
+  });
+
+  it('un post lungo viene riscritto entro il budget e poi formattato', async () => {
+    const riscrivi = vi.fn(async (_testo: string, massimo: number) => {
+      expect(massimo).toBe(280 - 13 - 4); // firma «\n\n#Politicare» pesa 13
+      return 'Titolo della notizia lunga: versione corta con gli stessi fatti.';
+    });
+    const testo = await componiTweetConRiscrittura(lungo, { firma: '#Politicare' }, riscrivi);
+    expect(testo).toBe('Titolo della notizia lunga\n\nVersione corta con gli stessi fatti.\n\n#Politicare');
+    expect(riscrivi).toHaveBeenCalledTimes(1);
+  });
+
+  it('se la riscrittura resta troppo lunga riprova con meno spazio, poi accorcia per frasi intere', async () => {
+    const riscrivi = vi.fn<Riscrittore>(async () => lungo);
+    const testo = await componiTweetConRiscrittura(lungo, { firma: '#Politicare' }, riscrivi);
+    expect(riscrivi).toHaveBeenCalledTimes(2);
+    expect(riscrivi.mock.calls[1][1]).toBe(263 - 30);
+    expect(lunghezzaX(testo)).toBeLessThanOrEqual(280);
+    expect(testo.endsWith('.\n\n#Politicare')).toBe(true);
+  });
+
+  it('senza riscrittore accorcia per frasi intere', async () => {
+    const testo = await componiTweetConRiscrittura(lungo, { firma: '#Politicare' });
+    expect(lunghezzaX(testo)).toBeLessThanOrEqual(280);
+    expect(testo).toMatch(/dettagli\.\n\n#Politicare$/);
   });
 });

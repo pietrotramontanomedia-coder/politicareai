@@ -10,7 +10,7 @@
  * Legge TELEGRAM_BOT_TOKEN e TELEGRAM_WEBHOOK_SECRET da .env.local (o dall'ambiente).
  */
 import { readFileSync } from 'node:fs';
-import { componiTweet, lunghezzaX, opzioniFormato } from '../lib/telegram-x.ts';
+import { componiTweetConRiscrittura, lunghezzaX, opzioniFormato } from '../lib/telegram-x.ts';
 
 const SITO_PREDEFINITO = 'https://politicare-app.vercel.app';
 
@@ -73,7 +73,13 @@ switch (comando) {
   case 'prova': {
     if (!argomento) throw new Error('scrivi il testo da provare tra virgolette');
     const formato = opzioniFormato(process.env);
-    const testo = componiTweet(argomento, { ...formato, link: `${SITO_PREDEFINITO}/ultimora/tg-0` });
+    let riscrivi;
+    if (process.env.ANTHROPIC_API_KEY && process.env.X_RISCRITTURA !== '0') {
+      ({ riscriviPerX: riscrivi } = await import('../lib/riscrittura-server.ts'));
+    } else {
+      console.log('(senza ANTHROPIC_API_KEY: niente riscrittura, un post lungo viene accorciato per frasi intere)\n');
+    }
+    const testo = await componiTweetConRiscrittura(argomento, { ...formato, link: `${SITO_PREDEFINITO}/ultimora/tg-0` }, riscrivi);
     console.log(testo);
     console.log(`\n— ${lunghezzaX(testo)} caratteri su ${formato.limite}`);
     break;

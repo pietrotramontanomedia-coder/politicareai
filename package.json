@@ -17,6 +17,7 @@
     "telegram-x": "node --no-warnings strumenti/telegram-x.mjs"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.125.0",
     "@politicare/motore": "*",
     "@supabase/supabase-js": "^2.116.0",
     "@vercel/blob": "^2.8.0",
