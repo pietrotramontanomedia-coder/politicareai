@@ -13,7 +13,8 @@
     "test": "vitest run && npm run test --workspace=@politicare/motore",
     "test:watch": "npm run test:watch --workspace=@politicare/motore",
     "test:app": "vitest run",
-    "test:motore": "npm run test --workspace=@politicare/motore"
+    "test:motore": "npm run test --workspace=@politicare/motore",
+    "telegram-x": "node --no-warnings strumenti/telegram-x.mjs"
   },
   "dependencies": {
     "@politicare/motore": "*",
@@ -23,7 +24,8 @@
     "framer-motion": "^12.0.0",
     "next": "^16.3.4",
     "react": "^19.2.8",
-    "react-dom": "^19.2.8"
+    "react-dom": "^19.2.8",
+    "twitter-api-v2": "^1.29.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.11",
