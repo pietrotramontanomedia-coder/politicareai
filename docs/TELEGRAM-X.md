@@ -20,8 +20,6 @@ Formato del post su X (`lib/telegram-x.ts`), regolabile dalle variabili d'ambien
 
 Si dovrà aspettare mercoledì per il conteggio…  ← il resto del testo, tagliato se serve
 
-https://politicare-app.vercel.app/ultimora/tg-1212   ← solo se il testo è stato tagliato
-
 #Politicare                                     ← firma (X_FIRMA, vuota per nessuna)
 ```
 
@@ -33,11 +31,11 @@ Regole di testo:
 - è più lungo → viene tagliato a una parola intera con `…` e riceve il link alla notizia
   sul sito (`/ultimora/tg-<numero>`), dove si legge tutta;
 - `X_LINK_NOTIZIE=sempre` aggiunge il link a tutti i post, `mai` non lo aggiunge mai;
-- con **X Premium** sull'account il limite sale (`X_LIMITE=25000`): i post escono interi e senza link,
-  cioè al prezzo base. Con i post attuali del canale (300-500 caratteri) è la via più economica.
-  Attenzione: dal 2026 l'API di X fattura per singolo post, e un post **con link costa
-  molto di più** di uno senza (nel 2026: 0,20 $ contro 0,015 $). `se-troncato`,
-  il valore predefinito, tiene i costi bassi.
+- con **X Premium** sull'account il limite sale (`X_LIMITE=25000`) e i post escono interi.
+
+Attenzione ai link: dal 2026 l'API di X fattura per singolo post, e un post **con link costa
+molto di più** di uno senza (nel 2026: 0,20 $ contro 0,015 $). `mai`, il valore predefinito,
+tiene i costi al minimo.
 
 Album di foto: X riceve solo la foto che porta la didascalia, le altre vengono ignorate.
 Le modifiche a un post già pubblicato non si propagano.
@@ -71,7 +69,7 @@ Nel progetto `politicare-app` → Settings → Environment Variables (ambiente P
 | `TELEGRAM_BOT_TOKEN` | token di BotFather |
 | `TELEGRAM_WEBHOOK_SECRET` | stringa casuale lunga (es. `openssl rand -hex 32`) |
 | `X_API_KEY`, `X_API_SECRET`, `X_ACCESS_TOKEN`, `X_ACCESS_SECRET` | dal portale X |
-| `X_LINK_NOTIZIE` | facoltativa: `mai`, `se-troncato` (predefinito) o `sempre` |
+| `X_LINK_NOTIZIE` | facoltativa: `mai` (predefinito), `se-troncato` o `sempre` |
 
 `BLOB_READ_WRITE_TOKEN` è già presente (serve al registro anti-duplicati).
 Dopo aver salvato le variabili fai un **Redeploy** dell'ultimo deployment.

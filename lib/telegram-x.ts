@@ -127,7 +127,7 @@ function separaTitolo(testo: string, stile: StileTitolo): { testa: string; corpo
 
 /** Trasforma il testo di un post Telegram nel testo del post su X, entro il limite. */
 export function componiTweet(grezzo: string, opzioni: OpzioniTweet = {}): string {
-  const { link, politicaLink = 'se-troncato', titolo = 'normale', firma = '', limite = LIMITE_X } = opzioni;
+  const { link, politicaLink = 'mai', titolo = 'normale', firma = '', limite = LIMITE_X } = opzioni;
   const { testa, corpo } = separaTitolo(pulisciPerX(grezzo), titolo);
   const chiusura = firma ? `\n\n${firma}` : '';
   const coda = link ? `\n\n${link}` : '';
@@ -158,10 +158,10 @@ function troncaEntro(testo: string, limite: number): string {
  * Formato regolabile dalle variabili d'ambiente senza toccare il codice:
  *   X_TITOLO        normale | maiuscolo | nessuno   (prima frase su una riga a sé)
  *   X_FIRMA         riga di chiusura, vuota per nessuna
- *   X_LINK_NOTIZIE  mai | se-troncato | sempre
+ *   X_LINK_NOTIZIE  mai (predefinito) | se-troncato | sempre
  *   X_LIMITE        280 (predefinito); con X Premium si può alzare, fino a 25000
  */
-export const FORMATO_PREDEFINITO = { titolo: 'normale', firma: '#Politicare', politicaLink: 'se-troncato' } as const;
+export const FORMATO_PREDEFINITO = { titolo: 'normale', firma: '#Politicare', politicaLink: 'mai' } as const;
 
 export function opzioniFormato(ambiente: Record<string, string | undefined>): Required<Pick<OpzioniTweet, 'titolo' | 'firma' | 'politicaLink' | 'limite'>> {
   const titolo = ambiente.X_TITOLO;

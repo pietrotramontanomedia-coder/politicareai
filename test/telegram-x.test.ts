@@ -64,20 +64,21 @@ describe('componiTweet', () => {
 
   it('con titolo e firma il taglio cade sul corpo e il totale resta entro 280', () => {
     const post = 'Titolo di prova abbastanza lungo: ' + Array.from({ length: 60 }, (_, i) => `parola${i}`).join(' ');
-    const testo = componiTweet(post, { link: LINK, firma: '#Politicare' });
+    const testo = componiTweet(post, { firma: '#Politicare' });
     expect(lunghezzaX(testo)).toBeLessThanOrEqual(280);
     expect(testo.startsWith('Titolo di prova abbastanza lungo\n\nParola0')).toBe(true);
-    expect(testo.endsWith(`…\n\n${LINK}\n\n#Politicare`)).toBe(true);
+    expect(testo.endsWith('…\n\n#Politicare')).toBe(true);
   });
 
-  it('un post breve non riceve il link, che su X costa di più', () => {
+  it('di norma il link non si aggiunge mai, nemmeno ai post tagliati', () => {
+    expect(contieneLink(componiTweet('a'.repeat(300), { link: LINK }))).toBe(false);
     const testo = componiTweet('Notizia breve', { link: LINK });
     expect(contieneLink(testo)).toBe(false);
   });
 
-  it('un post lungo viene troncato a una parola intera e rimanda alla notizia sul sito', () => {
+  it('con «se-troncato» un post lungo viene troncato a una parola intera e rimanda alla notizia sul sito', () => {
     const lungo = Array.from({ length: 60 }, (_, i) => `parola${i}`).join(' ');
-    const testo = componiTweet(lungo, { link: LINK });
+    const testo = componiTweet(lungo, { link: LINK, politicaLink: 'se-troncato' });
     expect(lunghezzaX(testo)).toBeLessThanOrEqual(280);
     expect(testo.endsWith(`…\n\n${LINK}`)).toBe(true);
     expect(testo).toMatch(/parola\d+…/);
