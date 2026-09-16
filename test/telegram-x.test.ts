@@ -247,6 +247,15 @@ describe('thread al posto del taglio', () => {
     for (const parte of parti) expect(lunghezzaX(parte)).toBeLessThanOrEqual(110);
   });
 
+  it('un post che entra resta parola per parola: se Claude cambia il testo, si scarta e vale la regola automatica', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    const originale = 'Meloni a Bruxelles per il vertice sui dazi. La premier vede von der Leyen.';
+    const manomesso = vi.fn<Riscrittore>(async () => '#Meloni vola a Bruxelles per il vertice sui dazi e incontra von der Leyen.');
+    expect(await componiPostConRiscrittura(originale, opzioniFormato({}), manomesso)).toEqual(['#Meloni a Bruxelles per il vertice sui dazi\n\nLa premier vede von der Leyen.']);
+    const soloCancelletto = vi.fn<Riscrittore>(async () => 'Meloni a #Bruxelles per il vertice sui dazi. La premier vede von der Leyen.');
+    expect(await componiPostConRiscrittura(originale, opzioniFormato({}), soloCancelletto)).toEqual(['Meloni a #Bruxelles per il vertice sui dazi\n\nLa premier vede von der Leyen.']);
+  });
+
   it('con il riscrittore prova prima a fare un post solo; se non basta, thread', async () => {
     const post = 'Salvini attacca il governo: ' + frasi.join(' ');
     const corto = vi.fn<Riscrittore>(async () => 'Salvini attacca il governo: #Salvini in due frasi. Fine.');

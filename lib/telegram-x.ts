@@ -342,6 +342,12 @@ export function spezzaInParti(testo: string, limite: number, primoLimite = limit
   });
 }
 
+/** Vero se i due testi coincidono a meno dei cancelletti e degli spazi. */
+function stessoTesto(a: string, b: string): boolean {
+  const norma = (t: string) => t.replace(/#/g, '').replace(/\s+/g, ' ').trim();
+  return norma(a) === norma(b);
+}
+
 /**
  * Il post per X come sequenza: un post solo se entra nel limite, altrimenti un thread
  * (primo post con titolo e foto, il resto come risposte). Con un riscrittore (Claude) si prova
@@ -370,6 +376,11 @@ export async function componiPostConRiscrittura(grezzo: string, opzioni: Opzioni
         break;
       }
       if (riscritto && lunghezzaX(riscritto) <= massimo) {
+        // Un post che entrava già deve restare parola per parola: da Claude si accetta solo il cancelletto.
+        if (!troppoLungo && !stessoTesto(riscritto, pulito)) {
+          console.error('[telegram-x] riscrittura scartata: il testo era stato cambiato, resta l\'originale');
+          break;
+        }
         return [componiTweet(riscritto, { ...opzioni, politicaLink: 'mai', hashtag: riscritto.includes('#') ? 0 : hashtag })];
       }
       massimo -= 30;
