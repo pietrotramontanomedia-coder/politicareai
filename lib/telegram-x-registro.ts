@@ -34,6 +34,14 @@ export async function giaPubblicato(numero: number): Promise<Pubblicazione | nul
   return (await leggi()).voci[String(numero)] ?? null;
 }
 
+/** Quando è uscito l'ultimo post su X, per tenere una distanza minima fra un post e l'altro. */
+export async function ultimaPubblicazione(): Promise<Date | null> {
+  const date = Object.values((await leggi()).voci)
+    .map((voce) => Date.parse(voce.data))
+    .filter((n) => !Number.isNaN(n));
+  return date.length ? new Date(Math.max(...date)) : null;
+}
+
 export async function registraPubblicazione(numero: number, idX: string, adesso: Date = new Date()): Promise<void> {
   const registro = await leggi();
   registro.voci[String(numero)] = { x: idX, data: adesso.toISOString() };

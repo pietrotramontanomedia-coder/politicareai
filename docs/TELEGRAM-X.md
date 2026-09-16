@@ -18,24 +18,34 @@ Formato del post su X (`lib/telegram-x.ts`), regolabile dalle variabili d'ambien
 ```
 🇸🇪 Elezioni in #Svezia, scarto minimo         ← prima frase del post = titolo (X_TITOLO: normale | maiuscolo | nessuno)
 
-Si dovrà aspettare mercoledì per il conteggio   ← il resto del testo; le parole più rilevanti
-dei voti: Magdalena #Andersson è in testa…         diventano hashtag (X_HASHTAG, predefinito 3)
+Si dovrà aspettare mercoledì per il conteggio   ← il resto del testo; la parola più rilevante
+dei voti: Magdalena Andersson è in testa.          diventa hashtag (X_HASHTAG, predefinito 1)
 ```
 
-Gli hashtag stanno dentro il testo, mai in coda. Con `ANTHROPIC_API_KEY` li sceglie Claude
-(cognomi, partiti, luoghi, tema); senza, una regola automatica prende i nomi propri più
-frequenti e riconosce i nomi composti (Regno Unito → #RegnoUnito, Partito Democratico → #PD).
+L'hashtag sta dentro il testo, mai in coda, ed è **uno solo**: su X più di uno o due hashtag
+riducono la portata e fanno scattare il filtro anti-spam. Con `ANTHROPIC_API_KEY` lo sceglie Claude
+(cognome, partito, luogo, tema); senza, una regola automatica preferisce il cognome di un
+«Nome Cognome», poi i nomi noti della politica, poi le istituzioni composte (Regno Unito → #RegnoUnito,
+Partito Democratico → #PD), e non tocca mai cariche («Ministro»), testate («Fatto Quotidiano») o parole generiche.
 Nessuna firma di default (`X_FIRMA` per aggiungerne una).
 
 Regole di testo:
 
 - la firma `@Politicare` di Telegram viene tolta; le bandiere iniziali vengono staccate dal testo;
+  il refuso «Fdl» diventa «FdI»;
 - la prima frase (fino al primo punto o ai due punti, se è lunga meno di 120 caratteri) diventa il titolo;
 - il post entra in 280 caratteri → esce intero, senza link;
-- è più lungo → viene tagliato a una parola intera con `…` e riceve il link alla notizia
-  sul sito (`/ultimora/tg-<numero>`), dove si legge tutta;
-- `X_LINK_NOTIZIE=sempre` aggiunge il link a tutti i post, `mai` non lo aggiunge mai;
-- con **X Premium** sull'account il limite sale (`X_LIMITE=25000`) e i post escono interi.
+- è più lungo → con `ANTHROPIC_API_KEY` Claude lo riscrive più corto (stessi fatti); se non basta
+  o la chiave manca, esce come **thread**: primo post con titolo e foto, il resto in risposta,
+  sempre per frasi intere (una frase troppo lunga si spezza a una pausa). Nessuna frase viene mai
+  tagliata né chiusa con puntini;
+- `X_LINK_NOTIZIE=sempre` aggiunge il link alla notizia sul sito a tutti i post, `mai` (predefinito) non lo aggiunge mai;
+- con **X Premium** sull'account il limite sale (`X_LIMITE=25000`) e i post escono interi in un post solo.
+
+Distanza fra i post: il sito pubblica al massimo un post ogni `X_DISTANZA_MINUTI` (predefinito 20).
+Se un post arriva prima, risponde 503 a Telegram, che lo ripresenta più tardi e tiene in coda quelli
+successivi, in ordine. Due post nello stesso minuto sono la firma dello spam per X: meglio distanziarli.
+`X_DISTANZA_MINUTI=0` disattiva l'attesa.
 
 Attenzione ai link: dal 2026 l'API di X fattura per singolo post, e un post **con link costa
 molto di più** di uno senza (nel 2026: 0,20 $ contro 0,015 $). `mai`, il valore predefinito,
@@ -74,10 +84,12 @@ Nel progetto `politicare-app` → Settings → Environment Variables (ambiente P
 | `TELEGRAM_WEBHOOK_SECRET` | stringa casuale lunga (es. `openssl rand -hex 32`) |
 | `X_API_KEY`, `X_API_SECRET`, `X_ACCESS_TOKEN`, `X_ACCESS_SECRET` | dal portale X |
 | `ANTHROPIC_API_KEY` | chiave Claude da [console.anthropic.com](https://console.anthropic.com): riscrive i post troppo lunghi (pochi millesimi di dollaro a post) |
-| `X_LINK_NOTIZIE` | facoltativa: `mai` (predefinito), `se-troncato` o `sempre` |
+| `X_LINK_NOTIZIE` | facoltativa: `mai` (predefinito) o `sempre` |
+| `X_HASHTAG` | facoltativa: quanti hashtag nel testo, predefinito `1` (`0` per nessuno) |
+| `X_DISTANZA_MINUTI` | facoltativa: minuti minimi fra un post e l'altro, predefinito `20` |
 
-`BLOB_READ_WRITE_TOKEN` è già presente (serve al registro anti-duplicati). Senza `ANTHROPIC_API_KEY`
-il ponte funziona lo stesso, ma i post lunghi vengono accorciati per frasi intere invece che riscritti.
+`BLOB_READ_WRITE_TOKEN` è già presente (serve al registro anti-duplicati e alla distanza fra i post).
+Senza `ANTHROPIC_API_KEY` il ponte funziona lo stesso, ma i post lunghi escono come thread invece che riscritti.
 Dopo aver salvato le variabili fai un **Redeploy** dell'ultimo deployment.
 
 ### 4. Collegare il webhook

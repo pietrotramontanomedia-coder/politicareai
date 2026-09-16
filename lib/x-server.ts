@@ -1,4 +1,4 @@
-import { ApiRequestError, ApiResponseError, EUploadMimeType, TwitterApi } from 'twitter-api-v2';
+import { ApiRequestError, ApiResponseError, EUploadMimeType, TwitterApi, type SendTweetV2Params } from 'twitter-api-v2';
 
 /**
  * Pubblicazione su X con OAuth 1.0a (chiavi dell'app + token dell'account @politicare).
@@ -29,17 +29,19 @@ function client(): TwitterApi {
 
 const TIPI_AMMESSI = new Set<string>(Object.values(EUploadMimeType));
 
-export async function pubblicaSuX(testo: string, immagine?: Immagine): Promise<{ id: string }> {
+/** Pubblica un post; con `rispostaA` esce come risposta a quel post (per i thread). */
+export async function pubblicaSuX(testo: string, immagine?: Immagine, rispostaA?: string): Promise<{ id: string }> {
   const x = client();
-  const media_ids: string[] = [];
+  const corpo: SendTweetV2Params = { text: testo };
   if (immagine && TIPI_AMMESSI.has(immagine.tipo)) {
     const id = await x.v2.uploadMedia(immagine.dati, {
       media_type: immagine.tipo as EUploadMimeType,
       media_category: 'tweet_image',
     });
-    media_ids.push(id);
+    corpo.media = { media_ids: [id] };
   }
-  const risposta = await x.v2.tweet(media_ids.length ? { text: testo, media: { media_ids: [media_ids[0]] } } : { text: testo });
+  if (rispostaA) corpo.reply = { in_reply_to_tweet_id: rispostaA };
+  const risposta = await x.v2.tweet(corpo);
   return { id: risposta.data.id };
 }
 

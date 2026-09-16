@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { aggiungiHashtag, componiTweet, componiTweetConRiscrittura, contieneLink, estraiPostCanale, lunghezzaX, opzioniFormato, type Riscrittore } from '@/lib/telegram-x';
+import { aggiungiHashtag, componiPostConRiscrittura, componiTweet, componiTweetConRiscrittura, contieneLink, estraiPostCanale, lunghezzaX, opzioniFormato, spezzaInParti, type Riscrittore } from '@/lib/telegram-x';
 
 /* Il ponte Telegram → X: solo i post nuovi del canale, testo entro 280 caratteri come li conta X. */
 
@@ -165,9 +165,9 @@ describe('componiTweetConRiscrittura', () => {
 });
 
 describe('aggiungiHashtag', () => {
-  it('mette il cancelletto sui nomi propri più rilevanti, al massimo tre, sulla prima occorrenza', () => {
+  it('mette il cancelletto sui nomi propri più rilevanti, fino al massimo richiesto, sulla prima occorrenza', () => {
     const testo = 'Elezioni in Svezia, scarto minimo: la coalizione guidata da Magdalena Andersson è in testa. Lo schieramento di Ulf Kristersson insegue. In Svezia si vota ogni quattro anni.';
-    expect(aggiungiHashtag(testo)).toBe(
+    expect(aggiungiHashtag(testo, 3)).toBe(
       'Elezioni in #Svezia, scarto minimo: la coalizione guidata da Magdalena #Andersson è in testa. Lo schieramento di Ulf #Kristersson insegue. In Svezia si vota ogni quattro anni.',
     );
   });
@@ -176,22 +176,87 @@ describe('aggiungiHashtag', () => {
     expect(aggiungiHashtag("Il governo ha deciso. Alla misura non ha aderito l'Italia. Vittoria in Sassonia-Anhalt.")).toBe(
       "Il governo ha deciso. Alla misura non ha aderito l'Italia. Vittoria in Sassonia-Anhalt.",
     );
-    expect(aggiungiHashtag('Fratoianni commenta la vittoria di AFD: "Salvini esulta".')).toBe('#Fratoianni commenta la vittoria di #AFD: "#Salvini esulta".');
+    expect(aggiungiHashtag('Fratoianni commenta la vittoria di AFD: "Salvini esulta".', 3)).toBe('#Fratoianni commenta la vittoria di #AFD: "#Salvini esulta".');
   });
 
   it('riconosce i nomi composti nella forma usata su X e rispetta il massimo', () => {
     expect(aggiungiHashtag('Dodici paesi, tra cui Regno Unito, Francia, Canada e Spagna, hanno imposto sanzioni.', 2)).toBe(
       'Dodici paesi, tra cui #RegnoUnito, #Francia, Canada e Spagna, hanno imposto sanzioni.',
     );
-    expect(aggiungiHashtag('Il Partito Democratico attacca Fratelli d’Italia sulla manovra.')).toBe('Il #PD attacca #FdI sulla manovra.');
+    expect(aggiungiHashtag('Il Partito Democratico attacca Fratelli d’Italia sulla manovra.', 3)).toBe('Il #PD attacca #FdI sulla manovra.');
+    expect(aggiungiHashtag('Il Partito Democratico attacca Fratelli d’Italia sulla manovra.')).toBe('Il #PD attacca Fratelli d’Italia sulla manovra.');
     expect(aggiungiHashtag('Meloni a Bruxelles.', 0)).toBe('Meloni a Bruxelles.');
   });
 
-  it('gli hashtag entrano nel conteggio e il formato predefinito ne chiede tre senza firma', () => {
+  it('il formato predefinito chiede un solo hashtag e nessuna firma', () => {
     const opzioni = opzioniFormato({});
-    expect(opzioni).toMatchObject({ hashtag: 3, firma: '' });
+    expect(opzioni).toMatchObject({ hashtag: 1, firma: '' });
     expect(opzioniFormato({ X_HASHTAG: '0' }).hashtag).toBe(0);
-    const testo = componiTweet('Meloni a Bruxelles per il vertice.', opzioni);
-    expect(testo).toBe('#Meloni a #Bruxelles per il vertice.');
+    expect(componiTweet('Meloni a Bruxelles per il vertice.', opzioni)).toBe('#Meloni a Bruxelles per il vertice.');
+  });
+
+  it('con un hashtag solo sceglie il nome politico, non cariche, testate o parole generiche', () => {
+    const nordio = "Secondo un'indiscrezione del Fatto Quotidiano, il Ministro della Giustizia Nordio, di FdI, potrebbe rimanere senza seggio in Veneto; la premier Meloni ha ribadito la volontà di ricandidare tutti i ministri.";
+    expect(aggiungiHashtag(nordio)).toBe(nordio.replace('Giustizia Nordio', 'Giustizia #Nordio'));
+    const procaccini = 'Nicola Procaccini, capodelegazione FdI al Parlamento europeo, attacca von der Leyen: "Imbarazzante inchino di Von Der Leyen a Carney".';
+    expect(aggiungiHashtag(procaccini)).toBe('Nicola #Procaccini, capodelegazione FdI al Parlamento europeo, attacca von der Leyen: "Imbarazzante inchino di Von Der Leyen a Carney".');
+    expect(aggiungiHashtag(procaccini, 2)).toBe('Nicola #Procaccini, capodelegazione #FdI al Parlamento europeo, attacca von der Leyen: "Imbarazzante inchino di Von Der Leyen a Carney".');
+  });
+
+  it('corregge il refuso «Fdl» in «FdI»', () => {
+    expect(componiTweet('Nicola Procaccini, capodelegazione Fdl al Parlamento europeo.', { hashtag: 0 })).toBe('Nicola Procaccini, capodelegazione FdI al Parlamento europeo.');
+  });
+});
+
+describe('thread al posto del taglio', () => {
+  const frasi = ['Prima frase della notizia con qualche dettaglio.', 'Seconda frase con altri dettagli utili.', 'Terza frase ancora più lunga che spiega il contesto.', 'Quarta frase finale.'];
+
+  it('spezzaInParti tiene le frasi intere e rispetta il budget del primo post', () => {
+    expect(spezzaInParti(frasi.join(' '), 100)).toEqual([
+      'Prima frase della notizia con qualche dettaglio. Seconda frase con altri dettagli utili.',
+      'Terza frase ancora più lunga che spiega il contesto. Quarta frase finale.',
+    ]);
+    expect(spezzaInParti(frasi.join(' '), 100, 60)).toEqual([
+      'Prima frase della notizia con qualche dettaglio.',
+      'Seconda frase con altri dettagli utili. Terza frase ancora più lunga che spiega il contesto.',
+      'Quarta frase finale.',
+    ]);
+  });
+
+  it('una frase che da sola non entra si spezza a una pausa, mai a metà parola né con puntini', () => {
+    const lunga = 'Il ministro potrebbe restare senza seggio in Veneto vista la nuova legge elettorale; la premier ha ribadito la volontà di ricandidare tutti i ministri, come già annunciato in conferenza stampa, senza eccezioni.';
+    const parti = spezzaInParti(lunga, 120);
+    expect(parti).toEqual([
+      'Il ministro potrebbe restare senza seggio in Veneto vista la nuova legge elettorale.',
+      'La premier ha ribadito la volontà di ricandidare tutti i ministri, come già annunciato in conferenza stampa.',
+      'Senza eccezioni.',
+    ]);
+    for (const parte of parti) expect(lunghezzaX(parte)).toBeLessThanOrEqual(120);
+    expect(parti.join(' ')).not.toContain('…');
+  });
+
+  it('un post che entra esce da solo; uno lungo senza riscrittore diventa un thread con titolo e hashtag solo nel primo', async () => {
+    expect(await componiPostConRiscrittura('Meloni a Bruxelles per il vertice.', opzioniFormato({}))).toEqual(['#Meloni a Bruxelles per il vertice.']);
+    const post = 'Salvini attacca il governo: ' + frasi.join(' ');
+    const parti = await componiPostConRiscrittura(post, { ...opzioniFormato({}), limite: 110 });
+    expect(parti).toEqual([
+      '#Salvini attacca il governo\n\nPrima frase della notizia con qualche dettaglio.',
+      'Seconda frase con altri dettagli utili. Terza frase ancora più lunga che spiega il contesto.',
+      'Quarta frase finale.',
+    ]);
+    for (const parte of parti) expect(lunghezzaX(parte)).toBeLessThanOrEqual(110);
+  });
+
+  it('con il riscrittore prova prima a fare un post solo; se non basta, thread', async () => {
+    const post = 'Salvini attacca il governo: ' + frasi.join(' ');
+    const corto = vi.fn<Riscrittore>(async () => 'Salvini attacca il governo: #Salvini in due frasi. Fine.');
+    expect(await componiPostConRiscrittura(post, { ...opzioniFormato({}), limite: 110 }, corto)).toEqual(['Salvini attacca il governo\n\n#Salvini in due frasi. Fine.']);
+    const rotto = vi.fn<Riscrittore>(async () => {
+      throw new Error('quota');
+    });
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    const parti = await componiPostConRiscrittura(post, { ...opzioniFormato({}), limite: 110 }, rotto);
+    expect(parti).toHaveLength(3);
+    expect(parti[0]).toMatch(/^#Salvini attacca il governo\n\n/);
   });
 });

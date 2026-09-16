@@ -10,7 +10,7 @@
  * Legge TELEGRAM_BOT_TOKEN e TELEGRAM_WEBHOOK_SECRET da .env.local (o dall'ambiente).
  */
 import { readFileSync } from 'node:fs';
-import { componiTweetConRiscrittura, lunghezzaX, opzioniFormato } from '../lib/telegram-x.ts';
+import { componiPostConRiscrittura, lunghezzaX, opzioniFormato } from '../lib/telegram-x.ts';
 
 const SITO_PREDEFINITO = 'https://politicare-app.vercel.app';
 
@@ -77,11 +77,14 @@ switch (comando) {
     if (process.env.ANTHROPIC_API_KEY && process.env.X_RISCRITTURA !== '0') {
       ({ riscriviPerX: riscrivi } = await import('../lib/riscrittura-server.ts'));
     } else {
-      console.log('(senza ANTHROPIC_API_KEY: niente riscrittura, un post lungo viene accorciato per frasi intere)\n');
+      console.log('(senza ANTHROPIC_API_KEY: niente riscrittura, un post lungo esce come thread di frasi intere)\n');
     }
-    const testo = await componiTweetConRiscrittura(argomento, { ...formato, link: `${SITO_PREDEFINITO}/ultimora/tg-0` }, riscrivi);
-    console.log(testo);
-    console.log(`\n— ${lunghezzaX(testo)} caratteri su ${formato.limite}`);
+    const parti = await componiPostConRiscrittura(argomento, { ...formato, link: `${SITO_PREDEFINITO}/ultimora/tg-0` }, riscrivi);
+    parti.forEach((parte, i) => {
+      if (parti.length > 1) console.log(`── post ${i + 1} di ${parti.length} ──`);
+      console.log(parte);
+      console.log(`— ${lunghezzaX(parte)} caratteri su ${formato.limite}\n`);
+    });
     break;
   }
   default:
