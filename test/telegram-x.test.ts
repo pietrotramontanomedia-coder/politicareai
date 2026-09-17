@@ -188,11 +188,12 @@ describe('aggiungiHashtag', () => {
     expect(aggiungiHashtag('Meloni a Bruxelles.', 0)).toBe('Meloni a Bruxelles.');
   });
 
-  it('il formato predefinito chiede un solo hashtag e nessuna firma', () => {
+  it('il formato predefinito chiede tre hashtag e nessuna firma', () => {
     const opzioni = opzioniFormato({});
-    expect(opzioni).toMatchObject({ hashtag: 1, firma: '' });
+    expect(opzioni).toMatchObject({ hashtag: 3, firma: '' });
     expect(opzioniFormato({ X_HASHTAG: '0' }).hashtag).toBe(0);
-    expect(componiTweet('Meloni a Bruxelles per il vertice.', opzioni)).toBe('#Meloni a Bruxelles per il vertice.');
+    expect(componiTweet('Meloni a Bruxelles per il vertice.', opzioni)).toBe('#Meloni a #Bruxelles per il vertice.');
+    expect(componiTweet('Meloni a Bruxelles per il vertice.', { ...opzioni, hashtag: 1 })).toBe('#Meloni a Bruxelles per il vertice.');
   });
 
   it('con un hashtag solo sceglie il nome politico, non cariche, testate o parole generiche', () => {
@@ -209,6 +210,7 @@ describe('aggiungiHashtag', () => {
 });
 
 describe('thread al posto del taglio', () => {
+  const UNO = opzioniFormato({ X_HASHTAG: '1' });
   const frasi = ['Prima frase della notizia con qualche dettaglio.', 'Seconda frase con altri dettagli utili.', 'Terza frase ancora più lunga che spiega il contesto.', 'Quarta frase finale.'];
 
   it('spezzaInParti tiene le frasi intere e rispetta il budget del primo post', () => {
@@ -236,9 +238,9 @@ describe('thread al posto del taglio', () => {
   });
 
   it('un post che entra esce da solo; uno lungo senza riscrittore diventa un thread con titolo e hashtag solo nel primo', async () => {
-    expect(await componiPostConRiscrittura('Meloni a Bruxelles per il vertice.', opzioniFormato({}))).toEqual(['#Meloni a Bruxelles per il vertice.']);
+    expect(await componiPostConRiscrittura('Meloni a Bruxelles per il vertice.', UNO)).toEqual(['#Meloni a Bruxelles per il vertice.']);
     const post = 'Salvini attacca il governo: ' + frasi.join(' ');
-    const parti = await componiPostConRiscrittura(post, { ...opzioniFormato({}), limite: 110 });
+    const parti = await componiPostConRiscrittura(post, { ...UNO, limite: 110 });
     expect(parti).toEqual([
       '#Salvini attacca il governo\n\nPrima frase della notizia con qualche dettaglio.',
       'Seconda frase con altri dettagli utili. Terza frase ancora più lunga che spiega il contesto.',
@@ -251,20 +253,22 @@ describe('thread al posto del taglio', () => {
     vi.spyOn(console, 'error').mockImplementation(() => {});
     const originale = 'Meloni a Bruxelles per il vertice sui dazi. La premier vede von der Leyen.';
     const manomesso = vi.fn<Riscrittore>(async () => '#Meloni vola a Bruxelles per il vertice sui dazi e incontra von der Leyen.');
-    expect(await componiPostConRiscrittura(originale, opzioniFormato({}), manomesso)).toEqual(['#Meloni a Bruxelles per il vertice sui dazi\n\nLa premier vede von der Leyen.']);
+    expect(await componiPostConRiscrittura(originale, UNO, manomesso)).toEqual(['#Meloni a Bruxelles per il vertice sui dazi\n\nLa premier vede von der Leyen.']);
+    const unite = vi.fn<Riscrittore>(async () => '#Meloni a #Bruxelles per il #VerticeSuiDazi. La premier vede von der Leyen.');
+    expect(await componiPostConRiscrittura(originale, opzioniFormato({}), unite)).toEqual(['#Meloni a #Bruxelles per il #VerticeSuiDazi\n\nLa premier vede von der Leyen.']);
     const soloCancelletto = vi.fn<Riscrittore>(async () => 'Meloni a #Bruxelles per il vertice sui dazi. La premier vede von der Leyen.');
-    expect(await componiPostConRiscrittura(originale, opzioniFormato({}), soloCancelletto)).toEqual(['Meloni a #Bruxelles per il vertice sui dazi\n\nLa premier vede von der Leyen.']);
+    expect(await componiPostConRiscrittura(originale, UNO, soloCancelletto)).toEqual(['Meloni a #Bruxelles per il vertice sui dazi\n\nLa premier vede von der Leyen.']);
   });
 
   it('con il riscrittore prova prima a fare un post solo; se non basta, thread', async () => {
     const post = 'Salvini attacca il governo: ' + frasi.join(' ');
     const corto = vi.fn<Riscrittore>(async () => 'Salvini attacca il governo: #Salvini in due frasi. Fine.');
-    expect(await componiPostConRiscrittura(post, { ...opzioniFormato({}), limite: 110 }, corto)).toEqual(['Salvini attacca il governo\n\n#Salvini in due frasi. Fine.']);
+    expect(await componiPostConRiscrittura(post, { ...UNO, limite: 110 }, corto)).toEqual(['Salvini attacca il governo\n\n#Salvini in due frasi. Fine.']);
     const rotto = vi.fn<Riscrittore>(async () => {
       throw new Error('quota');
     });
     vi.spyOn(console, 'error').mockImplementation(() => {});
-    const parti = await componiPostConRiscrittura(post, { ...opzioniFormato({}), limite: 110 }, rotto);
+    const parti = await componiPostConRiscrittura(post, { ...UNO, limite: 110 }, rotto);
     expect(parti).toHaveLength(3);
     expect(parti[0]).toMatch(/^#Salvini attacca il governo\n\n/);
   });

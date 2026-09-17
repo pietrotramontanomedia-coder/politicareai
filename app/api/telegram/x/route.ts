@@ -17,8 +17,8 @@ const SITO = process.env.SITO_URL ?? 'https://politicare-app.vercel.app';
 
 /** Minuti minimi fra un post e l'altro su X: due post nello stesso minuto sono la firma dello spam. */
 function distanzaMinima(): number {
-  const valore = Number(process.env.X_DISTANZA_MINUTI ?? 20);
-  return Number.isFinite(valore) && valore >= 0 ? valore : 20;
+  const valore = Number(process.env.X_DISTANZA_MINUTI ?? 10);
+  return Number.isFinite(valore) && valore >= 0 ? valore : 10;
 }
 
 export async function GET() {

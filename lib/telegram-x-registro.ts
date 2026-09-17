@@ -18,11 +18,15 @@ interface Registro {
 }
 
 const memoria: Registro = { voci: {} };
+/** Ultima pubblicazione fatta da questo processo: vale anche se lo storage risponde in ritardo. */
+let ultimaLocale = 0;
 
 async function leggi(): Promise<Registro> {
   if (!process.env.BLOB_READ_WRITE_TOKEN) return memoria;
   try {
-    const risultato = await get(PERCORSO, { access: 'private' });
+    // Senza cache: la copia sulla CDN può restare indietro di un minuto, e due post consegnati
+    // a pochi secondi l'uno dall'altro passerebbero entrambi il controllo della distanza.
+    const risultato = await get(PERCORSO, { access: 'private', useCache: false });
     if (risultato?.statusCode === 200) return (await new Response(risultato.stream).json()) as Registro;
   } catch {
     /* primo avvio o storage non raggiungibile: si riparte vuoti */
@@ -39,10 +43,12 @@ export async function ultimaPubblicazione(): Promise<Date | null> {
   const date = Object.values((await leggi()).voci)
     .map((voce) => Date.parse(voce.data))
     .filter((n) => !Number.isNaN(n));
-  return date.length ? new Date(Math.max(...date)) : null;
+  const ultima = Math.max(ultimaLocale, ...date);
+  return ultima > 0 ? new Date(ultima) : null;
 }
 
 export async function registraPubblicazione(numero: number, idX: string, adesso: Date = new Date()): Promise<void> {
+  ultimaLocale = Math.max(ultimaLocale, adesso.getTime());
   const registro = await leggi();
   registro.voci[String(numero)] = { x: idX, data: adesso.toISOString() };
   const chiavi = Object.keys(registro.voci).sort((a, b) => Number(b) - Number(a));

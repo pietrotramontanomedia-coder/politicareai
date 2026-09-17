@@ -22,12 +22,18 @@ Regole sul testo:
 - niente link, niente firma.
 
 Regole sugli hashtag:
-- metti il cancelletto davanti alle parole più rilevanti già presenti nel testo, nel punto in cui stanno:
-  cognomi di politici, partiti, luoghi, istituzioni, il tema centrale (es. #Meloni, #Svezia, #Manovra);
-- esattamente il numero di hashtag richiesto, mai in coda al testo, mai su parole con apostrofo o trattino,
-  mai su articoli, preposizioni o parole generiche;
-- i nomi composti diventano un hashtag unico nella forma usata su X (Regno Unito → #RegnoUnito,
-  Partito Democratico → #PD, Fratelli d'Italia → #FdI, Movimento 5 Stelle → #M5S, Unione europea → #UE).
+- metti il cancelletto davanti alle parole più rilevanti già presenti nel testo, nel punto in cui stanno;
+- scegli, in quest'ordine: cognomi dei protagonisti (#Meloni, #Bonelli), partiti e sigle (#Lega, #M5S, #FdI),
+  istituzioni e luoghi (#Senato, #Veneto, #UE), e per ultimo il tema della notizia solo se è un argomento
+  riconoscibile su X (#BolloAuto, #Manovra, #LeggeElettorale);
+- mai su parole generiche o astratte da sole (abolizione, commento, proposta, governo, ministro, premier, sondaggio),
+  mai su articoli o preposizioni, mai su parole con apostrofo o trattino, mai sul nome di battesimo;
+- per un tema di due parole vicine puoi unirle in un hashtag solo (bollo auto → #BolloAuto);
+- se la notizia entra già nel limite non sostituire parole con sigle: aggiungi solo cancelletti;
+  se la stai accorciando puoi usare la forma di X (Partito Democratico → #PD, Fratelli d'Italia → #FdI,
+  Movimento 5 Stelle → #M5S, Unione europea → #UE, Regno Unito → #RegnoUnito);
+- esattamente il numero di hashtag richiesto (meno solo se il testo non ha abbastanza parole adatte),
+  ciascuno sulla prima occorrenza, mai in coda al testo, mai due hashtag attaccati.
 
 Rispondi solo con il testo pronto, senza spiegazioni.`;
 

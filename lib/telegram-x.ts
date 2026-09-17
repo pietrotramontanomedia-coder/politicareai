@@ -342,9 +342,10 @@ export function spezzaInParti(testo: string, limite: number, primoLimite = limit
   });
 }
 
-/** Vero se i due testi coincidono a meno dei cancelletti e degli spazi. */
+/** Vero se i due testi coincidono a meno dei cancelletti, degli spazi e delle maiuscole. */
 function stessoTesto(a: string, b: string): boolean {
-  const norma = (t: string) => t.replace(/#/g, '').replace(/\s+/g, ' ').trim();
+  // Un hashtag può unire parole vicine («bollo auto» → «#BolloAuto»): spazi e maiuscole non contano.
+  const norma = (t: string) => t.replace(/#/g, '').replace(/\s+/g, '').toLowerCase();
   return norma(a) === norma(b);
 }
 
@@ -399,11 +400,11 @@ export async function componiPostConRiscrittura(grezzo: string, opzioni: Opzioni
  * Formato regolabile dalle variabili d'ambiente senza toccare il codice:
  *   X_TITOLO        normale | maiuscolo | nessuno   (prima frase su una riga a sé)
  *   X_FIRMA         riga di chiusura (predefinita: nessuna)
- *   X_HASHTAG       quante parole rilevanti diventano hashtag nel testo (predefinito 1, 0 per nessuna)
+ *   X_HASHTAG       quante parole rilevanti diventano hashtag nel testo (predefinito 3, scelte da Claude; 0 per nessuna)
  *   X_LINK_NOTIZIE  mai (predefinito) | se-troncato | sempre
  *   X_LIMITE        280 (predefinito); con X Premium si può alzare, fino a 25000
  */
-export const FORMATO_PREDEFINITO = { titolo: 'normale', firma: '', hashtag: 1, politicaLink: 'mai' } as const;
+export const FORMATO_PREDEFINITO = { titolo: 'normale', firma: '', hashtag: 3, politicaLink: 'mai' } as const;
 
 export function opzioniFormato(ambiente: Record<string, string | undefined>): Required<Pick<OpzioniTweet, 'titolo' | 'firma' | 'hashtag' | 'politicaLink' | 'limite'>> {
   const titolo = ambiente.X_TITOLO;

@@ -52,16 +52,16 @@ describe('webhook Telegram → X', () => {
     ultima = null;
   });
 
-  it('tiene almeno 20 minuti fra un post e l’altro: risponde 503 e Telegram riprova più tardi', async () => {
+  it('tiene almeno 10 minuti fra un post e l’altro: risponde 503 e Telegram riprova più tardi', async () => {
     const { POST } = await import('@/app/api/telegram/x/route');
-    ultima = new Date(Date.now() - 5 * 60_000);
+    ultima = new Date(Date.now() - 4 * 60_000);
     const presto = await POST(richiesta({ channel_post: { message_id: 8, chat, text: 'Notizia' } }));
     expect(presto.status).toBe(503);
-    expect(presto.headers.get('retry-after')).toBe(String(15 * 60));
-    expect(await presto.json()).toMatchObject({ ok: false, attesa: expect.stringContaining('riprovo fra 15 min') });
+    expect(presto.headers.get('retry-after')).toBe(String(6 * 60));
+    expect(await presto.json()).toMatchObject({ ok: false, attesa: expect.stringContaining('riprovo fra 6 min') });
     expect(pubblicaSuX).not.toHaveBeenCalled();
 
-    ultima = new Date(Date.now() - 25 * 60_000);
+    ultima = new Date(Date.now() - 12 * 60_000);
     const dopo = await POST(richiesta({ channel_post: { message_id: 8, chat, text: 'Notizia' } }));
     expect(dopo.status).toBe(200);
     expect(pubblicaSuX).toHaveBeenCalledTimes(1);
