@@ -1,8 +1,8 @@
 import { CANALE_TELEGRAM } from '@/lib/telegram-server';
-import { componiPostConRiscrittura, estraiPostCanale, opzioniFormato } from '@/lib/telegram-x';
+import { componiPostConRiscrittura, eDoppione, estraiPostCanale, impronta, opzioniFormato } from '@/lib/telegram-x';
 import { riscritturaDisponibile, riscriviPerX } from '@/lib/riscrittura-server';
 import { scaricaFotoTelegram, segretoTelegramValido } from '@/lib/telegram-bot-server';
-import { giaPubblicato, registraPubblicazione, ultimaPubblicazione } from '@/lib/telegram-x-registro';
+import { giaPubblicato, improteRecenti, registraPubblicazione, ultimaPubblicazione } from '@/lib/telegram-x-registro';
 import { pubblicaSuX, rifiutatoDaX, xConfigurato } from '@/lib/x-server';
 
 /**
@@ -21,6 +21,12 @@ function distanzaMinima(): number {
   return Number.isFinite(valore) && valore >= 0 ? valore : 10;
 }
 
+/** Per quante ore indietro si controlla se la stessa notizia è già uscita (0 = nessun controllo). */
+function oreDoppioni(): number {
+  const valore = Number(process.env.X_DOPPIONI_ORE ?? 24);
+  return Number.isFinite(valore) && valore >= 0 ? valore : 24;
+}
+
 export async function GET() {
   return Response.json({
     telegram: Boolean(process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_WEBHOOK_SECRET),
@@ -28,6 +34,7 @@ export async function GET() {
     canale: process.env.TELEGRAM_CANALE ?? CANALE_TELEGRAM,
     formato: opzioniFormato(process.env),
     distanzaMinuti: distanzaMinima(),
+    doppioniOre: oreDoppioni(),
     riscrittura: riscritturaDisponibile(),
   });
 }
@@ -50,6 +57,13 @@ export async function POST(request: Request) {
   const precedente = await giaPubblicato(post.numero);
   if (precedente) return Response.json({ ok: true, ignorato: 'già pubblicato', x: precedente.x });
 
+  // Il canale a volte ripubblica la stessa notizia corretta: su X un doppione è un segnale di spam.
+  const ore = oreDoppioni();
+  if (ore > 0 && eDoppione(post.testo, await improteRecenti(ore))) {
+    console.log(`[telegram-x] t.me/${canale}/${post.numero} scartato: notizia già pubblicata`);
+    return Response.json({ ok: true, ignorato: 'doppione: la stessa notizia è già uscita' });
+  }
+
   // Telegram consegna gli aggiornamenti in ordine e riprova quelli rifiutati con 503:
   // rispondere 503 finché non è passata la distanza minima li fa uscire distanziati.
   const ultima = await ultimaPubblicazione();
@@ -68,7 +82,7 @@ export async function POST(request: Request) {
     const parti = await componiPostConRiscrittura(post.testo, opzioni, riscritturaDisponibile() ? riscriviPerX : undefined);
     const immagine = post.foto ? await scaricaFotoTelegram(post.foto) : undefined;
     const { id } = await pubblicaSuX(parti[0], immagine);
-    await registraPubblicazione(post.numero, id);
+    await registraPubblicazione(post.numero, id, impronta(post.testo).join(' '));
     console.log(`[telegram-x] t.me/${canale}/${post.numero} → x.com/i/status/${id}${parti.length > 1 ? ` (thread di ${parti.length})` : ''}`);
     // Il primo post è registrato: se una risposta del thread fallisce non si ripubblica nulla.
     let precedente = id;

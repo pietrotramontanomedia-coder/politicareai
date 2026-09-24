@@ -12,6 +12,8 @@ const MASSIMO_VOCI = 300;
 export interface Pubblicazione {
   x: string;
   data: string;
+  /** Le parole che contano del post Telegram, per riconoscere una notizia già uscita. */
+  impronta?: string;
 }
 interface Registro {
   voci: Record<string, Pubblicazione>;
@@ -20,6 +22,8 @@ interface Registro {
 const memoria: Registro = { voci: {} };
 /** Ultima pubblicazione fatta da questo processo: vale anche se lo storage risponde in ritardo. */
 let ultimaLocale = 0;
+/** Impronte pubblicate da questo processo, per lo stesso motivo. */
+const improteLocali: { impronta: string; quando: number }[] = [];
 
 async function leggi(): Promise<Registro> {
   if (!process.env.BLOB_READ_WRITE_TOKEN) return memoria;
@@ -47,10 +51,25 @@ export async function ultimaPubblicazione(): Promise<Date | null> {
   return ultima > 0 ? new Date(ultima) : null;
 }
 
-export async function registraPubblicazione(numero: number, idX: string, adesso: Date = new Date()): Promise<void> {
+/** Le impronte dei post usciti nelle ultime `ore`, per scartare una notizia già pubblicata. */
+export async function improteRecenti(ore: number, adesso: Date = new Date()): Promise<string[]> {
+  if (ore <= 0) return [];
+  const limite = adesso.getTime() - ore * 3_600_000;
+  const dallo = Object.values((await leggi()).voci)
+    .filter((voce) => voce.impronta && Date.parse(voce.data) >= limite)
+    .map((voce) => voce.impronta!);
+  const locali = improteLocali.filter((voce) => voce.quando >= limite).map((voce) => voce.impronta);
+  return [...new Set([...dallo, ...locali])];
+}
+
+export async function registraPubblicazione(numero: number, idX: string, impronta = '', adesso: Date = new Date()): Promise<void> {
   ultimaLocale = Math.max(ultimaLocale, adesso.getTime());
+  if (impronta) {
+    improteLocali.push({ impronta, quando: adesso.getTime() });
+    if (improteLocali.length > 50) improteLocali.shift();
+  }
   const registro = await leggi();
-  registro.voci[String(numero)] = { x: idX, data: adesso.toISOString() };
+  registro.voci[String(numero)] = { x: idX, data: adesso.toISOString(), ...(impronta ? { impronta } : {}) };
   const chiavi = Object.keys(registro.voci).sort((a, b) => Number(b) - Number(a));
   for (const vecchia of chiavi.slice(MASSIMO_VOCI)) delete registro.voci[vecchia];
   if (!process.env.BLOB_READ_WRITE_TOKEN) return;

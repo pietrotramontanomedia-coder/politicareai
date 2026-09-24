@@ -30,6 +30,13 @@ solo il cancelletto. Senza `ANTHROPIC_API_KEY`, una regola automatica preferisce
 Partito Democratico → #PD), e non tocca mai cariche («Ministro»), testate («Fatto Quotidiano») o parole generiche.
 Nessuna firma di default (`X_FIRMA` per aggiungerne una).
 
+I politici citati vengono **taggati**: un hashtag che corrisponde a un politico con account noto
+diventa una menzione (`#Bonelli` → `@AngeloBonelli1`), così la persona riceve la notifica e spesso
+ricondivide. I segni nel testo non aumentano: la menzione prende il posto dell'hashtag, al massimo
+due per post (`X_MENZIONI`). Mai in prima posizione, perché un post che comincia con `@` X lo mostra
+solo a chi segue entrambi. La tabella dei nomi sta in `lib/telegram-x.ts` (`MENZIONI`): gli account
+sono stati verificati uno per uno aprendo il profilo il 24 settembre 2026, e nel dubbio non si tagga.
+
 Regole di testo:
 
 - la firma `@Politicare` di Telegram viene tolta; le bandiere iniziali vengono staccate dal testo;
@@ -42,6 +49,11 @@ Regole di testo:
   tagliata né chiusa con puntini;
 - `X_LINK_NOTIZIE=sempre` aggiunge il link alla notizia sul sito a tutti i post, `mai` (predefinito) non lo aggiunge mai;
 - con **X Premium** sull'account il limite sale (`X_LIMITE=25000`) e i post escono interi in un post solo.
+
+Doppioni: se la stessa notizia è già uscita nelle ultime `X_DOPPIONI_ORE` ore (predefinito 24) il post
+viene scartato e Telegram riceve 200, così non riprova. Il confronto è sulle parole che contano, senza
+emoji, accenti e cancelletti: riconosce anche una notizia ripubblicata con un refuso corretto, come gli
+exit poll di Berlino usciti due volte il 20 settembre 2026. `X_DOPPIONI_ORE=0` disattiva il controllo.
 
 Distanza fra i post: il sito pubblica al massimo un post ogni `X_DISTANZA_MINUTI` (predefinito 10).
 Se un post arriva prima, risponde 503 a Telegram, che lo ripresenta più tardi e tiene in coda quelli
@@ -89,6 +101,8 @@ Nel progetto `politicare-app` → Settings → Environment Variables (ambiente P
 | `X_LINK_NOTIZIE` | facoltativa: `mai` (predefinito) o `sempre` |
 | `X_HASHTAG` | facoltativa: quanti hashtag nel testo, predefinito `3` (`0` per nessuno) |
 | `X_DISTANZA_MINUTI` | facoltativa: minuti minimi fra un post e l'altro, predefinito `10` |
+| `X_MENZIONI` | facoltativa: quanti politici citati vengono taggati, predefinito `2` (`0` per nessuno) |
+| `X_DOPPIONI_ORE` | facoltativa: ore entro cui una notizia ripetuta viene scartata, predefinito `24` (`0` per nessun controllo) |
 
 `BLOB_READ_WRITE_TOKEN` è già presente (serve al registro anti-duplicati e alla distanza fra i post).
 Senza `ANTHROPIC_API_KEY` il ponte funziona lo stesso, ma i post lunghi escono come thread invece che riscritti.

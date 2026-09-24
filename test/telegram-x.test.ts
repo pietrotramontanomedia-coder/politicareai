@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { aggiungiHashtag, componiPostConRiscrittura, componiTweet, componiTweetConRiscrittura, contieneLink, estraiPostCanale, lunghezzaX, opzioniFormato, spezzaInParti, type Riscrittore } from '@/lib/telegram-x';
+import { aggiungiHashtag, aggiungiMenzioni, componiPostConRiscrittura, componiTweet, componiTweetConRiscrittura, contieneLink, eDoppione, estraiPostCanale, impronta, lunghezzaX, opzioniFormato, similitudine, spezzaInParti, type Riscrittore } from '@/lib/telegram-x';
 
 /* Il ponte Telegram → X: solo i post nuovi del canale, testo entro 280 caratteri come li conta X. */
 
@@ -209,6 +209,68 @@ describe('aggiungiHashtag', () => {
   });
 });
 
+describe('aggiungiMenzioni', () => {
+  it('l\u2019hashtag di un politico con account noto diventa una menzione, gli altri restano hashtag', () => {
+    expect(aggiungiMenzioni('Il commento di #Bonelli sul #BolloAuto: critiche a #Meloni.')).toBe(
+      'Il commento di @AngeloBonelli1 sul #BolloAuto: critiche a @GiorgiaMeloni.',
+    );
+    expect(aggiungiMenzioni('#Todde commenta il ritorno di #Grillo.')).toBe('#Todde commenta il ritorno di #Grillo.');
+  });
+
+  it('riconosce i nomi con accento e quelli composti', () => {
+    expect(aggiungiMenzioni('La ministra #Santanch\u00e8 replica.')).toBe('La ministra @DSantanche replica.');
+    expect(aggiungiMenzioni('Il presidente del Senato #LaRussa interviene.')).toBe('Il presidente del Senato @Ignazio_LaRussa interviene.');
+  });
+
+  it('mai in prima posizione: un post che comincia con @ lo vede solo chi segue entrambi', () => {
+    expect(aggiungiMenzioni('#Meloni parla di #Salvini.')).toBe('#Meloni parla di @matteosalvinimi.');
+  });
+
+  it('rispetta il massimo e si pu\u00f2 spegnere', () => {
+    const testo = '#Meloni, #Salvini e #Tajani al vertice.';
+    expect(aggiungiMenzioni(testo, 1)).toBe('#Meloni, @matteosalvinimi e #Tajani al vertice.');
+    expect(aggiungiMenzioni(testo, 0)).toBe(testo);
+  });
+
+  it('il formato predefinito ne chiede due e componiTweet le applica', () => {
+    expect(opzioniFormato({})).toMatchObject({ menzioni: 2 });
+    expect(opzioniFormato({ X_MENZIONI: '0' }).menzioni).toBe(0);
+    expect(componiTweet('Il governo Meloni risponde a Bonelli sulla manovra.', { ...opzioniFormato({}), titolo: 'nessuno' })).toBe(
+      'Il governo @GiorgiaMeloni risponde a @AngeloBonelli1 sulla manovra.',
+    );
+  });
+});
+
+describe('doppioni', () => {
+  const berlinoA = '\ud83c\udde9\ud83c\uddea Amministrative di #Berlino, primi exit poll\n\n#Linke \u00e8 in testa con il 26% mentre la Cdu \u00e8 seconda al 20%. #AfD terza con un 13,5%.';
+  const berlinoB = 'Amministrative di Berlino, promi exit poll\n\n#Linke \u00e8 in testa con il 26% mentre la #Cdu \u00e8 seconda al 20%. #AfD terza con un 13,5%.';
+
+  it('l\u2019impronta ignora emoji, accenti, cancelletti e paroline', () => {
+    expect(impronta('\ud83d\udd34 Il #Governo di Giorgia Meloni, oggi.')).toEqual(['governo', 'giorgia', 'meloni', 'oggi']);
+    expect(impronta(impronta(berlinoA).join(' '))).toEqual(impronta(berlinoA));
+  });
+
+  it('la similitudine va da 0 a 1', () => {
+    expect(similitudine(impronta(berlinoA), impronta(berlinoA))).toBe(1);
+    expect(similitudine(impronta(berlinoA), impronta('Elezioni in Svezia, trionfa il centrosinistra.'))).toBeLessThan(0.2);
+    expect(similitudine([], ['x'])).toBe(0);
+  });
+
+  it('riconosce la notizia gi\u00e0 uscita anche con un refuso e un\u2019emoji in pi\u00f9', () => {
+    expect(eDoppione(berlinoB, [impronta(berlinoA).join(' ')])).toBe(true);
+    expect(eDoppione(berlinoA, [])).toBe(false);
+  });
+
+  it('due notizie diverse sullo stesso tema non sono doppioni', () => {
+    const affluenza = 'Amministrative di Berlino, affluenza al 58% alle ore 18, in netto calo rispetto al 2021.';
+    expect(eDoppione(affluenza, [impronta(berlinoA).join(' ')])).toBe(false);
+  });
+
+  it('un testo molto corto non si giudica', () => {
+    expect(eDoppione('Nordio si dimette.', ['nordio dimette'])).toBe(false);
+  });
+});
+
 describe('thread al posto del taglio', () => {
   const UNO = opzioniFormato({ X_HASHTAG: '1' });
   const frasi = ['Prima frase della notizia con qualche dettaglio.', 'Seconda frase con altri dettagli utili.', 'Terza frase ancora più lunga che spiega il contesto.', 'Quarta frase finale.'];
@@ -263,7 +325,7 @@ describe('thread al posto del taglio', () => {
   it('con il riscrittore prova prima a fare un post solo; se non basta, thread', async () => {
     const post = 'Salvini attacca il governo: ' + frasi.join(' ');
     const corto = vi.fn<Riscrittore>(async () => 'Salvini attacca il governo: #Salvini in due frasi. Fine.');
-    expect(await componiPostConRiscrittura(post, { ...UNO, limite: 110 }, corto)).toEqual(['Salvini attacca il governo\n\n#Salvini in due frasi. Fine.']);
+    expect(await componiPostConRiscrittura(post, { ...UNO, limite: 110 }, corto)).toEqual(['Salvini attacca il governo\n\n@matteosalvinimi in due frasi. Fine.']);
     const rotto = vi.fn<Riscrittore>(async () => {
       throw new Error('quota');
     });

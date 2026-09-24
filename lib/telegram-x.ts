@@ -146,6 +146,7 @@ const COMPOSTI: [RegExp, string][] = [
   [/\bCorte dei [Cc]onti\b/, 'CorteDeiConti'],
   [/\bCorte [Cc]ostituzionale\b/, 'Consulta'],
   [/\bPalazzo Chigi\b/, 'PalazzoChigi'],
+  [/\bLa Russa\b/, 'LaRussa'],
   [/\bPartito Democratico\b/, 'PD'],
   [/\bFratelli d['’]Italia\b/, 'FdI'],
   [/\bForza Italia\b/, 'ForzaItalia'],
@@ -216,6 +217,62 @@ export function aggiungiHashtag(testo: string, massimo = 1): string {
   return finale;
 }
 
+/**
+ * Account X verificati uno per uno il 24 settembre 2026 aprendo il profilo:
+ * la chiave è il nome com'è nell'hashtag, senza accenti e in minuscolo.
+ * Nel dubbio non si aggiunge nulla: taggare la persona sbagliata è peggio che non taggare.
+ */
+const MENZIONI: Record<string, string> = {
+  meloni: 'GiorgiaMeloni',
+  schlein: 'ellyesse',
+  salvini: 'matteosalvinimi',
+  conte: 'GiuseppeConteIT',
+  tajani: 'Antonio_Tajani',
+  renzi: 'matteorenzi',
+  calenda: 'CarloCalenda',
+  bonelli: 'AngeloBonelli1',
+  fratoianni: 'NFratoianni',
+  magi: 'riccardomagi',
+  crosetto: 'GuidoCrosetto',
+  larussa: 'Ignazio_LaRussa',
+  lollobrigida: 'FrancescoLollo1',
+  santanche: 'DSantanche',
+  valditara: 'G_Valditara',
+  zaia: 'zaiapresidente',
+  vannacci: 'RoVannacci',
+  deluca: 'VincenzoDeLuca',
+  benifei: 'brandobenifei',
+  salis: 'silvia_salis',
+  trump: 'realDonaldTrump',
+  zelensky: 'ZelenskyyUa',
+  vonderleyen: 'vonderleyen',
+  macron: 'EmmanuelMacron',
+};
+
+function chiaveMenzione(nome: string): string {
+  return nome
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+}
+
+/**
+ * Trasforma in menzione gli hashtag che corrispondono a un politico con account noto:
+ * «#Bonelli» diventa «@AngeloBonelli1», così la persona citata riceve la notifica.
+ * Il numero di segni nel testo non cambia: la menzione prende il posto dell'hashtag.
+ * Mai in prima posizione: un post che comincia con «@» X lo mostra solo a chi segue entrambi.
+ */
+export function aggiungiMenzioni(testo: string, massimo = 2): string {
+  if (massimo <= 0) return testo;
+  let fatte = 0;
+  return testo.replace(/#(\p{Lu}[\p{L}\p{N}]*)/gu, (intero, nome: string, posizione: number) => {
+    const handle = MENZIONI[chiaveMenzione(nome)];
+    if (!handle || fatte >= massimo || posizione === 0) return intero;
+    fatte++;
+    return `@${handle}`;
+  });
+}
+
 export type PoliticaLink = 'mai' | 'se-troncato' | 'sempre';
 export type StileTitolo = 'normale' | 'maiuscolo' | 'nessuno';
 
@@ -229,6 +286,8 @@ export interface OpzioniTweet {
   firma?: string;
   /** Quante parole rilevanti trasformare in hashtag nel testo (0 = nessuna). */
   hashtag?: number;
+  /** Quanti hashtag di politici con account noto diventano menzioni (0 = nessuna). */
+  menzioni?: number;
   limite?: number;
 }
 
@@ -249,8 +308,8 @@ function separaTitolo(testo: string, stile: StileTitolo): { testa: string; corpo
 
 /** Trasforma il testo di un post Telegram nel testo del post su X, entro il limite. */
 export function componiTweet(grezzo: string, opzioni: OpzioniTweet = {}): string {
-  const { link, politicaLink = 'mai', titolo = 'normale', firma = '', hashtag = 0, limite = LIMITE_X } = opzioni;
-  const { testa, corpo } = separaTitolo(aggiungiHashtag(pulisciPerX(grezzo), hashtag), titolo);
+  const { link, politicaLink = 'mai', titolo = 'normale', firma = '', hashtag = 0, menzioni = 0, limite = LIMITE_X } = opzioni;
+  const { testa, corpo } = separaTitolo(aggiungiMenzioni(aggiungiHashtag(pulisciPerX(grezzo), hashtag), menzioni), titolo);
   const chiusura = firma ? `\n\n${firma}` : '';
   const coda = link ? `\n\n${link}` : '';
   const fisso = lunghezzaX(testa) + lunghezzaX(chiusura);
@@ -268,6 +327,45 @@ export function componiTweet(grezzo: string, opzioni: OpzioniTweet = {}): string
 
 function troncaEntro(testo: string, limite: number): string {
   return troncaPerPeso(testo, limite);
+}
+
+/** Soglia oltre la quale due post sono la stessa notizia: 1 = identici. */
+export const SOGLIA_DOPPIONE = 0.85;
+
+/**
+ * Le parole che contano di un testo, per confrontarlo con un altro: senza accenti,
+ * emoji, punteggiatura, cancelletti e paroline brevi. Applicarla due volte non cambia nulla.
+ */
+export function impronta(testo: string): string[] {
+  return testo
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[\p{Extended_Pictographic}\p{Regional_Indicator}]/gu, ' ')
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}\s]/gu, ' ')
+    .split(/\s+/)
+    .filter((parola) => parola.length >= 3 || /\d/.test(parola));
+}
+
+/** Quanto due liste di parole si somigliano, da 0 a 1 (coefficiente di Dice). */
+export function similitudine(a: string[], b: string[]): number {
+  if (!a.length || !b.length) return 0;
+  const insiemeA = new Set(a);
+  const insiemeB = new Set(b);
+  let comuni = 0;
+  for (const parola of insiemeA) if (insiemeB.has(parola)) comuni++;
+  return (2 * comuni) / (insiemeA.size + insiemeB.size);
+}
+
+/**
+ * Vero se la notizia è già uscita, anche riscritta o con un refuso in più:
+ * il 20 settembre gli exit poll di Berlino sono usciti due volte a undici minuti di distanza.
+ * Un testo molto corto non si giudica: troppe poche parole per distinguerlo da un altro.
+ */
+export function eDoppione(testo: string, precedenti: string[], soglia = SOGLIA_DOPPIONE): boolean {
+  const parole = impronta(testo);
+  if (parole.length < 6) return false;
+  return precedenti.some((precedente) => similitudine(parole, impronta(precedente)) >= soglia);
 }
 
 /** Un riscrittore riceve il testo, il numero massimo di caratteri (come li conta X) e quanti hashtag inserire; restituisce il testo pronto. */
@@ -389,7 +487,7 @@ export async function componiPostConRiscrittura(grezzo: string, opzioni: Opzioni
     if (!troppoLungo) return [intero()];
   }
 
-  const { testa: testaTag, corpo: corpoTag } = separaTitolo(aggiungiHashtag(pulito, hashtag), titolo);
+  const { testa: testaTag, corpo: corpoTag } = separaTitolo(aggiungiMenzioni(aggiungiHashtag(pulito, hashtag), opzioni.menzioni ?? 0), titolo);
   const parti = spezzaInParti(corpoTag, spazio, spazio - lunghezzaX(testaTag));
   parti[0] = testaTag + parti[0];
   parti[parti.length - 1] += chiusura;
@@ -401,18 +499,20 @@ export async function componiPostConRiscrittura(grezzo: string, opzioni: Opzioni
  *   X_TITOLO        normale | maiuscolo | nessuno   (prima frase su una riga a sé)
  *   X_FIRMA         riga di chiusura (predefinita: nessuna)
  *   X_HASHTAG       quante parole rilevanti diventano hashtag nel testo (predefinito 3, scelte da Claude; 0 per nessuna)
+ *   X_MENZIONI      quanti hashtag di politici noti diventano menzioni (predefinito 2, 0 per nessuna)
  *   X_LINK_NOTIZIE  mai (predefinito) | se-troncato | sempre
  *   X_LIMITE        280 (predefinito); con X Premium si può alzare, fino a 25000
  */
-export const FORMATO_PREDEFINITO = { titolo: 'normale', firma: '', hashtag: 3, politicaLink: 'mai' } as const;
+export const FORMATO_PREDEFINITO = { titolo: 'normale', firma: '', hashtag: 3, menzioni: 2, politicaLink: 'mai' } as const;
 
-export function opzioniFormato(ambiente: Record<string, string | undefined>): Required<Pick<OpzioniTweet, 'titolo' | 'firma' | 'hashtag' | 'politicaLink' | 'limite'>> {
+export function opzioniFormato(ambiente: Record<string, string | undefined>): Required<Pick<OpzioniTweet, 'titolo' | 'firma' | 'hashtag' | 'menzioni' | 'politicaLink' | 'limite'>> {
   const titolo = ambiente.X_TITOLO;
   const politicaLink = ambiente.X_LINK_NOTIZIE;
   return {
     titolo: titolo === 'maiuscolo' || titolo === 'nessuno' ? titolo : FORMATO_PREDEFINITO.titolo,
     firma: ambiente.X_FIRMA ?? FORMATO_PREDEFINITO.firma,
     hashtag: ambiente.X_HASHTAG === undefined || Number.isNaN(Number(ambiente.X_HASHTAG)) ? FORMATO_PREDEFINITO.hashtag : Math.max(0, Number(ambiente.X_HASHTAG)),
+    menzioni: ambiente.X_MENZIONI === undefined || Number.isNaN(Number(ambiente.X_MENZIONI)) ? FORMATO_PREDEFINITO.menzioni : Math.max(0, Number(ambiente.X_MENZIONI)),
     politicaLink: politicaLink === 'mai' || politicaLink === 'sempre' ? politicaLink : FORMATO_PREDEFINITO.politicaLink,
     limite: Number(ambiente.X_LIMITE) > 0 ? Number(ambiente.X_LIMITE) : LIMITE_X,
   };

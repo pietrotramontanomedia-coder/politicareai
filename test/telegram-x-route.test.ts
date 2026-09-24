@@ -4,8 +4,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const pubblicaSuX = vi.fn<(testo: string, immagine?: { dati: Buffer; tipo: string }, rispostaA?: string) => Promise<{ id: string }>>(async () => ({ id: '999' }));
 const scaricaFotoTelegram = vi.fn(async () => ({ dati: Buffer.from('jpg'), tipo: 'image/jpeg' }));
-const registro = new Map<number, { x: string; data: string }>();
+const registro = new Map<number, { x: string; data: string; impronta?: string }>();
 let ultima: Date | null = null;
+let improte: string[] = [];
 
 vi.mock('@/lib/x-server', () => ({
   pubblicaSuX: (...args: Parameters<typeof pubblicaSuX>) => pubblicaSuX(...args),
@@ -22,8 +23,9 @@ vi.mock('@/lib/riscrittura-server', () => ({
 }));
 vi.mock('@/lib/telegram-x-registro', () => ({
   giaPubblicato: async (n: number) => registro.get(n) ?? null,
-  registraPubblicazione: async (n: number, x: string) => void registro.set(n, { x, data: 'ora' }),
+  registraPubblicazione: async (n: number, x: string, impronta = '') => void registro.set(n, { x, data: 'ora', impronta }),
   ultimaPubblicazione: async () => ultima,
+  improteRecenti: async () => improte,
 }));
 
 const SEGRETO = 'segreto-di-prova';
@@ -50,6 +52,30 @@ describe('webhook Telegram → X', () => {
     scaricaFotoTelegram.mockClear();
     registro.clear();
     ultima = null;
+    improte = [];
+  });
+
+  it('scarta la notizia gi\u00e0 pubblicata, anche con un refuso, e lo dice a Telegram con 200', async () => {
+    const { POST } = await import('@/app/api/telegram/x/route');
+    const primo = '\ud83c\udde9\ud83c\uddea Amministrative di Berlino, primi exit poll. Linke \u00e8 in testa con il 26% mentre la Cdu \u00e8 seconda al 20%.';
+    const secondo = 'Amministrative di Berlino, promi exit poll. Linke \u00e8 in testa con il 26% mentre la Cdu \u00e8 seconda al 20%.';
+
+    const uscito = await POST(richiesta({ channel_post: { message_id: 60, chat, text: primo } }));
+    expect(uscito.status).toBe(200);
+    expect(pubblicaSuX).toHaveBeenCalledTimes(1);
+    improte = [registro.get(60)!.impronta!];
+    expect(improte[0]).toContain('amministrative berlino');
+
+    const doppione = await POST(richiesta({ channel_post: { message_id: 61, chat, text: secondo } }));
+    expect(doppione.status).toBe(200);
+    expect(await doppione.json()).toMatchObject({ ok: true, ignorato: expect.stringContaining('doppione') });
+    expect(pubblicaSuX).toHaveBeenCalledTimes(1);
+
+    vi.stubEnv('X_DOPPIONI_ORE', '0');
+    ultima = null;
+    const senzaControllo = await POST(richiesta({ channel_post: { message_id: 62, chat, text: secondo } }));
+    expect(senzaControllo.status).toBe(200);
+    expect(pubblicaSuX).toHaveBeenCalledTimes(2);
   });
 
   it('tiene almeno 10 minuti fra un post e l’altro: risponde 503 e Telegram riprova più tardi', async () => {
