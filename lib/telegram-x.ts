@@ -70,16 +70,59 @@ export function contieneLink(testo: string): boolean {
 
 const EMOJI_INIZIALI = /^(?:(?:\p{Regional_Indicator}{2}|\p{Extended_Pictographic}\uFE0F?)(?:\u200D\p{Extended_Pictographic}\uFE0F?)*)+/u;
 
+/** Refusi ricorrenti del canale: la «l» minuscola battuta al posto della «I» maiuscola. */
+const REFUSI: [RegExp, string][] = [
+  [/\bFdl\b/g, 'FdI'],
+  [/\bltal(ia|iano|iana|iani|iane)\b/g, 'Ital$1'],
+  [/\blsrael(e|iano|iana|iani)\b/g, 'Israel$1'],
+  [/\blran\b/g, 'Iran'],
+  [/\blraq\b/g, 'Iraq'],
+  [/\blstat\b/g, 'Istat'],
+];
+
+/**
+ * Chi scrive sul canale va a capo a mano dentro la frase: su X il post esce a scalini
+ * («Matteo» su una riga e «Renzi» su quella dopo). Un a capo singolo che non chiude
+ * la frase torna a essere uno spazio; la riga vuota fra due paragrafi resta.
+ */
+function unisciRigheSpezzate(testo: string): string {
+  return testo.replace(/([^\n.!?:;…»"”)\]])\n(?!\n)(?=[^\n])/g, '$1 ');
+}
+
 function pulisciPerX(grezzo: string): string {
-  return grezzo
+  let testo = grezzo
     .replace(FIRMA_TELEGRAM, '')
-    .replace(/[\u200B-\u200D\uFEFF]/g, '')
-    .replace(/\bFdl\b/g, 'FdI') // refuso frequente nel canale: «l» minuscola al posto della «I»
-    .replace(EMOJI_INIZIALI, (emoji) => `${emoji} `)
-    .replace(/[ \t]+/g, ' ')
-    .replace(/ ?\n ?/g, '\n')
-    .replace(/\n{3,}/g, '\n\n')
-    .trim();
+    .replace(/[\u200B-\u200D\uFEFF]/g, '');
+  for (const [refuso, giusto] of REFUSI) testo = testo.replace(refuso, giusto);
+  return unisciRigheSpezzate(
+    testo
+      .replace(EMOJI_INIZIALI, (emoji) => `${emoji} `)
+      .replace(/[ \t]+/g, ' ')
+      .replace(/ ?\n ?/g, '\n')
+      .replace(/\n{3,}/g, '\n\n'),
+  ).trim();
+}
+
+/** Dove stanno i link nel testo: dentro un link non si tocca niente. */
+function intervalliLink(testo: string): [number, number][] {
+  const intervalli: [number, number][] = [];
+  const cerca = new RegExp(URL.source, 'gi');
+  let trovato: RegExpExecArray | null;
+  while ((trovato = cerca.exec(testo))) intervalli.push([trovato.index, trovato.index + trovato[0].length]);
+  return intervalli;
+}
+
+function dentroLink(intervalli: [number, number][], posizione: number): boolean {
+  return intervalli.some(([inizio, fine]) => posizione >= inizio && posizione < fine);
+}
+
+/** Vero se il post non ha nulla da dire: solo un link, o un link e poche parole. */
+export function soloLink(grezzo: string): boolean {
+  const testo = grezzo.replace(FIRMA_TELEGRAM, '').trim();
+  if (!testo) return true;
+  const senzaLink = testo.replace(new RegExp(URL.source, 'gi'), ' ').trim();
+  if (senzaLink === testo) return false;
+  return senzaLink.split(/\s+/).filter((parola) => parola.length > 1).length < 4;
 }
 
 /** Tiene solo le frasi intere che entrano nel budget; se nemmeno la prima entra, taglia a parola con «…». */
@@ -117,7 +160,12 @@ const NON_HASHTAG = new Set(
   ministro ministra ministero ministri presidente presidenza premier vicepremier senatore senatrice senatori deputato deputata deputati
   sindaco sindaca governatore leader segretario segretaria capogruppo capodelegazione commissario commissaria portavoce
   sondaggio sondaggi indiscrezione esclusiva intervista dichiarazione nota comunicato giustizia interni esteri economia difesa
-  fatto quotidiano corriere sera repubblica stampa messaggero giornale foglio sole ore ansa agi adnkronos tg1 tg2 tg3 tgcom24 skytg24 rai mediaset la7`
+  fatto quotidiano corriere sera repubblica stampa messaggero giornale foglio sole ore ansa agi adnkronos tg1 tg2 tg3 tgcom24 skytg24 rai mediaset la7
+  sto stiamo siamo ecco leggi leggete guarda guardate ascolta ricorda vedo credo penso dico voglio posso devo faccio arriva arrivano
+  gennaio febbraio marzo aprile maggio giugno luglio agosto settembre ottobre novembre dicembre
+  aggiornamento commento commenti congetture congettura dichiarazione dichiarazioni parola parole risultato risultati
+  candidato candidata candidati vittoria sconfitta intervista esclusiva retroscena polemica replica reazione nota lettera
+  nazionale nazionali internazionale internazionali arabi uniti viva york monde libera nuovo nuova nuovi nuove`
     .split(/\s+/)
     .filter(Boolean),
 );
@@ -147,6 +195,16 @@ const COMPOSTI: [RegExp, string][] = [
   [/\bCorte [Cc]ostituzionale\b/, 'Consulta'],
   [/\bPalazzo Chigi\b/, 'PalazzoChigi'],
   [/\bLa Russa\b/, 'LaRussa'],
+  [/\bEmirati [Aa]rabi [Uu]niti\b/, 'EmiratiArabiUniti'],
+  [/\bNew York\b/, 'NewYork'],
+  [/\bItalia Viva\b/, 'ItaliaViva'],
+  [/\bFuturo Nazionale\b/, 'FuturoNazionale'],
+  [/\bSinistra Italiana\b/, 'SinistraItaliana'],
+  [/\bCasa Riformista\b/, 'CasaRiformista'],
+  [/\bNoi Moderati\b/, 'NoiModerati'],
+  [/\bLe Monde\b/, 'LeMonde'],
+  [/\bCasa Bianca\b/, 'CasaBianca'],
+  [/\bMedio [Oo]riente\b/, 'MedioOriente'],
   [/\bPartito Democratico\b/, 'PD'],
   [/\bFratelli d['’]Italia\b/, 'FdI'],
   [/\bForza Italia\b/, 'ForzaItalia'],
@@ -156,42 +214,90 @@ const COMPOSTI: [RegExp, string][] = [
   [/\bGran Bretagna\b/, 'GranBretagna'],
 ];
 
-/**
- * Trasforma in hashtag le parole più rilevanti del testo: nomi propri (persone, luoghi,
- * partiti, istituzioni) scelti per frequenza e posizione. Al massimo `massimo` hashtag,
- * ciascuno sulla prima occorrenza. Non tocca parole già hashtag, dopo un apostrofo o con trattino.
- * Di norma uno solo: su X più di uno o due hashtag riducono la portata.
- */
-export function aggiungiHashtag(testo: string, massimo = 1): string {
-  if (massimo <= 0) return testo;
-  const risultato = testo;
+/** Cognome con la particella dopo un nome di battesimo: «Donatella Di Cesare» → «#DiCesare». */
+const COGNOME_CON_PARTICELLA =
+  /(?<![\p{L}\p{N}#@'’-])\p{Lu}[\p{L}]{2,}\s+((?:Di|De|Del|Della|Dei|Da|Dal|La|Le|Lo|Van|Von|Mac|Mc)\s+\p{Lu}[\p{L}]{2,})(?![\p{L}\p{N}'’-])/gu;
 
-  interface Candidato {
-    parola: string; // com'è nel testo
-    tag: string; // com'è nell'hashtag
-    prima: number;
-    punteggio: number;
+/** La forma dell'hashtag per una parola o una frase: «bollo auto» → «BolloAuto». */
+function tagDa(frase: string): string {
+  return frase
+    .split(/[\s'’-]+/)
+    .filter(Boolean)
+    .map((parola) => parola[0].toUpperCase() + parola.slice(1))
+    .join('');
+}
+
+/** Dove compare per la prima volta una frase, fuori dai link e non già marcata. */
+function trovaFrase(testo: string, frase: string, link: [number, number][]): { indice: number; lunghezza: number } | null {
+  const schema = frase.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+');
+  const cerca = new RegExp(`(?<![\\p{L}\\p{N}#@'’-])${schema}(?![\\p{L}\\p{N}'’-])`, 'giu');
+  let trovato: RegExpExecArray | null;
+  while ((trovato = cerca.exec(testo))) {
+    if (!dentroLink(link, trovato.index)) return { indice: trovato.index, lunghezza: trovato[0].length };
   }
+  return null;
+}
+
+interface Candidato {
+  parola: string;
+  tag: string;
+  prima: number;
+  lunghezza: number;
+  punteggio: number;
+}
+
+/**
+ * Trasforma in hashtag le parole più rilevanti del testo. Se `scelte` è pieno le parole
+ * le ha scelte Claude e comandano loro; altrimenti decide la regola automatica, che preferisce
+ * i nomi composti, il cognome di un «Nome Cognome» e i nomi noti della politica.
+ * Il testo non cambia mai: si aggiunge solo il cancelletto, mai dentro un link.
+ */
+export function aggiungiHashtag(testo: string, massimo = 1, scelte: string[] = []): string {
+  if (massimo <= 0) return testo;
+  const link = intervalliLink(testo);
   const candidati: Candidato[] = [];
 
-  // Nomi composti (istituzioni, partiti): un hashtag unico nella forma usata su X.
+  // Le parole scelte da Claude vengono prima di tutto, nell'ordine in cui le ha date.
+  scelte.forEach((frase, posizione) => {
+    if (!frase?.trim()) return;
+    const dove = trovaFrase(testo, frase, link);
+    if (dove) candidati.push({ parola: testo.substr(dove.indice, dove.lunghezza), tag: tagDa(frase), prima: dove.indice, lunghezza: dove.lunghezza, punteggio: 1000 - posizione });
+  });
+
+  // Nomi composti noti: istituzioni, partiti, luoghi.
   for (const [composto, tag] of COMPOSTI) {
-    const m = risultato.match(composto);
-    if (!m || m.index === undefined || risultato[m.index - 1] === '#') continue;
-    candidati.push({ parola: m[0], tag, prima: m.index, punteggio: 6 });
+    const trovato = composto.exec(testo);
+    if (!trovato || trovato.index === undefined || dentroLink(link, trovato.index) || testo[trovato.index - 1] === '#') continue;
+    candidati.push({ parola: trovato[0], tag, prima: trovato.index, lunghezza: trovato[0].length, punteggio: 6 });
+  }
+
+  // Cognomi con la particella: l'hashtag va sul cognome, non sul nome di battesimo.
+  const daScartare = new Set<string>();
+  COGNOME_CON_PARTICELLA.lastIndex = 0;
+  let coppia: RegExpExecArray | null;
+  while ((coppia = COGNOME_CON_PARTICELLA.exec(testo))) {
+    const cognome = coppia[1];
+    const indice = coppia.index + coppia[0].length - cognome.length;
+    if (dentroLink(link, indice)) continue;
+    const ultima = cognome.split(/\s+/).pop() ?? '';
+    if (NON_HASHTAG.has(ultima.toLowerCase())) continue;
+    daScartare.add(coppia[0].split(/\s+/)[0]);
+    candidati.push({ parola: cognome, tag: tagDa(cognome), prima: indice, lunghezza: cognome.length, punteggio: 24 });
   }
 
   const parola = /(?<![\p{L}\p{N}#'’@_-])(\p{Lu}[\p{L}\p{N}]{2,})(?![\p{L}\p{N}'’-])/gu;
   const nomi = new Map<string, { conteggio: number; prima: number; inRun: boolean; soloInizio: boolean }>();
   let m: RegExpExecArray | null;
-  while ((m = parola.exec(risultato))) {
+  while ((m = parola.exec(testo))) {
     const nome = m[1];
-    if (NON_HASHTAG.has(nome.toLowerCase()) || /^\p{Lu}+$/u.test(nome) && nome.length < 3) continue;
-    if (COMPOSTI.some(([composto]) => new RegExp(composto.source + '$').test(risultato.slice(0, m!.index + nome.length)))) continue;
-    const precedente = risultato.slice(0, m.index).match(/(\p{Lu}[\p{L}\p{N}]*) $/u);
+    if (NON_HASHTAG.has(nome.toLowerCase()) || daScartare.has(nome) || dentroLink(link, m.index)) continue;
+    if (/^\p{Lu}+$/u.test(nome) && nome.length < 3) continue;
+    if (COMPOSTI.some(([composto]) => new RegExp(composto.source + '$').test(testo.slice(0, m!.index + nome.length)))) continue;
+    const precedente = testo.slice(0, m.index).match(/(\p{Lu}[\p{L}\p{N}]*) $/u);
     const inRun = Boolean(precedente && !NON_HASHTAG.has(precedente[1].toLowerCase()));
-    // A inizio frase la maiuscola non dice nulla: la parola conta solo se ricorre altrove (il primo termine del post fa eccezione).
-    const inizioFrase = m.index > 0 && /[.!?]\s*$|\n\s*$/.test(risultato.slice(0, m.index));
+    // A inizio frase la maiuscola non dice nulla: la parola conta solo se ricorre altrove.
+    // Vale anche dopo le virgolette aperte, altrimenti «"Sto portando via…"» diventa «#Sto».
+    const inizioFrase = m.index > 0 && /(?:[.!?…]|\n)\s*["«“'‘(\[]*\s*$/u.test(testo.slice(0, m.index));
     const voce = nomi.get(nome) ?? { conteggio: 0, prima: m.index, inRun, soloInizio: true };
     voce.conteggio++;
     if (!inizioFrase) voce.soloInizio = false;
@@ -200,19 +306,27 @@ export function aggiungiHashtag(testo: string, massimo = 1): string {
   for (const [nome, voce] of nomi) if (voce.soloInizio && voce.conteggio < 2) nomi.delete(nome);
   // In una coppia «Nome Cognome» l'hashtag va sul cognome: la prima parola della coppia esce.
   for (const [nome, voce] of nomi) {
-    const seguito = new RegExp(`(?<![\\p{L}\\p{N}#])${nome} \\p{Lu}[\\p{L}\\p{N}]{2,}`, 'u').exec(risultato);
+    const seguito = new RegExp(`(?<![\\p{L}\\p{N}#])${nome} \\p{Lu}[\\p{L}\\p{N}]{2,}`, 'u').exec(testo);
     if (seguito && !voce.inRun) nomi.delete(nome);
   }
-  // Vince il cognome di un «Nome Cognome» o un nome noto della politica; chi ricorre guadagna qualcosa; a parità vince chi viene prima.
   for (const [nome, voce] of nomi) {
-    candidati.push({ parola: nome, tag: nome, prima: voce.prima, punteggio: (voce.conteggio - 1) * 2 + (voce.inRun ? 8 : 0) + (PRIORITA.has(nome.toLowerCase()) ? 8 : 0) });
+    candidati.push({ parola: nome, tag: nome, prima: voce.prima, lunghezza: nome.length, punteggio: (voce.conteggio - 1) * 2 + (voce.inRun ? 8 : 0) + (PRIORITA.has(nome.toLowerCase()) ? 8 : 0) });
   }
 
-  const scelti = candidati.sort((a, b) => b.punteggio - a.punteggio || a.prima - b.prima).slice(0, massimo);
-  let finale = risultato;
-  for (const { parola, tag } of scelti) {
-    const testoParola = parola.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    finale = finale.replace(new RegExp(`(?<![\\p{L}\\p{N}#'’@_-])${testoParola}(?![\\p{L}\\p{N}'’-])`, 'u'), `#${tag}`);
+  // Si tiene il migliore, poi si scartano quelli che si sovrappongono a uno già preso.
+  const presi: Candidato[] = [];
+  for (const candidato of candidati.sort((a, b) => b.punteggio - a.punteggio || a.prima - b.prima)) {
+    if (presi.length >= massimo) break;
+    const inizio = candidato.prima;
+    const fine = candidato.prima + candidato.lunghezza;
+    if (presi.some((preso) => inizio < preso.prima + preso.lunghezza && preso.prima < fine)) continue;
+    presi.push(candidato);
+  }
+
+  // Si marca dal fondo verso l'inizio, così gli indici di chi viene prima restano validi.
+  let finale = testo;
+  for (const preso of [...presi].sort((a, b) => b.prima - a.prima)) {
+    finale = finale.slice(0, preso.prima) + `#${preso.tag}` + finale.slice(preso.prima + preso.lunghezza);
   }
   return finale;
 }
@@ -288,6 +402,8 @@ export interface OpzioniTweet {
   hashtag?: number;
   /** Quanti hashtag di politici con account noto diventano menzioni (0 = nessuna). */
   menzioni?: number;
+  /** Parole del testo scelte da Claude per diventare hashtag, in ordine di importanza. */
+  scelte?: string[];
   limite?: number;
 }
 
@@ -308,8 +424,8 @@ function separaTitolo(testo: string, stile: StileTitolo): { testa: string; corpo
 
 /** Trasforma il testo di un post Telegram nel testo del post su X, entro il limite. */
 export function componiTweet(grezzo: string, opzioni: OpzioniTweet = {}): string {
-  const { link, politicaLink = 'mai', titolo = 'normale', firma = '', hashtag = 0, menzioni = 0, limite = LIMITE_X } = opzioni;
-  const { testa, corpo } = separaTitolo(aggiungiMenzioni(aggiungiHashtag(pulisciPerX(grezzo), hashtag), menzioni), titolo);
+  const { link, politicaLink = 'mai', titolo = 'normale', firma = '', hashtag = 0, menzioni = 0, scelte = [], limite = LIMITE_X } = opzioni;
+  const { testa, corpo } = separaTitolo(aggiungiMenzioni(aggiungiHashtag(pulisciPerX(grezzo), hashtag, scelte), menzioni), titolo);
   const chiusura = firma ? `\n\n${firma}` : '';
   const coda = link ? `\n\n${link}` : '';
   const fisso = lunghezzaX(testa) + lunghezzaX(chiusura);
@@ -367,6 +483,9 @@ export function eDoppione(testo: string, precedenti: string[], soglia = SOGLIA_D
   if (parole.length < 6) return false;
   return precedenti.some((precedente) => similitudine(parole, impronta(precedente)) >= soglia);
 }
+
+/** Sceglie le parole del testo da trasformare in hashtag: le restituisce esatte, in ordine di importanza. */
+export type SceltaHashtag = (testo: string, quanti: number) => Promise<string[]>;
 
 /** Un riscrittore riceve il testo, il numero massimo di caratteri (come li conta X) e quanti hashtag inserire; restituisce il testo pronto. */
 export type Riscrittore = (testo: string, massimo: number, hashtag: number) => Promise<string>;
@@ -453,16 +572,26 @@ function stessoTesto(a: string, b: string): boolean {
  * prima a far entrare tutto in un post; se non basta o non è disponibile, thread.
  * Nessuna frase viene mai tagliata né chiusa con puntini.
  */
-export async function componiPostConRiscrittura(grezzo: string, opzioni: OpzioniTweet, riscrivi?: Riscrittore): Promise<string[]> {
+export async function componiPostConRiscrittura(grezzo: string, opzioni: OpzioniTweet, riscrivi?: Riscrittore, scegli?: SceltaHashtag): Promise<string[]> {
   const { titolo = 'normale', firma = '', hashtag = 0, limite = LIMITE_X } = opzioni;
   const pulito = pulisciPerX(grezzo);
   const chiusura = firma ? `\n\n${firma}` : '';
   const spazio = limite - lunghezzaX(chiusura);
   const { testa, corpo } = separaTitolo(pulito, titolo);
   const troppoLungo = lunghezzaX(testa + corpo) > spazio;
-  const intero = () => componiTweet(pulito, { ...opzioni, politicaLink: 'mai', limite: Number.POSITIVE_INFINITY });
+  const intero = (scelte: string[] = []) => componiTweet(pulito, { ...opzioni, scelte, politicaLink: 'mai', limite: Number.POSITIVE_INFINITY });
 
-  if (!troppoLungo && (!riscrivi || hashtag <= 0)) return [intero()];
+  // Caso normale: la notizia entra nel limite, quindi il testo esce esattamente com'è scritto
+  // e a Claude si chiede solo quali parole marcare. Così non può cambiare una virgola.
+  if (!troppoLungo) {
+    if (!scegli || hashtag <= 0) return [intero()];
+    try {
+      return [intero(await scegli(pulito, hashtag))];
+    } catch (errore) {
+      console.error(`[telegram-x] scelta hashtag non riuscita, vale la regola automatica: ${errore instanceof Error ? errore.message : errore}`);
+      return [intero()];
+    }
+  }
 
   if (riscrivi) {
     let massimo = spazio - 4 - hashtag;

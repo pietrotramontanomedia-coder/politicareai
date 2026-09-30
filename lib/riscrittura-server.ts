@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
-import type { Riscrittore } from './telegram-x';
+import type { Riscrittore, SceltaHashtag } from './telegram-x';
 
 /**
  * Riscrittura di una notizia troppo lunga per X: stessi fatti, meno parole.
@@ -36,6 +36,54 @@ Regole sugli hashtag:
   ciascuno sulla prima occorrenza, mai in coda al testo, mai due hashtag attaccati.
 
 Rispondi solo con il testo pronto, senza spiegazioni.`;
+
+const ISTRUZIONI_HASHTAG = `Sei il redattore di Politicare, pagina italiana di informazione politica, e prepari i post per X.
+Ricevi una notizia già scritta e devi solo dire quali parole del testo trasformare in hashtag.
+
+Scegli, in quest'ordine di preferenza:
+1. cognomi dei protagonisti della notizia (Meloni, Bonelli, Di Cesare: se il cognome ha una particella includila);
+2. partiti, sigle e istituzioni (Lega, M5S, Fratelli d'Italia, Senato, Corte costituzionale);
+3. luoghi e organizzazioni rilevanti (Veneto, Bruxelles, Emirati Arabi Uniti, New York);
+4. il tema della notizia, solo se è un argomento riconoscibile su X (bollo auto, manovra, legge elettorale).
+
+Non scegliere mai: verbi e parole di servizio (sto, ecco, leggi), parole generiche o astratte
+(aggiornamento, commento, dichiarazione, risultato, parole, nazionale), cariche da sole (ministro,
+premier, presidente, sindaco), nomi di testate (Il Fatto Quotidiano, Corriere, Ansa), mesi e giorni,
+nomi di battesimo da soli, parole dentro un link.
+
+Regole di forma:
+- restituisci le parole ESATTAMENTE come stanno nel testo, comprese maiuscole e accenti;
+- un nome di più parole va restituito intero in una sola voce ("Emirati Arabi Uniti", "Di Battista", "bollo auto");
+- se le parole adatte sono meno di quelle richieste, restituiscine meno: meglio poche e giuste;
+- rispondi solo con un array JSON di stringhe, senza spiegazioni. Esempio: ["Meloni","Manovra","Senato"]`;
+
+/** Chiede a Claude quali parole marcare. Il testo non gli passa mai: torna solo l'elenco. */
+export const scegliHashtag: SceltaHashtag = async (testo, quanti) => {
+  const client = new Anthropic();
+  const risposta = await client.beta.messages.create({
+    model: MODELLO,
+    max_tokens: 300,
+    betas: ['server-side-fallback-2026-07-01'],
+    fallbacks: 'default',
+    system: ISTRUZIONI_HASHTAG,
+    messages: [{ role: 'user', content: `Quante parole: ${quanti}\n\nNotizia:\n${testo}` }],
+  });
+  if (risposta.stop_reason === 'refusal') return [];
+  const grezzo = risposta.content
+    .filter((blocco): blocco is Anthropic.Beta.BetaTextBlock => blocco.type === 'text')
+    .map((blocco) => blocco.text)
+    .join('')
+    .trim();
+  const array = grezzo.slice(grezzo.indexOf('['), grezzo.lastIndexOf(']') + 1);
+  try {
+    const scelte: unknown = JSON.parse(array);
+    if (!Array.isArray(scelte)) return [];
+    return scelte.filter((voce): voce is string => typeof voce === 'string' && voce.trim().length > 1).slice(0, quanti);
+  } catch {
+    console.error('[telegram-x] Claude non ha restituito un elenco leggibile di hashtag');
+    return [];
+  }
+};
 
 export function riscritturaDisponibile(): boolean {
   return Boolean(process.env.ANTHROPIC_API_KEY) && process.env.X_RISCRITTURA !== '0';

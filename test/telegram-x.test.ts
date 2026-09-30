@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { aggiungiHashtag, aggiungiMenzioni, componiPostConRiscrittura, componiTweet, componiTweetConRiscrittura, contieneLink, eDoppione, estraiPostCanale, impronta, lunghezzaX, opzioniFormato, similitudine, spezzaInParti, type Riscrittore } from '@/lib/telegram-x';
+import { aggiungiHashtag, aggiungiMenzioni, componiPostConRiscrittura, soloLink, componiTweet, componiTweetConRiscrittura, contieneLink, eDoppione, estraiPostCanale, impronta, lunghezzaX, opzioniFormato, similitudine, spezzaInParti, type Riscrittore } from '@/lib/telegram-x';
 
 /* Il ponte Telegram → X: solo i post nuovi del canale, testo entro 280 caratteri come li conta X. */
 
@@ -241,6 +241,58 @@ describe('aggiungiMenzioni', () => {
   });
 });
 
+describe('gli errori visti sul profilo il 30 settembre', () => {
+  it('non mette il cancelletto sulla prima parola di una citazione', () => {
+    const mentana = 'Mentana continua a parlare di un suo possibile addio a La7\n\n"Sto portando via tutto quello che avevo in stanza. Ho parlato con la Rai".';
+    const testo = aggiungiHashtag(mentana, 3);
+    expect(testo).toContain('#Mentana');
+    expect(testo).not.toContain('#Sto');
+  });
+
+  it('non spezza in due i nomi di piu\u0300 parole', () => {
+    expect(aggiungiHashtag('Il collega proveniente dagli Emirati Arabi Uniti.', 1)).toContain('#EmiratiArabiUniti');
+    expect(aggiungiHashtag('Il sindaco socialista di New York ha annunciato un aumento.', 1)).toContain('#NewYork');
+    expect(aggiungiHashtag('Il leader di Italia Viva presenta il libro.', 1)).toContain('#ItaliaViva');
+    expect(aggiungiHashtag('Il candidato di Futuro Nazionale ha preso 7 mila preferenze.', 1)).toContain('#FuturoNazionale');
+  });
+
+  it('mette il cancelletto sul cognome con la particella, non sul nome di battesimo', () => {
+    expect(aggiungiHashtag('La filosofa Donatella Di Cesare interviene sul caso.', 1)).toBe('La filosofa Donatella #DiCesare interviene sul caso.');
+    expect(aggiungiHashtag('Alessandro Di Battista posta una foto su Substack.', 1)).toBe('Alessandro #DiBattista posta una foto su Substack.');
+  });
+
+  it('non tocca mai il testo dentro un link', () => {
+    expect(aggiungiHashtag('Il video di Meloni: instagram.com/p/Dd6CfnGAAuy oggi.', 3)).toBe('Il video di #Meloni: instagram.com/p/Dd6CfnGAAuy oggi.');
+    expect(aggiungiHashtag('instagram.com/p/Dd6CfnGAAuy', 3)).toBe('instagram.com/p/Dd6CfnGAAuy');
+  });
+
+  it('un post che e\u0300 solo un link non va su X', () => {
+    expect(soloLink('instagram.com/p/Dd6CfnGAAuy')).toBe(true);
+    expect(soloLink('Guarda qui https://politicare.it/ultimora/tg-12 @politicare')).toBe(true);
+    expect(soloLink('Il ministro Nordio commenta la sentenza, il video integrale su politicare.it')).toBe(false);
+    expect(soloLink('Nessun link in questo post, solo testo.')).toBe(false);
+  });
+
+  it('riunisce gli a capo che il canale mette dentro la frase', () => {
+    const renzi = 'Il leader di Italia Viva, Matteo\nRenzi ha parlato del libro.\nLe parole arrivano durante la\npresentazione.';
+    expect(componiTweet(renzi, { titolo: 'nessuno', hashtag: 0 })).toBe(
+      'Il leader di Italia Viva, Matteo Renzi ha parlato del libro.\nLe parole arrivano durante la presentazione.',
+    );
+  });
+
+  it('corregge i refusi con la «l» al posto della «I»', () => {
+    expect(componiTweet('Anche Q8 ltalia fissa il price cap.', { titolo: 'nessuno', hashtag: 0 })).toBe('Anche Q8 Italia fissa il price cap.');
+    expect(componiTweet('Tensione tra lsraele e lran.', { titolo: 'nessuno', hashtag: 0 })).toBe('Tensione tra Israele e Iran.');
+  });
+
+  it('non mette il cancelletto su parole generiche, mesi e verbi', () => {
+    for (const testo of ['Congetture su Beppe Grillo e Andrea Stroppa.', 'Aggiornamento sulla vicenda Flydubai.', 'Tetto sul costo dal 1 Ottobre.']) {
+      const marcato = aggiungiHashtag(testo, 3);
+      for (const vietata of ['#Congetture', '#Aggiornamento', '#Ottobre']) expect(marcato).not.toContain(vietata);
+    }
+  });
+});
+
 describe('doppioni', () => {
   const berlinoA = '\ud83c\udde9\ud83c\uddea Amministrative di #Berlino, primi exit poll\n\n#Linke \u00e8 in testa con il 26% mentre la Cdu \u00e8 seconda al 20%. #AfD terza con un 13,5%.';
   const berlinoB = 'Amministrative di Berlino, promi exit poll\n\n#Linke \u00e8 in testa con il 26% mentre la #Cdu \u00e8 seconda al 20%. #AfD terza con un 13,5%.';
@@ -311,15 +363,32 @@ describe('thread al posto del taglio', () => {
     for (const parte of parti) expect(lunghezzaX(parte)).toBeLessThanOrEqual(110);
   });
 
-  it('un post che entra resta parola per parola: se Claude cambia il testo, si scarta e vale la regola automatica', async () => {
-    vi.spyOn(console, 'error').mockImplementation(() => {});
+  it('un post che entra non passa mai dal riscrittore: a Claude si chiede solo quali parole marcare', async () => {
     const originale = 'Meloni a Bruxelles per il vertice sui dazi. La premier vede von der Leyen.';
-    const manomesso = vi.fn<Riscrittore>(async () => '#Meloni vola a Bruxelles per il vertice sui dazi e incontra von der Leyen.');
-    expect(await componiPostConRiscrittura(originale, UNO, manomesso)).toEqual(['#Meloni a Bruxelles per il vertice sui dazi\n\nLa premier vede von der Leyen.']);
-    const unite = vi.fn<Riscrittore>(async () => '#Meloni a #Bruxelles per il #VerticeSuiDazi. La premier vede von der Leyen.');
-    expect(await componiPostConRiscrittura(originale, opzioniFormato({}), unite)).toEqual(['#Meloni a #Bruxelles per il #VerticeSuiDazi\n\nLa premier vede von der Leyen.']);
-    const soloCancelletto = vi.fn<Riscrittore>(async () => 'Meloni a #Bruxelles per il vertice sui dazi. La premier vede von der Leyen.');
-    expect(await componiPostConRiscrittura(originale, UNO, soloCancelletto)).toEqual(['Meloni a #Bruxelles per il vertice sui dazi\n\nLa premier vede von der Leyen.']);
+    const riscrivi = vi.fn<Riscrittore>(async () => 'testo cambiato da Claude');
+    const scegli = vi.fn(async () => ['Bruxelles']);
+
+    const parti = await componiPostConRiscrittura(originale, UNO, riscrivi, scegli);
+    expect(riscrivi).not.toHaveBeenCalled();
+    expect(scegli).toHaveBeenCalledWith(originale, 1);
+    expect(parti).toEqual(['Meloni a #Bruxelles per il vertice sui dazi\n\nLa premier vede von der Leyen.']);
+  });
+
+  it('le parole scelte da Claude battono la regola automatica e possono unire piu\u0300 parole', async () => {
+    const testo = 'Il governo ha approvato il taglio del bollo auto per il 2027, ha annunciato Salvini.';
+    const scegli = vi.fn(async () => ['bollo auto', 'Salvini']);
+    expect(await componiPostConRiscrittura(testo, { ...opzioniFormato({}), menzioni: 0 }, undefined, scegli)).toEqual([
+      'Il governo ha approvato il taglio del #BolloAuto per il 2027, ha annunciato #Salvini.',
+    ]);
+  });
+
+  it('se Claude non risponde vale la regola automatica e il post esce lo stesso', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    const scegli = vi.fn(async () => {
+      throw new Error('quota finita');
+    });
+    const parti = await componiPostConRiscrittura('Meloni a Bruxelles per il vertice sui dazi.', UNO, undefined, scegli);
+    expect(parti).toEqual(['#Meloni a Bruxelles per il vertice sui dazi.']);
   });
 
   it('con il riscrittore prova prima a fare un post solo; se non basta, thread', async () => {

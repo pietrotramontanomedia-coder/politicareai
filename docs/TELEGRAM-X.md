@@ -22,7 +22,10 @@ Si dovrà aspettare mercoledì per il conteggio   ← il resto del testo; le par
 dei voti: Magdalena #Andersson è in testa.          diventano hashtag (X_HASHTAG, predefinito 3)
 ```
 
-Gli hashtag stanno dentro il testo, mai in coda, e sono **tre, scelti da Claude** (decisione di Pietro
+Gli hashtag stanno dentro il testo, mai in coda, e sono **tre, scelti da Claude**. Claude non riceve
+il testo da riscrivere: gli si chiede solo **quali parole marcare** e restituisce un elenco, così il testo
+non può cambiare di una virgola. Se non risponde o sbaglia formato vale la regola automatica.
+La scelta segue quest'ordine (decisione di Pietro
 del 17 settembre 2026): cognomi dei protagonisti, partiti, istituzioni e luoghi, e il tema solo se è
 riconoscibile su X (bollo auto → #BolloAuto). Il testo resta parola per parola: da Claude si accetta
 solo il cancelletto. Senza `ANTHROPIC_API_KEY`, una regola automatica preferisce il cognome di un
@@ -49,6 +52,13 @@ Regole di testo:
   tagliata né chiusa con puntini;
 - `X_LINK_NOTIZIE=sempre` aggiunge il link alla notizia sul sito a tutti i post, `mai` (predefinito) non lo aggiunge mai;
 - con **X Premium** sull'account il limite sale (`X_LIMITE=25000`) e i post escono interi in un post solo.
+
+Post scartati: un post che è **solo un link** (o un link e poche parole) non esce su X, perché non dice
+nulla ed è il formato più penalizzato dall'algoritmo. I cancelletti non entrano mai dentro un indirizzo.
+
+Pulizia del testo, oltre alla firma e alle bandiere: gli **a capo messi a mano dentro la frase** tornano a
+essere spazi (il canale va a capo a mano e su X il post usciva a scalini), e i **refusi con la «l» minuscola**
+al posto della «I» maiuscola vengono corretti (`ltalia`, `lsraele`, `lran`, `lstat`, `Fdl`).
 
 Doppioni: se la stessa notizia è già uscita nelle ultime `X_DOPPIONI_ORE` ore (predefinito 24) il post
 viene scartato e Telegram riceve 200, così non riprova. Il confronto è sulle parole che contano, senza

@@ -1,6 +1,6 @@
 import { CANALE_TELEGRAM } from '@/lib/telegram-server';
-import { componiPostConRiscrittura, eDoppione, estraiPostCanale, impronta, opzioniFormato } from '@/lib/telegram-x';
-import { riscritturaDisponibile, riscriviPerX } from '@/lib/riscrittura-server';
+import { componiPostConRiscrittura, eDoppione, estraiPostCanale, impronta, opzioniFormato, soloLink } from '@/lib/telegram-x';
+import { riscritturaDisponibile, riscriviPerX, scegliHashtag } from '@/lib/riscrittura-server';
 import { scaricaFotoTelegram, segretoTelegramValido } from '@/lib/telegram-bot-server';
 import { giaPubblicato, improteRecenti, registraPubblicazione, ultimaPubblicazione } from '@/lib/telegram-x-registro';
 import { pubblicaSuX, rifiutatoDaX, xConfigurato } from '@/lib/x-server';
@@ -53,6 +53,11 @@ export async function POST(request: Request) {
     return Response.json({ ok: true, ignorato: `canale ${post.canale} non seguito` });
   }
   if (!post.testo.trim()) return Response.json({ ok: true, ignorato: 'post senza testo' });
+  // Un post che è solo un link non dice nulla e su X è il formato più penalizzato di tutti.
+  if (soloLink(post.testo)) {
+    console.log(`[telegram-x] t.me/${post.canale}/${post.numero} scartato: solo un link`);
+    return Response.json({ ok: true, ignorato: 'solo un link' });
+  }
 
   const precedente = await giaPubblicato(post.numero);
   if (precedente) return Response.json({ ok: true, ignorato: 'già pubblicato', x: precedente.x });
@@ -79,7 +84,8 @@ export async function POST(request: Request) {
   const opzioni = { ...opzioniFormato(process.env), link: `${SITO}/ultimora/tg-${post.numero}` };
 
   try {
-    const parti = await componiPostConRiscrittura(post.testo, opzioni, riscritturaDisponibile() ? riscriviPerX : undefined);
+    const disponibile = riscritturaDisponibile();
+    const parti = await componiPostConRiscrittura(post.testo, opzioni, disponibile ? riscriviPerX : undefined, disponibile ? scegliHashtag : undefined);
     const immagine = post.foto ? await scaricaFotoTelegram(post.foto) : undefined;
     const { id } = await pubblicaSuX(parti[0], immagine);
     await registraPubblicazione(post.numero, id, impronta(post.testo).join(' '));
