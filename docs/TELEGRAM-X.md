@@ -37,7 +37,8 @@ I politici citati vengono **taggati**: un hashtag che corrisponde a un politico 
 diventa una menzione (`#Bonelli` → `@AngeloBonelli1`), così la persona riceve la notifica e spesso
 ricondivide. I segni nel testo non aumentano: la menzione prende il posto dell'hashtag, al massimo
 due per post (`X_MENZIONI`). Mai in prima posizione, perché un post che comincia con `@` X lo mostra
-solo a chi segue entrambi. La tabella dei nomi sta in `lib/telegram-x.ts` (`MENZIONI`): gli account
+solo a chi segue entrambi. Se il nome di battesimo è già dentro l'handle sparisce, per non leggere
+«Matteo @matteorenzi»; resta solo quando apre il post. La tabella dei nomi sta in `lib/telegram-x.ts` (`MENZIONI`): gli account
 sono stati verificati uno per uno aprendo il profilo il 24 settembre 2026, e nel dubbio non si tagga.
 
 Regole di testo:

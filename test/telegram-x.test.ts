@@ -226,6 +226,16 @@ describe('aggiungiMenzioni', () => {
     expect(aggiungiMenzioni('#Meloni parla di #Salvini.')).toBe('#Meloni parla di @matteosalvinimi.');
   });
 
+  it('il nome di battesimo gi\u00e0 contenuto nell\u2019handle sparisce, per non ripeterlo', () => {
+    expect(aggiungiMenzioni('Il leader di Italia Viva, Matteo #Renzi, ha parlato.')).toBe('Il leader di Italia Viva, @matteorenzi, ha parlato.');
+    expect(aggiungiMenzioni('La premier Giorgia #Meloni in aula.')).toBe('La premier @GiorgiaMeloni in aula.');
+    expect(aggiungiMenzioni('Il ministro Antonio #Tajani replica.')).toBe('Il ministro @Antonio_Tajani replica.');
+    // L'handle non contiene il nome: la ripetizione non c'\u00e8 e il nome resta.
+    expect(aggiungiMenzioni('Il segretario Nicola #Fratoianni interviene.')).toBe('Il segretario Nicola @NFratoianni interviene.');
+    // Il nome apre il post: togliendolo il post comincerebbe con «@».
+    expect(aggiungiMenzioni('Matteo #Renzi ha parlato del libro.')).toBe('Matteo @matteorenzi ha parlato del libro.');
+  });
+
   it('rispetta il massimo e si pu\u00f2 spegnere', () => {
     const testo = '#Meloni, #Salvini e #Tajani al vertice.';
     expect(aggiungiMenzioni(testo, 1)).toBe('#Meloni, @matteosalvinimi e #Tajani al vertice.');

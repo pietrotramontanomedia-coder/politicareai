@@ -379,11 +379,15 @@ function chiaveMenzione(nome: string): string {
 export function aggiungiMenzioni(testo: string, massimo = 2): string {
   if (massimo <= 0) return testo;
   let fatte = 0;
-  return testo.replace(/#(\p{Lu}[\p{L}\p{N}]*)/gu, (intero, nome: string, posizione: number) => {
-    const handle = MENZIONI[chiaveMenzione(nome)];
-    if (!handle || fatte >= massimo || posizione === 0) return intero;
+  return testo.replace(/(\p{Lu}[\p{L}]{2,} )?#(\p{Lu}[\p{L}\p{N}]*)/gu, (intero, nome: string | undefined, cognome: string, posizione: number) => {
+    const handle = MENZIONI[chiaveMenzione(cognome)];
+    const cancelletto = posizione + (nome?.length ?? 0);
+    if (!handle || fatte >= massimo || cancelletto === 0) return intero;
     fatte++;
-    return `@${handle}`;
+    // Il nome di battesimo che l'handle contiene già sparisce: «Matteo @matteorenzi» si legge male.
+    // Resta se è la prima parola del post, altrimenti il post comincerebbe con «@».
+    const ripetuto = nome && posizione > 0 && chiaveMenzione(handle).includes(chiaveMenzione(nome.trim()));
+    return `${ripetuto ? '' : (nome ?? '')}@${handle}`;
   });
 }
 
