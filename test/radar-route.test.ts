@@ -8,7 +8,8 @@ let stato: StatoRadar;
 let tendenze = [{ nome: '#Premierato', volume: 9000 }, { nome: '#Manovra', volume: 4000 }];
 let orari = [100, 100, 100, 400, 10];
 let valutazione: Valutazione;
-const inviaMessaggioTelegram = vi.fn(async () => {});
+const inviaAvvisoTelegram = vi.fn<(testo: string) => Promise<void>>(async () => {});
+let telegramConfigurato = true;
 const valutaTendenza = vi.fn(async () => valutazione);
 const campionePost = vi.fn(async () => [{ testo: 'Oggi in Senato', autore: 'qualcuno', like: 3, repost: 1 }]);
 
@@ -26,8 +27,9 @@ vi.mock('@/lib/radar-claude-server', () => ({
   valutazioneDisponibile: () => true,
   valutaTendenza: (...args: unknown[]) => valutaTendenza(...(args as [])),
 }));
-vi.mock('@/lib/telegram-bot-server', () => ({
-  inviaMessaggioTelegram: (...args: unknown[]) => inviaMessaggioTelegram(...(args as [])),
+vi.mock('@/lib/radar-telegram-server', () => ({
+  avvisiTelegramConfigurati: () => telegramConfigurato,
+  inviaAvvisoTelegram: (testo: string) => inviaAvvisoTelegram(testo),
 }));
 
 const SEGRETO = 'segreto-cron';
@@ -45,7 +47,7 @@ async function chiama(query = '') {
 beforeEach(() => {
   vi.stubEnv('CRON_SECRET', SEGRETO);
   vi.stubEnv('RADAR_MODALITA', 'avvisa');
-  vi.stubEnv('RADAR_TELEGRAM_CHAT', '12345');
+  telegramConfigurato = true;
   vi.stubEnv('RADAR_ORARIO', '0-24');
   vi.stubEnv('RADAR_MASSIMO_GIORNO', '10');
   // Un'ora fa in classifica c'era solo la manovra: il premierato è nuovo.
@@ -88,8 +90,8 @@ describe('/api/radar', () => {
   it('un tema nuovo che accelera viene valutato e mandato in privato, e non si ripete', async () => {
     const { corpo } = await chiama();
     expect(corpo.valutati).toEqual([expect.objectContaining({ nome: '#Premierato', esito: 'inviato', accelerazione: 4 })]);
-    expect(inviaMessaggioTelegram).toHaveBeenCalledTimes(1);
-    expect(inviaMessaggioTelegram).toHaveBeenCalledWith('12345', expect.stringContaining('Oggi il Senato vota il #Premierato.'));
+    expect(inviaAvvisoTelegram).toHaveBeenCalledTimes(1);
+    expect(inviaAvvisoTelegram).toHaveBeenCalledWith(expect.stringContaining('Oggi il Senato vota il #Premierato.'));
     expect(stato.avvisi.map((a) => a.chiave)).toEqual(['premierato']);
     expect(stato.rilevazioni).toHaveLength(2);
 
@@ -98,7 +100,7 @@ describe('/api/radar', () => {
     stato.rilevazioni[1].quando = new Date(Date.now() - 3_600_000).toISOString();
     stato.rilevazioni[1].tendenze = [{ nome: '#Manovra', volume: 4000 }];
     await chiama();
-    expect(inviaMessaggioTelegram).toHaveBeenCalledTimes(1);
+    expect(inviaAvvisoTelegram).toHaveBeenCalledTimes(1);
   });
 
   it('un tema che non accelera non arriva a Claude', async () => {
@@ -113,7 +115,7 @@ describe('/api/radar', () => {
     valutazione = { ...valutazione, pertinente: false, bozze: [] };
     const { corpo } = await chiama();
     expect(corpo.valutati[0].esito).toBe('non pertinente');
-    expect(inviaMessaggioTelegram).not.toHaveBeenCalled();
+    expect(inviaAvvisoTelegram).not.toHaveBeenCalled();
     expect(stato.avvisi).toHaveLength(1);
   });
 
@@ -121,7 +123,7 @@ describe('/api/radar', () => {
     vi.stubEnv('RADAR_MODALITA', 'registra');
     const { corpo } = await chiama();
     expect(corpo.valutati[0]).toMatchObject({ esito: 'registrato', bozze: ['Oggi il Senato vota il #Premierato.'] });
-    expect(inviaMessaggioTelegram).not.toHaveBeenCalled();
+    expect(inviaAvvisoTelegram).not.toHaveBeenCalled();
     expect(stato.avvisi[0].inviato).toBe(false);
   });
 
@@ -130,7 +132,7 @@ describe('/api/radar', () => {
     const { corpo } = await chiama('?prova=1');
     expect(corpo.modalita).toBe('prova');
     expect(corpo.valutati[0].esito).toBe('registrato');
-    expect(inviaMessaggioTelegram).not.toHaveBeenCalled();
+    expect(inviaAvvisoTelegram).not.toHaveBeenCalled();
     expect(stato.avvisi).toEqual([]);
   });
 
@@ -170,6 +172,14 @@ describe('/api/radar', () => {
     const { corpo } = await chiama();
     expect(corpo.valutati[0].esito).toBe('inviato');
     expect(campionePost).not.toHaveBeenCalled();
+  });
+
+  it('senza il bot del radar valuta ma non invia, e lo dice', async () => {
+    telegramConfigurato = false;
+    const { corpo } = await chiama();
+    expect(corpo.valutati[0].esito).toBe('registrato');
+    expect(corpo.avviso).toContain('RADAR_TELEGRAM_BOT_TOKEN');
+    expect(inviaAvvisoTelegram).not.toHaveBeenCalled();
   });
 
   it('se Claude sbaglia, il giro continua e la classifica viene salvata', async () => {

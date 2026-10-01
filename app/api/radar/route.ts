@@ -17,12 +17,15 @@ import {
 import { valutaTendenza, valutazioneDisponibile } from '@/lib/radar-claude-server';
 import { leggiStato, salvaStato } from '@/lib/radar-registro';
 import { campionePost, conteggiOrari, leggiTendenze, letturaXConfigurata } from '@/lib/radar-x-server';
-import { inviaMessaggioTelegram } from '@/lib/telegram-bot-server';
+import { avvisiTelegramConfigurati, inviaAvvisoTelegram } from '@/lib/radar-telegram-server';
 
 /**
  * Radar dei trend su X (vedi docs/RADAR.md). Lo chiama un job programmato ogni 20-30 minuti:
  * legge le tendenze italiane, trova i temi che salgono, fa valutare i migliori a Claude
  * e, in modalità `avvisa`, manda le bozze in privato su Telegram. Non pubblica mai su X.
+ *
+ * È scollegato dal ponte Telegram → X: bot, chiavi X, chiave Claude e file di stato sono suoi
+ * (variabili RADAR_*), e non importa nulla del codice del ponte.
  *
  * `?prova=1` fa un giro completo senza mandare messaggi e senza segnare i temi come proposti.
  */
@@ -61,7 +64,7 @@ export async function GET(request: Request) {
     return Response.json({ ok: true, attivo: false, nota: `fuori orario (${opzioni.orario.join('-')}): nessuna lettura` });
   }
   if (!letturaXConfigurata()) {
-    return Response.json({ ok: false, error: 'lettura da X non configurata' }, { status: 503 });
+    return Response.json({ ok: false, error: 'RADAR_X_BEARER_TOKEN mancante' }, { status: 503 });
   }
 
   const stato = await leggiStato();
@@ -82,8 +85,8 @@ export async function GET(request: Request) {
   const scelti = valutazioneDisponibile()
     ? segnaliDaValutare(segnali, stato.avvisi, { ...opzioni, valutazioni: Math.min(opzioni.valutazioni, rimaste) }, adesso)
     : [];
-  const chat = process.env.RADAR_TELEGRAM_CHAT;
-  const invia = opzioni.modalita === 'avvisa' && !prova && Boolean(chat);
+  const telegram = avvisiTelegramConfigurati();
+  const invia = opzioni.modalita === 'avvisa' && !prova && telegram;
 
   const valuta = async (segnale: Segnale): Promise<{ esito: Esito; avviso?: Avviso }> => {
     const query = querySuX(segnale.nome);
@@ -118,7 +121,7 @@ export async function GET(request: Request) {
         return { esito: { ...base, esito: 'non pertinente', dettaglio: valutazione.motivo }, avviso };
       }
       if (invia && valutazione.bozze.length) {
-        await inviaMessaggioTelegram(chat!, componiAvviso(segnale, valutazione, accel));
+        await inviaAvvisoTelegram(componiAvviso(segnale, valutazione, accel));
         avviso.inviato = true;
       }
       return {
@@ -150,8 +153,10 @@ export async function GET(request: Request) {
     tendenze: attuale.tendenze.length,
     segnali: segnali.slice(0, 10).map((s) => ({ nome: s.nome, motivo: s.motivo, forza: s.forza })),
     valutati: risultati.map((r) => r.esito),
-    ...(valutazioneDisponibile() ? {} : { nota: 'ANTHROPIC_API_KEY mancante: segnali registrati senza valutazione' }),
+    ...(valutazioneDisponibile() ? {} : { nota: 'RADAR_ANTHROPIC_API_KEY mancante: segnali registrati senza valutazione' }),
     ...(rimaste === 0 && segnali.length ? { tetto: `raggiunto il tetto di ${opzioni.massimoGiorno} temi valutati oggi` } : {}),
-    ...(opzioni.modalita === 'avvisa' && !chat ? { avviso: 'RADAR_TELEGRAM_CHAT mancante: nessun messaggio inviato' } : {}),
+    ...(opzioni.modalita === 'avvisa' && !telegram
+      ? { avviso: 'RADAR_TELEGRAM_BOT_TOKEN o RADAR_TELEGRAM_CHAT mancante: nessun messaggio inviato' }
+      : {}),
   });
 }

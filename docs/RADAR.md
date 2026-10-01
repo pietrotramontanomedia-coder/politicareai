@@ -22,11 +22,32 @@ Un job programmato chiama `https://politicare-app.vercel.app/api/radar` da una v
    qualcosa e scrive le bozze. Regole fisse: solo fatti, nessuna opinione o tifo, nessun numero
    inventato, aggancio a uno strumento del sito quando c'è. I fatti presi solo dai post finiscono
    nella lista «Prima di pubblicare verifica».
-5. **Avviso.** In modalità `avvisa`, il bot Telegram del ponte manda il messaggio in privato.
+5. **Avviso.** In modalità `avvisa`, il bot Telegram del radar manda il messaggio in privato.
    Lo stesso tema non viene riproposto per 12 ore (`RADAR_RIPOSO_ORE`).
 
 La memoria (classifiche delle ultime 48 ore e avvisi delle ultime due settimane) sta in
-`radar/stato.json` nello storage Blob, accanto al registro del ponte.
+`radar/stato.json` nello storage Blob.
+
+## Scollegato dal ponte Telegram → X
+
+Il radar non condivide nulla con il ponte che ripubblica il canale su X:
+
+| | Ponte Telegram → X | Radar |
+|---|---|---|
+| Bot Telegram | `TELEGRAM_BOT_TOKEN` | `RADAR_TELEGRAM_BOT_TOKEN`, un bot diverso |
+| Chiavi X | `X_API_KEY`, `X_ACCESS_TOKEN`… (pubblica) | `RADAR_X_BEARER_TOKEN`, di un'app X diversa (solo lettura) |
+| Claude | `ANTHROPIC_API_KEY` | `RADAR_ANTHROPIC_API_KEY`, una chiave diversa |
+| Codice | `lib/telegram-x*.ts`, `lib/x-server.ts`, `lib/telegram-bot-server.ts` | `lib/radar*.ts`, `app/api/radar` |
+| Stato | `telegram-x/pubblicati.json` | `radar/stato.json` |
+
+Un test (`test/radar-separazione.test.ts`) blocca la build se il codice del radar importa un modulo del
+ponte o legge una sua variabile. Se il radar si rompe, finisce i crediti o viene spento, il ponte
+continua come prima. In comune restano solo il sito su Vercel e lo storage Blob, in file diversi.
+
+Una cosa da sapere: su X i crediti prepagati sono dell'account sviluppatore, non della singola app.
+Con l'app separata le chiavi e i limiti sono distinti, ma la spesa del radar (al massimo circa 0,35 $
+al giorno su X con i valori predefiniti) esce dallo stesso saldo del ponte: tieni la ricarica
+automatica attiva o un margine di credito.
 
 ## Modalità
 
@@ -66,25 +87,45 @@ Tre freni tengono la spesa sotto controllo:
 
 ## Attivazione
 
-### 1. Dove arrivano gli avvisi
+Tutto si fa una volta sola, da computer. Niente di quello che segue tocca il ponte.
 
-1. Su Telegram apri il bot del ponte (quello creato con BotFather) e premi **Avvia**: un bot può
-   scrivere solo a chi gli ha scritto almeno una volta.
-2. Scrivi a `@userinfobot`: ti risponde con il tuo **Id** numerico. È `RADAR_TELEGRAM_CHAT`.
+### 1. Un bot Telegram solo per il radar
+
+1. Su Telegram scrivi a `@BotFather` → `/newbot`, nome per esempio «Politicare Radar»,
+   username per esempio `politicare_radar_bot`. Il token che ti dà è `RADAR_TELEGRAM_BOT_TOKEN`.
+2. Apri il nuovo bot e premi **Avvia**: un bot può scrivere solo a chi gli ha scritto almeno una volta.
+3. Scrivi a `@userinfobot`: ti risponde con il tuo **Id** numerico. È `RADAR_TELEGRAM_CHAT`.
    Per mandare gli avvisi a un gruppo della redazione, aggiungi il bot al gruppo e usa l'id del
    gruppo (comincia con `-`).
 
-### 2. Variabili su Vercel
+Il bot del radar non va aggiunto al canale `@politicare`.
 
-Le chiavi di X e di Claude sono già quelle del ponte (`X_API_KEY`, `X_API_SECRET`,
-`ANTHROPIC_API_KEY`, `TELEGRAM_BOT_TOKEN`, `BLOB_READ_WRITE_TOKEN`). In più:
+### 2. Un'app X solo per il radar
+
+1. Su [developer.x.com](https://developer.x.com), nello stesso account e progetto del ponte,
+   crea una **nuova app** (es. «Politicare Radar»). Non toccare l'app del ponte né le sue chiavi.
+2. Permessi: **Read** basta, il radar non pubblica.
+3. *Keys and tokens* → **Bearer Token** → genera e copia: è `RADAR_X_BEARER_TOKEN`.
+
+### 3. Una chiave Claude solo per il radar
+
+Su [console.anthropic.com](https://console.anthropic.com) → API Keys → **Create Key**, nome «radar».
+È `RADAR_ANTHROPIC_API_KEY`. Così nella console vedi la spesa del radar separata da quella del ponte,
+e puoi revocarla senza toccare il ponte.
+
+### 4. Variabili su Vercel
+
+Nel progetto `politicare-app` → Settings → Environment Variables (ambiente Production) aggiungi
+solo variabili nuove, senza modificare quelle esistenti:
 
 | Variabile | Valore |
 |---|---|
-| `RADAR_MODALITA` | `registra` per cominciare, poi `avvisa` |
+| `RADAR_MODALITA` | `avvisa` (oppure `registra` per avere le bozze solo nello stato, senza messaggi) |
+| `RADAR_TELEGRAM_BOT_TOKEN` | token del bot del radar (passo 1) |
 | `RADAR_TELEGRAM_CHAT` | il tuo id Telegram (passo 1) |
+| `RADAR_X_BEARER_TOKEN` | Bearer Token dell'app X del radar (passo 2) |
+| `RADAR_ANTHROPIC_API_KEY` | chiave Claude del radar (passo 3) |
 | `CRON_SECRET` | già presente per Instagram: serve anche al radar |
-| `X_BEARER_TOKEN` | facoltativa: il Bearer Token dell'app X; senza, il radar lo ricava da API Key e Secret |
 | `RADAR_MASSIMO_GIORNO` | facoltativa: tetto di temi valutati al giorno, predefinito `3` |
 | `RADAR_ORARIO` | facoltativa: ore italiane di lavoro, predefinito `10-22` (ultimo giro alle 21); `0-24` = tutto il giorno |
 | `RADAR_INTERVALLO_MINUTI` | facoltativa: minuti minimi fra due giri, predefinito `55` (un giro all'ora) |
@@ -94,9 +135,9 @@ Le chiavi di X e di Claude sono già quelle del ponte (`X_API_KEY`, `X_API_SECRE
 | `RADAR_CLASSIFICA` | facoltativa: fino a che posizione delle tendenze guardare, predefinito `30` |
 | `RADAR_CAMPIONE` | facoltativa: post letti per capire il tema, predefinito `10` (minimo di X); `0` per non leggerne |
 
-Dopo aver salvato fai un **Redeploy**.
+Dopo aver salvato fai un **Redeploy**. Per spegnere il radar basta togliere `RADAR_MODALITA`.
 
-### 3. Il job programmato (per la prova: una volta all'ora)
+### 5. Il job programmato (una volta all'ora)
 
 - **Vercel Pro**: aggiungi in `vercel.json`, dentro `crons`,
   `{ "path": "/api/radar", "schedule": "*/20 * * * *" }`. Vercel manda da solo il `CRON_SECRET`.
@@ -105,7 +146,7 @@ Dopo aver salvato fai un **Redeploy**.
   URL `https://politicare-app.vercel.app/api/radar`, ogni ora per la prova (poi ogni 20-30 minuti), con l'intestazione
   `Authorization: Bearer <CRON_SECRET>`.
 
-### 4. Prova
+### 6. Prova
 
 Con `CRON_SECRET` in `.env.local`:
 
@@ -119,9 +160,11 @@ classifica di un'ora prima con cui confrontarsi.
 
 ## Se qualcosa non va
 
-- **`tendenze non lette`**: chiavi X errate o crediti finiti. Le tendenze per località
+- **`RADAR_X_BEARER_TOKEN mancante`**: manca il Bearer Token dell'app X del radar.
+- **`tendenze non lette`**: Bearer Token errato o crediti finiti. Le tendenze per località
   (`/2/trends/by/woeid`) funzionano con il pay-per-use, ma X può cambiare i permessi: i log
   `[radar]` su Vercel riportano la risposta di X.
-- **Segnali ma nessuna valutazione**: manca `ANTHROPIC_API_KEY`, oppure i temi non accelerano.
-- **Valutato ma nessun messaggio**: `RADAR_MODALITA` non è `avvisa`, manca `RADAR_TELEGRAM_CHAT`
-  oppure non hai premuto Avvia nel bot.
+- **Segnali ma nessuna valutazione**: manca `RADAR_ANTHROPIC_API_KEY`, oppure i temi non accelerano,
+  oppure è stato raggiunto il tetto giornaliero.
+- **Valutato ma nessun messaggio**: `RADAR_MODALITA` non è `avvisa`, manca `RADAR_TELEGRAM_BOT_TOKEN`
+  o `RADAR_TELEGRAM_CHAT`, oppure non hai premuto Avvia nel bot del radar.

@@ -5,6 +5,7 @@ import type { PostCampione } from './radar-x-server';
 /**
  * Claude guarda un tema che sale su X e decide se Politicare ha qualcosa da dire;
  * se sì, prepara le bozze. Le bozze sono proposte: le legge e le pubblica una persona.
+ * Usa una chiave sua (RADAR_ANTHROPIC_API_KEY), separata da quella del ponte: spesa e limiti distinti.
  */
 
 const MODELLO = 'claude-opus-5-5';
@@ -52,7 +53,7 @@ const SCHEMA = {
 } as const;
 
 export function valutazioneDisponibile(): boolean {
-  return Boolean(process.env.ANTHROPIC_API_KEY);
+  return Boolean(process.env.RADAR_ANTHROPIC_API_KEY);
 }
 
 function descriviCampione(campione: PostCampione[]): string {
@@ -63,7 +64,7 @@ function descriviCampione(campione: PostCampione[]): string {
 }
 
 export async function valutaTendenza(segnale: Segnale, campione: PostCampione[], adesso = new Date()): Promise<Valutazione> {
-  const client = new Anthropic();
+  const client = new Anthropic({ apiKey: process.env.RADAR_ANTHROPIC_API_KEY });
   const risposta = await client.beta.messages.create({
     model: MODELLO,
     max_tokens: 16000,
