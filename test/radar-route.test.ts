@@ -132,6 +132,37 @@ describe('/api/radar', () => {
     expect(stato.avvisi).toEqual([]);
   });
 
+  it('raggiunto il tetto giornaliero registra la classifica ma non valuta', async () => {
+    vi.stubEnv('RADAR_MASSIMO_GIORNO', '1');
+    stato.avvisi = [
+      { chiave: 'altro', nome: 'Altro', quando: new Date().toISOString(), inviato: false, forza: 1, motivo: '', accelerazione: null, valutazione },
+    ];
+    const { corpo } = await chiama();
+    expect(corpo.valutati).toEqual([]);
+    expect(corpo.tetto).toContain('tetto di 1');
+    expect(valutaTendenza).not.toHaveBeenCalled();
+    expect(stato.rilevazioni).toHaveLength(2);
+  });
+
+  it('fuori orario non legge nemmeno le tendenze', async () => {
+    vi.stubEnv('RADAR_ORARIO', '0-1');
+    vi.useFakeTimers({ now: new Date('2026-10-01T10:00:00Z'), toFake: ['Date'] });
+    try {
+      const { corpo } = await chiama();
+      expect(corpo.attivo).toBe(false);
+      expect(stato.rilevazioni).toHaveLength(1);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('con RADAR_CAMPIONE=0 non legge i post e Claude valuta solo dal nome', async () => {
+    vi.stubEnv('RADAR_CAMPIONE', '0');
+    const { corpo } = await chiama();
+    expect(corpo.valutati[0].esito).toBe('inviato');
+    expect(campionePost).not.toHaveBeenCalled();
+  });
+
   it('se Claude sbaglia, il giro continua e la classifica viene salvata', async () => {
     valutaTendenza.mockRejectedValueOnce(new Error('rete'));
     const { status, corpo } = await chiama();

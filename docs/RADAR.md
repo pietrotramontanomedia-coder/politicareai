@@ -7,13 +7,14 @@ l'app con il testo già scritto, e il post lo decide e lo pubblica una persona.
 
 ## Come funziona
 
-Un job programmato chiama `https://politicare-app.vercel.app/api/radar` ogni 20-30 minuti. A ogni giro:
+Un job programmato chiama `https://politicare-app.vercel.app/api/radar` da una volta all'ora (per la prova) a ogni 20 minuti. A ogni giro:
 
 1. **Tendenze.** Legge le prime 30 tendenze di X per l'Italia (`lib/radar-x-server.ts`).
-2. **Salita.** Le confronta con la classifica di circa un'ora prima (`lib/radar.ts`). È un segnale
+2. **Salita.** Le confronta con la classifica di circa un'ora prima (`lib/radar.ts`; dopo una pausa
+   di oltre 3 ore, come la notte, il primo giro registra soltanto). È un segnale
    un tema che entra in classifica, sale di almeno 3 posizioni o cresce di volume di almeno una
    volta e mezza. Calcio, spettacolo e saluti del mattino vengono scartati subito.
-3. **Accelerazione.** Per i 2 segnali più forti (`RADAR_VALUTAZIONI`) conta i post in italiano
+3. **Accelerazione.** Per il segnale più forte (`RADAR_VALUTAZIONI`, predefinito 1) conta i post in italiano
    dell'ultima ora rispetto alla media delle tre ore prima. Sotto ×1,5 (`RADAR_ACCELERAZIONE`) il
    tema si ferma lì: sta già calando, è tardi per entrarci.
 4. **Valutazione.** Legge i 10 post più rilevanti sul tema e li passa a Claude
@@ -35,7 +36,7 @@ La memoria (classifiche delle ultime 48 ore e avvisi delle ultime due settimane)
 | `registra` | fa tutto, bozze comprese, ma non manda messaggi. Serve la prima settimana per verificare che gli avvisi arrivino **prima** del picco |
 | `avvisa` | manda gli avvisi su Telegram |
 
-Il percorso consigliato: una settimana in `registra`, poi si guarda `radar/stato.json`. Per ogni
+Il percorso consigliato: una settimana in `registra` con la configurazione **Prova** (vedi Costi), poi si guarda `radar/stato.json`. Per ogni
 avviso c'è l'ora, e nelle classifiche salvate si vede se il tema è salito ancora dopo. Se il radar
 arrivava in anticipo, si passa ad `avvisa`.
 
@@ -44,11 +45,22 @@ arrivava in anticipo, si passa ad `avvisa`.
 Prezzi pay-per-use di X nel 2026: tendenze 0,01 $ a chiamata, conteggi 0,005 $, ricerca 0,005 $ a
 post letto. Claude Opus 5.5 circa 0,05 $ a valutazione.
 
-- un giro senza temi nuovi: 0,01 $;
-- un tema valutato: circa 0,10 $ (conteggio, 10 post, Claude);
-- ogni 20 minuti, con 10-20 temi valutati al giorno: **circa 2-3 $ al giorno**.
+- un giro: 0,01 $ (la classifica), più 0,005 $ per ogni tema che sale ma non accelera;
+- un tema valutato: circa 0,10 $ (conteggio, 10 post, Claude), circa 0,05 $ con `RADAR_CAMPIONE=0`.
 
-Per spendere meno: un giro ogni 30 minuti e `RADAR_VALUTAZIONI=1`.
+Tre freni tengono la spesa sotto controllo:
+
+- `RADAR_MASSIMO_GIORNO` (predefinito 10): oltre questo numero di temi valutati in un giorno il radar
+  registra solo le classifiche fino a mezzanotte. È il tetto della spesa: 10 temi ≈ 1 $ al giorno;
+- `RADAR_ORARIO` (es. `8-23`): fuori da queste ore italiane il radar non legge nemmeno le tendenze;
+- `RADAR_CAMPIONE=0`: Claude valuta solo dal nome del tema, senza leggere i post. Costa la metà ma
+  scarta di più, perché un nome da solo spesso non basta a capire di cosa si parla.
+
+| Configurazione | Giri | Spesa massima |
+|---|---|---|
+| **Prova**: un giro all'ora, `RADAR_ORARIO=8-23`, `RADAR_MASSIMO_GIORNO=5` | 15 al giorno | ≈ 0,65 $ al giorno, **meno di 5 $ a settimana** |
+| **Normale**: ogni 30 minuti, `8-23`, tetto 10 | 30 al giorno | ≈ 1,30 $ al giorno, ≈ 40 $ al mese |
+| **Pieno**: ogni 20 minuti, tutto il giorno, tetto 20 | 72 al giorno | ≈ 2,70 $ al giorno, ≈ 80 $ al mese |
 
 ## Attivazione
 
@@ -71,21 +83,23 @@ Le chiavi di X e di Claude sono già quelle del ponte (`X_API_KEY`, `X_API_SECRE
 | `RADAR_TELEGRAM_CHAT` | il tuo id Telegram (passo 1) |
 | `CRON_SECRET` | già presente per Instagram: serve anche al radar |
 | `X_BEARER_TOKEN` | facoltativa: il Bearer Token dell'app X; senza, il radar lo ricava da API Key e Secret |
-| `RADAR_VALUTAZIONI` | facoltativa: temi valutati a ogni giro, predefinito `2` |
+| `RADAR_MASSIMO_GIORNO` | facoltativa: tetto di temi valutati al giorno, predefinito `10` |
+| `RADAR_ORARIO` | facoltativa: ore italiane di lavoro, es. `8-23`; vuota = tutto il giorno |
+| `RADAR_VALUTAZIONI` | facoltativa: temi valutati a ogni giro, predefinito `1` |
 | `RADAR_ACCELERAZIONE` | facoltativa: accelerazione minima dell'ultima ora, predefinito `1.5` |
 | `RADAR_RIPOSO_ORE` | facoltativa: ore prima di riproporre lo stesso tema, predefinito `12` |
 | `RADAR_CLASSIFICA` | facoltativa: fino a che posizione delle tendenze guardare, predefinito `30` |
-| `RADAR_CAMPIONE` | facoltativa: post letti per capire il tema, predefinito `10` (minimo di X) |
+| `RADAR_CAMPIONE` | facoltativa: post letti per capire il tema, predefinito `10` (minimo di X); `0` per non leggerne |
 
 Dopo aver salvato fai un **Redeploy**.
 
-### 3. Il job ogni 20-30 minuti
+### 3. Il job programmato (per la prova: una volta all'ora)
 
 - **Vercel Pro**: aggiungi in `vercel.json`, dentro `crons`,
   `{ "path": "/api/radar", "schedule": "*/20 * * * *" }`. Vercel manda da solo il `CRON_SECRET`.
   Sul piano Hobby i job possono girare solo una volta al giorno e il deploy fallisce: non aggiungerlo lì.
 - **Piano Hobby**: un servizio esterno gratuito come [cron-job.org](https://cron-job.org).
-  URL `https://politicare-app.vercel.app/api/radar`, ogni 20 minuti, con l'intestazione
+  URL `https://politicare-app.vercel.app/api/radar`, ogni ora per la prova (poi ogni 20-30 minuti), con l'intestazione
   `Authorization: Bearer <CRON_SECRET>`.
 
 ### 4. Prova

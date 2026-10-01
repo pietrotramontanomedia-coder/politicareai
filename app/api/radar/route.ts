@@ -2,11 +2,13 @@ import { autorizzatoCron } from '@/lib/cron';
 import {
   accelerazione,
   componiAvviso,
+  inOrario,
   opzioniRadar,
   pota,
   querySuX,
   segnaliDaValutare,
   trovaSegnali,
+  valutazioniRimaste,
   type Avviso,
   type Rilevazione,
   type Segnale,
@@ -53,11 +55,14 @@ export async function GET(request: Request) {
   if (opzioni.modalita === 'spento' && !prova) {
     return Response.json({ ok: true, attivo: false, nota: 'RADAR_MODALITA non impostata: il radar è spento' });
   }
+  const adesso = new Date();
+  if (!prova && !inOrario(opzioni.orario, adesso)) {
+    return Response.json({ ok: true, attivo: false, nota: `fuori orario (${opzioni.orario.join('-')}): nessuna lettura` });
+  }
   if (!letturaXConfigurata()) {
     return Response.json({ ok: false, error: 'lettura da X non configurata' }, { status: 503 });
   }
 
-  const adesso = new Date();
   const stato = await leggiStato();
 
   let attuale: Rilevazione;
@@ -69,7 +74,10 @@ export async function GET(request: Request) {
   }
 
   const segnali = trovaSegnali(stato.rilevazioni, attuale, opzioni.classifica);
-  const scelti = valutazioneDisponibile() ? segnaliDaValutare(segnali, stato.avvisi, opzioni, adesso) : [];
+  const rimaste = valutazioniRimaste(stato.avvisi, opzioni.massimoGiorno, adesso);
+  const scelti = valutazioneDisponibile()
+    ? segnaliDaValutare(segnali, stato.avvisi, { ...opzioni, valutazioni: Math.min(opzioni.valutazioni, rimaste) }, adesso)
+    : [];
   const chat = process.env.RADAR_TELEGRAM_CHAT;
   const invia = opzioni.modalita === 'avvisa' && !prova && Boolean(chat);
 
@@ -85,10 +93,12 @@ export async function GET(request: Request) {
     if (accel !== null && accel < opzioni.accelerazioneMinima) return { esito: { ...base, esito: 'non accelera' } };
 
     try {
-      const campione = await campionePost(query, opzioni.campione).catch((errore) => {
-        console.warn(`[radar] campione non letto per ${segnale.nome}:`, errore);
-        return [];
-      });
+      const campione = opzioni.campione
+        ? await campionePost(query, opzioni.campione).catch((errore) => {
+            console.warn(`[radar] campione non letto per ${segnale.nome}:`, errore);
+            return [];
+          })
+        : [];
       const valutazione = await valutaTendenza(segnale, campione, adesso);
       const avviso: Avviso = {
         chiave: segnale.chiave,
@@ -137,6 +147,7 @@ export async function GET(request: Request) {
     segnali: segnali.slice(0, 10).map((s) => ({ nome: s.nome, motivo: s.motivo, forza: s.forza })),
     valutati: risultati.map((r) => r.esito),
     ...(valutazioneDisponibile() ? {} : { nota: 'ANTHROPIC_API_KEY mancante: segnali registrati senza valutazione' }),
+    ...(rimaste === 0 && segnali.length ? { tetto: `raggiunto il tetto di ${opzioni.massimoGiorno} temi valutati oggi` } : {}),
     ...(opzioni.modalita === 'avvisa' && !chat ? { avviso: 'RADAR_TELEGRAM_CHAT mancante: nessun messaggio inviato' } : {}),
   });
 }

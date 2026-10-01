@@ -4,12 +4,14 @@ import {
   chiaveTema,
   componiAvviso,
   fuoriTema,
+  inOrario,
   linkScrivi,
   opzioniRadar,
   pota,
   querySuX,
   segnaliDaValutare,
   trovaSegnali,
+  valutazioniRimaste,
   type Rilevazione,
   type Valutazione,
 } from '@/lib/radar';
@@ -57,6 +59,12 @@ describe('trovaSegnali', () => {
     const adesso = rilevazione('2026-10-01T10:00:00Z', ['#Premierato']);
     expect(trovaSegnali([unOraFa, cinqueMinutiFa], adesso).map((s) => s.nome)).toEqual(['#Premierato']);
     expect(trovaSegnali([cinqueMinutiFa], adesso)).toEqual([]);
+  });
+
+  it('dopo la pausa notturna non confronta con la sera prima: il primo giro registra soltanto', () => {
+    const ieriSera = rilevazione('2026-09-30T21:00:00Z', ['#Manovra']);
+    const stamattina = rilevazione('2026-10-01T06:00:00Z', ['#Premierato', '#Manovra']);
+    expect(trovaSegnali([ieriSera], stamattina)).toEqual([]);
   });
 
   it('riconosce lo stesso tema scritto in modo diverso', () => {
@@ -108,13 +116,43 @@ describe('opzioniRadar', () => {
   it('valori predefiniti e limiti della ricerca su X', () => {
     expect(opzioniRadar({})).toEqual({
       modalita: 'spento',
-      valutazioni: 2,
+      valutazioni: 1,
       riposoOre: 12,
       accelerazioneMinima: 1.5,
       campione: 10,
       classifica: 30,
+      massimoGiorno: 10,
+      orario: [0, 24],
     });
     expect(opzioniRadar({ RADAR_CAMPIONE: '500', RADAR_ACCELERAZIONE: '2,5' })).toMatchObject({ campione: 100, accelerazioneMinima: 2.5 });
+    expect(opzioniRadar({ RADAR_CAMPIONE: '0' }).campione).toBe(0);
+    expect(opzioniRadar({ RADAR_CAMPIONE: '3' }).campione).toBe(10);
+  });
+
+  it("legge la fascia oraria e ignora quelle non valide", () => {
+    expect(opzioniRadar({ RADAR_ORARIO: '8-23' }).orario).toEqual([8, 23]);
+    expect(opzioniRadar({ RADAR_ORARIO: '23-8' }).orario).toEqual([0, 24]);
+    expect(opzioniRadar({ RADAR_ORARIO: 'giorno' }).orario).toEqual([0, 24]);
+  });
+});
+
+describe('freni sulla spesa', () => {
+  it("la fascia oraria è in ora italiana", () => {
+    // 6:30 UTC = 8:30 in Italia con l'ora legale
+    expect(inOrario([8, 23], new Date('2026-10-01T06:30:00Z'))).toBe(true);
+    expect(inOrario([8, 23], new Date('2026-10-01T05:30:00Z'))).toBe(false);
+    expect(inOrario([8, 23], new Date('2026-10-01T21:00:00Z'))).toBe(false);
+  });
+
+  it('il tetto giornaliero conta i temi valutati da mezzanotte italiana', () => {
+    const adesso = new Date('2026-10-01T10:00:00Z');
+    const avvisi = [
+      { quando: '2026-09-30T21:30:00Z' }, // 23:30 del 30 in Italia: ieri
+      { quando: '2026-09-30T22:30:00Z' }, // 00:30 del 1° in Italia: oggi
+      { quando: '2026-10-01T09:00:00Z' },
+    ];
+    expect(valutazioniRimaste(avvisi, 10, adesso)).toBe(8);
+    expect(valutazioniRimaste(avvisi, 2, adesso)).toBe(0);
   });
 });
 

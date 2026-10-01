@@ -63,10 +63,14 @@ export interface OpzioniRadar {
   riposoOre: number;
   /** Rapporto minimo fra l'ultima ora e la media delle tre precedenti. */
   accelerazioneMinima: number;
-  /** Post letti su X per capire di cosa si parla. */
+  /** Post letti su X per capire di cosa si parla; 0 = nessuno (Claude vede solo il nome del tema). */
   campione: number;
   /** Fino a che posizione della classifica un tema conta. */
   classifica: number;
+  /** Tetto di temi valutati al giorno (ora italiana): il freno sulla spesa. */
+  massimoGiorno: number;
+  /** Ore italiane in cui il radar lavora, [inizio, fine): fuori non legge nemmeno le tendenze. */
+  orario: [number, number];
 }
 
 /** Temi che non sono mai politica o attualità: si scartano senza spendere una chiamata. */
@@ -105,23 +109,64 @@ export function opzioniRadar(env: Record<string, string | undefined>): OpzioniRa
   const modalita = env.RADAR_MODALITA === 'avvisa' || env.RADAR_MODALITA === 'registra' ? env.RADAR_MODALITA : 'spento';
   return {
     modalita,
-    valutazioni: intero(env.RADAR_VALUTAZIONI, 2),
+    valutazioni: intero(env.RADAR_VALUTAZIONI, 1),
     riposoOre: intero(env.RADAR_RIPOSO_ORE, 12),
     accelerazioneMinima: decimale(env.RADAR_ACCELERAZIONE, 1.5),
-    campione: Math.min(Math.max(intero(env.RADAR_CAMPIONE, 10, 10), 10), 100),
+    campione: campione(env.RADAR_CAMPIONE),
     classifica: intero(env.RADAR_CLASSIFICA, 30, 5),
+    massimoGiorno: intero(env.RADAR_MASSIMO_GIORNO, 10),
+    orario: orario(env.RADAR_ORARIO),
   };
 }
 
-/** Il giro più vicino a `ore` fa (ma almeno di 20 minuti prima), per misurare la salita. */
+/** X restituisce da 10 a 100 post per ricerca: sotto 10 si salta la ricerca. */
+function campione(valore: string | undefined): number {
+  const n = intero(valore, 10);
+  return n === 0 ? 0 : Math.min(Math.max(n, 10), 100);
+}
+
+/** «8-23» → dalle 8 alle 23; vuoto o non valido → tutto il giorno. */
+function orario(valore: string | undefined): [number, number] {
+  const m = (valore ?? '').match(/^\s*(\d{1,2})\s*-\s*(\d{1,2})\s*$/);
+  if (!m) return [0, 24];
+  const inizio = Number(m[1]);
+  const fine = Number(m[2]);
+  return inizio < fine && fine <= 24 ? [inizio, fine] : [0, 24];
+}
+
+function oraItaliana(adesso: Date): number {
+  return Number(new Intl.DateTimeFormat('it-IT', { hour: 'numeric', hourCycle: 'h23', timeZone: 'Europe/Rome' }).format(adesso));
+}
+
+function giornoItaliano(data: Date): string {
+  return data.toLocaleDateString('sv-SE', { timeZone: 'Europe/Rome' });
+}
+
+export function inOrario(fascia: [number, number], adesso: Date): boolean {
+  const ora = oraItaliana(adesso);
+  return ora >= fascia[0] && ora < fascia[1];
+}
+
+/** Quanti temi si possono ancora valutare oggi, contando quelli già valutati da mezzanotte. */
+export function valutazioniRimaste(avvisi: Pick<Avviso, 'quando'>[], massimo: number, adesso: Date): number {
+  const oggi = giornoItaliano(adesso);
+  const fatte = avvisi.filter((a) => giornoItaliano(new Date(a.quando)) === oggi).length;
+  return Math.max(massimo - fatte, 0);
+}
+
+/**
+ * Il giro più vicino a `ore` fa (almeno 20 minuti prima, al massimo 3 ore), per misurare la salita.
+ * Dopo una pausa (la notte) non c'è confronto: il primo giro registra soltanto.
+ */
 function rilevazionePrecedente(storico: Rilevazione[], adesso: Date, ore: number): Rilevazione | null {
   const obiettivo = adesso.getTime() - ore * 3_600_000;
   const limite = adesso.getTime() - 20 * 60_000;
+  const troppoVecchio = adesso.getTime() - 3 * 3_600_000;
   let migliore: Rilevazione | null = null;
   let distanza = Infinity;
   for (const r of storico) {
     const t = Date.parse(r.quando);
-    if (Number.isNaN(t) || t > limite) continue;
+    if (Number.isNaN(t) || t > limite || t < troppoVecchio) continue;
     const d = Math.abs(t - obiettivo);
     if (d < distanza) {
       migliore = r;

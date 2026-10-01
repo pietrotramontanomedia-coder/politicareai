@@ -56,7 +56,7 @@ export function valutazioneDisponibile(): boolean {
 }
 
 function descriviCampione(campione: PostCampione[]): string {
-  if (!campione.length) return '(nessun post trovato)';
+  if (!campione.length) return '(nessun post disponibile: valuta solo dal nome del tema e, se non è chiaro, pertinente = false)';
   return campione
     .map((p, i) => `${i + 1}. @${p.autore || '?'} (${p.like} like, ${p.repost} repost): ${p.testo.replace(/\s+/g, ' ')}`)
     .join('\n');
