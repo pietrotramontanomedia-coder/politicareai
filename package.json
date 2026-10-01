@@ -14,7 +14,8 @@
     "test:watch": "npm run test:watch --workspace=@politicare/motore",
     "test:app": "vitest run",
     "test:motore": "npm run test --workspace=@politicare/motore",
-    "telegram-x": "node --no-warnings strumenti/telegram-x.mjs"
+    "telegram-x": "node --no-warnings strumenti/telegram-x.mjs",
+    "radar": "node --no-warnings strumenti/radar.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.125.0",
