@@ -128,13 +128,13 @@ function campione(valore: string | undefined): number {
   return n === 0 ? 0 : Math.min(Math.max(n, 10), 100);
 }
 
-/** «8-23» → dalle 8 alle 23 (il predefinito); «0-24» → tutto il giorno; non valido → predefinito. */
+/** «10-22» → dalle 10 alle 22, ultimo giro alle 21 (il predefinito); «0-24» → tutto il giorno; non valido → predefinito. */
 function orario(valore: string | undefined): [number, number] {
   const m = (valore ?? '').match(/^\s*(\d{1,2})\s*-\s*(\d{1,2})\s*$/);
-  if (!m) return [8, 23];
+  if (!m) return [10, 22];
   const inizio = Number(m[1]);
   const fine = Number(m[2]);
-  return inizio < fine && fine <= 24 ? [inizio, fine] : [8, 23];
+  return inizio < fine && fine <= 24 ? [inizio, fine] : [10, 22];
 }
 
 /** Vero se l'ultimo giro è più recente dell'intervallo minimo. */

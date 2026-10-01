@@ -52,16 +52,16 @@ Tre freni tengono la spesa sotto controllo:
 
 - `RADAR_MASSIMO_GIORNO` (predefinito 3): oltre questo numero di temi valutati in un giorno il radar
   registra solo le classifiche fino a mezzanotte. È il tetto della spesa;
-- `RADAR_ORARIO` (predefinito `8-23`): fuori da queste ore italiane il radar non legge nemmeno le
-  tendenze. `0-24` per tutto il giorno;
+- `RADAR_ORARIO` (predefinito `10-22`, ultimo giro alle 21): fuori da queste ore italiane il radar non
+  legge nemmeno le tendenze. `0-24` per tutto il giorno;
 - `RADAR_INTERVALLO_MINUTI` (predefinito 55): se il job chiama più spesso, i giri in più non leggono nulla;
 - `RADAR_CAMPIONE=0`: Claude valuta solo dal nome del tema, senza leggere i post. Costa la metà ma
   scarta di più, perché un nome da solo spesso non basta a capire di cosa si parla.
 
 | Configurazione | Giri | Spesa massima |
 |---|---|---|
-| **Prova** (i valori predefiniti): un giro all'ora dalle 8 alle 23, tetto 3 temi | 15 al giorno | ≈ 0,55 $ al giorno, **≈ 16 $ (≈ 14 €) al mese** |
-| Normale: ogni 30 minuti, `8-23`, tetto 10, `RADAR_INTERVALLO_MINUTI=25` | 30 al giorno | ≈ 1,40 $ al giorno, ≈ 42 $ al mese |
+| **Prova** (i valori predefiniti): un giro all'ora dalle 10 alle 22, tetto 3 temi | 12 al giorno | ≈ 0,50 $ al giorno, **≈ 15 $ (≈ 13 €) al mese** |
+| Normale: ogni 30 minuti, `10-22`, tetto 10, `RADAR_INTERVALLO_MINUTI=25` | 24 al giorno | ≈ 1,35 $ al giorno, ≈ 40 $ al mese |
 | Pieno: ogni 20 minuti, `0-24`, tetto 20, `RADAR_INTERVALLO_MINUTI=15` | 72 al giorno | ≈ 3 $ al giorno, ≈ 90 $ al mese |
 
 ## Attivazione
@@ -86,7 +86,7 @@ Le chiavi di X e di Claude sono già quelle del ponte (`X_API_KEY`, `X_API_SECRE
 | `CRON_SECRET` | già presente per Instagram: serve anche al radar |
 | `X_BEARER_TOKEN` | facoltativa: il Bearer Token dell'app X; senza, il radar lo ricava da API Key e Secret |
 | `RADAR_MASSIMO_GIORNO` | facoltativa: tetto di temi valutati al giorno, predefinito `3` |
-| `RADAR_ORARIO` | facoltativa: ore italiane di lavoro, predefinito `8-23`; `0-24` = tutto il giorno |
+| `RADAR_ORARIO` | facoltativa: ore italiane di lavoro, predefinito `10-22` (ultimo giro alle 21); `0-24` = tutto il giorno |
 | `RADAR_INTERVALLO_MINUTI` | facoltativa: minuti minimi fra due giri, predefinito `55` (un giro all'ora) |
 | `RADAR_VALUTAZIONI` | facoltativa: temi valutati a ogni giro, predefinito `1` |
 | `RADAR_ACCELERAZIONE` | facoltativa: accelerazione minima dell'ultima ora, predefinito `1.5` |
