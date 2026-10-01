@@ -11,6 +11,7 @@ import {
   querySuX,
   segnaliDaValutare,
   trovaSegnali,
+  troppoPresto,
   valutazioniRimaste,
   type Rilevazione,
   type Valutazione,
@@ -121,8 +122,9 @@ describe('opzioniRadar', () => {
       accelerazioneMinima: 1.5,
       campione: 10,
       classifica: 30,
-      massimoGiorno: 10,
-      orario: [0, 24],
+      massimoGiorno: 3,
+      orario: [8, 23],
+      intervalloMinuti: 55,
     });
     expect(opzioniRadar({ RADAR_CAMPIONE: '500', RADAR_ACCELERAZIONE: '2,5' })).toMatchObject({ campione: 100, accelerazioneMinima: 2.5 });
     expect(opzioniRadar({ RADAR_CAMPIONE: '0' }).campione).toBe(0);
@@ -130,9 +132,10 @@ describe('opzioniRadar', () => {
   });
 
   it("legge la fascia oraria e ignora quelle non valide", () => {
-    expect(opzioniRadar({ RADAR_ORARIO: '8-23' }).orario).toEqual([8, 23]);
-    expect(opzioniRadar({ RADAR_ORARIO: '23-8' }).orario).toEqual([0, 24]);
-    expect(opzioniRadar({ RADAR_ORARIO: 'giorno' }).orario).toEqual([0, 24]);
+    expect(opzioniRadar({ RADAR_ORARIO: '7-22' }).orario).toEqual([7, 22]);
+    expect(opzioniRadar({ RADAR_ORARIO: '0-24' }).orario).toEqual([0, 24]);
+    expect(opzioniRadar({ RADAR_ORARIO: '23-8' }).orario).toEqual([8, 23]);
+    expect(opzioniRadar({ RADAR_ORARIO: 'giorno' }).orario).toEqual([8, 23]);
   });
 });
 
@@ -142,6 +145,13 @@ describe('freni sulla spesa', () => {
     expect(inOrario([8, 23], new Date('2026-10-01T06:30:00Z'))).toBe(true);
     expect(inOrario([8, 23], new Date('2026-10-01T05:30:00Z'))).toBe(false);
     expect(inOrario([8, 23], new Date('2026-10-01T21:00:00Z'))).toBe(false);
+  });
+
+  it('al massimo un giro ogni intervallo, anche se il job chiama più spesso', () => {
+    const adesso = new Date('2026-10-01T10:00:00Z');
+    expect(troppoPresto([{ quando: '2026-10-01T09:30:00Z' }], 55, adesso)).toBe(true);
+    expect(troppoPresto([{ quando: '2026-10-01T09:04:00Z' }], 55, adesso)).toBe(false);
+    expect(troppoPresto([], 55, adesso)).toBe(false);
   });
 
   it('il tetto giornaliero conta i temi valutati da mezzanotte italiana', () => {

@@ -71,6 +71,8 @@ export interface OpzioniRadar {
   massimoGiorno: number;
   /** Ore italiane in cui il radar lavora, [inizio, fine): fuori non legge nemmeno le tendenze. */
   orario: [number, number];
+  /** Minuti minimi fra un giro e l'altro: un job chiamato troppo spesso non spende di più. */
+  intervalloMinuti: number;
 }
 
 /** Temi che non sono mai politica o attualità: si scartano senza spendere una chiamata. */
@@ -114,8 +116,9 @@ export function opzioniRadar(env: Record<string, string | undefined>): OpzioniRa
     accelerazioneMinima: decimale(env.RADAR_ACCELERAZIONE, 1.5),
     campione: campione(env.RADAR_CAMPIONE),
     classifica: intero(env.RADAR_CLASSIFICA, 30, 5),
-    massimoGiorno: intero(env.RADAR_MASSIMO_GIORNO, 10),
+    massimoGiorno: intero(env.RADAR_MASSIMO_GIORNO, 3),
     orario: orario(env.RADAR_ORARIO),
+    intervalloMinuti: intero(env.RADAR_INTERVALLO_MINUTI, 55),
   };
 }
 
@@ -125,13 +128,19 @@ function campione(valore: string | undefined): number {
   return n === 0 ? 0 : Math.min(Math.max(n, 10), 100);
 }
 
-/** «8-23» → dalle 8 alle 23; vuoto o non valido → tutto il giorno. */
+/** «8-23» → dalle 8 alle 23 (il predefinito); «0-24» → tutto il giorno; non valido → predefinito. */
 function orario(valore: string | undefined): [number, number] {
   const m = (valore ?? '').match(/^\s*(\d{1,2})\s*-\s*(\d{1,2})\s*$/);
-  if (!m) return [0, 24];
+  if (!m) return [8, 23];
   const inizio = Number(m[1]);
   const fine = Number(m[2]);
-  return inizio < fine && fine <= 24 ? [inizio, fine] : [0, 24];
+  return inizio < fine && fine <= 24 ? [inizio, fine] : [8, 23];
+}
+
+/** Vero se l'ultimo giro è più recente dell'intervallo minimo. */
+export function troppoPresto(rilevazioni: Pick<Rilevazione, 'quando'>[], minuti: number, adesso: Date): boolean {
+  const ultima = Math.max(0, ...rilevazioni.map((r) => Date.parse(r.quando)).filter((t) => !Number.isNaN(t)));
+  return ultima > 0 && adesso.getTime() - ultima < minuti * 60_000;
 }
 
 function oraItaliana(adesso: Date): number {

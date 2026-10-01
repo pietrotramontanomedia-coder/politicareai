@@ -46,6 +46,8 @@ beforeEach(() => {
   vi.stubEnv('CRON_SECRET', SEGRETO);
   vi.stubEnv('RADAR_MODALITA', 'avvisa');
   vi.stubEnv('RADAR_TELEGRAM_CHAT', '12345');
+  vi.stubEnv('RADAR_ORARIO', '0-24');
+  vi.stubEnv('RADAR_MASSIMO_GIORNO', '10');
   // Un'ora fa in classifica c'era solo la manovra: il premierato è nuovo.
   stato = {
     rilevazioni: [{ quando: new Date(Date.now() - 3_600_000).toISOString(), tendenze: [{ nome: '#Manovra', volume: 4000 }] }],
@@ -142,6 +144,13 @@ describe('/api/radar', () => {
     expect(corpo.tetto).toContain('tetto di 1');
     expect(valutaTendenza).not.toHaveBeenCalled();
     expect(stato.rilevazioni).toHaveLength(2);
+  });
+
+  it('un giro a meno di 55 minuti dal precedente non legge nulla', async () => {
+    stato.rilevazioni[0].quando = new Date(Date.now() - 10 * 60_000).toISOString();
+    const { corpo } = await chiama();
+    expect(corpo.attivo).toBe(false);
+    expect(stato.rilevazioni).toHaveLength(1);
   });
 
   it('fuori orario non legge nemmeno le tendenze', async () => {

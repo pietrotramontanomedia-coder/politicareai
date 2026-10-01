@@ -3,6 +3,7 @@ import {
   accelerazione,
   componiAvviso,
   inOrario,
+  troppoPresto,
   opzioniRadar,
   pota,
   querySuX,
@@ -64,6 +65,9 @@ export async function GET(request: Request) {
   }
 
   const stato = await leggiStato();
+  if (!prova && troppoPresto(stato.rilevazioni, opzioni.intervalloMinuti, adesso)) {
+    return Response.json({ ok: true, attivo: false, nota: `ultimo giro da meno di ${opzioni.intervalloMinuti} minuti: nessuna lettura` });
+  }
 
   let attuale: Rilevazione;
   try {
