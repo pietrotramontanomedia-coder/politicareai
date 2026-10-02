@@ -11,12 +11,20 @@ import type { Tendenza } from './radar';
 /** WOEID dell'Italia per le tendenze di X. */
 export const WOEID_ITALIA = 23424853;
 
+/**
+ * Il Bearer Token senza spazi: la console di X lo mostra incolonnato su più righe e
+ * copiandolo a mano ci finiscono dentro a capo che l'intestazione HTTP non accetta.
+ */
+function bearer(): string {
+  return (process.env.RADAR_X_BEARER_TOKEN ?? '').replace(/\s+/g, '');
+}
+
 export function letturaXConfigurata(): boolean {
-  return Boolean(process.env.RADAR_X_BEARER_TOKEN);
+  return Boolean(bearer());
 }
 
 function client(): TwitterApi {
-  const token = process.env.RADAR_X_BEARER_TOKEN;
+  const token = bearer();
   if (!token) throw new Error('RADAR_X_BEARER_TOKEN mancante');
   return new TwitterApi(token);
 }
