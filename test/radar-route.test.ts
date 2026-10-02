@@ -23,9 +23,11 @@ vi.mock('@/lib/radar-x-server', () => ({
   conteggiOrari: async () => orari,
   campionePost: (...args: unknown[]) => campionePost(...(args as [])),
 }));
+const scremaTendenze = vi.fn(async (nomi: string[]) => new Set(nomi));
 vi.mock('@/lib/radar-claude-server', () => ({
   valutazioneDisponibile: () => true,
   valutaTendenza: (...args: unknown[]) => valutaTendenza(...(args as [])),
+  scremaTendenze: (nomi: string[]) => scremaTendenze(nomi),
 }));
 vi.mock('@/lib/radar-telegram-server', () => ({
   avvisiTelegramConfigurati: () => telegramConfigurato,
@@ -189,5 +191,20 @@ describe('/api/radar', () => {
     expect(corpo.valutati[0]).toMatchObject({ esito: 'errore', dettaglio: 'rete' });
     expect(stato.rilevazioni).toHaveLength(2);
     expect(stato.avvisi).toEqual([]);
+  });
+
+  it('il filtro scarta i temi non politici prima della valutazione, che va al tema politico', async () => {
+    tendenze = [{ nome: 'Bridgerton', volume: 20000 }, { nome: '#Premierato', volume: 9000 }, { nome: '#Manovra', volume: 4000 }];
+    scremaTendenze.mockImplementationOnce(async (nomi: string[]) => new Set(nomi.filter((n) => n !== 'Bridgerton')));
+    const { corpo } = await chiama();
+    expect(corpo.scartati).toEqual(['Bridgerton']);
+    expect(corpo.valutati).toEqual([expect.objectContaining({ nome: '#Premierato', esito: 'inviato' })]);
+    expect(valutaTendenza).toHaveBeenCalledTimes(1);
+  });
+
+  it('se il filtro non risponde si valutano i segnali come prima', async () => {
+    scremaTendenze.mockRejectedValueOnce(new Error('rete'));
+    const { corpo } = await chiama();
+    expect(corpo.valutati).toEqual([expect.objectContaining({ nome: '#Premierato', esito: 'inviato' })]);
   });
 });

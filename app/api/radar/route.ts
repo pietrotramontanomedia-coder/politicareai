@@ -14,7 +14,7 @@ import {
   type Rilevazione,
   type Segnale,
 } from '@/lib/radar';
-import { valutaTendenza, valutazioneDisponibile } from '@/lib/radar-claude-server';
+import { scremaTendenze, valutaTendenza, valutazioneDisponibile } from '@/lib/radar-claude-server';
 import { leggiStato, salvaStato } from '@/lib/radar-registro';
 import { campionePost, conteggiOrari, leggiTendenze, letturaXConfigurata } from '@/lib/radar-x-server';
 import { avvisiTelegramConfigurati, inviaAvvisoTelegram } from '@/lib/radar-telegram-server';
@@ -110,8 +110,23 @@ export async function GET(request: Request) {
 
   const segnali = trovaSegnali(stato.rilevazioni, attuale, opzioni.classifica);
   const rimaste = valutazioniRimaste(stato.avvisi, opzioni.massimoGiorno, adesso);
+
+  // Prima della valutazione vera un filtro rapido scarta i temi non politici (sport, serie tv, marchi):
+  // senza, il tema più forte del giorno, anche se è Bridgerton, si prende il posto e il tetto giornaliero.
+  // Se il filtro non risponde si va avanti con tutti i segnali, come prima.
+  let candidati = segnali;
+  let scartati: string[] = [];
+  if (valutazioneDisponibile() && rimaste > 0 && segnali.length) {
+    try {
+      const tenuti = await scremaTendenze(segnali.map((s) => s.nome));
+      candidati = segnali.filter((s) => tenuti.has(s.nome));
+      scartati = segnali.filter((s) => !tenuti.has(s.nome)).map((s) => s.nome);
+    } catch (errore) {
+      console.warn('[radar] filtro non riuscito, si valutano tutti i segnali:', errore);
+    }
+  }
   const scelti = valutazioneDisponibile()
-    ? segnaliDaValutare(segnali, stato.avvisi, { ...opzioni, valutazioni: Math.min(opzioni.valutazioni, rimaste) }, adesso)
+    ? segnaliDaValutare(candidati, stato.avvisi, { ...opzioni, valutazioni: Math.min(opzioni.valutazioni, rimaste) }, adesso)
     : [];
   const telegram = avvisiTelegramConfigurati();
   const invia = opzioni.modalita === 'avvisa' && !prova && telegram;
@@ -181,6 +196,7 @@ export async function GET(request: Request) {
     tendenze: attuale.tendenze.length,
     segnali: segnali.slice(0, 10).map((s) => ({ nome: s.nome, motivo: s.motivo, forza: s.forza })),
     valutati: risultati.map((r) => r.esito),
+    ...(scartati.length ? { scartati } : {}),
     ...(valutazioneDisponibile() ? {} : { nota: 'RADAR_ANTHROPIC_API_KEY mancante: segnali registrati senza valutazione' }),
     ...(rimaste === 0 && segnali.length ? { tetto: `raggiunto il tetto di ${opzioni.massimoGiorno} temi valutati oggi` } : {}),
     ...(opzioni.modalita === 'avvisa' && !telegram

@@ -101,3 +101,36 @@ ${descriviCampione(campione)}
   const valutazione = JSON.parse(testo) as Valutazione;
   return { ...valutazione, bozze: valutazione.bozze.slice(0, 3) };
 }
+
+const MODELLO_FILTRO = 'claude-haiku-4-5-20251001';
+
+const ISTRUZIONI_FILTRO = `Ricevi un elenco di tendenze di X in Italia, una per riga. Restituisci SOLO un array JSON con
+le tendenze, scritte esattamente come nell'elenco, che potrebbero riguardare politica italiana o internazionale,
+istituzioni, elezioni, leggi, governo, partiti, politici, economia pubblica, giustizia o grandi fatti di attualità
+con un risvolto politico. Escludi sport, spettacolo, serie tv, gossip, marchi, giochi, nomi propri senza un
+legame evidente con la politica. Nel dubbio su un nome di persona che potrebbe essere un politico, includilo.
+Se nessuna è pertinente, restituisci [].`;
+
+/**
+ * Filtro rapido prima della valutazione vera: un modello piccolo scarta i temi che non c'entrano con la politica,
+ * così il tetto giornaliero e la valutazione costosa vanno ai temi giusti. Restituisce i nomi da tenere.
+ */
+export async function scremaTendenze(nomi: string[]): Promise<Set<string>> {
+  if (!nomi.length) return new Set();
+  const client = new Anthropic({ apiKey: chiave() });
+  const risposta = await client.messages.create({
+    model: MODELLO_FILTRO,
+    max_tokens: 1000,
+    system: ISTRUZIONI_FILTRO,
+    messages: [{ role: 'user', content: nomi.join('\n') }],
+  });
+  const testo = risposta.content
+    .filter((blocco): blocco is Anthropic.TextBlock => blocco.type === 'text')
+    .map((blocco) => blocco.text)
+    .join('');
+  const json = testo.match(/\[[\s\S]*\]/);
+  if (!json) throw new Error('filtro: risposta senza elenco');
+  const scelti = JSON.parse(json[0]) as unknown[];
+  const validi = new Set(nomi);
+  return new Set(scelti.filter((n): n is string => typeof n === 'string' && validi.has(n)));
+}

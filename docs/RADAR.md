@@ -14,15 +14,20 @@ Un job programmato chiama `https://politicare-app.vercel.app/api/radar` da una v
    di oltre 3 ore, come la notte, il primo giro registra soltanto). È un segnale
    un tema che entra in classifica, sale di almeno 3 posizioni o cresce di volume di almeno una
    volta e mezza. Calcio, spettacolo e saluti del mattino vengono scartati subito.
-3. **Accelerazione.** Per il segnale più forte (`RADAR_VALUTAZIONI`, predefinito 1) conta i post in italiano
+3. **Filtro.** Un modello piccolo e veloce (Claude Haiku 4.5, frazioni di centesimo) guarda i nomi dei
+   segnali e scarta quelli che non c'entrano con la politica: serie tv, marchi, sport, nomi senza legame
+   politico. Senza questo passaggio il tema più forte del giorno, anche se è «Bridgerton», si prendeva la
+   valutazione e un posto del tetto giornaliero, e i temi politici arrivati dopo restavano fuori.
+   Gli scartati compaiono nella risposta sotto `scartati`. Se il filtro non risponde, si va avanti con tutti.
+4. **Accelerazione.** Per il segnale più forte (`RADAR_VALUTAZIONI`, predefinito 1) conta i post in italiano
    dell'ultima ora rispetto alla media delle tre ore prima. Sotto ×1,5 (`RADAR_ACCELERAZIONE`) il
    tema si ferma lì: sta già calando, è tardi per entrarci.
-4. **Valutazione.** Legge i 10 post più rilevanti sul tema e li passa a Claude
+5. **Valutazione.** Legge i 10 post più rilevanti sul tema e li passa a Claude
    (`lib/radar-claude-server.ts`), che decide se è politica o attualità su cui Politicare può dire
    qualcosa e scrive le bozze. Regole fisse: solo fatti, nessuna opinione o tifo, nessun numero
    inventato, aggancio a uno strumento del sito quando c'è. I fatti presi solo dai post finiscono
    nella lista «Prima di pubblicare verifica».
-5. **Avviso.** In modalità `avvisa`, il bot Telegram del radar manda il messaggio in privato.
+6. **Avviso.** In modalità `avvisa`, il bot Telegram del radar manda il messaggio in privato.
    Lo stesso tema non viene riproposto per 12 ore (`RADAR_RIPOSO_ORE`).
 
 La memoria (classifiche delle ultime 48 ore e avvisi delle ultime due settimane) sta in
@@ -64,7 +69,7 @@ arrivava in anticipo, si passa ad `avvisa`.
 ## Costi
 
 Prezzi pay-per-use di X nel 2026: tendenze 0,01 $ a chiamata, conteggi 0,005 $, ricerca 0,005 $ a
-post letto. Claude Opus 5.5 circa 0,05 $ a valutazione.
+post letto. Claude Opus 5.5 circa 0,05 $ a valutazione; il filtro con Haiku 4.5 meno di 0,001 $ a giro.
 
 - un giro: 0,01 $ (la classifica), più 0,005 $ per ogni tema che sale ma non accelera;
 - un tema valutato: circa 0,10 $ (conteggio, 10 post, Claude), circa 0,05 $ con `RADAR_CAMPIONE=0`.
