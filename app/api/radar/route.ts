@@ -17,7 +17,7 @@ import {
 import { scremaTendenze, valutaTendenza, valutazioneDisponibile } from '@/lib/radar-claude-server';
 import { leggiStato, salvaStato } from '@/lib/radar-registro';
 import { campionePost, conteggiOrari, leggiTendenze, letturaXConfigurata } from '@/lib/radar-x-server';
-import { avvisiTelegramConfigurati, inviaAvvisoTelegram } from '@/lib/radar-telegram-server';
+import { avvisiTelegramConfigurati, descriviDestinatario, inviaAvvisoTelegram } from '@/lib/radar-telegram-server';
 
 /**
  * Radar dei trend su X (vedi docs/RADAR.md). Lo chiama un job programmato ogni 20-30 minuti:
@@ -56,6 +56,15 @@ export async function GET(request: Request) {
 
   const opzioni = opzioniRadar(process.env);
   const parametri = new URL(request.url).searchParams;
+
+  // `?telegram=chi` dice quale bot scrive e a quale chat, senza mandare nulla e senza mostrare il token.
+  if (parametri.get('telegram') === 'chi') {
+    try {
+      return Response.json({ ok: true, ...(await descriviDestinatario()) });
+    } catch (errore) {
+      return Response.json({ ok: false, error: messaggioErrore(errore) }, { status: 502 });
+    }
+  }
 
   // `?telegram=1` manda un avviso di esempio: serve a verificare che il bot del radar
   // sappia scrivere a RADAR_TELEGRAM_CHAT, senza aspettare che un tema vero passi tutti i filtri.

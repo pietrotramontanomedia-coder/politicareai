@@ -32,6 +32,7 @@ vi.mock('@/lib/radar-claude-server', () => ({
 vi.mock('@/lib/radar-telegram-server', () => ({
   avvisiTelegramConfigurati: () => telegramConfigurato,
   inviaAvvisoTelegram: (testo: string) => inviaAvvisoTelegram(testo),
+  descriviDestinatario: async () => ({ bot: '@radar_bot (Radar)', chat: 'private «Pietro»' }),
 }));
 
 const SEGRETO = 'segreto-cron';
