@@ -52,8 +52,16 @@ const SCHEMA = {
   additionalProperties: false,
 } as const;
 
+/**
+ * La chiave senza spazi: copiandola a mano dalla console ci finiscono dentro
+ * a capo e spazi, e l'intestazione dell'API li rifiuta.
+ */
+function chiave(): string {
+  return (process.env.RADAR_ANTHROPIC_API_KEY ?? '').replace(/\s+/g, '');
+}
+
 export function valutazioneDisponibile(): boolean {
-  return Boolean(process.env.RADAR_ANTHROPIC_API_KEY);
+  return Boolean(chiave());
 }
 
 function descriviCampione(campione: PostCampione[]): string {
@@ -64,7 +72,7 @@ function descriviCampione(campione: PostCampione[]): string {
 }
 
 export async function valutaTendenza(segnale: Segnale, campione: PostCampione[], adesso = new Date()): Promise<Valutazione> {
-  const client = new Anthropic({ apiKey: process.env.RADAR_ANTHROPIC_API_KEY });
+  const client = new Anthropic({ apiKey: chiave() });
   const risposta = await client.beta.messages.create({
     model: MODELLO,
     max_tokens: 16000,
