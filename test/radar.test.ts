@@ -13,6 +13,7 @@ import {
   trovaSegnali,
   troppoPresto,
   valutazioniRimaste,
+  temiStabili,
   type Rilevazione,
   type Valutazione,
 } from '@/lib/radar';
@@ -208,5 +209,22 @@ describe('componiAvviso', () => {
     const url = new URL(linkScrivi('Prova & #Tag'));
     expect(url.origin + url.pathname).toBe('https://x.com/intent/post');
     expect(url.searchParams.get('text')).toBe('Prova & #Tag');
+  });
+});
+
+describe('temiStabili', () => {
+  const alle = (ora: string) => `2026-10-02T${ora}:00+02:00`;
+  const giro = (ora: string, nomi: string[]) => ({ quando: alle(ora), tendenze: nomi.map((nome) => ({ nome, volume: null })) });
+
+  it('trova chi resta fra i primi 10 da almeno tre giri, non chi ci è appena entrato', () => {
+    const storico = [giro('11:20', ['Salis', 'Genova']), giro('12:20', ['Salis', 'Genova']), giro('13:20', ['Salis', 'Nuovo'])];
+    const segnali = temiStabili(storico, giro('14:20', ['Salis', 'Genova', 'Nuovo']));
+    expect(segnali.map((s) => s.nome)).toEqual(['Salis']);
+    expect(segnali[0]).toMatchObject({ stabile: true, posizione: 1 });
+  });
+
+  it('con meno di tre giri alle spalle non segnala nulla', () => {
+    const storico = [giro('12:20', ['Salis']), giro('13:20', ['Salis'])];
+    expect(temiStabili(storico, giro('14:20', ['Salis']))).toEqual([]);
   });
 });

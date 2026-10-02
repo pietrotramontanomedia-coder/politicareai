@@ -29,6 +29,8 @@ export interface Segnale {
   /** Più alto = più interessante. */
   forza: number;
   motivo: string;
+  /** Tema fermo in cima alla classifica da ore: non sale più, quindi non si misura l'accelerazione. */
+  stabile?: boolean;
 }
 
 export interface Valutazione {
@@ -313,4 +315,42 @@ export function componiAvviso(segnale: Segnale, valutazione: Valutazione, accel:
     righe.push('', '<b>Prima di pubblicare verifica:</b>', ...valutazione.verifiche.map((v) => `• ${escapeHtml(v)}`));
   }
   return righe.join('\n');
+}
+
+/**
+ * I temi fermi in cima alla classifica da ore. `trovaSegnali` vede solo chi sale, e così
+ * la storia del giorno (un nome al 2° posto dalla mattina) non diventava mai un segnale.
+ * Conta chi è nelle prime `cima` posizioni adesso e in almeno tre giri delle ultime 3 ore e mezza,
+ * tutti quelli disponibili: la forza è bassa, quindi un tema che sale passa sempre prima.
+ */
+export function temiStabili(storico: Rilevazione[], attuale: Rilevazione, cima = 10): Segnale[] {
+  const adesso = Date.parse(attuale.quando);
+  const recenti = storico.filter((r) => {
+    const t = Date.parse(r.quando);
+    return t < adesso - 20 * 60_000 && t >= adesso - 3.5 * 3_600_000;
+  });
+  if (recenti.length < 3) return [];
+  const inCima = recenti.map((r) => new Set(r.tendenze.slice(0, cima).map((t) => chiaveTema(t.nome))));
+
+  const segnali: Segnale[] = [];
+  const visti = new Set<string>();
+  attuale.tendenze.slice(0, cima).forEach((t, i) => {
+    const chiave = chiaveTema(t.nome);
+    if (visti.has(chiave) || fuoriTema(t.nome)) return;
+    visti.add(chiave);
+    if (!inCima.every((insieme) => insieme.has(chiave))) return;
+    const posizione = i + 1;
+    segnali.push({
+      nome: t.nome,
+      chiave,
+      posizione,
+      posizionePrima: null,
+      volume: t.volume,
+      volumePrima: null,
+      forza: Math.round(((cima + 1 - posizione) / cima) * 100) / 100,
+      motivo: `stabile fra i primi ${cima} da ore, ${posizione}° posto`,
+      stabile: true,
+    });
+  });
+  return segnali;
 }

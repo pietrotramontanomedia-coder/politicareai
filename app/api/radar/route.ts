@@ -8,6 +8,7 @@ import {
   pota,
   querySuX,
   segnaliDaValutare,
+  temiStabili,
   trovaSegnali,
   valutazioniRimaste,
   type Avviso,
@@ -35,6 +36,8 @@ export const maxDuration = 300;
 
 const ORE_RILEVAZIONI = 48;
 const ORE_AVVISI = 24 * 14;
+/** Conteggi di accelerazione al massimo per giro (0,005 $ l'uno). */
+const MASSIMO_CONTROLLI = 3;
 
 interface Esito {
   nome: string;
@@ -117,7 +120,10 @@ export async function GET(request: Request) {
     return Response.json({ ok: false, error: `tendenze non lette: ${messaggioErrore(errore)}` }, { status: 502 });
   }
 
-  const segnali = trovaSegnali(stato.rilevazioni, attuale, opzioni.classifica);
+  // Prima chi sale, poi i temi fermi in cima da ore (la storia del giorno), senza doppioni.
+  const inSalita = trovaSegnali(stato.rilevazioni, attuale, opzioni.classifica);
+  const giaVisti = new Set(inSalita.map((s) => s.chiave));
+  const segnali = [...inSalita, ...temiStabili(stato.rilevazioni, attuale).filter((s) => !giaVisti.has(s.chiave))];
   const rimaste = valutazioniRimaste(stato.avvisi, opzioni.massimoGiorno, adesso);
 
   // Prima della valutazione vera un filtro rapido scarta i temi non politici (sport, serie tv, marchi):
@@ -134,23 +140,27 @@ export async function GET(request: Request) {
       console.warn('[radar] filtro non riuscito, si valutano tutti i segnali:', errore);
     }
   }
+  // Tutti i candidati non a riposo, in ordine di forza: se il primo non accelera si prova il successivo,
+  // fino a MASSIMO_CONTROLLI conteggi (costano poco) e a `valutazioni` passaggi da Claude (costano di più).
   const scelti = valutazioneDisponibile()
-    ? segnaliDaValutare(candidati, stato.avvisi, { ...opzioni, valutazioni: Math.min(opzioni.valutazioni, rimaste) }, adesso)
+    ? segnaliDaValutare(candidati, stato.avvisi, { ...opzioni, valutazioni: candidati.length }, adesso)
     : [];
+  const daValutare = Math.min(opzioni.valutazioni, rimaste);
   const telegram = avvisiTelegramConfigurati();
   const invia = opzioni.modalita === 'avvisa' && !prova && telegram;
 
-  const valuta = async (segnale: Segnale): Promise<{ esito: Esito; avviso?: Avviso }> => {
-    const query = querySuX(segnale.nome);
-    let accel: number | null = null;
+  const accelera = async (segnale: Segnale): Promise<number | null> => {
     try {
-      accel = accelerazione(await conteggiOrari(query));
+      return accelerazione(await conteggiOrari(querySuX(segnale.nome)));
     } catch (errore) {
       console.warn(`[radar] conteggi non letti per ${segnale.nome}:`, errore);
+      return null;
     }
-    const base = { nome: segnale.nome, motivo: segnale.motivo, accelerazione: accel };
-    if (accel !== null && accel < opzioni.accelerazioneMinima) return { esito: { ...base, esito: 'non accelera' } };
+  };
 
+  const valuta = async (segnale: Segnale, accel: number | null): Promise<{ esito: Esito; avviso?: Avviso }> => {
+    const query = querySuX(segnale.nome);
+    const base = { nome: segnale.nome, motivo: segnale.motivo, accelerazione: accel };
     try {
       const campione = opzioni.campione
         ? await campionePost(query, opzioni.campione).catch((errore) => {
@@ -186,7 +196,25 @@ export async function GET(request: Request) {
     }
   };
 
-  const risultati = await Promise.all(scelti.map(valuta));
+  const risultati: { esito: Esito; avviso?: Avviso }[] = [];
+  let controlli = 0;
+  let valutazioniFatte = 0;
+  for (const segnale of scelti) {
+    if (valutazioniFatte >= daValutare) break;
+    // Un tema fermo in cima non sale più: l'accelerazione non dice nulla, si passa direttamente a Claude.
+    let accel: number | null = null;
+    if (!segnale.stabile) {
+      if (controlli >= MASSIMO_CONTROLLI) break;
+      controlli++;
+      accel = await accelera(segnale);
+      if (accel !== null && accel < opzioni.accelerazioneMinima) {
+        risultati.push({ esito: { nome: segnale.nome, motivo: segnale.motivo, accelerazione: accel, esito: 'non accelera' } });
+        continue;
+      }
+    }
+    valutazioniFatte++;
+    risultati.push(await valuta(segnale, accel));
+  }
 
   stato.rilevazioni = pota([...stato.rilevazioni, attuale], ORE_RILEVAZIONI, adesso);
   if (!prova) {

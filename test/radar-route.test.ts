@@ -20,7 +20,7 @@ vi.mock('@/lib/radar-registro', () => ({
 vi.mock('@/lib/radar-x-server', () => ({
   letturaXConfigurata: () => true,
   leggiTendenze: async () => tendenze,
-  conteggiOrari: async () => orari,
+  conteggiOrari: async () => ((globalThis as { __radarOrari?: () => number[] }).__radarOrari?.() ?? orari),
   campionePost: (...args: unknown[]) => campionePost(...(args as [])),
 }));
 const scremaTendenze = vi.fn(async (nomi: string[]) => new Set(nomi));
@@ -71,6 +71,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  delete (globalThis as { __radarOrari?: unknown }).__radarOrari;
   vi.unstubAllEnvs();
   vi.clearAllMocks();
 });
@@ -207,5 +208,31 @@ describe('/api/radar', () => {
     scremaTendenze.mockRejectedValueOnce(new Error('rete'));
     const { corpo } = await chiama();
     expect(corpo.valutati).toEqual([expect.objectContaining({ nome: '#Premierato', esito: 'inviato' })]);
+  });
+
+  it('se il primo tema non accelera prova il successivo', async () => {
+    tendenze = [{ nome: '#Premierato', volume: 9000 }, { nome: '#Legge', volume: 5000 }, { nome: '#Manovra', volume: 4000 }];
+    // Il primo conteggio (premierato) è piatto, il secondo (legge) accelera.
+    const conteggi = [[100, 100, 100, 110, 10], [100, 100, 100, 400, 10]];
+    Object.defineProperty(globalThis, '__radarOrari', { value: () => conteggi.shift(), configurable: true });
+    const { corpo } = await chiama();
+    expect(corpo.valutati.map((v: { nome: string; esito: string }) => `${v.nome}:${v.esito}`)).toEqual([
+      '#Premierato:non accelera',
+      '#Legge:inviato',
+    ]);
+  });
+
+  it('un tema fermo in cima da ore va a Claude senza misurare l\'accelerazione', async () => {
+    const ore = (n: number) => new Date(Date.now() - n * 3_600_000).toISOString();
+    const cima = [{ nome: 'Salis', volume: 30000 }, { nome: '#Manovra', volume: 4000 }];
+    stato.rilevazioni = [
+      { quando: ore(3), tendenze: cima },
+      { quando: ore(2), tendenze: cima },
+      { quando: ore(1), tendenze: cima },
+    ];
+    tendenze = cima;
+    orari = [100, 100, 100, 100, 10];
+    const { corpo } = await chiama();
+    expect(corpo.valutati[0]).toMatchObject({ nome: 'Salis', esito: 'inviato', accelerazione: null });
   });
 });

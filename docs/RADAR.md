@@ -14,14 +14,19 @@ Un job programmato chiama `https://politicare-app.vercel.app/api/radar` da una v
    di oltre 3 ore, come la notte, il primo giro registra soltanto). È un segnale
    un tema che entra in classifica, sale di almeno 3 posizioni o cresce di volume di almeno una
    volta e mezza. Calcio, spettacolo e saluti del mattino vengono scartati subito.
+   Diventa candidato anche un tema **fermo fra i primi 10 da almeno tre giri** (`temiStabili`): è la storia
+   del giorno, che non sale più perché è già in cima. Il 2 ottobre «Salis» è rimasta al 2°-3° posto tutto il
+   giorno e il radar, che guardava solo chi sale, non l'ha mai vista. I temi stabili hanno forza bassa
+   (passano dopo quelli in salita), non hanno controllo di accelerazione e, come tutti, riposano 12 ore.
 3. **Filtro.** Un modello piccolo e veloce (Claude Haiku 4.5, frazioni di centesimo) guarda i nomi dei
    segnali e scarta quelli che non c'entrano con la politica: serie tv, marchi, sport, nomi senza legame
    politico. Senza questo passaggio il tema più forte del giorno, anche se è «Bridgerton», si prendeva la
    valutazione e un posto del tetto giornaliero, e i temi politici arrivati dopo restavano fuori.
    Gli scartati compaiono nella risposta sotto `scartati`. Se il filtro non risponde, si va avanti con tutti.
-4. **Accelerazione.** Per il segnale più forte (`RADAR_VALUTAZIONI`, predefinito 1) conta i post in italiano
-   dell'ultima ora rispetto alla media delle tre ore prima. Sotto ×1,5 (`RADAR_ACCELERAZIONE`) il
-   tema si ferma lì: sta già calando, è tardi per entrarci.
+4. **Accelerazione.** Per i temi in salita conta i post in italiano dell'ultima ora rispetto alla media
+   delle tre ore prima. Sotto ×1,5 (`RADAR_ACCELERAZIONE`) il tema si ferma lì (sta già calando) e si
+   prova il successivo, fino a 3 conteggi per giro. Il primo che passa, o il primo tema stabile, va a
+   Claude: `RADAR_VALUTAZIONI` (predefinito 1) è quanti temi per giro arrivano a Claude.
 5. **Valutazione.** Legge i 10 post più rilevanti sul tema e li passa a Claude
    (`lib/radar-claude-server.ts`), che decide se è politica o attualità su cui Politicare può dire
    qualcosa e scrive le bozze. Regole fisse: solo fatti, nessuna opinione o tifo, nessun numero
