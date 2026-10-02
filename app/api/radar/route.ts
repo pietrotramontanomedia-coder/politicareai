@@ -55,7 +55,35 @@ export async function GET(request: Request) {
   }
 
   const opzioni = opzioniRadar(process.env);
-  const prova = new URL(request.url).searchParams.get('prova') === '1';
+  const parametri = new URL(request.url).searchParams;
+
+  // `?telegram=1` manda un avviso di esempio: serve a verificare che il bot del radar
+  // sappia scrivere a RADAR_TELEGRAM_CHAT, senza aspettare che un tema vero passi tutti i filtri.
+  if (parametri.get('telegram') === '1') {
+    if (!avvisiTelegramConfigurati()) {
+      return Response.json({ ok: false, error: 'RADAR_TELEGRAM_BOT_TOKEN o RADAR_TELEGRAM_CHAT mancanti' }, { status: 503 });
+    }
+    const esempio = componiAvviso(
+      { nome: 'Esempio', chiave: 'esempio', posizione: 7, posizionePrima: 19, volume: 12400, volumePrima: 4100, forza: 2.7, motivo: 'da 19\u00b0 a 7\u00b0 posto' },
+      {
+        pertinente: true,
+        tema: "Messaggio di prova del radar: nessun tema reale, serve solo a controllare che gli avvisi arrivino.",
+        motivo: 'Se stai leggendo questo, il bot del radar sa scriverti e le bozze arriveranno qui.',
+        gancio: 'politicare.it/simulatore',
+        bozze: ['Prima bozza di esempio: qui ci sar\u00e0 il post pronto, con i numeri e le fonti del tema che sta salendo.', 'Seconda bozza di esempio: un taglio diverso sullo stesso tema.'],
+        verifiche: ['Questo \u00e8 un messaggio di prova, non pubblicare nulla.'],
+      },
+      2.4,
+    );
+    try {
+      await inviaAvvisoTelegram(esempio);
+      return Response.json({ ok: true, inviato: 'avviso di esempio' });
+    } catch (errore) {
+      return Response.json({ ok: false, error: `Telegram: ${messaggioErrore(errore)}` }, { status: 502 });
+    }
+  }
+
+  const prova = parametri.get('prova') === '1';
   if (opzioni.modalita === 'spento' && !prova) {
     return Response.json({ ok: true, attivo: false, nota: 'RADAR_MODALITA non impostata: il radar è spento' });
   }
