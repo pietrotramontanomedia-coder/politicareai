@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { useSwipe } from '@/lib/useSwipe';
+import { percorsoDettaglio } from '@/lib/piattaforma';
 
 interface FeedArticle {
   id: string;
@@ -75,7 +76,7 @@ export default function NewsCarousel({ articoli }: { articoli: FeedArticle[] }) 
           exit={{ opacity: 0, x: direzione > 0 ? -60 : 60 }}
           transition={{ duration: 0.5, ease: 'easeInOut' }}
           className="absolute inset-0 cursor-pointer"
-          onClick={() => router.push(`/leggi/${corrente.slug}`)}
+          onClick={() => router.push(percorsoDettaglio('leggi', corrente.slug))}
         >
           {corrente.immagine ? (
             <img

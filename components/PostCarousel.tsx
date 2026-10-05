@@ -8,6 +8,7 @@ import { FONTI_ULTIMORA } from '@/lib/ultimora-testi';
 import { IconaFonte } from './ultimora/IconaFonte';
 import { formattaDataRelativa } from '@/lib/data-ora';
 import { useSwipe } from '@/lib/useSwipe';
+import { percorsoDettaglio } from '@/lib/piattaforma';
 
 const MAX_POST = 10;
 const PER_GRUPPO = 2;
@@ -93,7 +94,7 @@ export default function PostCarousel() {
             {corrente.map((p) => (
               <Link
                 key={p.id}
-                href={`/ultimora/${p.id}`}
+                href={percorsoDettaglio('ultimora', p.id)}
                 className="group flex gap-5 rounded-2xl border p-4 sm:p-5 transition-all hover:shadow-xl"
                 style={{ borderColor: 'var(--bordo)', background: 'var(--bg-card)' }}
               >

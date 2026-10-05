@@ -7,6 +7,8 @@ import { TESTI_CONDIVISIONE as T } from '@/lib/condivisione/testi';
 import { conAlfa } from '@/lib/strumenti';
 import { IconaCondividi } from '@/components/ultimora/IconaFonte';
 import { IconaStrumento } from '@/components/strumenti/IconaStrumento';
+import { IN_APP, urlPubblico } from '@/lib/piattaforma';
+import { condividiImmagine } from '@/lib/nativo';
 
 interface Props {
   /** Disegna l'immagine nel formato scelto. Gira solo sul dispositivo dell'utente. */
@@ -53,7 +55,8 @@ export default function PannelloCondivisione({ genera, nomeFile, titolo, testo, 
       const url = URL.createObjectURL(blob);
       urlCorrente.current = url;
       setImmagine({ url, file });
-      setPuoCondividere(Boolean(navigator.canShare?.({ files: [file] })));
+      // Nell'app si condivide sempre con il foglio nativo; sul web solo se il browser accetta file.
+      setPuoCondividere(IN_APP || Boolean(navigator.canShare?.({ files: [file] })));
       setStato('pronta');
     } catch {
       if (numero === richiesta.current) setStato('errore');
@@ -78,7 +81,11 @@ export default function PannelloCondivisione({ genera, nomeFile, titolo, testo, 
 
   async function condividi() {
     if (!immagine) return;
-    const link = `${window.location.origin}${percorso}`;
+    const link = urlPubblico(percorso);
+    if (IN_APP) {
+      await condividiImmagine(immagine.file, immagine.file.name, titolo, `${testo} ${link}`);
+      return;
+    }
     try {
       await navigator.share({ files: [immagine.file], title: titolo, text: `${testo} ${link}` });
     } catch {
@@ -236,17 +243,19 @@ export default function PannelloCondivisione({ genera, nomeFile, titolo, testo, 
                   {T.condividi}
                 </button>
               )}
-              <a
-                href={immagine && stato === 'pronta' ? immagine.url : undefined}
-                download={immagine?.file.name}
-                aria-disabled={stato !== 'pronta'}
-                className={`inline-flex items-center justify-center gap-2 rounded-full border py-2.5 text-sm font-semibold ${
-                  puoCondividere ? '' : 'sm:col-span-2'
-                } ${stato !== 'pronta' ? 'pointer-events-none opacity-50' : ''}`}
-                style={puoCondividere ? { borderColor: 'rgba(255,255,255,0.14)' } : { background: colore, color: '#0a0a0a', borderColor: colore }}
-              >
-                ↓ {T.scarica}
-              </a>
+              {!IN_APP && (
+                <a
+                  href={immagine && stato === 'pronta' ? immagine.url : undefined}
+                  download={immagine?.file.name}
+                  aria-disabled={stato !== 'pronta'}
+                  className={`inline-flex items-center justify-center gap-2 rounded-full border py-2.5 text-sm font-semibold ${
+                    puoCondividere ? '' : 'sm:col-span-2'
+                  } ${stato !== 'pronta' ? 'pointer-events-none opacity-50' : ''}`}
+                  style={puoCondividere ? { borderColor: 'rgba(255,255,255,0.14)' } : { background: colore, color: '#0a0a0a', borderColor: colore }}
+                >
+                  ↓ {T.scarica}
+                </a>
+              )}
             </div>
           </motion.div>
         )}

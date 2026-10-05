@@ -3,6 +3,8 @@ import type { ArchivioProfilo } from './archivio';
 import type { FornitoreAccesso, Sessione, UtenteAccesso } from './accesso';
 import { datiSincronizzabili, normalizzaProfilo, profiloVuoto } from './regole';
 import { VERSIONE_PROFILO, type Profilo } from './tipi';
+import { IN_APP, urlRitornoAccesso } from '@/lib/piattaforma';
+import { apriNelBrowser } from '@/lib/nativo';
 
 /*
  * Accesso con Supabase (progetto in regione UE): link magico via email e Google.
@@ -162,17 +164,34 @@ export const fornitoreSupabase: FornitoreAccesso = {
   async inviaLinkEmail(email) {
     const { error } = await client().auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: `${window.location.origin}/accedi` },
+      options: { emailRedirectTo: urlRitornoAccesso() },
     });
     if (error) throw error;
   },
 
   async accediConGoogle() {
-    const { error } = await client().auth.signInWithOAuth({
+    // Google rifiuta l'accesso dentro una webview: nell'app si apre il browser di sistema
+    // e si torna con il link it.politicare.app://accedi, gestito da completaDaLink.
+    const { data, error } = await client().auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/accedi` },
+      options: { redirectTo: urlRitornoAccesso(), skipBrowserRedirect: IN_APP },
     });
     if (error) throw error;
+    if (IN_APP && data.url) await apriNelBrowser(data.url);
+  },
+
+  async completaDaLink(url) {
+    // globalThis: in questo modulo URL è l'indirizzo del progetto Supabase.
+    const indirizzo = new globalThis.URL(url);
+    const parametri = new URLSearchParams(indirizzo.search);
+    new URLSearchParams(indirizzo.hash.replace(/^#/, '')).forEach((v, k) => parametri.set(k, v));
+    const errore = parametri.get('error_description') ?? parametri.get('error');
+    if (errore) return errore;
+    const codice = parametri.get('code');
+    if (!codice) return null;
+    // Flusso PKCE: il verificatore è nella memoria dell'app, dove l'accesso è partito.
+    const { error } = await client().auth.exchangeCodeForSession(codice);
+    return error ? error.message : null;
   },
 
   async esci() {

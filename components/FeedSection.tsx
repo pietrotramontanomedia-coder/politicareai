@@ -6,6 +6,7 @@ import NewsCarousel from './NewsCarousel';
 import ArticoliWidget from './ArticoliWidget';
 import NotiziarioLive from './ultimora/NotiziarioLive';
 import FeedSkeleton from './FeedSkeleton';
+import { apiUrl } from '@/lib/piattaforma';
 
 interface FeedArticle {
   id: string;
@@ -24,7 +25,7 @@ export default function FeedSection() {
   useEffect(() => {
     const fetchFeed = async () => {
       try {
-        const response = await fetch('/api/feed');
+        const response = await fetch(apiUrl('/api/feed'));
         const data = await response.json();
         setArticoli(data.articoli || []);
       } catch (error) {

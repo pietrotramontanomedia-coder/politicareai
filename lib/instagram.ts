@@ -5,6 +5,7 @@ import flashData from '@/content/agenzia/flash.json';
 import type { PostInstagram } from '@/lib/instagram-server';
 import type { FonteUltimOra, NotiziaUltimOra } from '@/lib/ultimora-server';
 import { scegliPostRecenti, type PostRecente } from '@/lib/post-recenti';
+import { apiUrl, percorsoDettaglio } from '@/lib/piattaforma';
 
 export type { PostInstagram };
 
@@ -39,7 +40,7 @@ export function useInstagram() {
   const [caricamento, setCaricamento] = useState(true);
 
   useEffect(() => {
-    usaRichiestaCondivisa<PostInstagram>('/api/instagram', (d) => (d as { post?: PostInstagram[] }).post ?? []).then(
+    usaRichiestaCondivisa<PostInstagram>(apiUrl('/api/instagram'), (d) => (d as { post?: PostInstagram[] }).post ?? []).then(
       (p) => {
         setPost(p);
         setCaricamento(false);
@@ -57,8 +58,8 @@ export function usePostRecenti() {
 
   useEffect(() => {
     Promise.all([
-      usaRichiestaCondivisa<PostInstagram>('/api/instagram', (d) => (d as { post?: PostInstagram[] }).post ?? []),
-      usaRichiestaCondivisa<NotiziaUltimOra>('/api/ultimora', (d) => (d as { voci?: NotiziaUltimOra[] }).voci ?? []),
+      usaRichiestaCondivisa<PostInstagram>(apiUrl('/api/instagram'), (d) => (d as { post?: PostInstagram[] }).post ?? []),
+      usaRichiestaCondivisa<NotiziaUltimOra>(apiUrl('/api/ultimora'), (d) => (d as { voci?: NotiziaUltimOra[] }).voci ?? []),
     ]).then(([instagram, notizie]) => {
       setPost(scegliPostRecenti(instagram, notizie));
       setCaricamento(false);
@@ -74,19 +75,19 @@ export function useUltimOra() {
   const [caricamento, setCaricamento] = useState(true);
 
   useEffect(() => {
-    usaRichiestaCondivisa<NotiziaUltimOra>('/api/ultimora', (d) => (d as { voci?: NotiziaUltimOra[] }).voci ?? []).then(
+    usaRichiestaCondivisa<NotiziaUltimOra>(apiUrl('/api/ultimora'), (d) => (d as { voci?: NotiziaUltimOra[] }).voci ?? []).then(
       (notizie) => {
         const daFonti = notizie.map((n) => ({
           id: n.id,
           orario: n.data,
           titolo: n.titolo,
           testo: n.testo,
-          href: `/ultimora/${n.id}`,
+          href: percorsoDettaglio('ultimora', n.id),
           immagine: n.immagine,
           fonte: n.fonte,
         }));
         setVoci(
-          daFonti.length > 0 ? daFonti : flashData.voci.map((v) => ({ ...v, href: `/ultimora/${v.id}` })),
+          daFonti.length > 0 ? daFonti : flashData.voci.map((v) => ({ ...v, href: percorsoDettaglio('ultimora', v.id) })),
         );
         setCaricamento(false);
       },

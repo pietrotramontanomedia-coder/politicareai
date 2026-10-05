@@ -110,6 +110,13 @@ politicare/
 Il rendering statico serve alla SEO, che per questo prodotto è il canale
 principale: la gente cerca "test elettorale" nelle settimane prima del voto.
 
+**App iOS e Android:** stessa base di codice impacchettata con Capacitor
+(`npm run build:app`, esportazione statica). Test, quiz e strumenti girano nel
+pacchetto e offline; le notizie arrivano dalle API del sito. Pagine solo web
+`page.web.tsx`, solo app `page.app.tsx`; indirizzi API, link ai dettagli, link
+condivisi e ritorno dall'accesso passano sempre da `lib/piattaforma.ts`, mai
+`fetch('/api/...')` o `window.location.origin` diretti. Dettagli in `docs/APP.md`.
+
 **`packages/motore` non importa mai React, Next o nulla di ambiente browser.**
 È logica pura con copertura di test alta. È il pezzo che deve poter essere letto
 e verificato da un giornalista o da un ricercatore.

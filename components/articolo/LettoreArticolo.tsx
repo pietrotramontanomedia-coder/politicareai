@@ -1,12 +1,13 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { slugToUrl } from '@/lib/slug';
 import ArticoloSkeleton from '@/components/ArticoloSkeleton';
 import BoxAutore from '@/components/BoxAutore';
 import type { Autore } from '@/app/api/articolo/route';
+import { apiUrl } from '@/lib/piattaforma';
 
 interface BloccoContenuto {
   tipo: 'titolo' | 'paragrafo' | 'lista';
@@ -63,10 +64,9 @@ function evidenziaDati(testo: string): React.ReactNode[] {
   return nodi;
 }
 
-export default function LeggiArticoloPage() {
-  const params = useParams();
+/** Lettore di un articolo di politicare.it: la pagina web passa lo slug dal percorso, quella dell'app dalla query. */
+export default function LettoreArticolo({ slug }: { slug: string }) {
   const router = useRouter();
-  const slug = params.slug as string;
 
   // L'URL originale deriva dallo slug: si calcola, non si tiene in stato.
   // Stringa vuota = slug non decodificabile.
@@ -90,7 +90,7 @@ export default function LeggiArticoloPage() {
     if (slugNonValido) return;
     let annullato = false;
 
-    fetch(`/api/articolo?url=${encodeURIComponent(urlOriginale)}`)
+    fetch(apiUrl(`/api/articolo?url=${encodeURIComponent(urlOriginale)}`))
       .then((res) => res.json())
       .then((data) => {
         if (annullato) return;
@@ -184,6 +184,7 @@ export default function LeggiArticoloPage() {
                 className="mb-8 rounded-2xl overflow-hidden shadow-2xl"
                 style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.4)' }}
               >
+                {/* eslint-disable-next-line @next/next/no-img-element -- immagine remota dell'articolo */}
                 <img src={articolo.immagine} alt={articolo.titolo} className="w-full h-auto" />
               </motion.div>
             )}

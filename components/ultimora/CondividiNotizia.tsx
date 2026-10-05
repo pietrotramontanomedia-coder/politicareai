@@ -3,13 +3,22 @@
 import { useState } from 'react';
 import { IconaCondividi } from './IconaFonte';
 import { TESTI_ULTIMORA as T } from '@/lib/ultimora-testi';
+import { IN_APP, urlPubblico } from '@/lib/piattaforma';
+import { condividiLink } from '@/lib/nativo';
 
-/** Condivisione nativa del telefono; dove non c'è, copia il link. */
-export default function CondividiNotizia({ titolo }: { titolo: string }) {
+/**
+ * Condivisione nativa del telefono; dove non c'è, copia il link.
+ * Si condivide sempre l'indirizzo pubblico sul sito, anche dall'app.
+ */
+export default function CondividiNotizia({ titolo, percorso }: { titolo: string; percorso: string }) {
   const [copiato, setCopiato] = useState(false);
 
   async function condividi() {
-    const url = window.location.href;
+    const url = urlPubblico(percorso);
+    if (IN_APP) {
+      await condividiLink(titolo, url);
+      return;
+    }
     if (navigator.share) {
       try {
         await navigator.share({ title: titolo, url });

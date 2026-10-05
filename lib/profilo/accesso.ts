@@ -25,6 +25,11 @@ export interface FornitoreAccesso {
   /** Link magico via email, senza password. */
   inviaLinkEmail(email: string): Promise<void>;
   accediConGoogle(): Promise<void>;
+  /**
+   * Solo app: completa l'accesso quando il sistema riapre l'app con il link di ritorno
+   * (it.politicare.app://accedi?code=...). Restituisce l'eventuale errore da mostrare.
+   */
+  completaDaLink(url: string): Promise<string | null>;
   esci(): Promise<void>;
   /** Archivio del profilo sul server, per l'utente autenticato. Non riceve mai il risultato del test. */
   archivioAccount(utente: UtenteAccesso): ArchivioProfilo;
@@ -50,6 +55,7 @@ export const fornitoreNonConfigurato: FornitoreAccesso = {
   osserva: () => () => undefined,
   inviaLinkEmail: nonAttivo,
   accediConGoogle: nonAttivo,
+  completaDaLink: async () => null,
   esci: async () => undefined,
   archivioAccount: () => {
     throw new AccessoNonAttivo();

@@ -1,5 +1,6 @@
 import { leggiPost, leggiPostSingolo } from '@/lib/instagram-server';
 import { leggiMessaggiTelegram, leggiMessaggioTelegram, PREFISSO_ID_TELEGRAM } from '@/lib/telegram-server';
+import flashData from '@/content/agenzia/flash.json';
 
 export type FonteUltimOra = 'instagram' | 'telegram';
 
@@ -53,4 +54,30 @@ export async function leggiNotizia(id: string): Promise<NotiziaUltimOra | null> 
   }
   const p = await leggiPostSingolo(id);
   return p ? { id: p.id, titolo: p.titolo, testo: p.testo, data: p.data, immagine: p.immagine, fonte: 'instagram' } : null;
+}
+
+/** Una notizia nella pagina di dettaglio: il flash redazionale di riserva non ha fonte né immagine. */
+export interface NotiziaDettaglio {
+  titolo: string;
+  testo: string;
+  data: string;
+  immagine?: string;
+  fonte?: FonteUltimOra;
+}
+
+/** Una notizia per id: prima le fonti social, poi il flash redazionale di riserva. */
+export async function leggiNotiziaOFlash(id: string): Promise<NotiziaDettaglio | null> {
+  const notizia = await leggiNotizia(id);
+  if (notizia) return notizia;
+  const flash = flashData.voci.find((v) => v.id === id);
+  return flash ? { titolo: flash.titolo, testo: flash.testo, data: flash.orario } : null;
+}
+
+/** Le ultime notizie diverse da quella aperta, per la sezione "altre" della pagina. */
+export async function leggiAltre(id: string, quante = 4): Promise<NotiziaUltimOra[]> {
+  try {
+    return (await leggiUltimOra()).filter((n) => n.id !== id).slice(0, quante);
+  } catch {
+    return [];
+  }
 }

@@ -1,56 +1,26 @@
-import type { Metadata } from 'next';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
-import { leggiNotizia, leggiUltimOra, type FonteUltimOra, type NotiziaUltimOra } from '@/lib/ultimora-server';
+import type { NotiziaDettaglio, NotiziaUltimOra } from '@/lib/ultimora-server';
 import { formattaDataEstesa, formattaDataRelativa } from '@/lib/data-ora';
+import { percorsoDettaglio, percorsoWebDettaglio } from '@/lib/piattaforma';
 import { conAlfa } from '@/lib/strumenti';
 import { FONTI_ULTIMORA, TESTI_ULTIMORA as T } from '@/lib/ultimora-testi';
 import BattitoLive from '@/components/ultimora/BattitoLive';
 import CondividiNotizia from '@/components/ultimora/CondividiNotizia';
 import { IconaFonte } from '@/components/ultimora/IconaFonte';
-import flashData from '@/content/agenzia/flash.json';
-
-export const revalidate = 900;
-
-interface Notizia {
-  titolo: string;
-  testo: string;
-  data: string;
-  immagine?: string;
-  fonte?: FonteUltimOra;
-}
-
-async function caricaNotizia(id: string): Promise<Notizia | null> {
-  const notizia = await leggiNotizia(id);
-  if (notizia) return notizia;
-  const flash = flashData.voci.find((v) => v.id === id);
-  if (flash) return { titolo: flash.titolo, testo: flash.testo, data: flash.orario };
-  return null;
-}
-
-async function caricaAltre(id: string): Promise<NotiziaUltimOra[]> {
-  try {
-    return (await leggiUltimOra()).filter((n) => n.id !== id).slice(0, 4);
-  } catch {
-    return [];
-  }
-}
-
-type Props = { params: Promise<{ id: string }> };
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { id } = await params;
-  const notizia = await caricaNotizia(id);
-  return { title: notizia ? `${notizia.titolo} — Politicare` : 'Notizia non trovata — Politicare' };
-}
 
 const VETRO = { borderColor: 'rgba(255,255,255,0.12)', background: 'rgba(20,20,20,0.6)' };
 
-export default async function NotiziaPage({ params }: Props) {
-  const { id } = await params;
-  const [notizia, altre] = await Promise.all([caricaNotizia(id), caricaAltre(id)]);
-  if (!notizia) notFound();
+interface Props {
+  id: string;
+  notizia: NotiziaDettaglio;
+  altre: NotiziaUltimOra[];
+}
 
+/**
+ * Pagina di una notizia di ultim'ora. La usano la pagina web (dati letti sul server)
+ * e quella dell'app (dati chiesti alle API): stessa presentazione, due modi di caricare.
+ */
+export default function DettaglioUltimora({ id, notizia, altre }: Props) {
   const paragrafi = notizia.testo
     .split('\n')
     .map((p) => p.trim())
@@ -74,7 +44,7 @@ export default async function NotiziaPage({ params }: Props) {
           >
             <span aria-hidden>←</span> {T.torna}
           </Link>
-          <CondividiNotizia titolo={notizia.titolo} />
+          <CondividiNotizia titolo={notizia.titolo} percorso={percorsoWebDettaglio('ultimora', id)} />
         </div>
 
         <div className="mt-8 flex flex-wrap items-center gap-2">
@@ -185,7 +155,7 @@ export default async function NotiziaPage({ params }: Props) {
               return (
                 <li key={n.id}>
                   <Link
-                    href={`/ultimora/${n.id}`}
+                    href={percorsoDettaglio('ultimora', n.id)}
                     className="group flex h-full gap-3 rounded-2xl border p-3.5 transition-colors hover:border-[rgba(239,68,68,0.45)]"
                     style={{ borderColor: 'rgba(255,255,255,0.07)', background: 'linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.01))' }}
                   >

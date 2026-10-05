@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import Link from 'next/link';
 import { useSwipe } from '@/lib/useSwipe';
+import { percorsoDettaglio } from '@/lib/piattaforma';
 
 interface FeedArticle {
   id: string;
@@ -94,7 +95,7 @@ export default function ArticoliWidget({ articoli }: { articoli: FeedArticle[] }
             {gruppoCorrente.map((articolo) => (
               <Link
                 key={articolo.id}
-                href={`/leggi/${articolo.slug}`}
+                href={percorsoDettaglio('leggi', articolo.slug)}
                 className="group flex items-center gap-4 p-4 sm:p-5 transition-colors hover:bg-white/[0.03]"
               >
                 <div

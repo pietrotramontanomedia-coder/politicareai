@@ -1,5 +1,6 @@
 import { conAlfa } from '@/lib/strumenti';
 import { FORMATI, type Formato, type VocePartitoGrafica } from './dati';
+import { hostPubblico } from '@/lib/piattaforma';
 
 /* Primitive di disegno su canvas per le grafiche da condividere. Da usare solo nel browser. */
 
@@ -197,7 +198,7 @@ export function piede(t: Tela, nota: string, invito: string, colore: string): vo
   carattere(t, 700, 32);
   ctx.fillStyle = colore;
   ctx.textAlign = 'right';
-  ctx.fillText(window.location.host, w - PAD, yBase);
+  ctx.fillText(hostPubblico(), w - PAD, yBase);
   ctx.textAlign = 'left';
 }
 
