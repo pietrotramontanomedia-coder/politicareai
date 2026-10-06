@@ -1,0 +1,12 @@
+# Caddy prende e rinnova da solo il certificato HTTPS per il dominio in .env.
+{$DOMINIO} {
+	encode gzip
+	reverse_proxy app:9000
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+	}
+}

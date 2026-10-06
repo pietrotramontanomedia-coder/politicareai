@@ -1,0 +1,30 @@
+<!--
+  Esempio di corpo di campagna (Campagne → Nuova → formato HTML), da usare con il modello newsletter.html.
+  I link che finiscono con @TrackLink vengono contati nelle statistiche dei clic.
+  È una bozza di prova: testi e link vanno rivisti prima dell'invio.
+-->
+<h1>La newsletter di Politicare cambia casa</h1>
+
+<p>Ciao{{ if .Subscriber.FirstName }} {{ .Subscriber.FirstName }}{{ end }},</p>
+
+<p>da oggi la newsletter di Politicare arriva da un sistema tutto nostro: niente più piattaforme di marketing esterne, i tuoi dati stanno su server in Europa e non vengono ceduti a nessuno.</p>
+
+<p>Ti scriveremo un paio di volte a settimana, con poche cose e fatte bene:</p>
+<ul>
+  <li><strong>il quiz settimanale</strong> di cultura politica, per metterti alla prova in due minuti;</li>
+  <li><strong>cosa è successo davvero</strong> in Parlamento, spiegato senza tifo;</li>
+  <li><strong>i test sui temi</strong> che contano, dal premierato alle prossime riforme.</li>
+</ul>
+
+<div class="riquadro">
+  <strong>Questa settimana:</strong> 7 domande sulla legge di bilancio. Quante ne indovini?
+</div>
+
+<p><a class="bottone" href="https://www.politicare.it/@TrackLink">Fai il quiz</a></p>
+
+<hr>
+
+<h2>Una richiesta</h2>
+<p>Se questa email è finita nella cartella Spam o Promozioni, spostala nella Posta in arrivo: aiuta a far arrivare anche le prossime. E se preferisci non riceverle più, trovi il link per disiscriverti qui sotto, senza domande.</p>
+
+<p>A presto,<br>la redazione di Politicare</p>

@@ -1,0 +1,71 @@
+# Newsletter Politicare: Listmonk + Postgres + Caddy (HTTPS automatico).
+# Si avvia con installa.sh; le variabili stanno in .env (modello: esempio.env).
+# Guida completa: ../README.md
+
+services:
+  app:
+    image: listmonk/listmonk:v6.2.0           # versione fissata: si aggiorna a mano, vedi README → Manutenzione
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    # Installa lo schema solo al primo avvio, applica le migrazioni a ogni aggiornamento,
+    # poi parte leggendo la configurazione solo dalle variabili d'ambiente.
+    command: [sh, -c, "./listmonk --install --idempotent --yes --config '' && ./listmonk --upgrade --yes --config '' && ./listmonk --config ''"]
+    environment:
+      LISTMONK_app__address: 0.0.0.0:9000
+      LISTMONK_db__host: db
+      LISTMONK_db__port: 5432
+      LISTMONK_db__user: listmonk
+      LISTMONK_db__password: ${DB_PASSWORD:?manca DB_PASSWORD in .env}
+      LISTMONK_db__database: listmonk
+      LISTMONK_db__ssl_mode: disable
+      LISTMONK_db__max_open: 25
+      LISTMONK_db__max_idle: 25
+      LISTMONK_db__max_lifetime: 300s
+      # Creano l'amministratore solo al primo avvio; dopo si possono togliere da .env.
+      LISTMONK_ADMIN_USER: ${LISTMONK_ADMIN_USER:-}
+      LISTMONK_ADMIN_PASSWORD: ${LISTMONK_ADMIN_PASSWORD:-}
+      TZ: Europe/Rome
+    volumes:
+      - ./uploads:/listmonk/uploads           # immagini caricate (logo, foto delle newsletter)
+    networks: [interna]
+    # Nessuna porta pubblicata: dall'esterno si arriva solo passando da Caddy.
+
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: listmonk
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?manca DB_PASSWORD in .env}
+      POSTGRES_DB: listmonk
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U listmonk"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+    volumes:
+      - dati-db:/var/lib/postgresql/data
+    networks: [interna]
+    # Il database non è raggiungibile da fuori, nemmeno dal server stesso.
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on: [app]
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMINIO: ${DOMINIO:?manca DOMINIO in .env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - dati-caddy:/data                      # certificati HTTPS
+    networks: [interna]
+
+networks:
+  interna:
+
+volumes:
+  dati-db:
+  dati-caddy:

@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- La pagina non può collegarsi a niente: i contatti non lasciano il computer. -->
+<meta http-equiv="Content-Security-Policy" content="connect-src 'none'; form-action 'none'; img-src data: blob:">
+<title>Convertitore contatti · Newsletter Politicare</title>
+<style>
+  :root {
+    --giallo: #FEDC01;
+    --nero: #0a0a0a;
+    --carta: #ffffff;
+    --testo: #111111;
+    --muto: #555555;
+    --bordo: #dddddd;
+    --rosso: #b42318;
+    --arancio: #8a5a00;
+    --verde: #11703a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    background: #f4f4f2;
+    color: var(--testo);
+  }
+  header { background: var(--nero); color: #fff; padding: 20px 16px; border-bottom: 4px solid var(--giallo); }
+  header h1 { margin: 0; font-size: 1.35rem; }
+  header p { margin: 4px 0 0; color: #ccc; font-size: .95rem; }
+  main { max-width: 960px; margin: 0 auto; padding: 24px 16px 64px; }
+  section { background: var(--carta); border: 1px solid var(--bordo); border-radius: 10px; padding: 20px; margin-bottom: 20px; }
+  h2 { margin: 0 0 12px; font-size: 1.1rem; }
+  .zona {
+    display: block; border: 2px dashed #999; border-radius: 10px; padding: 32px 16px;
+    text-align: center; cursor: pointer; background: #fafafa;
+  }
+  .zona.sopra { border-color: var(--nero); background: #fffbe0; }
+  .zona strong { display: block; font-size: 1.05rem; }
+  input[type=file] { position: absolute; width: 1px; height: 1px; opacity: 0; }
+  input[type=file]:focus-visible + .zona, .zona:focus-visible { outline: 3px solid var(--nero); outline-offset: 3px; }
+  label.opzione { display: flex; gap: 10px; align-items: flex-start; margin: 10px 0; }
+  input[type=text] { font: inherit; padding: 8px 10px; border: 1px solid #999; border-radius: 6px; width: 100%; max-width: 420px; }
+  .numeri { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+  .numero { border: 1px solid var(--bordo); border-radius: 8px; padding: 12px; }
+  .numero b { display: block; font-size: 1.6rem; line-height: 1.2; }
+  .numero.ok b { color: var(--verde); }
+  .numero.male b { color: var(--rosso); }
+  .numero.attenzione b { color: var(--arancio); }
+  .tabella { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--bordo); vertical-align: top; }
+  th { background: #f4f4f2; }
+  code { font-size: .85em; background: #f1f1f1; padding: 1px 4px; border-radius: 4px; word-break: break-all; }
+  .bottoni { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
+  button {
+    font: inherit; font-weight: 600; padding: 10px 18px; border-radius: 8px; cursor: pointer;
+    border: 2px solid var(--nero); background: var(--giallo); color: var(--nero);
+  }
+  button.secondario { background: #fff; }
+  button:focus-visible { outline: 3px solid var(--nero); outline-offset: 3px; }
+  .errore { color: var(--rosso); font-weight: 600; }
+  .nota { color: var(--muto); font-size: .9rem; }
+  [hidden] { display: none !important; }
+  @media (prefers-reduced-motion: no-preference) { .zona { transition: background .15s, border-color .15s; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Convertitore contatti per la newsletter</h1>
+  <p>Funziona senza internet: il file resta sul vostro computer e non viene inviato a nessuno.</p>
+</header>
+
+<main>
+  <section>
+    <h2>1. Scegliete il file</h2>
+    <p class="nota">In Excel: <em>File → Salva con nome → CSV (delimitato dal separatore di elenco)</em>.
+      La prima riga deve contenere i nomi delle colonne (Email, Nome, Cognome, Telefono, Città, Data iscrizione, Evento…).</p>
+    <input type="file" id="file" accept=".csv,.txt,text/csv">
+    <label for="file" class="zona" id="zona">
+      <strong>Trascinate qui il CSV</strong>
+      oppure fate clic per sceglierlo
+    </label>
+    <label class="opzione"><input type="checkbox" id="gruppi" checked>
+      <span>Dividi i contatti nei 5 gruppi dell'<strong>avvio graduale</strong> (attributo <code>gruppo_avvio</code>).
+        Lasciatelo attivo per la prima importazione.</span></label>
+    <label class="opzione" for="evento" style="display:block">
+      <span>Evento da segnare su tutti i contatti di questo file (facoltativo, es. «Festa Politicare Napoli 2026»):</span><br>
+      <input type="text" id="evento" autocomplete="off">
+    </label>
+    <p class="errore" id="errore" role="alert" hidden></p>
+  </section>
+
+  <section id="esito" hidden aria-live="polite">
+    <h2>2. Risultato</h2>
+    <div class="numeri" id="numeri"></div>
+  </section>
+
+  <section id="colonne" hidden>
+    <h2>Colonne riconosciute</h2>
+    <p class="nota">Controllate che ogni colonna sia finita nel posto giusto. Le colonne «altro» vengono comunque conservate.</p>
+    <div class="tabella"><table><thead><tr><th>Colonna nel vostro file</th><th>Diventa</th></tr></thead><tbody id="corpo-colonne"></tbody></table></div>
+  </section>
+
+  <section id="anteprima" hidden>
+    <h2>Anteprima (primi 10 contatti)</h2>
+    <div class="tabella"><table><thead><tr><th>Email</th><th>Nome</th><th>Dati</th></tr></thead><tbody id="corpo-anteprima"></tbody></table></div>
+  </section>
+
+  <section id="scarica" hidden>
+    <h2>3. Scaricate i file</h2>
+    <div class="bottoni">
+      <button type="button" id="scarica-listmonk">Scarica il file per Listmonk</button>
+      <button type="button" class="secondario" id="scarica-controllo">Scarica righe scartate e da controllare</button>
+    </div>
+    <p class="nota">Il file per Listmonk si importa da <em>Iscritti → Importa</em>, con separatore <strong>virgola</strong>.
+      Il file di controllo si apre in Excel: correggete le righe scartate nel file originale e riconvertitelo.</p>
+  </section>
+</main>
+
+<script src="logica.js"></script>
+<script>
+(function () {
+  'use strict';
+  var C = window.ConvertiNewsletter;
+  var ultimo = null;
+  var ultimoTesto = null;
+  var ultimoNome = '';
+
+  var $ = function (id) { return document.getElementById(id); };
+  var NOMI_CAMPI = {
+    email: 'Email', nome: 'Nome', cognome: 'Cognome', nome_completo: 'Nome e cognome',
+    telefono: 'Telefono', citta: 'Città', provincia: 'Provincia', data_iscrizione: 'Data di iscrizione',
+    evento: 'Evento / provenienza', consenso_newsletter: 'Consenso newsletter (entra solo chi ha «sì»)',
+  };
+
+  function testo(el, t) { el.textContent = t; return el; }
+  function crea(tag, t, classe) {
+    var el = document.createElement(tag);
+    if (t != null) el.textContent = t;
+    if (classe) el.className = classe;
+    return el;
+  }
+
+  function mostraErrore(msg) {
+    var e = $('errore');
+    e.hidden = !msg;
+    testo(e, msg || '');
+  }
+
+  function elabora() {
+    if (ultimoTesto == null) return;
+    var r = C.converti(ultimoTesto, { gruppiAvvio: $('gruppi').checked, evento: $('evento').value.trim() });
+    ultimo = r;
+    ['esito', 'colonne', 'anteprima', 'scarica'].forEach(function (id) { $(id).hidden = true; });
+    if (r.errore) { mostraErrore(r.errore); if (r.mappatura) mostraColonne(r.mappatura); return; }
+    mostraErrore('');
+    mostraNumeri(r.riepilogo);
+    mostraColonne(r.mappatura);
+    mostraAnteprima(r.contatti.slice(0, 10));
+    $('scarica').hidden = false;
+  }
+
+  function mostraNumeri(n) {
+    var box = $('numeri');
+    box.replaceChildren();
+    [
+      ['Contatti pronti', n.contatti, 'ok'],
+      ['Righe lette', n.righeLette, ''],
+      ['Doppioni uniti', n.doppioniUniti, ''],
+      ['Righe scartate', n.scartati, n.scartati ? 'male' : ''],
+      ['Da controllare', n.avvisi, n.avvisi ? 'attenzione' : ''],
+      ['Con telefono', n.conTelefono, ''],
+    ].forEach(function (v) {
+      var d = crea('div', null, 'numero ' + v[2]);
+      d.appendChild(crea('b', String(v[1])));
+      d.appendChild(document.createTextNode(v[0]));
+      box.appendChild(d);
+    });
+    $('esito').hidden = false;
+  }
+
+  function mostraColonne(mappatura) {
+    var corpo = $('corpo-colonne');
+    corpo.replaceChildren();
+    mappatura.forEach(function (c) {
+      var tr = crea('tr');
+      tr.appendChild(crea('td', c.intestazione || '(senza nome)'));
+      var dove = NOMI_CAMPI[c.campo] ||
+        (c.campo.indexOf('consenso_') === 0 ? 'Consenso: ' + c.campo.slice(9) : 'altro → ' + c.chiave);
+      tr.appendChild(crea('td', dove));
+      corpo.appendChild(tr);
+    });
+    $('colonne').hidden = false;
+  }
+
+  function mostraAnteprima(contatti) {
+    var corpo = $('corpo-anteprima');
+    corpo.replaceChildren();
+    contatti.forEach(function (c) {
+      var tr = crea('tr');
+      tr.appendChild(crea('td', c.email));
+      tr.appendChild(crea('td', c.nome));
+      var td = crea('td');
+      td.appendChild(crea('code', JSON.stringify(c.attributi)));
+      tr.appendChild(td);
+      corpo.appendChild(tr);
+    });
+    $('anteprima').hidden = false;
+  }
+
+  function scarica(nome, contenuto) {
+    var url = URL.createObjectURL(new Blob([contenuto], { type: 'text/csv;charset=utf-8' }));
+    var a = crea('a');
+    a.href = url;
+    a.download = nome;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  }
+
+  function base() { return (ultimoNome.replace(/\.[^.]+$/, '') || 'contatti'); }
+
+  function apri(file) {
+    if (!file) return;
+    ultimoNome = file.name;
+    file.arrayBuffer().then(function (byte) {
+      ultimoTesto = C.leggiTesto(new Uint8Array(byte));
+      elabora();
+    }, function () { mostraErrore('Non riesco a leggere il file.'); });
+  }
+
+  $('file').addEventListener('change', function (e) { apri(e.target.files[0]); });
+  $('gruppi').addEventListener('change', elabora);
+  $('evento').addEventListener('change', elabora);
+
+  var zona = $('zona');
+  ['dragenter', 'dragover'].forEach(function (t) {
+    zona.addEventListener(t, function (e) { e.preventDefault(); zona.classList.add('sopra'); });
+  });
+  ['dragleave', 'drop'].forEach(function (t) {
+    zona.addEventListener(t, function (e) { e.preventDefault(); zona.classList.remove('sopra'); });
+  });
+  zona.addEventListener('drop', function (e) { apri(e.dataTransfer.files[0]); });
+
+  $('scarica-listmonk').addEventListener('click', function () {
+    if (ultimo && !ultimo.errore) scarica(base() + '-listmonk.csv', C.csvListmonk(ultimo.contatti));
+  });
+  $('scarica-controllo').addEventListener('click', function () {
+    if (ultimo && !ultimo.errore) scarica(base() + '-da-controllare.csv', C.csvControllo(ultimo.scarti, ultimo.avvisi));
+  });
+})();
+</script>
+</body>
+</html>
