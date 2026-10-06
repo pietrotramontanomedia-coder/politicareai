@@ -1,3 +1,4 @@
+import { fraseDiApertura, titoloLungo, troncaAParola } from '@/lib/testo-notizia';
 import type { NotiziaUltimOra } from '@/lib/ultimora-server';
 
 /**
@@ -93,9 +94,9 @@ export function datiStrutturati(voci: NotiziaUltimOra[], g: Giorno, url: string)
     author: { '@type': 'Organization', name: 'Politicare', url: 'https://www.politicare.it/author/politicare/' },
     liveBlogUpdate: [...voci].map((v) => ({
       '@type': 'BlogPosting',
-      headline: v.titolo,
+      headline: troncaAParola(v.titolo, 110),
       datePublished: v.data,
-      articleBody: [v.titolo, v.testo].filter(Boolean).join('. '),
+      articleBody: [fraseDiApertura(v.titolo), v.testo].filter(Boolean).join(' '),
       url: `${url}#${ancora(v)}`,
     })),
   };
@@ -124,10 +125,16 @@ export function componiPagina(voci: NotiziaUltimOra[], g: Giorno, url: string, o
     : `Le notizie di politica del ${g.giorno} ${g.mese} ${g.anno}, scritte dalla redazione di Politicare. La più recente è in alto. Gli aggiornamenti in tempo reale sono nella pagina <a href="https://www.politicare.it/live/">Live</a>.`;
   const blocchi = [paragrafo(apertura)];
   for (const v of voci) {
+    // Una prima frase molto lunga non fa da titolo: resta in grassetto in testa al testo, senza tagli né ripetizioni.
+    const lungo = titoloLungo(v.titolo);
+    const intestazione = lungo ? oraDi(new Date(v.data)) : `${oraDi(new Date(v.data))} · ${esc(v.titolo)}`;
     blocchi.push(
-      `<!-- wp:heading {"anchor":"${ancora(v)}"} -->\n<h2 class="wp-block-heading" id="${ancora(v)}">${oraDi(new Date(v.data))} · ${esc(v.titolo)}</h2>\n<!-- /wp:heading -->`,
+      `<!-- wp:heading {"anchor":"${ancora(v)}"} -->\n<h2 class="wp-block-heading" id="${ancora(v)}">${intestazione}</h2>\n<!-- /wp:heading -->`,
     );
-    if (v.testo) blocchi.push(paragrafo(esc(ripulisci(v.testo)).replace(/\n+/g, '<br>')));
+    const corpo = esc(ripulisci(v.testo)).replace(/\n+/g, '<br>');
+    const apertura = lungo ? `<strong>${esc(fraseDiApertura(v.titolo))}</strong>` : '';
+    const paragrafoVoce = [apertura, corpo].filter(Boolean).join(' ');
+    if (paragrafoVoce) blocchi.push(paragrafo(paragrafoVoce));
   }
   blocchi.push(
     paragrafo(
@@ -141,7 +148,7 @@ export function componiPagina(voci: NotiziaUltimOra[], g: Giorno, url: string, o
 
 /** Riassunto per Google e per le anteprime: i primi titoli del giorno. */
 export function riassunto(voci: NotiziaUltimOra[], g: Giorno): string {
-  const titoli = voci.slice(0, 3).map((v) => v.titolo.replace(/[.…]+$/, ''));
+  const titoli = voci.slice(0, 3).map((v) => troncaAParola(v.titolo, 110).replace(/[.…]+$/, ''));
   const testo = `Le notizie di politica del ${g.giorno} ${g.mese}: ${titoli.join('; ')}.`;
   return testo.length > 300 ? `${testo.slice(0, 297).replace(/\s+\S*$/, '')}…` : testo;
 }

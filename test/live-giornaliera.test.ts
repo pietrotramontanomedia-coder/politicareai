@@ -47,6 +47,16 @@ describe('pagina Politica oggi', () => {
     expect(html).not.toContain('<b>');
   });
 
+  it('una prima frase troppo lunga non fa da titoletto: resta in grassetto nel testo', () => {
+    const g = giornoDi(new Date('2026-10-06T10:00:00Z'));
+    const lunga = `La Giunta del CONI ha votato per commissariare la FIGC ${'dopo molte polemiche '.repeat(8)}sulla nomina`;
+    const html = componiPagina([voce('tg-9', '2026-10-06T13:44:00Z', lunga, 'Seconda frase.')], g, 'https://x');
+    expect(html).toContain('id="notizia-tg-9">15:44</h2>');
+    expect(html).toContain(`<p><strong>${lunga}.</strong> Seconda frase.</p>`);
+    // Solo il «headline» dei dati strutturati è accorciato, come chiede Google; nel testo della pagina niente tagli.
+    expect(html.split('application/ld+json')[0]).not.toContain('…');
+  });
+
   it('i dati strutturati non possono chiudere il tag script', () => {
     const g = giornoDi(new Date('2026-10-06T10:00:00Z'));
     const json = datiStrutturati([voce('tg-9', '2026-10-06T09:00:00Z', 'Titolo </script><script>')], g, 'https://x');
