@@ -38,14 +38,15 @@ export function CondividiQuiz({ quiz, risposte, percorso }: { quiz: QuizSettiman
   );
 }
 
-export function CondividiSimulazione({ esito }: { esito: Esito }) {
+/** `percorso` può portare lo scenario nel frammento (#...), così chi apre il link ritrova le stesse percentuali. */
+export function CondividiSimulazione({ esito, percorso = STRUMENTI.simulatore.href }: { esito: Esito; percorso?: string }) {
   return (
     <PannelloCondivisione
       genera={(f) => disegnaSimulazione(datiSimulazione(esito), f)}
       nomeFile={T.simulatore.file}
       titolo={T.simulatore.titolo}
       testo={T.simulatore.testo}
-      percorso={STRUMENTI.simulatore.href}
+      percorso={percorso}
       colore={STRUMENTI.simulatore.colore}
       etichetta={T.simulatore.pulsante}
       compatto

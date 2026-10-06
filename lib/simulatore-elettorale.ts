@@ -1,5 +1,6 @@
 /**
- * Simulatore della legge elettorale approvata alla Camera il 16 luglio 2026.
+ * Simulatore della nuova legge elettorale nel testo approvato dal Senato il 15 settembre 2026
+ * (terza lettura alla Camera con la fiducia, voto finale previsto l'8 ottobre 2026).
  * Logica pura e deterministica: dalle percentuali di liste e coalizioni ai seggi.
  * Regole e semplificazioni sono dichiarate in TESTI_SIMULATORE e nella pagina.
  */
@@ -19,11 +20,16 @@ export interface Ramo {
   /** Seggi assegnati in Italia, esclusa la circoscrizione Estero. */
   seggiItalia: number;
   premio: number;
+  /** Seggi massimi del vincitore, esclusi quelli dell'Estero. */
   tetto: number;
   estero: number;
+  /** Seggi elettivi, Estero compreso. */
   totale: number;
+  /** Maggioranza assoluta dei seggi elettivi. */
   maggioranza: number;
 }
+
+export type IdRamo = 'camera' | 'senato';
 
 export const REGOLE = {
   camera: { seggiItalia: 392, premio: 70, tetto: 220, estero: 8, totale: 400, maggioranza: 201 },
@@ -42,10 +48,12 @@ export interface Competitore {
   nome: string;
   tipo: 'coalizione' | 'lista';
   colore: string;
-  /** Voti utili: liste sopra soglia più, per le coalizioni, il miglior perdente. */
-  voti: number;
-  /** Quota sui voti validi, in percentuale. */
+  /** Voti di tutte le liste: valgono per il 42% e per chi arriva primo. */
+  votiTotali: number;
+  /** Quota di votiTotali sui voti validi, in percentuale. */
   quota: number;
+  /** Voti delle liste che prendono seggi (sopra il 3% e miglior perdente): valgono per il riparto. */
+  voti: number;
   listeConSeggi: ListaInput[];
   seggiCamera: number;
   seggiSenato: number;
@@ -138,9 +146,10 @@ export function simula(
       continue;
     }
 
+    // Miglior perdente: la lista più votata fra quelle sotto il 3% prende seggi come le altre.
     const sotto = reali.filter((l) => l.percentuale < sogliaLista && l.percentuale > 0).sort((a, b) => b.percentuale - a.percentuale);
     const migliorPerdente = sotto[0];
-    const voti = sopra.reduce((a, l) => a + l.percentuale, 0) + (migliorPerdente?.percentuale ?? 0);
+    const conSeggi = migliorPerdente ? [...sopra, migliorPerdente] : sopra;
     const principale = [...sopra].sort((a, b) => b.percentuale - a.percentuale)[0];
 
     competitori.push({
@@ -148,9 +157,11 @@ export function simula(
       nome: opzioni.coalizioni[id] ?? id,
       tipo: 'coalizione',
       colore: principale.colore,
-      voti,
+      // Senza la norma "anti-cespugli" contano per il premio anche le liste sotto soglia.
+      votiTotali: totale,
       quota: 0,
-      listeConSeggi: sopra,
+      voti: conSeggi.reduce((a, l) => a + l.percentuale, 0),
+      listeConSeggi: conSeggi,
       seggiCamera: 0,
       seggiSenato: 0,
     });
@@ -163,22 +174,34 @@ export function simula(
     if (l.aggregato) {
       stati.set(l.id, { stato: 'altre-liste', competitore: null });
     } else if (l.percentuale >= sogliaLista) {
-      competitori.push({ id: l.id, nome: l.nome, tipo: 'lista', colore: l.colore, voti: l.percentuale, quota: 0, listeConSeggi: [l], seggiCamera: 0, seggiSenato: 0 });
+      competitori.push({
+        id: l.id,
+        nome: l.nome,
+        tipo: 'lista',
+        colore: l.colore,
+        votiTotali: l.percentuale,
+        quota: 0,
+        voti: l.percentuale,
+        listeConSeggi: [l],
+        seggiCamera: 0,
+        seggiSenato: 0,
+      });
       stati.set(l.id, { stato: 'in-parlamento', competitore: l.id });
     } else {
       stati.set(l.id, { stato: 'sotto-soglia', competitore: null });
     }
   }
 
-  for (const c of competitori) c.quota = totaleVoti > 0 ? (c.voti / totaleVoti) * 100 : 0;
+  for (const c of competitori) c.quota = totaleVoti > 0 ? (c.votiTotali / totaleVoti) * 100 : 0;
 
   // Premio: a chi arriva primo con almeno il 42% dei voti validi, in entrambe le Camere.
-  const ordinati = [...competitori].sort((a, b) => b.voti - a.voti);
+  // Primato e soglia si misurano su tutti i voti della coalizione, anche delle liste sotto il 3%.
+  const ordinati = [...competitori].sort((a, b) => b.votiTotali - a.votiTotali);
   const [primo, secondo] = ordinati;
   let motivo: MotivoPremio;
   if (!primo || totaleVoti <= 0) motivo = 'nessun-voto';
-  else if (primo.quota < sogliaPremio) motivo = 'nessuno-al-42';
-  else if (secondo && Math.abs(secondo.voti - primo.voti) < 1e-9) motivo = 'pareggio';
+  else if (primo.quota < sogliaPremio - 1e-9) motivo = 'nessuno-al-42';
+  else if (secondo && Math.abs(secondo.votiTotali - primo.votiTotali) < 1e-9) motivo = 'pareggio';
   else if (opzioni.maggioranzeDiverse) motivo = 'maggioranze-diverse';
   else motivo = 'assegnato';
 
@@ -201,7 +224,7 @@ export function simula(
 
   return {
     totaleVoti,
-    competitori: [...competitori].sort((a, b) => b.seggiCamera - a.seggiCamera || b.voti - a.voti),
+    competitori: [...competitori].sort((a, b) => b.seggiCamera - a.seggiCamera || b.votiTotali - a.votiTotali),
     liste: liste.map((lista) => {
       const s = stati.get(lista.id) ?? { stato: 'sotto-soglia' as const, competitore: null };
       const seggi = seggiListe.get(lista.id) ?? { camera: 0, senato: 0 };
@@ -288,18 +311,117 @@ export function presetPartitiDiOggi(partiti: { id: string; nome: string; colore:
   };
 }
 
+/** Arrotonda ai centesimi, la precisione dei campi del simulatore. */
+export function centesimi(n: number): number {
+  return Math.round(n * 100) / 100;
+}
+
+/** Legge un numero scritto da una persona: accetta la virgola, rifiuta il resto. Null se non è un numero. */
+export function leggiPercentuale(testo: string): number | null {
+  const pulito = testo.trim().replace(',', '.');
+  if (!/^\d{0,3}(\.\d*)?$/.test(pulito) || pulito === '' || pulito === '.') return null;
+  return Math.min(100, Math.max(0, centesimi(Number.parseFloat(pulito))));
+}
+
+const somma = (liste: readonly ListaInput[]) => liste.reduce((a, l) => a + l.percentuale, 0);
+
+/** Riporta il totale a 100 mantenendo le proporzioni fra le liste. */
+export function portaACento(liste: readonly ListaInput[]): ListaInput[] {
+  const totale = somma(liste);
+  if (totale <= 0) return [...liste];
+  const nuove = liste.map((l) => ({ ...l, percentuale: centesimi((l.percentuale * 100) / totale) }));
+  // L'arrotondamento può lasciare qualche centesimo: va alla lista più grande.
+  const scarto = centesimi(100 - somma(nuove));
+  const maggiore = nuove.reduce((m, l, i) => (l.percentuale > nuove[m].percentuale ? i : m), 0);
+  nuove[maggiore] = { ...nuove[maggiore], percentuale: centesimi(nuove[maggiore].percentuale + scarto) };
+  return nuove;
+}
+
+/** Mette nelle "Altre liste" quello che manca per arrivare a 100. Senza "Altre liste" non cambia nulla. */
+export function restoAdAltre(liste: readonly ListaInput[]): ListaInput[] {
+  const altre = liste.find((l) => l.aggregato);
+  if (!altre) return [...liste];
+  const resto = centesimi(100 - somma(liste.filter((l) => l !== altre)));
+  return liste.map((l) => (l === altre ? { ...l, percentuale: Math.max(0, resto) } : l));
+}
+
+export interface Scenario {
+  preset: string;
+  liste: ListaInput[];
+  coalizioni: Record<string, string>;
+  maggioranzeDiverse: boolean;
+}
+
+/**
+ * Lo scenario nel frammento dell'indirizzo (#p=...&v.fdi=26&c.fdi=cdx...), per condividerlo con un link.
+ * Il frammento non arriva mai al server: resta fra chi manda il link e chi lo apre.
+ */
+export function scenarioInFrammento(scenario: Scenario): string {
+  const parametri = new URLSearchParams({ p: scenario.preset });
+  for (const l of scenario.liste) {
+    parametri.set(`v.${l.id}`, String(l.percentuale));
+    if (l.coalizione) parametri.set(`c.${l.id}`, l.coalizione);
+  }
+  for (const [id, nome] of Object.entries(scenario.coalizioni)) parametri.set(`n.${id}`, nome);
+  if (scenario.maggioranzeDiverse) parametri.set('d', '1');
+  return parametri.toString();
+}
+
+/** Rilegge uno scenario sopra il suo preset. Ignora liste e coalizioni sconosciute; null se il preset non c'è. */
+export function scenarioDaFrammento(frammento: string, preset: readonly Preset[]): Scenario | null {
+  const parametri = new URLSearchParams(frammento.replace(/^#/, ''));
+  const base = preset.find((p) => p.id === parametri.get('p'));
+  if (!base) return null;
+
+  const coalizioni = Object.fromEntries(
+    Object.entries(base.coalizioni).map(([id, nome]) => [id, parametri.get(`n.${id}`)?.trim().slice(0, 40) || nome]),
+  );
+  const liste = base.liste.map((l) => {
+    // Una lista che il link non nomina resta com'è nel preset.
+    if (!parametri.has(`v.${l.id}`)) return l;
+    const percentuale = leggiPercentuale(parametri.get(`v.${l.id}`) ?? '') ?? l.percentuale;
+    const coalizione = parametri.get(`c.${l.id}`);
+    return {
+      ...l,
+      percentuale,
+      coalizione: l.aggregato ? null : coalizione && coalizione in coalizioni ? coalizione : null,
+    };
+  });
+  return { preset: base.id, liste, coalizioni, maggioranzeDiverse: parametri.get('d') === '1' };
+}
+
 export const FONTI_LEGGE = [
   {
-    citazione: 'CISE LUISS, analisi e simulazioni della riforma approvata alla Camera (23 luglio 2026)',
+    citazione: 'Il Post, il Senato approva la legge elettorale (15 settembre 2026)',
+    url: 'https://www.ilpost.it/2026/09/15/senato-approvazione-legge-elettorale/',
+  },
+  {
+    citazione: 'ANSA, via libera del Senato alla legge elettorale con 113 sì (15 settembre 2026)',
+    url: 'https://www.ansa.it/sito/notizie/politica/2026/09/15/via-libera-del-senato-alla-legge-elettorale-con-113-si_a398356e-998c-482f-a11d-a5256441e9f0.html',
+  },
+  {
+    citazione: 'L’Espresso, cosa prevede la legge elettorale approvata dal Senato (15 settembre 2026)',
+    url: 'https://lespresso.it/c/politica/2026/9/15/legge-elettorale-senato-meloni-cosa-prevede/64698',
+  },
+  {
+    citazione: 'Il Fatto Quotidiano, premio di maggioranza, soglie e miglior perdente (11 settembre 2026)',
+    url: 'https://www.ilfattoquotidiano.it/2026/09/11/legge-elettorale-premio-maggioranza-soglia-notizie/8503813/',
+  },
+  {
+    citazione: 'Sky TG24, simulazione dei risultati con la nuova legge (15 settembre 2026)',
+    url: 'https://tg24.sky.it/politica/2026/09/15/legge-elettorale-simulazione-risultati-elezioni',
+  },
+  {
+    citazione: 'CISE LUISS, le simulazioni: maggioranze, preferenze e confronto con il Rosatellum (28 settembre 2026)',
+    url: 'https://cise.luiss.it/2026/09/28/legge-elettorale-le-simulazioni-maggioranze-preferenze-e-il-confronto-con-il-rosatellum-lanalisi-per-coalizioni-e-partiti/',
+  },
+  {
+    citazione: 'CISE LUISS, esempi di calcolo del premio (23 luglio 2026)',
     url: 'https://cise.luiss.it/2026/07/23/la-nuova-legge-elettorale-garantisce-davvero-stabilita-analisi-e-simulazioni-della-riforma-approvata-alla-camera/',
   },
   {
-    citazione: 'AGI, Cosa prevede la nuova legge elettorale (16 luglio 2026)',
-    url: 'https://www.agi.it/politica/news/2026-07-16/legge-elettorale-cosa-prevede-38066645/',
-  },
-  {
-    citazione: 'lavoce.info, La nuova legge elettorale a metà del guado',
-    url: 'https://lavoce.info/archives/111986/la-nuova-legge-elettorale-a-meta-del-guado/',
+    citazione: 'Il Fatto Quotidiano, fiducia alla Camera e voto finale: le tappe (5 ottobre 2026)',
+    url: 'https://www.ilfattoquotidiano.it/2026/10/05/legge-elettorale-rush-finale-camera-fiducia-voto-segreto-tappe-notizie/8527870/',
   },
 ];
 
@@ -312,59 +434,80 @@ export const TESTI_SIMULATORE = {
   etichetta: 'Simulatore',
   titolo: 'Simulatore della legge elettorale',
   descrizione:
-    'Inserisci i voti di liste e coalizioni e guarda come diventano seggi con la nuova legge elettorale: premio di maggioranza al 42%, soglie e tetti.',
-  stato: 'Regole del testo approvato dalla Camera il 16 luglio 2026, all’esame del Senato: possono ancora cambiare.',
+    'Inserisci i voti di liste e coalizioni e guarda come diventano seggi con la nuova legge elettorale: premio di maggioranza al 42%, miglior perdente, soglie e tetti.',
+  stato:
+    'Regole del testo approvato dal Senato il 15 settembre 2026. La Camera lo esamina in terza lettura con la fiducia, voto finale previsto l’8 ottobre: il testo non dovrebbe più cambiare.',
   partiDa: 'Parti da',
+  ricomincia: 'Ricomincia',
+  ricominciaAria: (nome: string) => `Riporta i valori di partenza di “${nome}”`,
   liste: 'Liste e coalizioni',
   percentuale: 'Voti %',
+  meno: (nome: string) => `Togli mezzo punto a ${nome}`,
+  piu: (nome: string) => `Aggiungi mezzo punto a ${nome}`,
   coalizione: 'Coalizione',
   daSola: 'Da sola',
   totale: (t: number) => `Totale ${formattaPercentuale(t)}%`,
   totaleAvviso: 'Il totale non fa 100: i seggi si calcolano comunque in proporzione ai voti inseriti.',
-  maggioranzeDiverse: 'Al Senato arriva prima un’altra coalizione',
-  maggioranzeDiverseNota: 'Il premio spetta solo a chi arriva primo con almeno il 42% in entrambe le Camere.',
+  portaACento: 'Porta a 100 in proporzione',
+  restoAdAltre: (n: string) => `Metti il ${n}% che manca in “Altre liste”`,
+  nomiCoalizioni: 'Nomi delle coalizioni',
+  nomeCoalizione: (n: number) => `Nome della coalizione ${n}`,
+  maggioranzeDiverse: 'Voto diverso al Senato',
+  maggioranzeDiverseNota:
+    'Spunta se al Senato il primo non è lo stesso della Camera o resta sotto il 42%: il premio non si assegna in nessuna delle due Camere.',
   premio: {
     assegnato: (nome: string) => `Premio di maggioranza a ${nome}: +70 seggi alla Camera e +35 al Senato`,
     'nessuno-al-42': 'Nessuno raggiunge il 42%: i seggi si ripartiscono in modo proporzionale puro',
     pareggio: 'I primi due sono a pari voti: il premio non si assegna',
-    'maggioranze-diverse': 'Maggioranze diverse fra Camera e Senato: il premio non si assegna',
+    'maggioranze-diverse': 'Vincitori diversi fra Camera e Senato: il premio non si assegna',
     'nessun-voto': 'Inserisci i voti per vedere i seggi',
   },
   tetto: (ramo: string, n: number) => `${ramo}: tetto raggiunto, il vincitore si ferma a ${n} seggi e l’eccedenza va agli altri`,
   camera: 'Camera',
   senato: 'Senato',
+  vista: 'Emiciclo da mostrare',
+  emiciclo: (ramo: string, voci: string) => `Emiciclo: ${ramo}. ${voci}`,
   stima: 'stima',
-  votiUtili: 'Voti utili',
+  voti: 'Voti',
+  seggiDi: (nome: string) => `seggi di ${nome}`,
   maggioranza: (n: number, tot: number) => `maggioranza ${n} su ${tot}`,
-  conMaggioranza: 'ha la maggioranza',
+  conMaggioranza: { camera: 'maggioranza alla Camera', senato: 'maggioranza al Senato' } satisfies Record<IdRamo, string>,
+  senzaMaggioranza: 'Nessuno ha da solo la maggioranza: serve un accordo fra più forze',
   estero: 'Estero, non simulati',
   coalizioneDi: (nomi: string) => `con ${nomi}`,
   dispersi: (p: string) => `Voti a liste senza seggi: ${p}%`,
   coalizioniSottoSoglia: (nomi: string) => `${nomi}: sotto il 10%, le liste corrono da sole`,
+  riepilogo: 'Riepilogo dei seggi alla Camera',
+  vaiAlRisultato: 'Vedi il risultato',
+  copiaLink: 'Copia il link a questo scenario',
+  linkCopiato: 'Link copiato',
+  linkNonCopiato: 'Copia non riuscita: usa l’indirizzo nella barra',
   stati: {
     'in-parlamento': 'entra in Parlamento',
-    'miglior-perdente': 'miglior perdente: i voti contano per la coalizione, nessun seggio',
+    'miglior-perdente': 'miglior perdente: entra con la coalizione',
     'sotto-soglia': 'sotto soglia',
     'altre-liste': 'nessuna lista supera le soglie',
   } satisfies Record<StatoLista, string>,
   dettaglioListe: 'Il dettaglio lista per lista',
   regoleTitolo: 'Le regole che applichiamo',
   regole: [
-    'Proporzionale senza collegi uninominali: 400 deputati, 8 dei quali eletti all’Estero; 200 senatori, 4 all’Estero.',
-    'Soglie: 3% per le liste, 10% per le coalizioni che hanno almeno una lista al 3%. Per ogni coalizione contano anche i voti del “miglior perdente”, la prima lista sotto il 3%.',
-    'Premio: chi arriva primo con almeno il 42% dei voti validi in entrambe le Camere ottiene 70 seggi alla Camera e 35 al Senato, in aggiunta alla sua quota proporzionale.',
-    'Tetti: il vincitore non supera 220 seggi alla Camera e 113 al Senato; i seggi in eccesso vanno alle altre liste.',
-    'Se nessuno arriva al 42%, o se le due Camere danno maggioranze diverse, vale il proporzionale puro. Il ballottaggio non c’è più.',
+    'Proporzionale senza collegi uninominali, tranne in Valle d’Aosta e Trentino-Alto Adige: 400 deputati, 8 eletti all’Estero; 200 senatori elettivi, 4 all’Estero. Si danno fino a tre preferenze, il capolista è bloccato.',
+    'Soglie: 3% per le liste, 10% per le coalizioni che hanno almeno una lista al 3%. In ogni coalizione prende seggi anche il “miglior perdente”, la lista più votata fra quelle sotto il 3%.',
+    'Premio: chi arriva primo con almeno il 42% dei voti validi, alla Camera e al Senato, ottiene 70 deputati e 35 senatori in più della sua quota proporzionale.',
+    'Per il 42% e per il primo posto contano i voti di tutte le liste della coalizione, anche di quelle sotto il 3%: il Senato ha tolto la norma “anti-cespugli”.',
+    'Tetti: il vincitore non supera 220 deputati e 113 senatori, esclusi gli eletti all’Estero; i seggi in eccesso vanno agli altri.',
+    'Il premio va alla stessa coalizione nelle due Camere. Se nessuno arriva al 42%, o se le Camere danno vincitori diversi, vale il proporzionale puro. Il ballottaggio non c’è.',
   ],
   approssimazioniTitolo: 'Dove semplifichiamo',
   approssimazioni: [
-    'Riparto con quozienti interi e resti più alti su base nazionale: le fonti consultate non indicano il metodo.',
-    'Il Senato nella realtà si ripartisce su base regionale: qui è una stima nazionale.',
-    'Il miglior perdente conta nei voti della coalizione ma non riceve seggi.',
-    'Le fonti non concordano sul peso di Trentino-Alto Adige e Valle d’Aosta: seguiamo il CISE, secondo cui nella realtà il vincitore può arrivare fino a 228 deputati.',
+    'Riparto nazionale con quozienti interi e resti più alti: prima fra coalizioni e liste singole, poi dentro ogni coalizione.',
+    'I seggi di Trentino-Alto Adige e Valle d’Aosta, dove restano i collegi uninominali, sono stimati in proporzione ai voti nazionali.',
+    'Il Senato nella realtà si ripartisce regione per regione: qui è una stima nazionale, che può scostarsi di qualche seggio.',
+    'Gli stessi voti valgono per Camera e Senato. Un risultato diverso fra le due Camere si prova con l’opzione “Voto diverso al Senato”.',
+    'Al Senato siedono anche i senatori a vita: con i 5 di oggi i senatori sono 205 e la maggioranza assoluta sale a 103. Qui contiamo i 200 eletti.',
     'I parlamentari eletti all’Estero non sono simulati.',
   ],
-  verifica: 'Controllo automatico: una coalizione al 42% ottiene 205 deputati, come nell’esempio del CISE.',
+  verifica: 'Controllo automatico: una coalizione al 42% senza voti dispersi ottiene 135 + 70 = 205 deputati, come negli esempi del CISE.',
   fonti: 'Fonti sulla legge',
   fontePreset: 'Dati di partenza',
   collegamenti: { confronta: 'Confronta le posizioni dei partiti', test: 'Fai il test dei partiti' },
