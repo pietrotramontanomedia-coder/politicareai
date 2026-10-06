@@ -1,5 +1,5 @@
 import { autorizzatoCron } from '@/lib/cron';
-import { aggiornaLiveGiornaliera, liveGiornalieraConfigurata } from '@/lib/live-giornaliera-server';
+import { aggiornaLiveGiornaliera, liveGiornalieraConfigurata, verificaAccessoWordPress } from '@/lib/live-giornaliera-server';
 
 /**
  * Aggiorna la pagina «Politica oggi» del giorno su politicare.it.
@@ -12,7 +12,9 @@ export const maxDuration = 60;
 
 export async function GET(request: Request) {
   if (!autorizzatoCron(request.headers.get('authorization'), process.env.CRON_SECRET)) {
-    return Response.json({ configurata: liveGiornalieraConfigurata() }, { status: 401 });
+    // Senza segreto si può solo controllare che l'accesso a WordPress funzioni (?verifica=1), senza scrivere nulla.
+    const verifica = new URL(request.url).searchParams.has('verifica') ? await verificaAccessoWordPress() : undefined;
+    return Response.json({ configurata: liveGiornalieraConfigurata(), ...(verifica ? { wordpress: verifica } : {}) }, { status: 401 });
   }
   try {
     const esito = await aggiornaLiveGiornaliera(new Date(), { fresco: true });

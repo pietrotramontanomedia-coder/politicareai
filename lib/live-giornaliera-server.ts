@@ -33,6 +33,25 @@ export function liveGiornalieraConfigurata(): boolean {
   return config() !== null;
 }
 
+let ultimaVerifica: { quando: number; esito: string } | null = null;
+
+/** Prova l'accesso a WordPress con la password per le applicazioni, senza scrivere nulla. Al massimo una volta al minuto. */
+export async function verificaAccessoWordPress(): Promise<string> {
+  if (ultimaVerifica && Date.now() - ultimaVerifica.quando < 60_000) return ultimaVerifica.esito;
+  const c = config();
+  let esito = 'non configurato';
+  if (c) {
+    try {
+      const io = await wp<{ name?: string; capabilities?: Record<string, boolean> }>(c, 'users/me?context=edit&_fields=name,capabilities');
+      esito = io.capabilities?.publish_posts ? `ok: accesso come ${io.name}, può pubblicare` : `accesso come ${io.name}, ma senza permesso di pubblicare`;
+    } catch (errore) {
+      esito = errore instanceof Error ? errore.message.slice(0, 160) : 'errore';
+    }
+  }
+  ultimaVerifica = { quando: Date.now(), esito };
+  return esito;
+}
+
 async function wp<T>(c: Config, percorso: string, init: RequestInit = {}): Promise<T> {
   const risposta = await fetch(`${c.base}/wp-json/wp/v2/${percorso}`, {
     ...init,
