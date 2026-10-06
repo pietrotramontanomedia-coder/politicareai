@@ -85,4 +85,10 @@ describe('pagina Politica oggi', () => {
     const voci = [voce('tg-2', '2026-09-20T10:00:00Z', 'Vecchia'), voce('tg-1', '2026-09-19T10:00:00Z', 'Più vecchia')];
     expect(giorniDaPubblicare(voci, new Date('2026-10-06T10:00:00Z')).map((g) => g.chiave)).toEqual(['2026-10-06']);
   });
+
+  it('toglie i caratteri spuri delle emoji di Telegram', () => {
+    const g = giornoDi(new Date('2026-10-05T10:00:00Z'));
+    const html = componiPagina([voce('tg-1', '2026-10-05T10:00:00Z', 'Titolo', 'elezioni anticipateỊDiscutendo poi')], g, 'https://x');
+    expect(html).toContain('elezioni anticipate Discutendo poi');
+  });
 });

@@ -101,7 +101,7 @@ async function pubblicaGiorno(c: Config, tutte: NotiziaUltimOra[], g: Giorno, og
   }
 
   const [categoria, immagine] = await Promise.all([idPerSlug(c, 'categories', 'live'), idPerSlug(c, 'media', 'politicare-live-copertina')]);
-  const creato = await wp<{ link: string }>(c, 'posts', {
+  const creato = await wp<{ id: number; link: string }>(c, 'posts', {
     method: 'POST',
     body: JSON.stringify({
       title: titoloGiorno(g, oggi),
@@ -116,6 +116,8 @@ async function pubblicaGiorno(c: Config, tutte: NotiziaUltimOra[], g: Giorno, og
       ...(immagine ? { featured_media: immagine } : {}),
     }),
   });
+  // Yoast prepara i dati della pagina prima che l'immagine sia agganciata: un secondo salvataggio la fa entrare in og:image.
+  if (immagine) await wp(c, `posts/${creato.id}`, { method: 'POST', body: JSON.stringify({ featured_media: immagine }) });
   return { stato: 'creata', giorno: g.chiave, notizie: voci.length, url: creato.link };
 }
 

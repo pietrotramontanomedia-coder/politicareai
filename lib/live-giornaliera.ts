@@ -68,6 +68,11 @@ function esc(testo: string): string {
   return testo.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
+/** Telegram a volte lascia lettere vietnamite (Ạ, Ị…) al posto delle emoji personalizzate: in italiano non esistono. */
+function ripulisci(testo: string): string {
+  return testo.replace(/\s*[\u1EA0-\u1EF9]+\s*/g, ' ').trim();
+}
+
 function paragrafo(html: string): string {
   return `<!-- wp:paragraph -->\n<p>${html}</p>\n<!-- /wp:paragraph -->`;
 }
@@ -122,7 +127,7 @@ export function componiPagina(voci: NotiziaUltimOra[], g: Giorno, url: string, o
     blocchi.push(
       `<!-- wp:heading {"anchor":"${ancora(v)}"} -->\n<h2 class="wp-block-heading" id="${ancora(v)}">${oraDi(new Date(v.data))} · ${esc(v.titolo)}</h2>\n<!-- /wp:heading -->`,
     );
-    if (v.testo) blocchi.push(paragrafo(esc(v.testo).replace(/\n+/g, '<br>')));
+    if (v.testo) blocchi.push(paragrafo(esc(ripulisci(v.testo)).replace(/\n+/g, '<br>')));
   }
   blocchi.push(
     paragrafo(
