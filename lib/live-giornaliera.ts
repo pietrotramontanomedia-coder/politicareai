@@ -37,8 +37,24 @@ export function slugGiorno(g: Giorno): string {
   return `politica-oggi-${g.giorno}-${g.mese}-${g.anno}`;
 }
 
-export function titoloGiorno(g: Giorno): string {
-  return `Politica oggi, ${g.giorno} ${g.mese} ${g.anno}: le notizie in diretta`;
+export function titoloGiorno(g: Giorno, oggi = true): string {
+  return `Politica oggi, ${g.giorno} ${g.mese} ${g.anno}: ${oggi ? 'le notizie in diretta' : 'le notizie del giorno'}`;
+}
+
+/** Quanti giorni indietro si guardano per chiudere le pagine dei giorni passati. */
+export const GIORNI_INDIETRO = 7;
+
+/**
+ * I giorni di cui scrivere (o riscrivere) la pagina: oggi più i giorni passati presenti nel feed.
+ * Il giorno più vecchio del feed si salta, perché il feed ha un limite di voci e quel giorno
+ * può essere tagliato a metà: riscriverlo toglierebbe notizie dalla pagina.
+ */
+export function giorniDaPubblicare(voci: NotiziaUltimOra[], adesso: Date): Giorno[] {
+  const oggi = giornoDi(adesso);
+  const limite = giornoDi(new Date(adesso.getTime() - GIORNI_INDIETRO * 86_400_000)).chiave;
+  const chiavi = [...new Set(voci.map((v) => giornoDi(new Date(v.data)).chiave))].sort();
+  const passati = chiavi.slice(1).filter((c) => c < oggi.chiave && c >= limite);
+  return [oggi, ...passati.reverse().map((c) => giornoDi(new Date(`${c}T12:00:00Z`)))];
 }
 
 /** Le notizie di quel giorno (fuso di Roma), dalla più recente. */
@@ -52,16 +68,8 @@ function esc(testo: string): string {
   return testo.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
-function paragrafo(html: string, piccolo = false): string {
-  return piccolo
-    ? `<!-- wp:paragraph {"fontSize":"small"} -->\n<p class="has-small-font-size">${html}</p>\n<!-- /wp:paragraph -->`
-    : `<!-- wp:paragraph -->\n<p>${html}</p>\n<!-- /wp:paragraph -->`;
-}
-
-function fonte(v: NotiziaUltimOra): string {
-  const nome = v.fonte === 'instagram' ? 'Instagram di Politicare' : 'canale Telegram di Politicare';
-  const link = v.link ?? (v.fonte === 'instagram' ? 'https://www.instagram.com/politicareit/' : 'https://t.me/politicare');
-  return `Fonte: <a href="${esc(link)}" target="_blank" rel="noopener">${nome}</a>`;
+function paragrafo(html: string): string {
+  return `<!-- wp:paragraph -->\n<p>${html}</p>\n<!-- /wp:paragraph -->`;
 }
 
 /** Dati strutturati LiveBlogPosting: dicono a Google che è una diretta e quali sono gli aggiornamenti. */
@@ -103,24 +111,24 @@ function ancora(v: NotiziaUltimOra): string {
   return `notizia-${v.id.replace(/[^a-zA-Z0-9-]/g, '')}`;
 }
 
-/** Il contenuto della pagina, in blocchi Gutenberg. */
-export function componiPagina(voci: NotiziaUltimOra[], g: Giorno, url: string): string {
+/** Il contenuto della pagina, in blocchi Gutenberg. Sono notizie della redazione: nessuna «fonte» da citare. */
+export function componiPagina(voci: NotiziaUltimOra[], g: Giorno, url: string, oggi = true): string {
   const ultima = voci[0];
-  const blocchi = [
-    paragrafo(
-      `<strong>Aggiornato alle ${oraDi(new Date(ultima.data))}.</strong> Le notizie di politica del ${g.giorno} ${g.mese} ${g.anno}, raccolte dalla redazione di Politicare. La più recente è in alto. ` +
-        `Segui la diretta nella pagina <a href="https://www.politicare.it/live/">Live</a> o sul nostro <a href="https://t.me/politicare" target="_blank" rel="noopener">canale Telegram</a>.`,
-    ),
-  ];
+  const apertura = oggi
+    ? `<strong>Aggiornato alle ${oraDi(new Date(ultima.data))}.</strong> Le notizie di politica di oggi, ${g.giorno} ${g.mese} ${g.anno}, scritte dalla redazione di Politicare. La più recente è in alto. Gli aggiornamenti in tempo reale sono nella pagina <a href="https://www.politicare.it/live/">Live</a>.`
+    : `Le notizie di politica del ${g.giorno} ${g.mese} ${g.anno}, scritte dalla redazione di Politicare. La più recente è in alto. Gli aggiornamenti in tempo reale sono nella pagina <a href="https://www.politicare.it/live/">Live</a>.`;
+  const blocchi = [paragrafo(apertura)];
   for (const v of voci) {
     blocchi.push(
       `<!-- wp:heading {"anchor":"${ancora(v)}"} -->\n<h2 class="wp-block-heading" id="${ancora(v)}">${oraDi(new Date(v.data))} · ${esc(v.titolo)}</h2>\n<!-- /wp:heading -->`,
     );
     if (v.testo) blocchi.push(paragrafo(esc(v.testo).replace(/\n+/g, '<br>')));
-    blocchi.push(paragrafo(fonte(v), true));
   }
   blocchi.push(
-    paragrafo(`Le guide e gli approfondimenti di Politicare sono nella pagina <a href="https://www.politicare.it/elezioni-2027/">Elezioni 2027</a>.`),
+    paragrafo(
+      `Le notizie degli altri giorni sono nell'archivio <a href="https://www.politicare.it/category/live/">Politica oggi</a>. ` +
+        `Guide e approfondimenti sul voto sono nella pagina <a href="https://www.politicare.it/elezioni-2027/">Elezioni 2027</a>.`,
+    ),
   );
   blocchi.push(datiStrutturati(voci, g, url));
   return blocchi.join('\n\n');

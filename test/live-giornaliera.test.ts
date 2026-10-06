@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { componiPagina, datiStrutturati, giornoDi, notizieDelGiorno, oraDi, riassunto, slugGiorno, titoloGiorno } from '@/lib/live-giornaliera';
+import { componiPagina, datiStrutturati, giornoDi, giorniDaPubblicare, notizieDelGiorno, oraDi, riassunto, slugGiorno, titoloGiorno } from '@/lib/live-giornaliera';
 import type { NotiziaUltimOra } from '@/lib/ultimora-server';
 
 const voce = (id: string, data: string, titolo: string, testo = ''): NotiziaUltimOra => ({
@@ -34,12 +34,15 @@ describe('pagina Politica oggi', () => {
     expect(notizieDelGiorno(voci, g).map((v) => v.titolo)).toEqual(['Pomeriggio', 'Mattina']);
   });
 
-  it('il contenuto ha un titoletto per notizia, la fonte e i dati strutturati', () => {
+  it('il contenuto ha un titoletto per notizia e i dati strutturati, senza fonte', () => {
     const g = giornoDi(new Date('2026-10-06T10:00:00Z'));
     const voci = [voce('tg-3', '2026-10-06T16:00:00Z', 'Pomeriggio <b>', 'Testo'), voce('tg-2', '2026-10-06T08:00:00Z', 'Mattina')];
     const html = componiPagina(voci, g, 'https://www.politicare.it/politica-oggi-6-ottobre-2026/');
     expect(html).toContain('18:00 · Pomeriggio &lt;b&gt;');
-    expect(html).toContain('https://t.me/politicare/3');
+    expect(html).not.toContain('t.me/');
+    expect(html).not.toContain('Fonte');
+    expect(html).toContain('Le notizie di politica di oggi');
+    expect(componiPagina(voci, g, 'https://x', false)).toContain('Le notizie di politica del 6 ottobre 2026');
     expect(html).toContain('"@type":"LiveBlogPosting"');
     expect(html).not.toContain('<b>');
   });
@@ -61,5 +64,25 @@ describe('pagina Politica oggi', () => {
     expect(riassunto([voce('tg-2', '2026-10-06T08:00:00Z', 'Primo.'), voce('tg-1', '2026-10-06T07:00:00Z', 'Secondo')], g)).toBe(
       'Le notizie di politica del 6 ottobre: Primo; Secondo.',
     );
+  });
+
+  it('titolo dei giorni passati', () => {
+    expect(titoloGiorno(giornoDi(new Date('2026-10-05T10:00:00Z')), false)).toBe('Politica oggi, 5 ottobre 2026: le notizie del giorno');
+  });
+
+  it('pubblica oggi e i giorni passati, ma non il giorno più vecchio del feed', () => {
+    const voci = [
+      voce('tg-6', '2026-10-06T08:00:00Z', 'Oggi'),
+      voce('tg-5', '2026-10-05T15:00:00Z', 'Ieri'),
+      voce('tg-4', '2026-10-04T15:00:00Z', 'Altro ieri'),
+      voce('tg-1', '2026-10-01T15:00:00Z', 'Forse tagliato'),
+    ];
+    const giorni = giorniDaPubblicare(voci, new Date('2026-10-06T10:00:00Z')).map((g) => g.chiave);
+    expect(giorni).toEqual(['2026-10-06', '2026-10-05', '2026-10-04']);
+  });
+
+  it('non torna indietro più di una settimana e oggi c’è sempre', () => {
+    const voci = [voce('tg-2', '2026-09-20T10:00:00Z', 'Vecchia'), voce('tg-1', '2026-09-19T10:00:00Z', 'Più vecchia')];
+    expect(giorniDaPubblicare(voci, new Date('2026-10-06T10:00:00Z')).map((g) => g.chiave)).toEqual(['2026-10-06']);
   });
 });

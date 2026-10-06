@@ -1,5 +1,6 @@
 import { after } from 'next/server';
-import { componiPagina, giornoDi, MINIMO_NOTIZIE, notizieDelGiorno, riassunto, slugGiorno, titoloGiorno } from '@/lib/live-giornaliera';
+import { componiPagina, giorniDaPubblicare, MINIMO_NOTIZIE, notizieDelGiorno, riassunto, slugGiorno, titoloGiorno, type Giorno } from '@/lib/live-giornaliera';
+import type { NotiziaUltimOra } from '@/lib/ultimora-server';
 import { leggiUltimOra } from '@/lib/ultimora-server';
 
 /**
@@ -70,23 +71,20 @@ async function idPerSlug(c: Config, tipo: 'categories' | 'media', slug: string):
   return risultati[0]?.id;
 }
 
-export type EsitoLive =
-  | { stato: 'non configurato' }
+export type EsitoGiorno =
   | { stato: 'poche notizie'; giorno: string; notizie: number }
   | { stato: 'invariata' | 'aggiornata' | 'creata'; giorno: string; notizie: number; url: string };
 
-/** Crea o aggiorna la pagina del giorno. Chiamarla più volte è innocuo: riscrive solo se qualcosa è cambiato. */
-export async function aggiornaLiveGiornaliera(adesso: Date = new Date(), opzioni: { fresco?: boolean } = {}): Promise<EsitoLive> {
-  const c = config();
-  if (!c) return { stato: 'non configurato' };
+export type EsitoLive = { stato: 'non configurato' } | (EsitoGiorno & { giorniPassati: EsitoGiorno[] });
 
-  const g = giornoDi(adesso);
-  const voci = notizieDelGiorno(await leggiUltimOra(opzioni), g);
+/** Crea o aggiorna la pagina di un giorno. Riscrive solo se qualcosa è cambiato. */
+async function pubblicaGiorno(c: Config, tutte: NotiziaUltimOra[], g: Giorno, oggi: boolean): Promise<EsitoGiorno> {
+  const voci = notizieDelGiorno(tutte, g);
   if (voci.length < MINIMO_NOTIZIE) return { stato: 'poche notizie', giorno: g.chiave, notizie: voci.length };
 
   const slug = slugGiorno(g);
   const url = `${c.base}/${slug}/`;
-  const contenuto = componiPagina(voci, g, url);
+  const contenuto = componiPagina(voci, g, url, oggi);
   const estratto = riassunto(voci, g);
 
   const esistenti = await wp<{ id: number; link: string; content: { raw: string } }[]>(
@@ -98,7 +96,7 @@ export async function aggiornaLiveGiornaliera(adesso: Date = new Date(), opzioni
     if (esistente.content.raw.trim() === contenuto.trim()) {
       return { stato: 'invariata', giorno: g.chiave, notizie: voci.length, url: esistente.link };
     }
-    await wp(c, `posts/${esistente.id}`, { method: 'POST', body: JSON.stringify({ content: contenuto, excerpt: estratto }) });
+    await wp(c, `posts/${esistente.id}`, { method: 'POST', body: JSON.stringify({ title: titoloGiorno(g, oggi), content: contenuto, excerpt: estratto }) });
     return { stato: 'aggiornata', giorno: g.chiave, notizie: voci.length, url: esistente.link };
   }
 
@@ -106,17 +104,35 @@ export async function aggiornaLiveGiornaliera(adesso: Date = new Date(), opzioni
   const creato = await wp<{ link: string }>(c, 'posts', {
     method: 'POST',
     body: JSON.stringify({
-      title: titoloGiorno(g),
+      title: titoloGiorno(g, oggi),
       slug,
       status: 'publish',
       content: contenuto,
       excerpt: estratto,
       author: c.autore,
+      // Data della pagina = ultima notizia del giorno, così l'archivio resta in ordine anche per i giorni recuperati.
+      ...(oggi ? {} : { date_gmt: new Date(voci[0].data).toISOString().slice(0, 19) }),
       ...(categoria ? { categories: [categoria] } : {}),
       ...(immagine ? { featured_media: immagine } : {}),
     }),
   });
   return { stato: 'creata', giorno: g.chiave, notizie: voci.length, url: creato.link };
+}
+
+/**
+ * Crea o aggiorna la pagina di oggi e chiude quelle dei giorni passati ancora nel feed
+ * (per esempio le notizie arrivate dopo l'ultimo giro della sera). Chiamarla più volte è innocuo.
+ */
+export async function aggiornaLiveGiornaliera(adesso: Date = new Date(), opzioni: { fresco?: boolean } = {}): Promise<EsitoLive> {
+  const c = config();
+  if (!c) return { stato: 'non configurato' };
+
+  const tutte = await leggiUltimOra(opzioni);
+  const [oggi, ...passati] = giorniDaPubblicare(tutte, adesso);
+  const esitoOggi = await pubblicaGiorno(c, tutte, oggi, true);
+  const giorniPassati: EsitoGiorno[] = [];
+  for (const g of passati) giorniPassati.push(await pubblicaGiorno(c, tutte, g, false));
+  return { ...esitoOggi, giorniPassati };
 }
 
 /** Fa partire l'aggiornamento dopo la risposta HTTP; fuori da una richiesta (per esempio nei test) parte subito senza attendere. */
