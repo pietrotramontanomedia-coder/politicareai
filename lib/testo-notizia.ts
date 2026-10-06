@@ -17,9 +17,25 @@ export function senzaEmojiIniziali(testo: string): string {
   return testo.replace(/^[\p{Extended_Pictographic}\p{Regional_Indicator}️‍\s]+/u, '');
 }
 
+/** Parole con cui comincia una frase nuova: dopo un a capo segnano un titolo finito, non una riga spezzata. */
+const INIZI_DI_FRASE = new Set(
+  (
+    'il lo la i gli le l un una uno del della dello dei degli delle dell al alla allo ai agli alle all nel nella nello nei negli nelle nell ' +
+    'sul sulla sullo sui sugli sulle sull dal dalla dallo dai dagli dalle dall di da a in con per tra fra su e ed o ma però tuttavia ' +
+    'inoltre anche intanto secondo dopo prima oggi ieri domani questo questa questi queste quello quella già non ci si se che come ' +
+    'quando dove mentre poi infatti invece così ecco ora è c'
+  ).split(' '),
+);
+
+function iniziaUnaFrase(riga: string): boolean {
+  const parola = riga.match(/^["«“]?([\p{L}]+)/u)?.[1];
+  return !!parola && /^\p{Lu}/u.test(parola) && INIZI_DI_FRASE.has(parola.toLowerCase());
+}
+
 /**
  * Chi scrive sul canale a volte va a capo a metà frase: una riga che non chiude la frase continua nella successiva.
- * Una riga vuota o una riga che finisce con un'emoji invece sono un a capo voluto (per esempio dopo un titolo).
+ * Sono a capo voluti invece: una riga vuota, una riga che finisce con un'emoji, e una riga che comincia
+ * come una frase nuova («Il…», «L'ipotesi…», «Tuttavia…»), come dopo un titolo senza punto.
  */
 export function unisciRigheSpezzate(righeGrezze: string[]): string[] {
   const unite: string[] = [];
@@ -30,7 +46,7 @@ export function unisciRigheSpezzate(righeGrezze: string[]): string[] {
       chiusa = true; // una riga vuota separa sempre due paragrafi
       continue;
     }
-    if (!chiusa && unite.length > 0) {
+    if (!chiusa && unite.length > 0 && !iniziaUnaFrase(riga)) {
       unite[unite.length - 1] = `${unite[unite.length - 1]} ${riga}`;
     } else {
       unite.push(riga);

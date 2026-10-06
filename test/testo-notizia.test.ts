@@ -21,6 +21,14 @@ describe('titolo e testo delle notizie del canale', () => {
     expect(testo).toBe('Poi il resto.');
   });
 
+  it('dopo un titolo senza punto, una riga che comincia come frase nuova resta separata', () => {
+    const { titolo, testo } = titoloETesto(
+      "Sicilia: possibili dimissioni imminenti per il presidente\nSchifani\nL'ipotesi dopo le parole di Minardo.\nAltro.",
+    );
+    expect(titolo).toBe('Sicilia: possibili dimissioni imminenti per il presidente Schifani');
+    expect(testo).toBe("L'ipotesi dopo le parole di Minardo.\nAltro.");
+  });
+
   it('una riga vuota o un’emoji in fondo alla riga sono un a capo voluto', () => {
     expect(titoloETesto('"Condotta depistante" del senatore Scarpinato\n\nEx pm della Procura di Palermo.').titolo).toBe(
       '"Condotta depistante" del senatore Scarpinato',
