@@ -10,6 +10,8 @@ export interface NotiziaUltimOra {
   data: string;
   immagine?: string;
   fonte: FonteUltimOra;
+  /** Il post originale su Telegram o Instagram. */
+  link?: string;
 }
 
 const LIMITE = 20;
@@ -23,12 +25,12 @@ function chiaveDuplicato(titolo: string): string {
 }
 
 /** Notizie da Instagram e Telegram unite e ordinate per data; la stessa notizia su entrambi conta una volta. */
-export async function leggiUltimOra(): Promise<NotiziaUltimOra[]> {
-  const [instagram, telegram] = await Promise.all([leggiPost(), leggiMessaggiTelegram()]);
+export async function leggiUltimOra(opzioni: { fresco?: boolean } = {}): Promise<NotiziaUltimOra[]> {
+  const [instagram, telegram] = await Promise.all([leggiPost(), leggiMessaggiTelegram(opzioni)]);
 
   const tutte: NotiziaUltimOra[] = [
-    ...instagram.map((p) => ({ id: p.id, titolo: p.titolo, testo: p.testo, data: p.data, immagine: p.immagine, fonte: 'instagram' as const })),
-    ...telegram.map((m) => ({ id: m.id, titolo: m.titolo, testo: m.testo, data: m.data, immagine: m.immagine, fonte: 'telegram' as const })),
+    ...instagram.map((p) => ({ id: p.id, titolo: p.titolo, testo: p.testo, data: p.data, immagine: p.immagine, fonte: 'instagram' as const, link: p.link })),
+    ...telegram.map((m) => ({ id: m.id, titolo: m.titolo, testo: m.testo, data: m.data, immagine: m.immagine, fonte: 'telegram' as const, link: m.link })),
   ]
     .filter((n) => n.titolo)
     .sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime());

@@ -49,13 +49,15 @@ function estraiMessaggi(html: string): MessaggioTelegram[] {
   return messaggi;
 }
 
-async function scarica(url: string): Promise<string | null> {
-  const response = await fetch(url, { next: { revalidate: REVALIDATE_S }, headers: { 'User-Agent': UA } });
+async function scarica(url: string, fresco = false): Promise<string | null> {
+  const cache = fresco ? { cache: 'no-store' as const } : { next: { revalidate: REVALIDATE_S } };
+  const response = await fetch(url, { ...cache, headers: { 'User-Agent': UA } });
   return response.ok ? response.text() : null;
 }
 
-export async function leggiMessaggiTelegram(): Promise<MessaggioTelegram[]> {
-  const html = await scarica(`https://t.me/s/${CANALE_TELEGRAM}`);
+/** `fresco` salta la cache: serve quando un post nuovo è appena arrivato dal webhook. */
+export async function leggiMessaggiTelegram(opzioni: { fresco?: boolean } = {}): Promise<MessaggioTelegram[]> {
+  const html = await scarica(`https://t.me/s/${CANALE_TELEGRAM}`, opzioni.fresco);
   if (!html) return [];
   return estraiMessaggi(html).sort((a, b) => b.numero - a.numero);
 }

@@ -1,3 +1,4 @@
+import { aggiornaLiveDopoLaRisposta } from '@/lib/live-giornaliera-server';
 import { CANALE_TELEGRAM } from '@/lib/telegram-server';
 import { componiPostConRiscrittura, eDoppione, estraiPostCanale, impronta, opzioniFormato, soloLink } from '@/lib/telegram-x';
 import { riscritturaDisponibile, riscriviPerX, scegliHashtag } from '@/lib/riscrittura-server';
@@ -53,6 +54,8 @@ export async function POST(request: Request) {
     return Response.json({ ok: true, ignorato: `canale ${post.canale} non seguito` });
   }
   if (!post.testo.trim()) return Response.json({ ok: true, ignorato: 'post senza testo' });
+  // La pagina «Politica oggi» su politicare.it si aggiorna dopo la risposta, senza rallentare X.
+  aggiornaLiveDopoLaRisposta();
   // Un post che è solo un link non dice nulla e su X è il formato più penalizzato di tutti.
   if (soloLink(post.testo)) {
     console.log(`[telegram-x] t.me/${post.canale}/${post.numero} scartato: solo un link`);
