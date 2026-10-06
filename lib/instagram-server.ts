@@ -51,7 +51,10 @@ function normalizza(m: MediaInstagram): PostInstagram {
 async function chiamaGraph(percorso: string, revalidate: number): Promise<unknown | null> {
   if (!chiamateInstagramAttive()) return null;
   const token = await leggiToken();
-  if (!token) return null;
+  if (!token) {
+    ultimoErrore = 'nessun token configurato';
+    return null;
+  }
 
   const url = new URL(`https://graph.instagram.com/v21.0/${percorso}`);
   url.searchParams.set('fields', CAMPI);
@@ -59,8 +62,30 @@ async function chiamaGraph(percorso: string, revalidate: number): Promise<unknow
   if (percorso.endsWith('/media')) url.searchParams.set('limit', String(LIMITE));
 
   const response = await fetch(url, { next: { revalidate } });
-  if (!response.ok) return null;
+  if (!response.ok) {
+    ultimoErrore = await descriviErrore(response);
+    console.error(`[instagram] ${ultimoErrore}`);
+    return null;
+  }
+  ultimoErrore = null;
   return response.json();
+}
+
+/** Ultimo errore di Instagram, senza token: serve a capire perché il feed è vuoto. */
+let ultimoErrore: string | null = null;
+
+export function erroreInstagram(): string | null {
+  return ultimoErrore;
+}
+
+async function descriviErrore(response: Response): Promise<string> {
+  try {
+    const corpo = (await response.json()) as { error?: { message?: string; type?: string; code?: number; error_subcode?: number } };
+    const e = corpo.error ?? {};
+    return `HTTP ${response.status} · codice ${e.code ?? '?'}${e.error_subcode ? `/${e.error_subcode}` : ''} · ${e.type ?? ''} · ${(e.message ?? '').slice(0, 200)}`;
+  } catch {
+    return `HTTP ${response.status}`;
+  }
 }
 
 export async function leggiPost(): Promise<PostInstagram[]> {
