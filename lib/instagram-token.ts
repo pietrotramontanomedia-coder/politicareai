@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { get, put } from '@vercel/blob';
 
 /**
@@ -15,6 +16,23 @@ export interface TokenSalvato {
   token: string;
   rinnovatoIl: string;
   scadeIl: string;
+  /** Impronta del token d'ambiente da cui discende questo token: se il token d'ambiente cambia, vince quello. */
+  origineAmbiente?: string;
+}
+
+/** Impronta corta e non reversibile di un token, per confrontarli senza salvarli in chiaro. */
+export function impronta(token: string): string {
+  return createHash('sha256').update(token).digest('hex').slice(0, 16);
+}
+
+/**
+ * Sceglie il token da usare. Quello salvato (rinnovato ogni settimana) vale finché discende dal
+ * token d'ambiente attuale. Se su Vercel viene messo un token nuovo, per esempio dopo che Meta ha
+ * invalidato la sessione, vince il token d'ambiente e il primo rinnovo lo salva di nuovo.
+ */
+export function scegliToken(salvato: TokenSalvato | null, ambiente: string | undefined): string | null {
+  if (salvato && (!ambiente || salvato.origineAmbiente === impronta(ambiente))) return salvato.token;
+  return ambiente ?? salvato?.token ?? null;
 }
 
 let cache: { valore: TokenSalvato | null; letto: number } | null = null;
@@ -41,8 +59,7 @@ async function leggiDaStorage(): Promise<TokenSalvato | null> {
 }
 
 export async function leggiToken(): Promise<string | null> {
-  const salvato = await leggiDaStorage();
-  return salvato?.token ?? process.env.INSTAGRAM_ACCESS_TOKEN ?? null;
+  return scegliToken(await leggiDaStorage(), process.env.INSTAGRAM_ACCESS_TOKEN);
 }
 
 /** Sotto questo intervallo un nuovo rinnovo non serve: Instagram non allunga la scadenza e troppi rinnovi insospettiscono. */
@@ -52,11 +69,14 @@ export const INTERVALLO_MINIMO_RINNOVO_MS = 24 * 60 * 60 * 1000;
 export async function rinnovaToken(
   adesso: Date = new Date(),
 ): Promise<{ scadeIl: string; partitoDa: 'storage' | 'ambiente'; saltato?: boolean }> {
-  const salvato = await leggiDaStorage();
+  const ambiente = process.env.INSTAGRAM_ACCESS_TOKEN;
+  const letto = await leggiDaStorage();
+  // Un token salvato che non discende dal token d'ambiente attuale è superato: si riparte da quello d'ambiente.
+  const salvato = letto && scegliToken(letto, ambiente) === letto.token ? letto : null;
   if (salvato && adesso.getTime() - Date.parse(salvato.rinnovatoIl) < INTERVALLO_MINIMO_RINNOVO_MS) {
     return { scadeIl: salvato.scadeIl, partitoDa: 'storage', saltato: true };
   }
-  const attuale = salvato?.token ?? process.env.INSTAGRAM_ACCESS_TOKEN;
+  const attuale = salvato?.token ?? ambiente;
   if (!attuale) throw new Error('nessun token Instagram configurato');
 
   const url = new URL(URL_RINNOVO);
@@ -77,6 +97,7 @@ export async function rinnovaToken(
     token: dati.access_token,
     rinnovatoIl: adesso.toISOString(),
     scadeIl: calcolaScadenza(dati.expires_in, adesso),
+    origineAmbiente: ambiente ? impronta(ambiente) : undefined,
   };
   await put(PERCORSO, JSON.stringify(nuovo), {
     access: 'private',
