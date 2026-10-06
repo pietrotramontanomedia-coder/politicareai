@@ -14,7 +14,7 @@ export interface MessaggioTelegram {
   link: string;
 }
 
-const REVALIDATE_S = 900;
+const REVALIDATE_S = 180;
 const UA = 'Mozilla/5.0 (compatible; PoliticareBot/1.0)';
 const FIRMA = /\s*@politicare\s*$/i;
 
