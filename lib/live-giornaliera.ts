@@ -90,7 +90,7 @@ export function datiStrutturati(voci: NotiziaUltimOra[], g: Giorno, url: string)
     coverageStartTime: `${g.chiave}T00:00:00${offsetRoma(g)}`,
     coverageEndTime: `${g.chiave}T23:59:59${offsetRoma(g)}`,
     publisher: { '@type': 'Organization', name: 'Politicare', url: 'https://www.politicare.it/' },
-    author: { '@type': 'Organization', name: 'Redazione di Politicare', url: 'https://www.politicare.it/redazione-ragazzi/' },
+    author: { '@type': 'Organization', name: 'Politicare', url: 'https://www.politicare.it/author/politicare/' },
     liveBlogUpdate: [...voci].map((v) => ({
       '@type': 'BlogPosting',
       headline: v.titolo,
