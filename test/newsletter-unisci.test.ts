@@ -50,11 +50,13 @@ const SHOPIFY_ORDINI = [
   '#1003,hans@esempio.de,paid,yes,50.00,0.00,2024-02-23 10:00:00 +0100,Felpa Politico Z - M,Hans Muller,Berlin,,DE,10115,',
 ].join('\n');
 
-const MAILCHIMP = 'Email Address,First Name,Last Name,Phone Number,MEMBER_RATING,OPTIN_TIME,CONFIRM_TIME,CC,TAGS\n';
-const MC_ISCRITTI = MAILCHIMP + 'giulia@esempio.it,Giulia,Rosa,,3,2023-05-01 10:00:00,2023-05-01 10:05:00,IT,"""Evento Roma"",""Volontari"""\n'
-  + 'luca@esempio.it,Luca,Verdi,,2,2023-01-01 10:00:00,,IT,\n';
-const MC_DISISCRITTI = MAILCHIMP + 'anna@esempio.it,Anna,Bianchi,,1,2022-01-01 10:00:00,,IT,\n';
-const MC_PULITI = MAILCHIMP + 'rimbalza@esempio.it,,,,1,2022-01-01 10:00:00,,IT,\n';
+const MAILCHIMP = 'Email Address,First Name,Last Name,Phone Number,MEMBER_RATING,OPTIN_TIME,CONFIRM_TIME,CC,TAGS,SOURCE\n';
+const MC_ISCRITTI = MAILCHIMP + 'giulia@esempio.it,Giulia,Rosa,,3,2023-05-01 10:00:00,2023-05-01 10:05:00,IT,"""Evento Roma"",""Volontari""",Hosted Signup Form\n'
+  + 'luca@esempio.it,Luca,Verdi,,2,2023-01-01 10:00:00,,IT,,Embedded Form\n'
+  + 'importato@esempio.it,,,,2,2024-02-01 10:00:00,,IT,Cliente,List Import from File\n'
+  + 'sara@esempio.it,,,,2,2024-02-01 10:00:00,,IT,Cliente,List Import from File\n';
+const MC_DISISCRITTI = MAILCHIMP + 'anna@esempio.it,Anna,Bianchi,,1,2022-01-01 10:00:00,,IT,,Hosted Signup Form\n';
+const MC_PULITI = MAILCHIMP + 'rimbalza@esempio.it,,,,1,2022-01-01 10:00:00,,IT,,Hosted Signup Form\n';
 
 const EVENTBRITE = [
   'Order #,Order Date,First Name,Last Name,Email,Event Name,Ticket Type,Attendee Status,Tieni informato dall\'organizzatore',
@@ -81,6 +83,7 @@ describe('riconoscimento delle fonti', () => {
     expect(U.tipoFonte('orders_export.csv', SHOPIFY_ORDINI)).toBe('shopify-ordini');
     expect(U.tipoFonte('abandoned_checkouts.csv', SHOPIFY_ORDINI)).toBe('shopify-carrelli');
     expect(U.tipoFonte('x.csv', MC_ISCRITTI)).toBe('mailchimp');
+    expect(U.tipoFonte('x.csv', 'Indirizzo email,Nome,Cognome,Numero di telefono,MEMBER_RATING,OPTIN_TIME,LEID\n')).toBe('mailchimp');
     expect(U.tipoFonte('x.csv', EVENTBRITE)).toBe('eventbrite');
     expect(U.tipoFonte('x.csv', 'Nome;Email\nMario;m@b.it')).toBe('generico');
   });
@@ -98,7 +101,7 @@ describe('unione', () => {
 
   it('un contatto per email, da tutte le fonti', () => {
     expect(e.contatti.map((c) => c.email).sort()).toEqual([
-      'anna@esempio.it', 'elena@esempio.it', 'giulia@esempio.it', 'hans@esempio.de', 'luca@esempio.it',
+      'anna@esempio.it', 'elena@esempio.it', 'giulia@esempio.it', 'hans@esempio.de', 'importato@esempio.it', 'luca@esempio.it',
       'marco@esempio.it', 'paolo@esempio.it', 'rimbalza@esempio.it', 'sara@esempio.it',
     ]);
     expect(per(e, 'luca@esempio.it').fonti.sort()).toEqual(['mailchimp', 'shopify']);
@@ -120,7 +123,16 @@ describe('unione', () => {
 
   it('senza consenso resta nel database ma non riceve la newsletter', () => {
     expect(per(e, 'elena@esempio.it')).toMatchObject({ invia: false, motivo: 'nessun consenso registrato' });
-    expect(per(e, 'sara@esempio.it')).toMatchObject({ invia: false, motivo: 'nessun consenso registrato' });
+  });
+
+  it('su Mailchimp chi è stato importato da file non conta come iscritto', () => {
+    expect(per(e, 'importato@esempio.it')).toMatchObject({ invia: false, motivo: 'importato in Mailchimp da file, consenso da verificare' });
+    expect(per(e, 'sara@esempio.it')).toMatchObject({ invia: false, motivo: 'importato in Mailchimp da file, consenso da verificare (su Shopify ha detto no)' });
+  });
+
+  it('chi ha detto no su Shopify non riceve la newsletter', () => {
+    const e2 = U.unisci([{ nome: 'customers_export.csv', testo: SHOPIFY_CLIENTI }], OGGI);
+    expect(per(e2, 'sara@esempio.it')).toMatchObject({ invia: false, motivo: 'ha rifiutato il marketing su Shopify' });
   });
 
   it('ordini: uno per numero, spesa sommata, totali di sempre dall\'export clienti', () => {
@@ -136,9 +148,17 @@ describe('unione', () => {
     expect(per(e, 'paolo@esempio.it').segmenti).toContain('partecipante_eventi');
   });
 
+  it('Mailchimp con intestazioni in italiano', () => {
+    const it = U.unisci([{
+      nome: 'unsubscribed_email_audience_export_x.csv',
+      testo: 'Indirizzo email,Nome,Cognome,Numero di telefono,MEMBER_RATING,OPTIN_TIME,LEID,TAGS\nzeta@esempio.it,ZETA,ROSSI,333 4444444,2,2023-01-01 10:00:00,1,\n',
+    }], OGGI).contatti[0];
+    expect(it).toMatchObject({ email: 'zeta@esempio.it', nomeCompleto: 'Zeta Rossi', telefono: '+393334444444', blocklist: true, invia: false });
+  });
+
   it('tag di Mailchimp e di Shopify', () => {
-    expect(per(e, 'giulia@esempio.it').tag).toEqual(['Evento Roma', 'Volontari']);
-    expect(per(e, 'anna@esempio.it').tag).toEqual(['newsletter']);
+    expect(per(e, 'giulia@esempio.it').tag).toEqual(['Evento Roma', 'Volontari', 'origine Mailchimp: Hosted Signup Form']);
+    expect(per(e, 'anna@esempio.it').tag).toEqual(['newsletter', 'origine Mailchimp: Hosted Signup Form']);
   });
 
   it('nomi, telefoni e città sistemati', () => {

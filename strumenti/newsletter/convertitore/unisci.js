@@ -5,7 +5,8 @@
  * Produce un database unico per email, con fonti, segmenti, eventi, acquisti e consenso,
  * e decide per ogni contatto se può ricevere la newsletter. Regole, dalla più forte:
  *   1. disiscritto o indirizzo non valido su Mailchimp → mai (va anche nella blocklist di Listmonk)
- *   2. consenso esplicito in almeno una fonte → sì
+ *   2. consenso esplicito in almeno una fonte → sì (su Mailchimp conta solo chi si è iscritto da un
+ *      modulo: i contatti importati da file o aggiunti a mano restano «da verificare»)
  *   3. cliente senza consenso → no (il «soft opt-in» va valutato con il legale)
  *   4. tutti gli altri → no
  *
@@ -90,7 +91,8 @@
   /** shopify-clienti, shopify-ordini, shopify-carrelli, mailchimp, eventbrite oppure generico */
   function tipoFonte(nomeFile, t) {
     var f = nomeFile.toLowerCase();
-    if (t.ha('Email Address') && (t.ha('MEMBER_RATING') || t.ha('OPTIN_TIME') || t.ha('LEID'))) return 'mailchimp';
+    // Mailchimp esporta le intestazioni nella lingua dell'account: «Email Address» o «Indirizzo email».
+    if ((t.ha('Email Address') || t.ha('Indirizzo email')) && (t.ha('MEMBER_RATING') || t.ha('OPTIN_TIME') || t.ha('LEID'))) return 'mailchimp';
     if (t.ha('Customer ID') && (t.ha('Accepts Email Marketing') || t.ha('Total Orders'))) return 'shopify-clienti';
     if (t.ha('Lineitem name') || t.ha('Lineitem quantity')) {
       return /checkout|abbandon|abandon/.test(f) || t.cerca(/abandon/i) ? 'shopify-carrelli' : 'shopify-ordini';
@@ -192,20 +194,25 @@
         var numero = i + 2;
         var c;
         if (tipo === 'mailchimp') {
-          c = contatto(L(r, 'Email Address'), f.nome, numero);
+          c = contatto(L(r, 'Email Address', 'Indirizzo email'), f.nome, numero);
           if (!c) return;
           c.fonti.mailchimp = true;
-          riempi(c, 'nome', C.sistemaMaiuscole(L(r, 'First Name')));
-          riempi(c, 'cognome', C.sistemaMaiuscole(L(r, 'Last Name')));
-          telefono(c, L(r, 'Phone Number', 'Phone'));
+          riempi(c, 'nome', C.sistemaMaiuscole(L(r, 'First Name', 'Nome')));
+          riempi(c, 'cognome', C.sistemaMaiuscole(L(r, 'Last Name', 'Cognome')));
+          telefono(c, L(r, 'Phone Number', 'Numero di telefono', 'Phone'));
           luogo(c, '', '', '', L(r, 'CC'));
           tagDaTesto(L(r, 'TAGS')).forEach(function (x) { c.tag[x] = true; });
+          if (L(r, 'SOURCE')) c.tag['origine Mailchimp: ' + L(r, 'SOURCE')] = true;
           c.primoContatto = prima(c.primoContatto, data(L(r, 'CONFIRM_TIME', 'OPTIN_TIME')));
           var stato = statoMailchimp(f.nome);
           // Lo stato più restrittivo vince: un contatto disiscritto resta disiscritto.
           var peso = { non_valido: 4, disiscritto: 3, iscritto: 2, mai_iscritto: 1, sconosciuto: 0 };
           if (!c.mailchimp || peso[stato] > peso[c.mailchimp]) c.mailchimp = stato;
-          if (stato === 'iscritto') c.consensi.push('Mailchimp');
+          if (stato === 'iscritto') {
+            // Chi è stato caricato da un file o a mano non si è iscritto da solo: non è un consenso.
+            if (/import|admin/i.test(L(r, 'SOURCE'))) c.importatoMailchimp = true;
+            else c.consensi.push('Mailchimp');
+          }
         } else if (tipo === 'shopify-clienti') {
           c = contatto(L(r, 'Email'), f.nome, numero);
           if (!c) return;
@@ -216,7 +223,9 @@
           telefono(c, L(r, 'Default Address Phone'));
           luogo(c, L(r, 'Default Address City'), L(r, 'Default Address Province Code'), L(r, 'Default Address Zip'), L(r, 'Default Address Country Code'));
           tagDaTesto(L(r, 'Tags')).forEach(function (x) { c.tag[x] = true; });
-          if (siNo(L(r, 'Accepts Email Marketing')) === true) c.consensi.push('Shopify');
+          var accettaCliente = siNo(L(r, 'Accepts Email Marketing'));
+          if (accettaCliente === true) c.consensi.push('Shopify');
+          if (accettaCliente === false) c.noShopify = true;
           var spesi = parseFloat(L(r, 'Total Spent')) || 0;
           var ordini = parseInt(L(r, 'Total Orders'), 10) || 0;
           // L'export clienti ha i totali di sempre; quello ordini può coprire solo un periodo.
@@ -235,7 +244,9 @@
             L(r, 'Billing Zip', 'Shipping Zip'), L(r, 'Billing Country', 'Shipping Country'));
           var quando = data(L(r, 'Created at'));
           c.primoContatto = prima(c.primoContatto, quando);
-          if (siNo(L(r, 'Accepts Marketing', 'Accepts Email Marketing')) === true) c.consensi.push('Shopify');
+          var accettaOrdine = siNo(L(r, 'Accepts Marketing', 'Accepts Email Marketing'));
+          if (accettaOrdine === true) c.consensi.push('Shopify');
+          if (accettaOrdine === false) c.noShopify = true;
           var numeroOrdine = L(r, 'Name', 'Id');
           if (tipo === 'shopify-carrelli') {
             c.carrello = true;
@@ -312,6 +323,11 @@
     if (c.mailchimp === 'disiscritto') { invia = false; motivo = 'disiscritto da Mailchimp'; }
     else if (c.mailchimp === 'non_valido') { invia = false; motivo = 'indirizzo non valido (Mailchimp cleaned)'; }
     else if (consensi.length) { invia = true; motivo = 'consenso: ' + consensi.join(', '); }
+    else if (c.importatoMailchimp) {
+      invia = false;
+      motivo = 'importato in Mailchimp da file, consenso da verificare' + (c.noShopify ? ' (su Shopify ha detto no)' : '');
+    }
+    else if (c.noShopify) { invia = false; motivo = 'ha rifiutato il marketing su Shopify'; }
     else if (nOrdini >= 1) { invia = false; motivo = 'cliente senza consenso marketing (soft opt-in da valutare con il legale)'; }
     else { invia = false; motivo = 'nessun consenso registrato'; }
 
