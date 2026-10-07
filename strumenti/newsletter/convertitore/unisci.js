@@ -321,14 +321,14 @@
       resocontoFonti.push(resoconto);
     });
 
-    var contatti = Object.keys(mappa).map(function (e) { return completa(mappa[e], oggi); });
+    var contatti = Object.keys(mappa).map(function (e) { return completa(mappa[e], oggi, opzioni); });
     assegnaGruppiAvvio(contatti.filter(function (c) { return c.invia; }));
     return { contatti: contatti, fonti: resocontoFonti, scarti: scarti };
   }
 
   // ---------------------------------------------------------------- segmenti e decisione
 
-  function completa(c, oggi) {
+  function completa(c, oggi, opzioni) {
     var nOrdini = Math.max(Object.keys(c.ordini).length, c.ordiniDaClienti || 0);
     var spesa = Math.max(c.spesa, c.spesaDaClienti || 0);
     var nomeCompleto = [c.nome, c.cognome].filter(Boolean).join(' ') || c.nomeCompleto;
@@ -357,6 +357,15 @@
     else if (Object.keys(c.eventi).length) { invia = false; motivo = 'partecipante a eventi senza consenso alla newsletter'; }
     else { invia = false; motivo = 'nessun consenso registrato'; }
 
+    // Su scelta del titolare entrano anche i contatti senza prova del consenso, segnati come tali.
+    // Chi ha un rifiuto documentato (disiscritto, indirizzo non valido, «no» su Shopify) resta fuori sempre.
+    var verificato = invia;
+    var blocklist = c.mailchimp === 'disiscritto' || c.mailchimp === 'non_valido';
+    if (!invia && opzioni.includiNonVerificati && !blocklist && !c.noShopify) {
+      invia = true;
+      motivo = 'consenso dichiarato dal titolare, non verificato (' + motivo + ')';
+    }
+
     return {
       email: c.email,
       nome: c.nome,
@@ -378,7 +387,9 @@
       primoContatto: c.primoContatto,
       statoMailchimp: c.mailchimp,
       invia: invia,
-      blocklist: c.mailchimp === 'disiscritto' || c.mailchimp === 'non_valido',
+      verificato: verificato,
+      // In blocklist anche chi ha detto «no» su Shopify senza un consenso altrove: non deve ricevere nulla.
+      blocklist: blocklist || (!invia && !!c.noShopify),
       motivo: motivo,
       importatoIl: oggi,
     };
@@ -388,10 +399,11 @@
     return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
   }
 
-  /** Gruppi dell'avvio graduale: prima chi ha avuto un contatto più recente. */
+  /** Gruppi dell'avvio graduale: prima i consensi verificati, poi chi ha avuto un contatto più recente. */
   function assegnaGruppiAvvio(contatti) {
     var recente = function (c) { return dopo(c.ultimoOrdine, c.primoContatto) || ''; };
     var ordinati = contatti.slice().sort(function (a, b) {
+      if (a.verificato !== b.verificato) return a.verificato ? -1 : 1;
       var x = recente(a);
       var y = recente(b);
       return x < y ? 1 : x > y ? -1 : 0;
@@ -416,7 +428,8 @@
   var COLONNE = [
     ['Email', 'email'], ['Nome', 'nome'], ['Cognome', 'cognome'], ['Nome completo', 'nomeCompleto'],
     ['Telefono', 'telefono'], ['Città', 'citta'], ['Provincia', 'provincia'], ['CAP', 'cap'], ['Paese', 'paese'],
-    ['Newsletter', function (c) { return c.invia ? 'SÌ' : 'NO'; }], ['Motivo', 'motivo'],
+    ['Newsletter', function (c) { return c.invia ? 'SÌ' : 'NO'; }],
+    ['Consenso verificato', function (c) { return c.verificato ? 'SÌ' : 'NO'; }], ['Motivo', 'motivo'],
     ['Fonti', 'fonti'], ['Segmenti', 'segmenti'], ['Tag', 'tag'], ['Eventi', 'eventi'],
     ['Ordini', 'nOrdini'], ['Spesa totale €', function (c) { return c.spesa ? String(c.spesa).replace('.', ',') : ''; }],
     ['Primo ordine', 'primoOrdine'], ['Ultimo ordine', 'ultimoOrdine'], ['Primo contatto', 'primoContatto'],
@@ -444,6 +457,7 @@
     if (c.nOrdini) { a.ordini = c.nOrdini; a.spesa = c.spesa; a.ultimo_ordine = c.ultimoOrdine; }
     if (c.primoContatto) a.data_iscrizione = c.primoContatto;
     a.base_invio = c.motivo;
+    a.consenso_verificato = c.verificato;
     if (c.gruppoAvvio) a.gruppo_avvio = c.gruppoAvvio;
     a.importato_il = c.importatoIl;
     return a;
@@ -464,8 +478,9 @@
   }
 
   function riepilogo(esito) {
-    var r = { totale: esito.contatti.length, invia: 0, blocklist: 0, clientiSenzaConsenso: 0, senzaConsenso: 0, segmenti: {} };
+    var r = { totale: esito.contatti.length, invia: 0, nonVerificati: 0, blocklist: 0, clientiSenzaConsenso: 0, senzaConsenso: 0, segmenti: {} };
     esito.contatti.forEach(function (c) {
+      if (c.invia && !c.verificato) r.nonVerificati++;
       if (c.invia) r.invia++;
       else if (c.blocklist) r.blocklist++;
       else if (c.nOrdini) r.clientiSenzaConsenso++;

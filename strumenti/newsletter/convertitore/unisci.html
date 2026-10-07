@@ -54,6 +54,10 @@
       <li>Altri elenchi (fogli degli eventi, vecchi Excel salvati come CSV) vanno bene lo stesso.</li>
     </ul>
     <input type="file" id="file" accept=".csv,.txt,.zip" multiple>
+    <label style="display:flex;gap:10px;align-items:flex-start;margin:0 0 14px"><input type="checkbox" id="non-verificati">
+      <span>Includi anche i contatti <strong>senza prova del consenso</strong> (clienti, partecipanti agli eventi, importati in Mailchimp),
+        sotto la responsabilità del titolare. Restano sempre esclusi chi si è disiscritto, gli indirizzi non validi e chi ha detto
+        «no» su Shopify. Nel file avranno <code>consenso_verificato: false</code>.</span></label>
     <label for="file" class="zona" id="zona"><strong>Trascinate qui i file</strong>oppure fate clic per sceglierli (anche più di uno)</label>
     <p class="errore" id="errore" role="alert" hidden></p>
   </section>
@@ -67,7 +71,7 @@
     <h2>2. Risultato</h2>
     <div class="numeri" id="numeri"></div>
     <p class="nota">La newsletter va solo a chi ha dato il consenso. Gli altri restano nel database con il motivo,
-      e chi si è disiscritto da Mailchimp finisce nella blocklist di Listmonk, così non riceve nulla nemmeno per errore.
+      e chi si è disiscritto o ha detto «no» finisce nella blocklist di Listmonk, così non riceve nulla nemmeno per errore.
       I prodotti acquistati non vengono registrati: rivelerebbero opinioni politiche.</p>
     <h2 style="margin-top:20px">Segmenti</h2>
     <div class="tabella"><table><thead><tr><th>Segmento</th><th>Contatti</th></tr></thead><tbody id="corpo-segmenti"></tbody></table></div>
@@ -93,6 +97,7 @@
   var C = window.ConvertiNewsletter;
   var U = window.UnisciContatti;
   var esito = null;
+  var ultimiFile = null;
   var $ = function (id) { return document.getElementById(id); };
   var NOMI = {
     'shopify-clienti': 'Shopify · clienti', 'shopify-ordini': 'Shopify · ordini', 'shopify-carrelli': 'Shopify · carrelli abbandonati',
@@ -131,9 +136,15 @@
     if (!file.length) return;
     errore('');
     Promise.all(file.map(leggi)).then(function (gruppi) {
-      esito = U.unisci([].concat.apply([], gruppi));
-      mostra();
+      ultimiFile = [].concat.apply([], gruppi);
+      elabora();
     }, function (e) { errore('Non riesco a leggere uno dei file: ' + e.message); });
+  }
+
+  function elabora() {
+    if (!ultimiFile) return;
+    esito = U.unisci(ultimiFile, { includiNonVerificati: $('non-verificati').checked });
+    mostra();
   }
 
   function mostra() {
@@ -150,7 +161,8 @@
     [
       ['Contatti unici', r.totale, ''],
       ['Ricevono la newsletter', r.invia, 'ok'],
-      ['Disiscritti / non validi', r.blocklist, 'male'],
+      ['di cui non verificati', r.nonVerificati, r.nonVerificati ? 'male' : ''],
+      ['Rifiuti e indirizzi non validi', r.blocklist, 'male'],
       ['Clienti senza consenso', r.clientiSenzaConsenso, ''],
       ['Senza consenso', r.senzaConsenso, ''],
     ].forEach(function (v) {
@@ -180,6 +192,7 @@
   }
 
   $('file').addEventListener('change', function (e) { apri(e.target.files); });
+  $('non-verificati').addEventListener('change', elabora);
   var zona = $('zona');
   ['dragenter', 'dragover'].forEach(function (t) { zona.addEventListener(t, function (e) { e.preventDefault(); zona.classList.add('sopra'); }); });
   ['dragleave', 'drop'].forEach(function (t) { zona.addEventListener(t, function (e) { e.preventDefault(); zona.classList.remove('sopra'); }); });

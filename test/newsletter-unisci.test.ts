@@ -196,6 +196,39 @@ describe('unione', () => {
   });
 });
 
+describe('contatti senza prova del consenso, su scelta del titolare', () => {
+  const e = U.unisci([
+    { nome: 'customers_export.csv', testo: SHOPIFY_CLIENTI },
+    { nome: 'orders_export_1.csv', testo: SHOPIFY_ORDINI },
+    { nome: 'subscribed_email_audience_export_abc.csv', testo: MC_ISCRITTI },
+    { nome: 'unsubscribed_email_audience_export_abc.csv', testo: MC_DISISCRITTI },
+    { nome: 'cleaned_email_audience_export_abc.csv', testo: MC_PULITI },
+    { nome: 'report-partecipanti.csv', testo: EVENTBRITE },
+  ], { ...OGGI, includiNonVerificati: true }) as Esito & { contatti: (Contatto & { verificato: boolean })[] };
+  const c = (email: string) => e.contatti.find((x) => x.email === email)!;
+
+  it('entrano, segnati come non verificati', () => {
+    expect(c('elena@esempio.it')).toMatchObject({ invia: true, verificato: false });
+    expect(c('elena@esempio.it').motivo).toMatch(/^consenso dichiarato dal titolare, non verificato/);
+    expect(c('importato@esempio.it')).toMatchObject({ invia: true, verificato: false });
+    expect(U.csvListmonkIscritti(e.contatti)).toContain('consenso_verificato\"\":false');
+  });
+
+  it('i consensi veri restano verificati e vengono per primi nell\'avvio graduale', () => {
+    expect(c('marco@esempio.it')).toMatchObject({ invia: true, verificato: true });
+    const massimoVerificati = Math.max(...e.contatti.filter((x) => x.verificato).map((x) => x.gruppoAvvio!));
+    const minimoAltri = Math.min(...e.contatti.filter((x) => x.invia && !x.verificato).map((x) => x.gruppoAvvio!));
+    expect(massimoVerificati).toBeLessThanOrEqual(minimoAltri);
+  });
+
+  it('chi ha un rifiuto documentato resta fuori comunque', () => {
+    expect(c('anna@esempio.it').invia).toBe(false);
+    expect(c('rimbalza@esempio.it').invia).toBe(false);
+    expect(c('sara@esempio.it')).toMatchObject({ invia: false, motivo: 'importato in Mailchimp da file, consenso da verificare (su Shopify ha detto no)' });
+    expect(c('luca@esempio.it').invia).toBe(true);
+  });
+});
+
 describe('consenso di Shopify', () => {
   const intestazione = 'Customer ID,First Name,Last Name,Email,Accepts Email Marketing,Accepts SMS Marketing,Total Orders,Tags';
 
@@ -246,11 +279,13 @@ describe('file in uscita', () => {
     expect(csv).not.toContain('elena@esempio.it');
   });
 
-  it('blocklist: disiscritti e indirizzi non validi', () => {
+  it('blocklist: disiscritti, indirizzi non validi e «no» su Shopify', () => {
     const csv = U.csvListmonkBlocklist(e.contatti);
     expect(csv).toContain('anna@esempio.it');
     expect(csv).toContain('rimbalza@esempio.it');
-    expect(csv.trim().split('\r\n')).toHaveLength(3);
+    expect(csv).toContain('sara@esempio.it'); // «no» su Shopify
+    expect(csv).not.toContain('luca@esempio.it'); // «no» su un ordine, ma iscritto da modulo su Mailchimp
+    expect(csv.trim().split('\r\n')).toHaveLength(4);
   });
 
   it('database per Excel: BOM, punto e virgola, colonna Newsletter', () => {
