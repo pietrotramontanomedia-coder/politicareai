@@ -122,7 +122,25 @@ describe('unione', () => {
   });
 
   it('senza consenso resta nel database ma non riceve la newsletter', () => {
-    expect(per(e, 'elena@esempio.it')).toMatchObject({ invia: false, motivo: 'nessun consenso registrato' });
+    expect(per(e, 'elena@esempio.it')).toMatchObject({ invia: false, motivo: 'partecipante a eventi senza consenso alla newsletter' });
+    expect(e.contatti.some((c) => c.email === 'elena@esempio.it')).toBe(true);
+  });
+
+  it('Eventbrite con intestazioni in italiano: eventi distinti per data, nessun consenso', () => {
+    const csv = [
+      "ID dell'ordine,Data dell'ordine,Nome del partecipante,Cognome del partecipante,E-mail del partecipante,Numero di telefono,Nome dell'evento,ID evento,Data di inizio dell'evento,Ospite",
+      '1,2024-09-02 21:10:58,Ugo,Neri,ugo@esempio.it,,La Giovane Politica,1,2024-10-01,No',
+      '2,2025-09-02 21:10:58,Ugo,Neri,ugo@esempio.it,3331234567,La Giovane Politica,2,2025-10-01,No',
+      'TOTALI,,,,,,,,,',
+    ].join('\n');
+    expect(U.tipoFonte('x.csv', csv)).toBe('eventbrite');
+    const esito = U.unisci([{ nome: 'La_Giovane_Politica_Attendees.csv', testo: csv }], OGGI);
+    expect(esito.scarti).toEqual([]);
+    expect(esito.contatti).toHaveLength(1);
+    expect(esito.contatti[0]).toMatchObject({
+      nomeCompleto: 'Ugo Neri', telefono: '+393331234567', invia: false,
+      eventi: ['La Giovane Politica (2024-10-01)', 'La Giovane Politica (2025-10-01)'],
+    });
   });
 
   it('su Mailchimp chi è stato importato da file non conta come iscritto', () => {
@@ -145,6 +163,7 @@ describe('unione', () => {
     expect(per(e, 'sara@esempio.it').segmenti).toContain('shopify_senza_acquisti');
     expect(per(e, 'hans@esempio.de').segmenti).toContain('estero');
     expect(per(e, 'paolo@esempio.it').eventi).toEqual(['Politicare Live Roma', 'Politicare Live Napoli']);
+    expect(per(e, 'elena@esempio.it').motivo).toBe('partecipante a eventi senza consenso alla newsletter');
     expect(per(e, 'paolo@esempio.it').segmenti).toContain('partecipante_eventi');
   });
 

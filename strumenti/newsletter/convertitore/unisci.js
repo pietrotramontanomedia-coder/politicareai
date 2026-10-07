@@ -97,7 +97,8 @@
     if (t.ha('Lineitem name') || t.ha('Lineitem quantity')) {
       return /checkout|abbandon|abandon/.test(f) || t.cerca(/abandon/i) ? 'shopify-carrelli' : 'shopify-ordini';
     }
-    if ((t.ha('Event Name') || t.ha('Nome evento') || t.ha('Event name')) && (t.ha('Email') || t.ha('E-mail'))) return 'eventbrite';
+    if ((t.ha('Event Name') || t.ha('Nome evento') || t.ha("Nome dell'evento")) &&
+      (t.ha('Email') || t.ha('E-mail') || t.ha('E-mail del partecipante'))) return 'eventbrite';
     return 'generico';
   }
 
@@ -261,15 +262,17 @@
             }
           }
         } else if (tipo === 'eventbrite') {
-          c = contatto(L(r, 'Email', 'E-mail', 'Indirizzo email'), f.nome, numero);
+          c = contatto(L(r, 'Email', 'E-mail', 'E-mail del partecipante', 'Indirizzo email'), f.nome, numero);
           if (!c) return;
           c.fonti.eventbrite = true;
-          riempi(c, 'nome', C.sistemaMaiuscole(L(r, 'First Name', 'Nome')));
-          riempi(c, 'cognome', C.sistemaMaiuscole(L(r, 'Last Name', 'Cognome')));
-          telefono(c, L(r, 'Cell Phone', 'Mobile Phone', 'Phone', 'Telefono', 'Cellulare'));
-          var evento = L(r, 'Event Name', 'Nome evento', 'Event name');
-          if (evento) c.eventi[evento] = true;
-          c.primoContatto = prima(c.primoContatto, data(L(r, 'Order Date', 'Data ordine', 'Order date')));
+          riempi(c, 'nome', C.sistemaMaiuscole(L(r, 'First Name', 'Nome del partecipante', 'Nome')));
+          riempi(c, 'cognome', C.sistemaMaiuscole(L(r, 'Last Name', 'Cognome del partecipante', 'Cognome')));
+          telefono(c, L(r, 'Cell Phone', 'Mobile Phone', 'Phone', 'Numero di telefono', 'Telefono', 'Cellulare'));
+          var evento = L(r, 'Event Name', "Nome dell'evento", 'Nome evento');
+          // Edizioni diverse possono avere lo stesso nome: la data le distingue.
+          var giorno = data(L(r, 'Event Start Date', "Data di inizio dell'evento"));
+          if (evento) c.eventi[evento + (giorno ? ' (' + giorno + ')' : '')] = true;
+          c.primoContatto = prima(c.primoContatto, data(L(r, 'Order Date', "Data dell'ordine", 'Data ordine')));
           var colConsenso = t.cerca(/opt.?in|consens|aggiornament|informat|marketing|keep me|updates|newsletter/i);
           if (colConsenso && siNo(r[t.intestazioni.indexOf(colConsenso)]) === true) c.consensi.push('Eventbrite');
         } else {
@@ -329,6 +332,7 @@
     }
     else if (c.noShopify) { invia = false; motivo = 'ha rifiutato il marketing su Shopify'; }
     else if (nOrdini >= 1) { invia = false; motivo = 'cliente senza consenso marketing (soft opt-in da valutare con il legale)'; }
+    else if (Object.keys(c.eventi).length) { invia = false; motivo = 'partecipante a eventi senza consenso alla newsletter'; }
     else { invia = false; motivo = 'nessun consenso registrato'; }
 
     return {
