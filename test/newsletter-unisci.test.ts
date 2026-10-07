@@ -12,9 +12,9 @@ type Contatto = {
   email: string; nomeCompleto: string; telefono: string; citta: string; provincia: string; paese: string;
   fonti: string[]; segmenti: string[]; tag: string[]; eventi: string[];
   nOrdini: number; spesa: number; ultimoOrdine: string; statoMailchimp: string;
-  invia: boolean; blocklist: boolean; motivo: string; gruppoAvvio?: number;
+  invia: boolean; verificato: boolean; blocklist: boolean; motivo: string; gruppoAvvio?: number;
 };
-type Esito = { contatti: Contatto[]; fonti: { nome: string; tipo: string; righe: number; scartate: number }[]; scarti: unknown[] };
+type Esito = { contatti: Contatto[]; fonti: { nome: string; tipo: string; righe: number; scartate: number; avviso?: string }[]; scarti: unknown[] };
 type Api = {
   leggiZip(b: Uint8Array): Promise<{ nome: string; byte: Uint8Array }[]>;
   tipoFonte(nome: string, testo: string): string;

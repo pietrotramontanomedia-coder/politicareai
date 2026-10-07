@@ -1,0 +1,203 @@
+#cloud-config
+# Newsletter Politicare: incollare in Hetzner → Crea server → «Cloud config».
+# Generato da genera-cloud-config.mjs: non modificare a mano.
+write_files:
+  - path: /opt/newsletter/docker-compose.yml
+    permissions: '0644'
+    content: |
+      # Newsletter Politicare: Listmonk + Postgres + Caddy (HTTPS automatico).
+      # Si avvia con installa.sh; le variabili stanno in .env (modello: esempio.env).
+      # Guida completa: ../README.md
+
+      services:
+        app:
+          image: listmonk/listmonk:v6.2.0           # versione fissata: si aggiorna a mano, vedi README → Manutenzione
+          restart: unless-stopped
+          depends_on:
+            db:
+              condition: service_healthy
+          # Installa lo schema solo al primo avvio, applica le migrazioni a ogni aggiornamento,
+          # poi parte leggendo la configurazione solo dalle variabili d'ambiente.
+          command: [sh, -c, "./listmonk --install --idempotent --yes --config '' && ./listmonk --upgrade --yes --config '' && ./listmonk --config ''"]
+          environment:
+            LISTMONK_app__address: 0.0.0.0:9000
+            LISTMONK_db__host: db
+            LISTMONK_db__port: 5432
+            LISTMONK_db__user: listmonk
+            LISTMONK_db__password: ${DB_PASSWORD:?manca DB_PASSWORD in .env}
+            LISTMONK_db__database: listmonk
+            LISTMONK_db__ssl_mode: disable
+            LISTMONK_db__max_open: 25
+            LISTMONK_db__max_idle: 25
+            LISTMONK_db__max_lifetime: 300s
+            # Creano l'amministratore solo al primo avvio; dopo si possono togliere da .env.
+            LISTMONK_ADMIN_USER: ${LISTMONK_ADMIN_USER:-}
+            LISTMONK_ADMIN_PASSWORD: ${LISTMONK_ADMIN_PASSWORD:-}
+            TZ: Europe/Rome
+          volumes:
+            - ./uploads:/listmonk/uploads           # immagini caricate (logo, foto delle newsletter)
+          networks: [interna]
+          # Nessuna porta pubblicata: dall'esterno si arriva solo passando da Caddy.
+
+        db:
+          image: postgres:17-alpine
+          restart: unless-stopped
+          environment:
+            POSTGRES_USER: listmonk
+            POSTGRES_PASSWORD: ${DB_PASSWORD:?manca DB_PASSWORD in .env}
+            POSTGRES_DB: listmonk
+          healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U listmonk"]
+            interval: 10s
+            timeout: 5s
+            retries: 6
+          volumes:
+            - dati-db:/var/lib/postgresql/data
+          networks: [interna]
+          # Il database non è raggiungibile da fuori, nemmeno dal server stesso.
+
+        caddy:
+          image: caddy:2-alpine
+          restart: unless-stopped
+          depends_on: [app]
+          ports:
+            - "80:80"
+            - "443:443"
+          environment:
+            DOMINIO: ${DOMINIO:?manca DOMINIO in .env}
+          volumes:
+            - ./Caddyfile:/etc/caddy/Caddyfile:ro
+            - dati-caddy:/data                      # certificati HTTPS
+          networks: [interna]
+
+      networks:
+        interna:
+
+      volumes:
+        dati-db:
+        dati-caddy:
+  - path: /opt/newsletter/Caddyfile
+    permissions: '0644'
+    content: |
+      # Caddy prende e rinnova da solo il certificato HTTPS per il dominio in .env.
+      {$DOMINIO} {
+      	encode gzip
+      	reverse_proxy app:9000
+
+      	header {
+      		Strict-Transport-Security "max-age=31536000"
+      		X-Content-Type-Options nosniff
+      		Referrer-Policy strict-origin-when-cross-origin
+      		-Server
+      	}
+      }
+  - path: /opt/newsletter/installa.sh
+    permissions: '0755'
+    content: |
+      #!/usr/bin/env bash
+      # Installa la newsletter Politicare su un server Ubuntu 24.04 appena creato.
+      #
+      #   sudo ./installa.sh newsletter.politicare.it
+      #
+      # Va lanciato dalla cartella che contiene docker-compose.yml e Caddyfile (es. /opt/newsletter).
+      # Si può rilanciare senza danni: non tocca un .env già esistente né i dati.
+      set -euo pipefail
+
+      DOMINIO="${1:-}"
+      CARTELLA="$(cd "$(dirname "$0")" && pwd)"
+
+      if [[ $EUID -ne 0 ]]; then
+        echo "Va lanciato come root: sudo ./installa.sh $DOMINIO" >&2
+        exit 1
+      fi
+      if [[ -z "$DOMINIO" && ! -f "$CARTELLA/.env" ]]; then
+        echo "Uso: sudo ./installa.sh newsletter.politicare.it" >&2
+        exit 1
+      fi
+      cd "$CARTELLA"
+
+      echo "→ Aggiornamenti di sistema e aggiornamenti di sicurezza automatici"
+      export DEBIAN_FRONTEND=noninteractive
+      apt-get update -q
+      apt-get upgrade -yq -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold
+      apt-get install -yq ca-certificates curl openssl ufw unattended-upgrades
+      dpkg-reconfigure -f noninteractive unattended-upgrades
+
+      echo "→ Docker"
+      if ! command -v docker >/dev/null 2>&1; then
+        curl -fsSL https://get.docker.com | sh
+      fi
+
+      echo "→ Firewall: aperte solo SSH, HTTP e HTTPS"
+      ufw allow OpenSSH >/dev/null
+      ufw allow 80/tcp >/dev/null
+      ufw allow 443/tcp >/dev/null
+      ufw --force enable >/dev/null
+
+      PASSWORD_NUOVA=""
+      if [[ ! -f .env ]]; then
+        echo "→ Creo .env con password casuali"
+        PASSWORD_NUOVA="$(openssl rand -base64 18 | tr -d '/+=')"
+        umask 077
+        cat > .env <<EOF
+      DOMINIO=$DOMINIO
+      DB_PASSWORD=$(openssl rand -hex 24)
+      LISTMONK_ADMIN_USER=admin
+      LISTMONK_ADMIN_PASSWORD=$PASSWORD_NUOVA
+      EOF
+        umask 022
+      else
+        echo "→ .env già presente: lo lascio com'è"
+      fi
+
+      mkdir -p uploads backup
+      chmod 700 backup
+
+      echo "→ Avvio dei servizi"
+      docker compose pull -q
+      docker compose up -d
+
+      echo "→ Backup automatico del database ogni notte alle 3:30"
+      chmod +x "$CARTELLA/backup.sh"
+      cat > /etc/cron.d/newsletter-backup <<EOF
+      30 3 * * * root $CARTELLA/backup.sh >> /var/log/newsletter-backup.log 2>&1
+      EOF
+
+      DOMINIO_ATTIVO="$(grep '^DOMINIO=' .env | cut -d= -f2)"
+      echo
+      echo "Fatto. Fra un minuto il pannello è su: https://$DOMINIO_ATTIVO/admin"
+      if [[ -n "$PASSWORD_NUOVA" ]]; then
+        echo
+        echo "  utente:   admin"
+        echo "  password: $PASSWORD_NUOVA"
+        echo
+        echo "Salvate la password in un gestore di password: non viene mostrata di nuovo."
+        echo "Dopo il primo accesso potete toglierla da .env (riga LISTMONK_ADMIN_PASSWORD)."
+      fi
+      echo
+      echo "Se la pagina non si apre: il record DNS di $DOMINIO_ATTIVO punta già all'IP di questo server?"
+      echo "Controllo: docker compose logs caddy"
+  - path: /opt/newsletter/backup.sh
+    permissions: '0755'
+    content: |
+      #!/usr/bin/env bash
+      # Copia del database della newsletter (contatti, campagne, statistiche).
+      # Parte ogni notte da cron (lo imposta installa.sh); si può lanciare anche a mano.
+      # Tiene gli ultimi 14 giorni in ./backup. Per una copia fuori dal server attivate
+      # anche i Backup di Hetzner (README → Server).
+      set -euo pipefail
+
+      CARTELLA="$(cd "$(dirname "$0")" && pwd)"
+      cd "$CARTELLA"
+      mkdir -p backup
+      chmod 700 backup
+
+      FILE="backup/listmonk-$(date +%F).sql.gz"
+      docker compose exec -T db pg_dump -U listmonk listmonk | gzip > "$FILE.tmp"
+      mv "$FILE.tmp" "$FILE"
+      chmod 600 "$FILE"
+
+      find backup -name 'listmonk-*.sql.gz' -mtime +14 -delete
+      echo "$(date '+%F %T') backup salvato in $FILE"
+runcmd:
+  - [bash, /opt/newsletter/installa.sh, newsletter.politicare.it]

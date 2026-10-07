@@ -23,7 +23,7 @@ cd "$CARTELLA"
 echo "→ Aggiornamenti di sistema e aggiornamenti di sicurezza automatici"
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -q
-apt-get upgrade -yq
+apt-get upgrade -yq -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold
 apt-get install -yq ca-certificates curl openssl ufw unattended-upgrades
 dpkg-reconfigure -f noninteractive unattended-upgrades
 

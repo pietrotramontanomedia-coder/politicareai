@@ -28,6 +28,7 @@ I contatti non vanno mai salvati in questo repository.
 |---|---|
 | `server/docker-compose.yml` | Listmonk 6.2.0 + Postgres + Caddy (HTTPS automatico) |
 | `server/installa.sh` | installa tutto su un server Ubuntu nuovo, con firewall e aggiornamenti automatici |
+| `server/cloud-config.yaml` | da incollare in Hetzner alla creazione del server: installa tutto da solo (si rigenera con `genera-cloud-config.mjs`) |
 | `server/backup.sh` | copia notturna del database, tiene 14 giorni |
 | `server/esempio.env` | modello delle variabili (il vero `.env` lo crea `installa.sh`) |
 | `convertitore/converti.html` | **pagina da aprire con doppio clic**: trasforma il vostro Excel nel file per Listmonk |
@@ -77,9 +78,13 @@ poi server e Listmonk, poi importazione e primo invio di prova.
    - immagine **Ubuntu 24.04**, sede in UE (Norimberga, Falkenstein o Helsinki)
    - il tipo condiviso più piccolo con 2 vCPU e 4 GB (circa 4–5 €/mese)
    - aggiungete la vostra **chiave SSH** (niente password) e attivate **Backups**
+   - **Cloud config**: incollate tutto il contenuto di `server/cloud-config.yaml`. All'accensione il server
+     installa Listmonk da solo (5–10 minuti); i passi 4 e 5 qui sotto non servono più.
 2. Annotate l'indirizzo IPv4 del server.
 3. Create il record DNS `newsletter.politicare.it` → IPv4 del server (sezione 3).
-4. Copiate questa cartella `server/` sul server. Da un computer con il repository:
+   Utente e password dell'amministratore si leggono dalla console del server (Hetzner → server → *Console*):
+   `grep ADMIN /opt/newsletter/.env`. Se qualcosa non va: `tail -50 /var/log/cloud-init-output.log`.
+4. Solo senza cloud config: copiate questa cartella `server/` sul server. Da un computer con il repository:
    ```bash
    scp -r strumenti/newsletter/server root@IP_DEL_SERVER:/opt/newsletter
    ```
