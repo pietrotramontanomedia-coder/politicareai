@@ -62,7 +62,8 @@ poi server e Listmonk, poi importazione e primo invio di prova.
    in questa regione.
 3. Aprite **Amazon SES → Configuration → Identities → Create identity**:
    - tipo **Domain**, dominio `politicare.it`
-   - **Use a custom MAIL FROM domain**: `mail.politicare.it`, comportamento in caso di errore: *Use default MAIL FROM*
+   - **Use a custom MAIL FROM domain**: `bounce.politicare.it`, comportamento in caso di errore: *Use default MAIL FROM*
+     (non `mail`: su Aruba quel nome è riservato alla posta del dominio e non si può usare)
    - **Easy DKIM**, chiave RSA 2048, *Publish DNS records to Route53* disattivato
 4. SES mostra i record DNS da creare (sezione 3 qui sotto). Dopo averli inseriti, lo stato diventa *Verified*
    in genere in meno di un'ora.
@@ -107,7 +108,7 @@ principale (serve alla posta che usate oggi), e se esiste già un `_dmarc` non s
 
 **Su Aruba** (dove è registrato politicare.it): *Area clienti → Pannello di controllo → politicare.it →
 Gestione DNS e Name Server → Gestione DNS*. Nel campo del nome si scrive **solo la parte prima del dominio**
-(`newsletter`, `mail`, `xxxx._domainkey`): Aruba aggiunge `.politicare.it` da solo. Se il pannello non
+(`newsletter`, `bounce`, `xxxx._domainkey`): Aruba aggiunge `.politicare.it` da solo. Se il pannello non
 permette di modificare i record, i name server non sono quelli di Aruba e i record vanno messi dove puntano.
 La casella per le risposte (`newsletter@politicare.it`) si crea dal pannello Email di Aruba, come casella
 o come alias verso una casella esistente.
@@ -116,8 +117,8 @@ o come alias verso una casella esistente.
 |---|---|---|---|
 | A | `newsletter` | IPv4 del server Hetzner | pannello, link e pagine di disiscrizione |
 | CNAME ×3 | `xxxx._domainkey` | `xxxx.dkim.amazonses.com` (li dà SES) | firma DKIM delle mail |
-| MX | `mail` | `10 feedback-smtp.eu-central-1.amazonses.com` | MAIL FROM personalizzato (rimbalzi) |
-| TXT | `mail` | `"v=spf1 include:amazonses.com ~all"` | SPF allineato al dominio |
+| MX | `bounce` | `10 feedback-smtp.eu-central-1.amazonses.com` | MAIL FROM personalizzato (rimbalzi) |
+| TXT | `bounce` | `"v=spf1 include:amazonses.com ~all"` | SPF allineato al dominio |
 | TXT | `_dmarc` | `"v=DMARC1; p=none; rua=mailto:dmarc@politicare.it"` | DMARC, **solo se non esiste già** |
 
 Dopo un mese di invii puliti si può passare il DMARC a `p=quarantine`.

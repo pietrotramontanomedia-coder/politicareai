@@ -32,7 +32,7 @@ Unsubscribe: every message has a visible unsubscribe link and the List-Unsubscri
 List-Unsubscribe-Post (one-click) headers; unsubscribes take effect immediately.
 
 Authentication: the domain politicare.it is verified with Easy DKIM, a custom MAIL FROM domain
-(mail.politicare.it) with SPF, and a DMARC policy.
+(bounce.politicare.it) with SPF, and a DMARC policy.
 
 Content: news digests, quiz invitations and explanations of public policy topics, in Italian.
 ```
