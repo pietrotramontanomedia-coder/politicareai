@@ -76,7 +76,8 @@ poi server e Listmonk, poi importazione e primo invio di prova.
 
 1. Su <https://www.hetzner.com/cloud> create un progetto e un server:
    - immagine **Ubuntu 24.04**, sede in UE (Norimberga, Falkenstein o Helsinki)
-   - il tipo condiviso più piccolo con 2 vCPU e 4 GB (circa 4–5 €/mese)
+   - il tipo condiviso più piccolo con 2 vCPU e 4 GB: **CX23** (Intel/AMD) o **CAX11** (Arm), circa 4–6 €/mese.
+     Va bene anche Arm: Listmonk, Postgres e Caddy hanno le immagini arm64. Evitate i CPX, costano 3–4 volte tanto
    - aggiungete la vostra **chiave SSH** (niente password) e attivate **Backups**
    - **Cloud config**: incollate tutto il contenuto di `server/cloud-config.yaml`. All'accensione il server
      installa Listmonk da solo (5–10 minuti); i passi 4 e 5 qui sotto non servono più.
