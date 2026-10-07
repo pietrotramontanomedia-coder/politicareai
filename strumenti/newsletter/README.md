@@ -99,6 +99,13 @@ Nota: Hetzner blocca le porte 25 e 465 in uscita. Non ci riguarda, perché SES s
 Prima di aggiungere qualcosa, **guardate cosa c'è già**: non va toccato il record SPF del dominio
 principale (serve alla posta che usate oggi), e se esiste già un `_dmarc` non se ne crea un secondo.
 
+**Su Aruba** (dove è registrato politicare.it): *Area clienti → Pannello di controllo → politicare.it →
+Gestione DNS e Name Server → Gestione DNS*. Nel campo del nome si scrive **solo la parte prima del dominio**
+(`newsletter`, `mail`, `xxxx._domainkey`): Aruba aggiunge `.politicare.it` da solo. Se il pannello non
+permette di modificare i record, i name server non sono quelli di Aruba e i record vanno messi dove puntano.
+La casella per le risposte (`newsletter@politicare.it`) si crea dal pannello Email di Aruba, come casella
+o come alias verso una casella esistente.
+
 | Tipo | Nome | Valore | Perché |
 |---|---|---|---|
 | A | `newsletter` | IPv4 del server Hetzner | pannello, link e pagine di disiscrizione |
