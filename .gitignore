@@ -31,3 +31,6 @@ next-env.d.ts
 .claude/settings.local.json
 .vercel
 .env*
+
+# Contatti reali della newsletter: mai nel repository
+strumenti/newsletter/dati/

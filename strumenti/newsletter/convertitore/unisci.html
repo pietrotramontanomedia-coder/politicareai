@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- La pagina non può collegarsi a niente: i contatti non lasciano il computer. -->
+<meta http-equiv="Content-Security-Policy" content="connect-src 'none'; form-action 'none'; img-src data: blob:">
+<title>Unisci contatti · Newsletter Politicare</title>
+<style>
+  :root { --giallo: #FEDC01; --nero: #0a0a0a; --bordo: #dddddd; --muto: #555555; --rosso: #b42318; --verde: #11703a; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; background: #f4f4f2; color: #111; }
+  header { background: var(--nero); color: #fff; padding: 20px 16px; border-bottom: 4px solid var(--giallo); }
+  header h1 { margin: 0; font-size: 1.35rem; }
+  header p { margin: 4px 0 0; color: #ccc; font-size: .95rem; }
+  main { max-width: 960px; margin: 0 auto; padding: 24px 16px 64px; }
+  section { background: #fff; border: 1px solid var(--bordo); border-radius: 10px; padding: 20px; margin-bottom: 20px; }
+  h2 { margin: 0 0 12px; font-size: 1.1rem; }
+  .zona { display: block; border: 2px dashed #999; border-radius: 10px; padding: 32px 16px; text-align: center; cursor: pointer; background: #fafafa; }
+  .zona.sopra { border-color: var(--nero); background: #fffbe0; }
+  .zona strong { display: block; font-size: 1.05rem; }
+  input[type=file] { position: absolute; width: 1px; height: 1px; opacity: 0; }
+  input[type=file]:focus-visible + .zona { outline: 3px solid var(--nero); outline-offset: 3px; }
+  .numeri { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+  .numero { border: 1px solid var(--bordo); border-radius: 8px; padding: 12px; }
+  .numero b { display: block; font-size: 1.6rem; line-height: 1.2; }
+  .numero.ok b { color: var(--verde); }
+  .numero.male b { color: var(--rosso); }
+  .tabella { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--bordo); vertical-align: top; }
+  th { background: #f4f4f2; }
+  .bottoni { display: flex; flex-wrap: wrap; gap: 12px; }
+  button { font: inherit; font-weight: 600; padding: 10px 18px; border-radius: 8px; cursor: pointer; border: 2px solid var(--nero); background: var(--giallo); color: var(--nero); }
+  button.secondario { background: #fff; }
+  button:focus-visible { outline: 3px solid var(--nero); outline-offset: 3px; }
+  .nota { color: var(--muto); font-size: .9rem; }
+  .errore { color: var(--rosso); font-weight: 600; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Unisci i contatti di Shopify, Mailchimp ed Eventbrite</h1>
+  <p>Funziona senza internet: i file restano sul vostro computer e non vengono inviati a nessuno.</p>
+</header>
+<main>
+  <section>
+    <h2>1. Caricate tutti gli export insieme</h2>
+    <ul class="nota">
+      <li><strong>Shopify:</strong> Clienti → Esporta → Tutti i clienti; Ordini → Esporta → Tutti gli ordini; carrelli abbandonati se li avete.</li>
+      <li><strong>Mailchimp:</strong> Audience → Export: caricate lo <strong>.zip così com'è</strong> (contiene iscritti, disiscritti e indirizzi non validi).</li>
+      <li><strong>Eventbrite:</strong> Report → Riepilogo partecipanti → tutti gli eventi → Esporta CSV.</li>
+      <li>Altri elenchi (fogli degli eventi, vecchi Excel salvati come CSV) vanno bene lo stesso.</li>
+    </ul>
+    <input type="file" id="file" accept=".csv,.txt,.zip" multiple>
+    <label for="file" class="zona" id="zona"><strong>Trascinate qui i file</strong>oppure fate clic per sceglierli (anche più di uno)</label>
+    <p class="errore" id="errore" role="alert" hidden></p>
+  </section>
+
+  <section id="fonti" hidden>
+    <h2>File letti</h2>
+    <div class="tabella"><table><thead><tr><th>File</th><th>Riconosciuto come</th><th>Righe</th><th>Scartate</th></tr></thead><tbody id="corpo-fonti"></tbody></table></div>
+  </section>
+
+  <section id="esito" hidden aria-live="polite">
+    <h2>2. Risultato</h2>
+    <div class="numeri" id="numeri"></div>
+    <p class="nota">La newsletter va solo a chi ha dato il consenso. Gli altri restano nel database con il motivo,
+      e chi si è disiscritto da Mailchimp finisce nella blocklist di Listmonk, così non riceve nulla nemmeno per errore.
+      I prodotti acquistati non vengono registrati: rivelerebbero opinioni politiche.</p>
+    <h2 style="margin-top:20px">Segmenti</h2>
+    <div class="tabella"><table><thead><tr><th>Segmento</th><th>Contatti</th></tr></thead><tbody id="corpo-segmenti"></tbody></table></div>
+  </section>
+
+  <section id="scarica" hidden>
+    <h2>3. Scaricate i file</h2>
+    <div class="bottoni">
+      <button type="button" id="scarica-database">Database completo (Excel)</button>
+      <button type="button" id="scarica-iscritti">Iscritti per Listmonk</button>
+      <button type="button" class="secondario" id="scarica-blocklist">Blocklist per Listmonk</button>
+    </div>
+    <p class="nota">In Listmonk: <em>Iscritti → Importa</em>, separatore <strong>virgola</strong>. Prima la blocklist in modalità
+      «Blocklist», poi gli iscritti in modalità «Iscrivi» nella lista Newsletter Politicare.</p>
+  </section>
+</main>
+
+<script src="logica.js"></script>
+<script src="unisci.js"></script>
+<script>
+(function () {
+  'use strict';
+  var C = window.ConvertiNewsletter;
+  var U = window.UnisciContatti;
+  var esito = null;
+  var $ = function (id) { return document.getElementById(id); };
+  var NOMI = {
+    'shopify-clienti': 'Shopify · clienti', 'shopify-ordini': 'Shopify · ordini', 'shopify-carrelli': 'Shopify · carrelli abbandonati',
+    mailchimp: 'Mailchimp', eventbrite: 'Eventbrite', generico: 'Elenco generico',
+  };
+
+  function crea(tag, testo, classe) {
+    var el = document.createElement(tag);
+    if (testo != null) el.textContent = testo;
+    if (classe) el.className = classe;
+    return el;
+  }
+  function riga(celle) {
+    var tr = crea('tr');
+    celle.forEach(function (c) { tr.appendChild(crea('td', String(c))); });
+    return tr;
+  }
+  function errore(msg) { $('errore').hidden = !msg; $('errore').textContent = msg || ''; }
+
+  function leggi(file) {
+    return file.arrayBuffer().then(function (b) {
+      var byte = new Uint8Array(b);
+      if (/\.zip$/i.test(file.name)) {
+        return U.leggiZip(byte).then(function (voci) {
+          return voci.filter(function (v) { return /\.csv$/i.test(v.nome); }).map(function (v) {
+            return { nome: v.nome.split('/').pop(), testo: C.leggiTesto(v.byte) };
+          });
+        });
+      }
+      return [{ nome: file.name, testo: C.leggiTesto(byte) }];
+    });
+  }
+
+  function apri(lista) {
+    var file = Array.prototype.slice.call(lista || []);
+    if (!file.length) return;
+    errore('');
+    Promise.all(file.map(leggi)).then(function (gruppi) {
+      esito = U.unisci([].concat.apply([], gruppi));
+      mostra();
+    }, function (e) { errore('Non riesco a leggere uno dei file: ' + e.message); });
+  }
+
+  function mostra() {
+    var corpo = $('corpo-fonti');
+    corpo.replaceChildren();
+    esito.fonti.forEach(function (f) { corpo.appendChild(riga([f.nome, NOMI[f.tipo], f.righe, f.scartate])); });
+    $('fonti').hidden = false;
+
+    var r = U.riepilogo(esito);
+    var box = $('numeri');
+    box.replaceChildren();
+    [
+      ['Contatti unici', r.totale, ''],
+      ['Ricevono la newsletter', r.invia, 'ok'],
+      ['Disiscritti / non validi', r.blocklist, 'male'],
+      ['Clienti senza consenso', r.clientiSenzaConsenso, ''],
+      ['Senza consenso', r.senzaConsenso, ''],
+    ].forEach(function (v) {
+      var d = crea('div', null, 'numero ' + v[2]);
+      d.appendChild(crea('b', String(v[1])));
+      d.appendChild(document.createTextNode(v[0]));
+      box.appendChild(d);
+    });
+    var seg = $('corpo-segmenti');
+    seg.replaceChildren();
+    Object.keys(r.segmenti).sort(function (a, b) { return r.segmenti[b] - r.segmenti[a]; }).forEach(function (s) {
+      seg.appendChild(riga([s, r.segmenti[s]]));
+    });
+    $('esito').hidden = false;
+    $('scarica').hidden = false;
+  }
+
+  function scarica(nome, contenuto) {
+    var url = URL.createObjectURL(new Blob([contenuto], { type: 'text/csv;charset=utf-8' }));
+    var a = crea('a');
+    a.href = url;
+    a.download = nome;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  }
+
+  $('file').addEventListener('change', function (e) { apri(e.target.files); });
+  var zona = $('zona');
+  ['dragenter', 'dragover'].forEach(function (t) { zona.addEventListener(t, function (e) { e.preventDefault(); zona.classList.add('sopra'); }); });
+  ['dragleave', 'drop'].forEach(function (t) { zona.addEventListener(t, function (e) { e.preventDefault(); zona.classList.remove('sopra'); }); });
+  zona.addEventListener('drop', function (e) { apri(e.dataTransfer.files); });
+
+  $('scarica-database').addEventListener('click', function () { if (esito) scarica('contatti-database-completo.csv', U.csvDatabase(esito.contatti)); });
+  $('scarica-iscritti').addEventListener('click', function () { if (esito) scarica('listmonk-iscritti.csv', U.csvListmonkIscritti(esito.contatti)); });
+  $('scarica-blocklist').addEventListener('click', function () { if (esito) scarica('listmonk-blocklist.csv', U.csvListmonkBlocklist(esito.contatti)); });
+})();
+</script>
+</body>
+</html>
