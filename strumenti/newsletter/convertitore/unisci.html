@@ -139,7 +139,9 @@
   function mostra() {
     var corpo = $('corpo-fonti');
     corpo.replaceChildren();
-    esito.fonti.forEach(function (f) { corpo.appendChild(riga([f.nome, NOMI[f.tipo], f.righe, f.scartate])); });
+    esito.fonti.forEach(function (f) {
+      corpo.appendChild(riga([f.nome, NOMI[f.tipo] + (f.avviso ? ' — ⚠ ' + f.avviso : ''), f.righe, f.scartate]));
+    });
     $('fonti').hidden = false;
 
     var r = U.riepilogo(esito);

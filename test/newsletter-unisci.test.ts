@@ -196,6 +196,44 @@ describe('unione', () => {
   });
 });
 
+describe('consenso di Shopify', () => {
+  const intestazione = 'Customer ID,First Name,Last Name,Email,Accepts Email Marketing,Accepts SMS Marketing,Total Orders,Tags';
+
+  it('un export con tutti «yes» è stato modificato: la colonna viene ignorata', () => {
+    const righe = [intestazione];
+    for (let i = 0; i < 60; i++) righe.push(`${i},N,C,c${i}@esempio.it,yes,yes,1,`);
+    const e = U.unisci([{ nome: 'customers_export_pulito.csv', testo: righe.join('\n') }], OGGI);
+    expect(e.fonti[0].avviso).toMatch(/modificato/);
+    expect(e.contatti.every((c) => !c.invia)).toBe(true);
+  });
+
+  it('un «no» vero resta tale anche se un file modificato dice «yes»', () => {
+    const modificato = [intestazione];
+    for (let i = 0; i < 60; i++) modificato.push(`${i},N,C,c${i}@esempio.it,yes,yes,1,`);
+    const originale = `${intestazione}\n0,N,C,c0@esempio.it,no,no,1,\n`;
+    const e = U.unisci([
+      { nome: 'customers_export.csv', testo: originale },
+      { nome: 'customers_export_pulito.csv', testo: modificato.join('\n') },
+    ], OGGI);
+    expect(e.contatti.find((c) => c.email === 'c0@esempio.it')).toMatchObject({ invia: false, motivo: 'ha rifiutato il marketing su Shopify' });
+  });
+
+  it('con poche righe o con qualche «no» il file è credibile', () => {
+    const e = U.unisci([{ nome: 'c.csv', testo: `${intestazione}\n1,N,C,a@esempio.it,yes,no,1,\n` }], OGGI);
+    expect(e.fonti[0].avviso).toBeUndefined();
+    expect(e.contatti[0].invia).toBe(true);
+  });
+
+  it('il tag «newsletter» del modulo del negozio vale come consenso', () => {
+    const righe = [intestazione];
+    for (let i = 0; i < 60; i++) righe.push(`${i},N,C,c${i}@esempio.it,yes,yes,1,${i === 5 ? 'newsletter' : ''}`);
+    const e = U.unisci([{ nome: 'customers_export_pulito.csv', testo: righe.join('\n') }], OGGI);
+    expect(e.contatti.filter((c) => c.invia).map((c) => [c.email, c.motivo])).toEqual([
+      ['c5@esempio.it', 'consenso: Shopify (modulo newsletter)'],
+    ]);
+  });
+});
+
 describe('file in uscita', () => {
   const e = tutti();
 

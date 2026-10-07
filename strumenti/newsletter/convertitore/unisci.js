@@ -102,6 +102,19 @@
     return 'generico';
   }
 
+  /**
+   * Un export vero di Shopify non ha mai tutti «yes»: se su almeno 50 clienti il consenso email è sempre
+   * «yes» (e anche SMS, quando c'è la colonna), il file è stato modificato e la colonna non vale come prova.
+   */
+  function consensoTuttoSi(t) {
+    if (t.righe.length < 50) return false;
+    var colonne = ['Accepts Email Marketing', 'Accepts SMS Marketing'].filter(function (h) { return t.ha(h); });
+    if (!colonne.length) return false;
+    return t.righe.every(function (r) {
+      return colonne.every(function (h) { return siNo(t.leggi(r, h)) === true; });
+    });
+  }
+
   /** Stato Mailchimp dal nome del file dell'export: subscribed / unsubscribed / cleaned / nonsubscribed */
   function statoMailchimp(nomeFile) {
     var f = nomeFile.toLowerCase();
@@ -190,6 +203,10 @@
       var resoconto = { nome: f.nome, tipo: tipo, righe: t.righe.length, scartate: 0 };
       var scartiPrima = scarti.length;
       var L = t.leggi;
+      var consensoInaffidabile = tipo === 'shopify-clienti' && consensoTuttoSi(t);
+      if (consensoInaffidabile) {
+        resoconto.avviso = 'consenso tutto «yes»: sembra modificato a mano, la colonna viene ignorata';
+      }
 
       t.righe.forEach(function (r, i) {
         var numero = i + 2;
@@ -223,8 +240,13 @@
           telefono(c, L(r, 'Phone'));
           telefono(c, L(r, 'Default Address Phone'));
           luogo(c, L(r, 'Default Address City'), L(r, 'Default Address Province Code'), L(r, 'Default Address Zip'), L(r, 'Default Address Country Code'));
-          tagDaTesto(L(r, 'Tags')).forEach(function (x) { c.tag[x] = true; });
-          var accettaCliente = siNo(L(r, 'Accepts Email Marketing'));
+          var tagCliente = tagDaTesto(L(r, 'Tags'));
+          tagCliente.forEach(function (x) { c.tag[x] = true; });
+          // Il tag «newsletter» lo aggiunge il modulo d'iscrizione del negozio: è un consenso vero.
+          if (tagCliente.some(function (x) { return x.toLowerCase() === 'newsletter'; })) {
+            c.consensi.push('Shopify (modulo newsletter)');
+          }
+          var accettaCliente = consensoInaffidabile ? null : siNo(L(r, 'Accepts Email Marketing'));
           if (accettaCliente === true) c.consensi.push('Shopify');
           if (accettaCliente === false) c.noShopify = true;
           var spesi = parseFloat(L(r, 'Total Spent')) || 0;
