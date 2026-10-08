@@ -5,26 +5,37 @@ import Link from 'next/link';
 import {
   FONTI_LEGGE,
   formattaPercentuale,
+  LOCALI,
   puntiEmiciclo,
   REGOLE,
   simula,
   TESTI_SIMULATORE as T,
   type Esito,
+  type GeografiaSenato,
   type ListaInput,
   type Preset,
+  type SeggiSpeciali,
 } from '@/lib/simulatore-elettorale';
 import { CondividiSimulazione } from '@/components/condivisione/Condivisioni';
 
 const DA_SOLA = '';
 const PUNTI_CAMERA = puntiEmiciclo(REGOLE.camera.totale, 12);
 
-export default function Simulatore({ preset }: { preset: Preset[] }) {
+type Speciali = { camera: SeggiSpeciali; senato: SeggiSpeciali };
+
+const specialiDi = (p: Preset): Speciali => ({ camera: { ...(p.speciali?.camera ?? {}) }, senato: { ...(p.speciali?.senato ?? {}) } });
+
+export default function Simulatore({ preset, geografia }: { preset: Preset[]; geografia?: GeografiaSenato }) {
   const [idPreset, setIdPreset] = useState(preset[0].id);
   const [liste, setListe] = useState<ListaInput[]>(preset[0].liste);
   const [coalizioni, setCoalizioni] = useState(preset[0].coalizioni);
   const [maggioranzeDiverse, setMaggioranzeDiverse] = useState(false);
+  const [speciali, setSpeciali] = useState<Speciali>(specialiDi(preset[0]));
 
-  const esito = useMemo(() => simula(liste, { coalizioni, maggioranzeDiverse }), [liste, coalizioni, maggioranzeDiverse]);
+  const esito = useMemo(
+    () => simula(liste, { coalizioni, maggioranzeDiverse, speciali, geografia }),
+    [liste, coalizioni, maggioranzeDiverse, speciali, geografia],
+  );
   const presetAttivo = preset.find((p) => p.id === idPreset);
 
   const carica = (p: Preset) => {
@@ -32,6 +43,7 @@ export default function Simulatore({ preset }: { preset: Preset[] }) {
     setListe(p.liste);
     setCoalizioni(p.coalizioni);
     setMaggioranzeDiverse(false);
+    setSpeciali(specialiDi(p));
   };
 
   const aggiorna = (id: string, modifica: Partial<ListaInput>) =>
@@ -186,6 +198,8 @@ export default function Simulatore({ preset }: { preset: Preset[] }) {
               </span>
             </span>
           </label>
+
+          <Speciali esito={esito} speciali={speciali} onChange={setSpeciali} />
         </section>
 
         {/* Risultato */}
@@ -195,6 +209,7 @@ export default function Simulatore({ preset }: { preset: Preset[] }) {
       </div>
 
       <DettaglioListe esito={esito} />
+      <Regioni esito={esito} />
 
       <section className="mt-10 grid gap-4 md:grid-cols-2">
         <div className="rounded-3xl border p-5" style={{ borderColor: 'var(--bordo)', background: 'var(--bg-card)' }}>
@@ -280,6 +295,7 @@ function Risultato({ esito }: { esito: Esito }) {
         <ul className="mt-2 space-y-1 text-xs" style={{ color: 'var(--fg-muta)' }}>
           {esito.tettoCamera && <li>{T.tetto(T.camera, REGOLE.camera.tetto)}</li>}
           {esito.tettoSenato && <li>{T.tetto(T.senato, REGOLE.senato.tetto)}</li>}
+          {esito.correzioniTettoSenato.length > 0 && <li>{T.correzioniSenato(esito.correzioniTettoSenato.length)}</li>}
         </ul>
       )}
 
@@ -312,13 +328,19 @@ function Risultato({ esito }: { esito: Esito }) {
                       {T.coalizioneDi(c.listeConSeggi.map((l) => l.nome).join(', '))}
                     </span>
                   )}
+                  {c.tipo !== 'locali' && (c.camera.premio > 0 || c.camera.speciali > 0) && (
+                    <span className="mt-0.5 block pl-5 text-xs" style={{ color: 'var(--fg-muta)' }}>
+                      {T.camera}: {T.composizione(c.camera.proporzionali, c.camera.premio, c.camera.speciali)}
+                    </span>
+                  )}
                   {c.seggiCamera >= REGOLE.camera.maggioranza && (
                     <span className="mt-1 ml-5 inline-block rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide" style={{ background: 'rgba(34,197,94,0.15)', color: '#22c55e' }}>
                       {T.conMaggioranza}
+                      {c.seggiSenato >= REGOLE.senato.maggioranza ? ` · ${T.maggioranzaSenato}` : ''}
                     </span>
                   )}
                 </td>
-                <td className="py-2 text-right tabular-nums">{formattaPercentuale(c.quota)}%</td>
+                <td className="py-2 text-right tabular-nums">{c.tipo === 'locali' ? '' : `${formattaPercentuale(c.quota)}%`}</td>
                 <td className="py-2 text-right text-base font-bold tabular-nums">{c.seggiCamera}</td>
                 <td className="py-2 text-right tabular-nums">{c.seggiSenato}</td>
               </tr>
@@ -362,7 +384,7 @@ function DettaglioListe({ esito }: { esito: Esito }) {
             </tr>
           </thead>
           <tbody>
-            {esito.liste.map(({ lista, stato, seggiCamera, seggiSenato }) => (
+            {esito.liste.map(({ lista, stato, statoSenato, seggiCamera, seggiSenato }) => (
               <tr key={lista.id} className="border-t" style={{ borderColor: 'var(--bordo)' }}>
                 <td className="py-2 pr-2">
                   <span className="flex items-center gap-2">
@@ -373,9 +395,152 @@ function DettaglioListe({ esito }: { esito: Esito }) {
                 <td className="py-2 text-right tabular-nums">{formattaPercentuale(lista.percentuale)}</td>
                 <td className="py-2 pl-3 text-xs" style={{ color: stato === 'in-parlamento' ? '#22c55e' : 'var(--fg-muta)' }}>
                   {T.stati[stato]}
+                  {statoSenato !== stato && statoSenato === 'in-parlamento' && <span className="block">{T.statoSenatoDiverso}</span>}
                 </td>
                 <td className="py-2 text-right font-semibold tabular-nums">{seggiCamera}</td>
                 <td className="py-2 text-right tabular-nums">{seggiSenato}</td>
+              </tr>
+            ))}
+            {esito.competitori
+              .filter((c) => c.camera.premio > 0 || c.senato.premio > 0)
+              .map((c) => (
+                <tr key={`premio-${c.id}`} className="border-t" style={{ borderColor: 'var(--bordo)' }}>
+                  <td className="py-2 pr-2" colSpan={3}>
+                    {T.premioListino}: {c.nome}
+                  </td>
+                  <td className="py-2 text-right font-semibold tabular-nums">{c.camera.premio}</td>
+                  <td className="py-2 text-right tabular-nums">{c.senato.premio}</td>
+                </tr>
+              ))}
+          </tbody>
+        </table>
+        <p className="mt-3 text-xs" style={{ color: 'var(--fg-muta)' }}>
+          {T.dettaglioListeNota}
+        </p>
+      </div>
+    </details>
+  );
+}
+
+function Speciali({ esito, speciali, onChange }: { esito: Esito; speciali: { camera: SeggiSpeciali; senato: SeggiSpeciali }; onChange: (s: { camera: SeggiSpeciali; senato: SeggiSpeciali }) => void }) {
+  const scelte = [
+    ...esito.competitori.filter((c) => c.tipo !== 'locali').map((c) => ({ id: c.id, nome: c.nome, colore: c.colore })),
+    { id: LOCALI, nome: T.specialiLocali, colore: '#9ca3af' },
+  ];
+  const valore = (ramo: 'camera' | 'senato', id: string) => {
+    const c = esito.competitori.find((x) => x.id === id);
+    return c ? c[ramo].speciali : 0;
+  };
+  const cambia = (ramo: 'camera' | 'senato', id: string, delta: number) => {
+    const max = REGOLE[ramo].speciali;
+    const attuale: SeggiSpeciali = Object.fromEntries(scelte.map((x) => [x.id, valore(ramo, x.id)]));
+    const nuovo = Math.min(max, Math.max(0, (attuale[id] ?? 0) + delta));
+    if (nuovo === attuale[id]) return;
+    attuale[id] = nuovo;
+    // Il totale resta fisso: si toglie o si aggiunge alle liste locali, poi agli altri.
+    let scarto = Object.values(attuale).reduce((a, b) => a + b, 0) - max;
+    for (const x of [LOCALI, ...scelte.map((y) => y.id)]) {
+      if (scarto === 0 || x === id) continue;
+      const v = attuale[x] ?? 0;
+      const passo = scarto > 0 ? Math.min(v, scarto) : scarto;
+      attuale[x] = v - passo;
+      scarto -= passo;
+    }
+    onChange({ ...speciali, [ramo]: attuale });
+  };
+
+  return (
+    <details className="group mt-4 rounded-2xl border p-3" style={{ borderColor: 'var(--bordo)' }}>
+      <summary className="cursor-pointer list-none text-sm font-semibold">
+        {T.specialiTitolo} <span className="inline-block transition-transform group-open:rotate-90">›</span>
+      </summary>
+      <p className="mt-2 text-xs" style={{ color: 'var(--fg-muta)' }}>
+        {T.specialiNota}
+      </p>
+      <table className="mt-3 w-full text-left text-sm">
+        <thead>
+          <tr style={{ color: 'var(--fg-muta)' }}>
+            <th scope="col" className="py-1 font-medium" />
+            <th scope="col" className="py-1 text-center font-medium">
+              {T.camera} ({REGOLE.camera.speciali})
+            </th>
+            <th scope="col" className="py-1 text-center font-medium">
+              {T.senato} ({REGOLE.senato.speciali})
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {scelte.map((x) => (
+            <tr key={x.id} className="border-t" style={{ borderColor: 'var(--bordo)' }}>
+              <td className="py-1.5 pr-2 text-xs">
+                <span className="flex items-center gap-2">
+                  <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: x.colore }} aria-hidden />
+                  {x.nome}
+                </span>
+              </td>
+              {(['camera', 'senato'] as const).map((ramo) => (
+                <td key={ramo} className="py-1.5 text-center">
+                  <span className="inline-flex items-center gap-1.5">
+                    <button type="button" onClick={() => cambia(ramo, x.id, -1)} aria-label={`Un seggio in meno a ${x.nome}, ${ramo}`} className="h-6 w-6 rounded-full border text-xs" style={{ borderColor: 'var(--bordo)' }}>
+                      −
+                    </button>
+                    <span className="w-4 tabular-nums">{valore(ramo, x.id)}</span>
+                    <button type="button" onClick={() => cambia(ramo, x.id, 1)} aria-label={`Un seggio in più a ${x.nome}, ${ramo}`} className="h-6 w-6 rounded-full border text-xs" style={{ borderColor: 'var(--bordo)' }}>
+                      +
+                    </button>
+                  </span>
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </details>
+  );
+}
+
+function Regioni({ esito }: { esito: Esito }) {
+  const competitori = esito.competitori.filter((c) => c.tipo !== 'locali' && c.senato.proporzionali > 0);
+  return (
+    <details className="group mt-4 rounded-3xl border p-4 sm:p-5" style={{ borderColor: 'var(--bordo)', background: 'var(--bg-card)' }}>
+      <summary className="cursor-pointer list-none text-base font-semibold">
+        {T.regioniTitolo} <span className="inline-block transition-transform group-open:rotate-90">›</span>
+      </summary>
+      <p className="mt-2 text-xs" style={{ color: 'var(--fg-muta)' }}>
+        {T.regioniNota}
+      </p>
+      <div className="mt-3 overflow-x-auto">
+        <table className="w-full text-left text-sm">
+          <thead>
+            <tr style={{ color: 'var(--fg-muta)' }}>
+              <th scope="col" className="py-1.5 font-medium">
+                {T.regione}
+              </th>
+              <th scope="col" className="py-1.5 text-right font-medium">
+                {T.seggiRegione}
+              </th>
+              {competitori.map((c) => (
+                <th key={c.id} scope="col" className="py-1.5 pl-3 text-right font-medium">
+                  <span className="inline-flex items-center gap-1.5">
+                    <span className="h-2.5 w-2.5 rounded-full" style={{ background: c.colore }} aria-hidden />
+                    {c.nome}
+                  </span>
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {esito.regioniSenato.map((r) => (
+              <tr key={r.regione.id} className="border-t" style={{ borderColor: 'var(--bordo)' }}>
+                <td className="py-1.5 pr-2">{r.regione.nome}</td>
+                <td className="py-1.5 text-right tabular-nums" style={{ color: 'var(--fg-muta)' }}>
+                  {Object.values(r.seggi).reduce((a, b) => a + b, 0)}
+                </td>
+                {competitori.map((c) => (
+                  <td key={c.id} className="py-1.5 pl-3 text-right tabular-nums">
+                    {r.seggi[c.id] ?? 0}
+                  </td>
+                ))}
               </tr>
             ))}
           </tbody>

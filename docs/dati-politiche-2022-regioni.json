@@ -1,0 +1,3252 @@
+{
+ "descrizione": "Elezioni politiche 25 settembre 2022. Voti di lista (parte proporzionale) per regione, Senato e Camera, più i collegi uninominali di Valle d'Aosta e Trentino-Alto Adige. Raccolta del 2026-10-08.",
+ "fonte": {
+  "ente": "Ministero dell'Interno - DAIT, Eligendo Archivio storico delle elezioni (dati ufficiali delle proclamazioni). Nessun dato preso da Wikipedia.",
+  "senato_regioni": "https://elezionistorico.interno.gov.it/index.php?tpel=S&dtel=25/09/2022&tpa=I&tpe=R&lev0=0&levsut0=0&levsut1=1&es0=S&es1=S&ms=S&ne1={1..20}&lev1={1..20}  (una pagina per regione, ne1/lev1 = codice regione Eligendo: 1 Piemonte, 3 Lombardia, 5 Veneto, 6 FVG, 7 Liguria, 8 Emilia-Romagna, 9 Toscana, 10 Umbria, 11 Marche, 12 Lazio, 13 Abruzzo, 14 Molise, 15 Campania, 16 Puglia, 17 Basilicata, 18 Calabria, 19 Sicilia, 20 Sardegna)",
+  "senato_italia": "https://elezionistorico.interno.gov.it/index.php?tpel=S&dtel=25/09/2022&tpa=I&tpe=A&lev0=0&levsut0=0&es0=S&ms=S",
+  "camera_regioni": "https://elezionistorico.interno.gov.it/index.php?tpel=C&dtel=25/09/2022&tpa=I&tpe=I&lev0=0&levsut0=0&levsut1=1&es0=S&es1=S&ms=S&ne1={1..28}&lev1={1..28}  (una pagina per circoscrizione; le regioni sono somme delle circoscrizioni)",
+  "camera_italia": "https://elezionistorico.interno.gov.it/index.php?tpel=C&dtel=25/09/2022&tpa=I&tpe=A&lev0=0&levsut0=0&es0=S&ms=S",
+  "collegi_speciali_camera": [
+   "https://elezionistorico.interno.gov.it/index.php?tpel=C&dtel=25/09/2022&tpa=H&tpe=L&lev0=27&levsut0=1&levsut1=2&es0=S&es1=S&ms=S&ne1=2701&lev1=1",
+   "https://elezionistorico.interno.gov.it/index.php?tpel=C&dtel=25/09/2022&tpa=I&tpe=L&lev0=0&levsut0=0&lev1=28&levsut1=1&lev2=1&levsut2=2&levsut3=3&ne1=28&ne2=281&es0=S&es1=S&es2=S&es3=S&ms=S&ne3=2811&lev3=1",
+   "https://elezionistorico.interno.gov.it/index.php?tpel=C&dtel=25/09/2022&tpa=I&tpe=L&lev0=0&levsut0=0&lev1=28&levsut1=1&lev2=1&levsut2=2&levsut3=3&ne1=28&ne2=281&es0=S&es1=S&es2=S&es3=S&ms=S&ne3=2812&lev3=2",
+   "https://elezionistorico.interno.gov.it/index.php?tpel=C&dtel=25/09/2022&tpa=I&tpe=L&lev0=0&levsut0=0&lev1=28&levsut1=1&lev2=1&levsut2=2&levsut3=3&ne1=28&ne2=281&es0=S&es1=S&es2=S&es3=S&ms=S&ne3=2813&lev3=3",
+   "https://elezionistorico.interno.gov.it/index.php?tpel=C&dtel=25/09/2022&tpa=I&tpe=L&lev0=0&levsut0=0&lev1=28&levsut1=1&lev2=1&levsut2=2&levsut3=3&ne1=28&ne2=281&es0=S&es1=S&es2=S&es3=S&ms=S&ne3=2814&lev3=4"
+  ],
+  "collegi_speciali_senato": [
+   "https://elezionistorico.interno.gov.it/index.php?tpel=S&dtel=25/09/2022&tpa=G&tpe=L&lev0=2&levsut0=1&levsut1=2&es0=S&es1=S&ms=S&ne1=201&lev1=1",
+   "https://elezionistorico.interno.gov.it/index.php?tpel=S&dtel=25/09/2022&tpa=G&tpe=L&lev0=4&levsut0=1&levsut1=2&es0=S&es1=S&ms=S&ne1=401&lev1=1",
+   "https://elezionistorico.interno.gov.it/index.php?tpel=S&dtel=25/09/2022&tpa=G&tpe=L&lev0=4&levsut0=1&levsut1=2&es0=S&es1=S&ms=S&ne1=402&lev1=2",
+   "https://elezionistorico.interno.gov.it/index.php?tpel=S&dtel=25/09/2022&tpa=G&tpe=L&lev0=4&levsut0=1&levsut1=2&es0=S&es1=S&ms=S&ne1=403&lev1=3",
+   "https://elezionistorico.interno.gov.it/index.php?tpel=S&dtel=25/09/2022&tpa=G&tpe=L&lev0=4&levsut0=1&levsut1=2&es0=S&es1=S&ms=S&ne1=404&lev1=4",
+   "https://elezionistorico.interno.gov.it/index.php?tpel=S&dtel=25/09/2022&tpa=G&tpe=L&lev0=4&levsut0=1&levsut1=2&es0=S&es1=S&ms=S&ne1=405&lev1=5",
+   "https://elezionistorico.interno.gov.it/index.php?tpel=S&dtel=25/09/2022&tpa=G&tpe=L&lev0=4&levsut0=1&levsut1=2&es0=S&es1=S&ms=S&ne1=406&lev1=6"
+  ],
+  "camera_taa_proporzionale": "https://elezionistorico.interno.gov.it/index.php?tpel=C&dtel=25/09/2022&tpa=I&tpe=I&lev0=0&levsut0=0&levsut1=1&es0=S&es1=S&ms=S&ne1=28&lev1=28",
+  "open_data_ministero": "https://elezionistorico.interno.gov.it/daithome/documenti/opendata/senato/senato-20220925.zip e .../camera/camera-20220925.zip (scaricati ma NON usati per i totali: vedi note)"
+ },
+ "legenda_liste": {
+  "fdi": "FRATELLI D'ITALIA CON GIORGIA MELONI",
+  "lega": "LEGA PER SALVINI PREMIER",
+  "fi": "FORZA ITALIA",
+  "noimoderati": "NOI MODERATI/LUPI - TOTI - BRUGNARO - UDC",
+  "pd": "PARTITO DEMOCRATICO - ITALIA DEMOCRATICA E PROGRESSISTA",
+  "avs": "ALLEANZA VERDI E SINISTRA",
+  "piueuropa": "+EUROPA",
+  "impegnocivico": "IMPEGNO CIVICO LUIGI DI MAIO - CENTRO DEMOCRATICO",
+  "m5s": "MOVIMENTO 5 STELLE",
+  "azione-iv": "AZIONE - ITALIA VIVA - CALENDA",
+  "italexit": "ITALEXIT PER L'ITALIA",
+  "up": "UNIONE POPOLARE CON DE MAGISTRIS",
+  "altre": "tutte le altre liste; il dettaglio è in altre_dettaglio"
+ },
+ "senato_regioni": {
+  "Piemonte": {
+   "elettori": 3320437,
+   "votanti": 2203211,
+   "validi": 2100390,
+   "liste": {
+    "fdi": 564973,
+    "lega": 226972,
+    "fi": 164116,
+    "noimoderati": 13119,
+    "pd": 418454,
+    "avs": 82124,
+    "piueuropa": 88947,
+    "impegnocivico": 11123,
+    "m5s": 216371,
+    "azione-iv": 182019,
+    "italexit": 49654,
+    "up": 28002,
+    "altre": 54516
+   },
+   "altre_dettaglio": {
+    "ITALIA SOVRANA E POPOLARE": 29359,
+    "VITA": 17581,
+    "ALTERNATIVA PER L'ITALIA - NO GREEN PASS": 5313,
+    "MASTELLA NOI DI CENTRO EUROPEISTI": 2263
+   }
+  },
+  "Lombardia": {
+   "elettori": 7505068,
+   "votanti": 5260161,
+   "validi": 5059716,
+   "liste": {
+    "fdi": 1392208,
+    "lega": 704371,
+    "fi": 402477,
+    "noimoderati": 51147,
+    "pd": 970725,
+    "avs": 193087,
+    "piueuropa": 189777,
+    "impegnocivico": 19487,
+    "m5s": 370295,
+    "azione-iv": 513249,
+    "italexit": 92176,
+    "up": 56003,
+    "altre": 104714
+   },
+   "altre_dettaglio": {
+    "ITALIA SOVRANA E POPOLARE": 58206,
+    "VITA": 40251,
+    "MASTELLA NOI DI CENTRO EUROPEISTI": 6257
+   }
+  },
+  "Veneto": {
+   "elettori": 3728012,
+   "votanti": 2616007,
+   "validi": 2511026,
+   "liste": {
+    "fdi": 818520,
+    "lega": 366425,
+    "fi": 173609,
+    "noimoderati": 51931,
+    "pd": 405809,
+    "avs": 87382,
+    "piueuropa": 81107,
+    "impegnocivico": 7752,
+    "m5s": 145559,
+    "azione-iv": 210020,
+    "italexit": 61818,
+    "up": 23292,
+    "altre": 77802
+   },
+   "altre_dettaglio": {
+    "VITA": 42552,
+    "ITALIA SOVRANA E POPOLARE": 26631,
+    "ALTERNATIVA PER L'ITALIA - NO GREEN PASS": 8619
+   }
+  },
+  "Friuli-Venezia Giulia": {
+   "elettori": 936273,
+   "votanti": 619935,
+   "validi": 592506,
+   "liste": {
+    "fdi": 191341,
+    "lega": 64534,
+    "fi": 37746,
+    "noimoderati": 4656,
+    "pd": 109393,
+    "avs": 22257,
+    "piueuropa": 20063,
+    "impegnocivico": 2233,
+    "m5s": 43777,
+    "azione-iv": 48703,
+    "italexit": 17929,
+    "up": 6891,
+    "altre": 22983
+   },
+   "altre_dettaglio": {
+    "ITALIA SOVRANA E POPOLARE": 10881,
+    "VITA": 8912,
+    "ALTERNATIVA PER L'ITALIA - NO GREEN PASS": 2387,
+    "MASTELLA NOI DI CENTRO EUROPEISTI": 803
+   }
+  },
+  "Liguria": {
+   "elettori": 1195266,
+   "votanti": 767210,
+   "validi": 735081,
+   "liste": {
+    "fdi": 179118,
+    "lega": 64399,
+    "fi": 48746,
+    "noimoderati": 18794,
+    "pd": 163076,
+    "avs": 30573,
+    "piueuropa": 24788,
+    "impegnocivico": 4148,
+    "m5s": 95008,
+    "azione-iv": 53490,
+    "italexit": 18914,
+    "up": 11323,
+    "altre": 22704
+   },
+   "altre_dettaglio": {
+    "ITALIA SOVRANA E POPOLARE": 11619,
+    "VITA": 5935,
+    "PARTITO COMUNISTA DEI LAVORATORI": 4491,
+    "MASTELLA NOI DI CENTRO EUROPEISTI": 659
+   }
+  },
+  "Emilia-Romagna": {
+   "elettori": 3328327,
+   "votanti": 2395342,
+   "validi": 2304908,
+   "liste": {
+    "fdi": 575452,
+    "lega": 178543,
+    "fi": 130198,
+    "noimoderati": 12414,
+    "pd": 638807,
+    "avs": 104105,
+    "piueuropa": 76138,
+    "impegnocivico": 7312,
+    "m5s": 230444,
+    "azione-iv": 195499,
+    "italexit": 44188,
+    "up": 32543,
+    "altre": 79265
+   },
+   "altre_dettaglio": {
+    "ITALIA SOVRANA E POPOLARE": 28387,
+    "VITA": 25483,
+    "PARTITO ANIMALISTA - UCDL - 10 VOLTE MEGLIO": 14888,
+    "ALTERNATIVA PER L'ITALIA - NO GREEN PASS": 6233,
+    "DESTRE UNITE": 2415,
+    "MASTELLA NOI DI CENTRO EUROPEISTI": 1859
+   }
+  },
+  "Toscana": {
+   "elettori": 2811953,
+   "votanti": 1961284,
+   "validi": 1877492,
+   "liste": {
+    "fdi": 486055,
+    "lega": 120356,
+    "fi": 107795,
+    "noimoderati": 9201,
+    "pd": 479932,
+    "avs": 89267,
+    "piueuropa": 54360,
+    "impegnocivico": 11875,
+    "m5s": 212068,
+    "azione-iv": 174942,
+    "italexit": 30928,
+    "up": 37641,
+    "altre": 63072
+   },
+   "altre_dettaglio": {
+    "ITALIA SOVRANA E POPOLARE": 25821,
+    "PARTITO COMUNISTA ITALIANO": 24099,
+    "VITA": 13152
+   }
+  },
+  "Umbria": {
+   "elettori": 662094,
+   "votanti": 455740,
+   "validi": 436170,
+   "liste": {
+    "fdi": 131396,
+    "lega": 34517,
+    "fi": 31743,
+    "noimoderati": 2007,
+    "pd": 93435,
+    "avs": 15217,
+    "piueuropa": 9143,
+    "impegnocivico": 2415,
+    "m5s": 55205,
+    "azione-iv": 35111,
+    "italexit": 7821,
+    "up": 5051,
+    "altre": 13109
+   },
+   "altre_dettaglio": {
+    "ITALIA SOVRANA E POPOLARE": 5373,
+    "PARTITO COMUNISTA ITALIANO": 5199,
+    "VITA": 2537
+   }
+  },
+  "Marche": {
+   "elettori": 1165397,
+   "votanti": 797050,
+   "validi": 761144,
+   "liste": {
+    "fdi": 224487,
+    "lega": 60798,
+    "fi": 49755,
+    "noimoderati": 5976,
+    "pd": 151777,
+    "avs": 24791,
+    "piueuropa": 20341,
+    "impegnocivico": 3556,
+    "m5s": 104970,
+    "azione-iv": 56492,
+    "italexit": 20023,
+    "up": 10019,
+    "altre": 28159
+   },
+   "altre_dettaglio": {
+    "ITALIA SOVRANA E POPOLARE": 10443,
+    "PARTITO COMUNISTA ITALIANO": 8647,
+    "VITA": 6336,
+    "ALTERNATIVA PER L'ITALIA - NO GREEN PASS": 2733
+   }
+  },
+  "Lazio": {
+   "elettori": 4351194,
+   "votanti": 2799694,
+   "validi": 2710989,
+   "liste": {
+    "fdi": 852687,
+    "lega": 165594,
+    "fi": 186162,
+    "noimoderati": 11099,
+    "pd": 498154,
+    "avs": 105291,
+    "piueuropa": 89949,
+    "impegnocivico": 14656,
+    "m5s": 401386,
+    "azione-iv": 231257,
+    "italexit": 42743,
+    "up": 42136,
+    "altre": 69875
+   },
+   "altre_dettaglio": {
+    "ITALIA SOVRANA E POPOLARE": 33711,
+    "PARTITO COMUNISTA ITALIANO": 17950,
+    "VITA": 13021,
+    "ALTERNATIVA PER L'ITALIA - NO GREEN PASS": 5193
+   }
+  },
+  "Abruzzo": {
+   "elettori": 1026974,
+   "votanti": 657133,
+   "validi": 624700,
+   "liste": {
+    "fdi": 170074,
+    "lega": 51747,
+    "fi": 75663,
+    "noimoderati": 4309,
+    "pd": 100475,
+    "avs": 16874,
+    "piueuropa": 12271,
+    "impegnocivico": 3865,
+    "m5s": 116921,
+    "azione-iv": 38011,
+    "italexit": 11976,
+    "up": 10172,
+    "altre": 12342
+   },
+   "altre_dettaglio": {
+    "ITALIA SOVRANA E POPOLARE": 7875,
+    "VITA": 2819,
+    "ALTERNATIVA PER L'ITALIA - NO GREEN PASS": 1648
+   }
+  },
+  "Molise": {
+   "elettori": 243884,
+   "votanti": 138023,
+   "validi": 129693,
+   "liste": {
+    "fdi": 28985,
+    "lega": 8460,
+    "fi": 16473,
+    "noimoderati": 1699,
+    "pd": 23813,
+    "avs": 3760,
+    "piueuropa": 2014,
+    "impegnocivico": 932,
+    "m5s": 31756,
+    "azione-iv": 6061,
+    "italexit": 0,
+    "up": 2306,
+    "altre": 3434
+   },
+   "altre_dettaglio": {
+    "ITALIA SOVRANA E POPOLARE": 2054,
+    "MASTELLA NOI DI CENTRO EUROPEISTI": 1380
+   }
+  },
+  "Campania": {
+   "elettori": 4510722,
+   "votanti": 2403042,
+   "validi": 2301027,
+   "liste": {
+    "fdi": 416191,
+    "lega": 90779,
+    "fi": 244777,
+    "noimoderati": 13028,
+    "pd": 365553,
+    "avs": 62060,
+    "piueuropa": 49657,
+    "impegnocivico": 34734,
+    "m5s": 798013,
+    "azione-iv": 121165,
+    "italexit": 32277,
+    "up": 45063,
+    "altre": 27730
+   },
+   "altre_dettaglio": {
+    "MASTELLA NOI DI CENTRO EUROPEISTI": 27730
+   }
+  },
+  "Puglia": {
+   "elettori": 3217704,
+   "votanti": 1819782,
+   "validi": 1737554,
+   "liste": {
+    "fdi": 425160,
+    "lega": 91393,
+    "fi": 190643,
+    "noimoderati": 12265,
+    "pd": 277763,
+    "avs": 48102,
+    "piueuropa": 30710,
+    "impegnocivico": 12764,
+    "m5s": 491373,
+    "azione-iv": 83986,
+    "italexit": 22366,
+    "up": 17271,
+    "altre": 33758
+   },
+   "altre_dettaglio": {
+    "ITALIA SOVRANA E POPOLARE": 15178,
+    "PARTITO COMUNISTA ITALIANO": 7562,
+    "VITA": 4837,
+    "ALTERNATIVA PER L'ITALIA - NO GREEN PASS": 3840,
+    "SUD CHIAMA NORD": 2341
+   }
+  },
+  "Basilicata": {
+   "elettori": 446685,
+   "votanti": 262521,
+   "validi": 244555,
+   "liste": {
+    "fdi": 47083,
+    "lega": 17471,
+    "fi": 22027,
+    "noimoderati": 1699,
+    "pd": 39573,
+    "avs": 6786,
+    "piueuropa": 4900,
+    "impegnocivico": 2016,
+    "m5s": 59644,
+    "azione-iv": 30006,
+    "italexit": 3478,
+    "up": 3856,
+    "altre": 6016
+   },
+   "altre_dettaglio": {
+    "ITALIA SOVRANA E POPOLARE": 2854,
+    "PARTITO COMUNISTA ITALIANO": 2287,
+    "MASTELLA NOI DI CENTRO EUROPEISTI": 875
+   }
+  },
+  "Calabria": {
+   "elettori": 1496834,
+   "votanti": 760355,
+   "validi": 718274,
+   "liste": {
+    "fdi": 136060,
+    "lega": 40549,
+    "fi": 116700,
+    "noimoderati": 5930,
+    "pd": 105678,
+    "avs": 10733,
+    "piueuropa": 7900,
+    "impegnocivico": 4685,
+    "m5s": 211759,
+    "azione-iv": 28535,
+    "italexit": 9787,
+    "up": 14736,
+    "altre": 25222
+   },
+   "altre_dettaglio": {
+    "ITALIA SOVRANA E POPOLARE": 9584,
+    "PARTITO COMUNISTA ITALIANO": 5194,
+    "SUD CHIAMA NORD": 2889,
+    "ALTERNATIVA PER L'ITALIA - NO GREEN PASS": 2116,
+    "PARTITO ANIMALISTA - UCDL - 10 VOLTE MEGLIO": 2062,
+    "VITA": 1434,
+    "MASTELLA NOI DI CENTRO EUROPEISTI": 1079,
+    "FORZA DEL POPOLO": 864
+   }
+  },
+  "Sicilia": {
+   "elettori": 3921575,
+   "votanti": 2220576,
+   "validi": 2040084,
+   "liste": {
+    "fdi": 373915,
+    "lega": 103438,
+    "fi": 218739,
+    "noimoderati": 18421,
+    "pd": 241461,
+    "avs": 41242,
+    "piueuropa": 33086,
+    "impegnocivico": 13289,
+    "m5s": 555333,
+    "azione-iv": 92258,
+    "italexit": 33065,
+    "up": 17717,
+    "altre": 298120
+   },
+   "altre_dettaglio": {
+    "SUD CHIAMA NORD": 267232,
+    "ITALIA SOVRANA E POPOLARE": 20686,
+    "VITA": 7887,
+    "ALTERNATIVA PER L'ITALIA - NO GREEN PASS": 2315
+   }
+  },
+  "Sardegna": {
+   "elettori": 1342551,
+   "votanti": 713774,
+   "validi": 684366,
+   "liste": {
+    "fdi": 155170,
+    "lega": 47060,
+    "fi": 63889,
+    "noimoderati": 10613,
+    "pd": 136378,
+    "avs": 29129,
+    "piueuropa": 15290,
+    "impegnocivico": 4931,
+    "m5s": 150312,
+    "azione-iv": 30219,
+    "italexit": 16514,
+    "up": 10225,
+    "altre": 14636
+   },
+   "altre_dettaglio": {
+    "ITALIA SOVRANA E POPOLARE": 10729,
+    "VITA": 3907
+   }
+  }
+ },
+ "senato_italia": {
+  "elettori": 45210950,
+  "votanti": 28850840,
+  "validi": 27569675,
+  "liste": {
+   "fdi": 7168875,
+   "lega": 2437406,
+   "fi": 2281258,
+   "noimoderati": 248308,
+   "pd": 5220256,
+   "avs": 972780,
+   "piueuropa": 810441,
+   "impegnocivico": 161773,
+   "m5s": 4290194,
+   "azione-iv": 2131023,
+   "italexit": 515657,
+   "up": 374247,
+   "altre": 957457
+  },
+  "altre_dettaglio": {
+   "ITALIA SOVRANA E POPOLARE": 309391,
+   "SUD CHIAMA NORD": 272462,
+   "VITA": 196644,
+   "PARTITO COMUNISTA ITALIANO": 70938,
+   "MASTELLA NOI DI CENTRO EUROPEISTI": 42905,
+   "ALTERNATIVA PER L'ITALIA - NO GREEN PASS": 40397,
+   "PARTITO ANIMALISTA - UCDL - 10 VOLTE MEGLIO": 16950,
+   "PARTITO COMUNISTA DEI LAVORATORI": 4491,
+   "DESTRE UNITE": 2415,
+   "FORZA DEL POPOLO": 864
+  },
+  "ambito": "Italia esclusi Estero, Valle d'Aosta e Trentino-Alto Adige (dove al Senato non c'è voto di lista) = somma delle 18 regioni"
+ },
+ "camera_regioni": {
+  "Piemonte": {
+   "elettori": 3320437,
+   "votanti": 2203197,
+   "validi": 2101886,
+   "liste": {
+    "fdi": 567237,
+    "lega": 224103,
+    "fi": 165569,
+    "noimoderati": 14117,
+    "pd": 417470,
+    "avs": 85769,
+    "piueuropa": 86143,
+    "impegnocivico": 10666,
+    "m5s": 218241,
+    "azione-iv": 186178,
+    "italexit": 52690,
+    "up": 29670,
+    "altre": 44033
+   },
+   "altre_dettaglio": {
+    "ITALIA SOVRANA E POPOLARE": 33463,
+    "VITA": 10570
+   }
+  },
+  "Lombardia": {
+   "elettori": 7505068,
+   "votanti": 5260137,
+   "validi": 5066115,
+   "liste": {
+    "fdi": 1443333,
+    "lega": 671012,
+    "fi": 398698,
+    "noimoderati": 48165,
+    "pd": 957790,
+    "avs": 192702,
+    "piueuropa": 180824,
+    "impegnocivico": 20959,
+    "m5s": 379067,
+    "azione-iv": 522137,
+    "italexit": 94144,
+    "up": 57497,
+    "altre": 99787
+   },
+   "altre_dettaglio": {
+    "ITALIA SOVRANA E POPOLARE": 54209,
+    "VITA": 37419,
+    "MASTELLA NOI DI CENTRO EUROPEISTI": 5198,
+    "ALTERNATIVA PER L'ITALIA - NO GREEN PASS": 2132,
+    "FREE": 829
+   }
+  },
+  "Veneto": {
+   "elettori": 3728012,
+   "votanti": 2615999,
+   "validi": 2511895,
+   "liste": {
+    "fdi": 821620,
+    "lega": 365147,
+    "fi": 175112,
+    "noimoderati": 51515,
+    "pd": 409335,
+    "avs": 83351,
+    "piueuropa": 77154,
+    "impegnocivico": 8471,
+    "m5s": 146320,
+    "azione-iv": 210685,
+    "italexit": 62508,
+    "up": 24578,
+    "altre": 76099
+   },
+   "altre_dettaglio": {
+    "VITA": 44496,
+    "ITALIA SOVRANA E POPOLARE": 27839,
+    "ALTERNATIVA PER L'ITALIA - NO GREEN PASS": 3764
+   }
+  },
+  "Friuli-Venezia Giulia": {
+   "elettori": 936273,
+   "votanti": 619940,
+   "validi": 591649,
+   "liste": {
+    "fdi": 185778,
+    "lega": 64789,
+    "fi": 39584,
+    "noimoderati": 4921,
+    "pd": 109020,
+    "avs": 21817,
+    "piueuropa": 19287,
+    "impegnocivico": 2239,
+    "m5s": 42572,
+    "azione-iv": 51604,
+    "italexit": 18960,
+    "up": 7740,
+    "altre": 23338
+   },
+   "altre_dettaglio": {
+    "ITALIA SOVRANA E POPOLARE": 11412,
+    "VITA": 8858,
+    "ALTERNATIVA PER L'ITALIA - NO GREEN PASS": 2342,
+    "MASTELLA NOI DI CENTRO EUROPEISTI": 726
+   }
+  },
+  "Liguria": {
+   "elettori": 1195266,
+   "votanti": 767218,
+   "validi": 733781,
+   "liste": {
+    "fdi": 176907,
+    "lega": 68086,
+    "fi": 48121,
+    "noimoderati": 15645,
+    "pd": 166347,
+    "avs": 31850,
+    "piueuropa": 24745,
+    "impegnocivico": 3702,
+    "m5s": 93413,
+    "azione-iv": 54030,
+    "italexit": 19103,
+    "up": 12807,
+    "altre": 19025
+   },
+   "altre_dettaglio": {
+    "ITALIA SOVRANA E POPOLARE": 12049,
+    "VITA": 6192,
+    "MASTELLA NOI DI CENTRO EUROPEISTI": 784
+   }
+  },
+  "Emilia-Romagna": {
+   "elettori": 3328327,
+   "votanti": 2395364,
+   "validi": 2306552,
+   "liste": {
+    "fdi": 577453,
+    "lega": 173379,
+    "fi": 134364,
+    "noimoderati": 12772,
+    "pd": 648837,
+    "avs": 99736,
+    "piueuropa": 72679,
+    "impegnocivico": 7988,
+    "m5s": 228578,
+    "azione-iv": 197316,
+    "italexit": 44689,
+    "up": 32331,
+    "altre": 76430
+   },
+   "altre_dettaglio": {
+    "ITALIA SOVRANA E POPOLARE": 32964,
+    "VITA": 25380,
+    "PARTITO ANIMALISTA - UCDL - 10 VOLTE MEGLIO": 14594,
+    "MASTELLA NOI DI CENTRO EUROPEISTI": 1892,
+    "SUD CHIAMA NORD": 1600
+   }
+  },
+  "Toscana": {
+   "elettori": 2811953,
+   "votanti": 1961281,
+   "validi": 1877990,
+   "liste": {
+    "fdi": 487156,
+    "lega": 123273,
+    "fi": 104749,
+    "noimoderati": 9356,
+    "pd": 490654,
+    "avs": 95985,
+    "piueuropa": 54392,
+    "impegnocivico": 9574,
+    "m5s": 209144,
+    "azione-iv": 176513,
+    "italexit": 32274,
+    "up": 42087,
+    "altre": 42833
+   },
+   "altre_dettaglio": {
+    "ITALIA SOVRANA E POPOLARE": 29233,
+    "VITA": 13600
+   }
+  },
+  "Umbria": {
+   "elettori": 662094,
+   "votanti": 455740,
+   "validi": 435948,
+   "liste": {
+    "fdi": 134370,
+    "lega": 33776,
+    "fi": 29802,
+    "noimoderati": 1806,
+    "pd": 91129,
+    "avs": 15499,
+    "piueuropa": 9001,
+    "impegnocivico": 1618,
+    "m5s": 55196,
+    "azione-iv": 35600,
+    "italexit": 7870,
+    "up": 5443,
+    "altre": 14838
+   },
+   "altre_dettaglio": {
+    "PARTITO COMUNISTA ITALIANO": 6029,
+    "ITALIA SOVRANA E POPOLARE": 5987,
+    "VITA": 2544,
+    "MASTELLA NOI DI CENTRO EUROPEISTI": 278
+   }
+  },
+  "Marche": {
+   "elettori": 1165397,
+   "votanti": 797054,
+   "validi": 762134,
+   "liste": {
+    "fdi": 222122,
+    "lega": 60402,
+    "fi": 51709,
+    "noimoderati": 5920,
+    "pd": 155269,
+    "avs": 25341,
+    "piueuropa": 19136,
+    "impegnocivico": 3646,
+    "m5s": 103534,
+    "azione-iv": 56434,
+    "italexit": 20053,
+    "up": 10422,
+    "altre": 28146
+   },
+   "altre_dettaglio": {
+    "ITALIA SOVRANA E POPOLARE": 10742,
+    "PARTITO COMUNISTA ITALIANO": 8225,
+    "VITA": 6489,
+    "ALTERNATIVA PER L'ITALIA - NO GREEN PASS": 2690
+   }
+  },
+  "Lazio": {
+   "elettori": 4351194,
+   "votanti": 2799678,
+   "validi": 2709956,
+   "liste": {
+    "fdi": 841507,
+    "lega": 175071,
+    "fi": 183587,
+    "noimoderati": 14561,
+    "pd": 523128,
+    "avs": 103633,
+    "piueuropa": 80243,
+    "impegnocivico": 15749,
+    "m5s": 406332,
+    "azione-iv": 225943,
+    "italexit": 45297,
+    "up": 46574,
+    "altre": 48331
+   },
+   "altre_dettaglio": {
+    "ITALIA SOVRANA E POPOLARE": 35187,
+    "VITA": 9379,
+    "ALTERNATIVA PER L'ITALIA - NO GREEN PASS": 2346,
+    "PARTITO DELLA FOLLIA CREATIVA": 1419
+   }
+  },
+  "Abruzzo": {
+   "elettori": 1026974,
+   "votanti": 657134,
+   "validi": 625731,
+   "liste": {
+    "fdi": 173153,
+    "lega": 51764,
+    "fi": 69512,
+    "noimoderati": 4191,
+    "pd": 103956,
+    "avs": 16799,
+    "piueuropa": 12363,
+    "impegnocivico": 4218,
+    "m5s": 115336,
+    "azione-iv": 39295,
+    "italexit": 11500,
+    "up": 10761,
+    "altre": 12883
+   },
+   "altre_dettaglio": {
+    "ITALIA SOVRANA E POPOLARE": 6926,
+    "VITA": 2963,
+    "ALTERNATIVA PER L'ITALIA - NO GREEN PASS": 1832,
+    "SUD CHIAMA NORD": 1162
+   }
+  },
+  "Molise": {
+   "elettori": 243884,
+   "votanti": 138087,
+   "validi": 129295,
+   "liste": {
+    "fdi": 27818,
+    "lega": 10792,
+    "fi": 14777,
+    "noimoderati": 2080,
+    "pd": 23447,
+    "avs": 3777,
+    "piueuropa": 2059,
+    "impegnocivico": 907,
+    "m5s": 31265,
+    "azione-iv": 6247,
+    "italexit": 0,
+    "up": 2483,
+    "altre": 3643
+   },
+   "altre_dettaglio": {
+    "ITALIA SOVRANA E POPOLARE": 2127,
+    "MASTELLA NOI DI CENTRO EUROPEISTI": 1516
+   }
+  },
+  "Campania": {
+   "elettori": 4510722,
+   "votanti": 2403123,
+   "validi": 2303673,
+   "liste": {
+    "fdi": 404858,
+    "lega": 101411,
+    "fi": 224532,
+    "noimoderati": 12053,
+    "pd": 362509,
+    "avs": 62773,
+    "piueuropa": 46436,
+    "impegnocivico": 38854,
+    "m5s": 796450,
+    "azione-iv": 120146,
+    "italexit": 25724,
+    "up": 47037,
+    "altre": 60890
+   },
+   "altre_dettaglio": {
+    "ITALIA SOVRANA E POPOLARE": 17471,
+    "MASTELLA NOI DI CENTRO EUROPEISTI": 33226,
+    "PARTITO ANIMALISTA - UCDL - 10 VOLTE MEGLIO": 4623,
+    "PARTITO COMUNISTA ITALIANO": 3329,
+    "VITA": 2241
+   }
+  },
+  "Puglia": {
+   "elettori": 3217704,
+   "votanti": 1819787,
+   "validi": 1742661,
+   "liste": {
+    "fdi": 408641,
+    "lega": 94753,
+    "fi": 199844,
+    "noimoderati": 12331,
+    "pd": 291186,
+    "avs": 54861,
+    "piueuropa": 33563,
+    "impegnocivico": 12481,
+    "m5s": 486673,
+    "azione-iv": 83958,
+    "italexit": 25624,
+    "up": 19489,
+    "altre": 19257
+   },
+   "altre_dettaglio": {
+    "ITALIA SOVRANA E POPOLARE": 19257
+   }
+  },
+  "Basilicata": {
+   "elettori": 446685,
+   "votanti": 262520,
+   "validi": 244425,
+   "liste": {
+    "fdi": 44419,
+    "lega": 21904,
+    "fi": 22881,
+    "noimoderati": 4430,
+    "pd": 37171,
+    "avs": 8378,
+    "piueuropa": 5114,
+    "impegnocivico": 2115,
+    "m5s": 61113,
+    "azione-iv": 23865,
+    "italexit": 3520,
+    "up": 3617,
+    "altre": 5898
+   },
+   "altre_dettaglio": {
+    "ITALIA SOVRANA E POPOLARE": 2638,
+    "PARTITO COMUNISTA ITALIANO": 2304,
+    "MASTELLA NOI DI CENTRO EUROPEISTI": 956
+   }
+  },
+  "Calabria": {
+   "elettori": 1496834,
+   "votanti": 760354,
+   "validi": 720332,
+   "liste": {
+    "fdi": 136746,
+    "lega": 41195,
+    "fi": 112643,
+    "noimoderati": 7343,
+    "pd": 103735,
+    "avs": 12558,
+    "piueuropa": 7957,
+    "impegnocivico": 6499,
+    "m5s": 211479,
+    "azione-iv": 29868,
+    "italexit": 10039,
+    "up": 16366,
+    "altre": 23904
+   },
+   "altre_dettaglio": {
+    "ITALIA SOVRANA E POPOLARE": 8589,
+    "PARTITO COMUNISTA ITALIANO": 4662,
+    "SUD CHIAMA NORD": 2431,
+    "PARTITO ANIMALISTA - UCDL - 10 VOLTE MEGLIO": 2234,
+    "ALTERNATIVA PER L'ITALIA - NO GREEN PASS": 2031,
+    "MASTELLA NOI DI CENTRO EUROPEISTI": 1654,
+    "VITA": 1484,
+    "FORZA DEL POPOLO": 819
+   }
+  },
+  "Sicilia": {
+   "elettori": 3921575,
+   "votanti": 2247661,
+   "validi": 2042795,
+   "liste": {
+    "fdi": 391206,
+    "lega": 103371,
+    "fi": 227986,
+    "noimoderati": 16176,
+    "pd": 242730,
+    "avs": 42659,
+    "piueuropa": 34572,
+    "impegnocivico": 15642,
+    "m5s": 575914,
+    "azione-iv": 104430,
+    "italexit": 35522,
+    "up": 19174,
+    "altre": 233413
+   },
+   "altre_dettaglio": {
+    "SUD CHIAMA NORD": 207761,
+    "ITALIA SOVRANA E POPOLARE": 21721,
+    "VITA": 3931
+   }
+  },
+  "Sardegna": {
+   "elettori": 1342551,
+   "votanti": 713789,
+   "validi": 685533,
+   "liste": {
+    "fdi": 161771,
+    "lega": 42860,
+    "fi": 58849,
+    "noimoderati": 14342,
+    "pd": 128438,
+    "avs": 34858,
+    "piueuropa": 15608,
+    "impegnocivico": 5949,
+    "m5s": 149460,
+    "azione-iv": 31571,
+    "italexit": 16671,
+    "up": 10735,
+    "altre": 14421
+   },
+   "altre_dettaglio": {
+    "ITALIA SOVRANA E POPOLARE": 10570,
+    "VITA": 3851
+   }
+  },
+  "Trentino-Alto Adige": {
+   "elettori": 811006,
+   "votanti": 535594,
+   "validi": 505845,
+   "liste": {
+    "fdi": 95208,
+    "lega": 43230,
+    "fi": 16947,
+    "noimoderati": 2403,
+    "pd": 86525,
+    "avs": 29462,
+    "piueuropa": 14781,
+    "impegnocivico": 2278,
+    "m5s": 25407,
+    "azione-iv": 30685,
+    "italexit": 8762,
+    "up": 4338,
+    "altre": 145819
+   },
+   "altre_dettaglio": {
+    "SÜDTIROLER VOLKSPARTEI (SVP) - PATT": 117032,
+    "VITA": 22340,
+    "ITALIA SOVRANA E POPOLARE": 6447
+   }
+  }
+ },
+ "camera_circoscrizioni": {
+  "Piemonte 1": {
+   "elettori": 1723921,
+   "votanti": 1139749,
+   "validi": 1092058,
+   "liste": {
+    "fdi": 260248,
+    "lega": 93052,
+    "fi": 74319,
+    "noimoderati": 7492,
+    "pd": 239768,
+    "avs": 54622,
+    "piueuropa": 50075,
+    "impegnocivico": 5402,
+    "m5s": 136323,
+    "azione-iv": 98829,
+    "italexit": 26197,
+    "up": 18153,
+    "altre": 27578
+   },
+   "altre_dettaglio": {
+    "ITALIA SOVRANA E POPOLARE": 17008,
+    "VITA": 10570
+   }
+  },
+  "Piemonte 2": {
+   "elettori": 1596516,
+   "votanti": 1063448,
+   "validi": 1009828,
+   "liste": {
+    "fdi": 306989,
+    "lega": 131051,
+    "fi": 91250,
+    "noimoderati": 6625,
+    "pd": 177702,
+    "avs": 31147,
+    "piueuropa": 36068,
+    "impegnocivico": 5264,
+    "m5s": 81918,
+    "azione-iv": 87349,
+    "italexit": 26493,
+    "up": 11517,
+    "altre": 16455
+   },
+   "altre_dettaglio": {
+    "ITALIA SOVRANA E POPOLARE": 16455
+   }
+  },
+  "Lombardia 1": {
+   "elettori": 2971612,
+   "votanti": 2066014,
+   "validi": 2003539,
+   "liste": {
+    "fdi": 499938,
+    "lega": 199602,
+    "fi": 147193,
+    "noimoderati": 21091,
+    "pd": 435579,
+    "avs": 93075,
+    "piueuropa": 85344,
+    "impegnocivico": 9483,
+    "m5s": 178138,
+    "azione-iv": 235629,
+    "italexit": 36279,
+    "up": 26271,
+    "altre": 35917
+   },
+   "altre_dettaglio": {
+    "ITALIA SOVRANA E POPOLARE": 22275,
+    "VITA": 11949,
+    "MASTELLA NOI DI CENTRO EUROPEISTI": 1693
+   }
+  },
+  "Lombardia 2": {
+   "elettori": 1649052,
+   "votanti": 1127070,
+   "validi": 1078979,
+   "liste": {
+    "fdi": 325778,
+    "lega": 169388,
+    "fi": 89283,
+    "noimoderati": 11726,
+    "pd": 171404,
+    "avs": 36807,
+    "piueuropa": 37369,
+    "impegnocivico": 4064,
+    "m5s": 71205,
+    "azione-iv": 107643,
+    "italexit": 21599,
+    "up": 10023,
+    "altre": 22690
+   },
+   "altre_dettaglio": {
+    "ITALIA SOVRANA E POPOLARE": 12151,
+    "VITA": 9096,
+    "MASTELLA NOI DI CENTRO EUROPEISTI": 1443
+   }
+  },
+  "Lombardia 3": {
+   "elettori": 1652489,
+   "votanti": 1214390,
+   "validi": 1166248,
+   "liste": {
+    "fdi": 366788,
+    "lega": 189176,
+    "fi": 92949,
+    "noimoderati": 8505,
+    "pd": 193884,
+    "avs": 39263,
+    "piueuropa": 35693,
+    "impegnocivico": 3806,
+    "m5s": 67558,
+    "azione-iv": 113010,
+    "italexit": 19557,
+    "up": 12340,
+    "altre": 23719
+   },
+   "altre_dettaglio": {
+    "ITALIA SOVRANA E POPOLARE": 11235,
+    "VITA": 11100,
+    "MASTELLA NOI DI CENTRO EUROPEISTI": 1384
+   }
+  },
+  "Lombardia 4": {
+   "elettori": 1231915,
+   "votanti": 852663,
+   "validi": 817349,
+   "liste": {
+    "fdi": 250829,
+    "lega": 112846,
+    "fi": 69273,
+    "noimoderati": 6843,
+    "pd": 156923,
+    "avs": 23557,
+    "piueuropa": 22418,
+    "impegnocivico": 3606,
+    "m5s": 62166,
+    "azione-iv": 65855,
+    "italexit": 16709,
+    "up": 8863,
+    "altre": 17461
+   },
+   "altre_dettaglio": {
+    "ITALIA SOVRANA E POPOLARE": 8548,
+    "VITA": 5274,
+    "ALTERNATIVA PER L'ITALIA - NO GREEN PASS": 2132,
+    "FREE": 829,
+    "MASTELLA NOI DI CENTRO EUROPEISTI": 678
+   }
+  },
+  "Veneto 1": {
+   "elettori": 1480472,
+   "votanti": 1015657,
+   "validi": 972048,
+   "liste": {
+    "fdi": 311366,
+    "lega": 140302,
+    "fi": 60942,
+    "noimoderati": 24166,
+    "pd": 163264,
+    "avs": 34518,
+    "piueuropa": 30796,
+    "impegnocivico": 3401,
+    "m5s": 58584,
+    "azione-iv": 78395,
+    "italexit": 23870,
+    "up": 9873,
+    "altre": 32571
+   },
+   "altre_dettaglio": {
+    "VITA": 17427,
+    "ITALIA SOVRANA E POPOLARE": 11380,
+    "ALTERNATIVA PER L'ITALIA - NO GREEN PASS": 3764
+   }
+  },
+  "Veneto 2": {
+   "elettori": 2247540,
+   "votanti": 1600342,
+   "validi": 1539847,
+   "liste": {
+    "fdi": 510254,
+    "lega": 224845,
+    "fi": 114170,
+    "noimoderati": 27349,
+    "pd": 246071,
+    "avs": 48833,
+    "piueuropa": 46358,
+    "impegnocivico": 5070,
+    "m5s": 87736,
+    "azione-iv": 132290,
+    "italexit": 38638,
+    "up": 14705,
+    "altre": 43528
+   },
+   "altre_dettaglio": {
+    "VITA": 27069,
+    "ITALIA SOVRANA E POPOLARE": 16459
+   }
+  },
+  "Friuli-Venezia Giulia": {
+   "elettori": 936273,
+   "votanti": 619940,
+   "validi": 591649,
+   "liste": {
+    "fdi": 185778,
+    "lega": 64789,
+    "fi": 39584,
+    "noimoderati": 4921,
+    "pd": 109020,
+    "avs": 21817,
+    "piueuropa": 19287,
+    "impegnocivico": 2239,
+    "m5s": 42572,
+    "azione-iv": 51604,
+    "italexit": 18960,
+    "up": 7740,
+    "altre": 23338
+   },
+   "altre_dettaglio": {
+    "ITALIA SOVRANA E POPOLARE": 11412,
+    "VITA": 8858,
+    "ALTERNATIVA PER L'ITALIA - NO GREEN PASS": 2342,
+    "MASTELLA NOI DI CENTRO EUROPEISTI": 726
+   }
+  },
+  "Liguria": {
+   "elettori": 1195266,
+   "votanti": 767218,
+   "validi": 733781,
+   "liste": {
+    "fdi": 176907,
+    "lega": 68086,
+    "fi": 48121,
+    "noimoderati": 15645,
+    "pd": 166347,
+    "avs": 31850,
+    "piueuropa": 24745,
+    "impegnocivico": 3702,
+    "m5s": 93413,
+    "azione-iv": 54030,
+    "italexit": 19103,
+    "up": 12807,
+    "altre": 19025
+   },
+   "altre_dettaglio": {
+    "ITALIA SOVRANA E POPOLARE": 12049,
+    "VITA": 6192,
+    "MASTELLA NOI DI CENTRO EUROPEISTI": 784
+   }
+  },
+  "Emilia-Romagna": {
+   "elettori": 3328327,
+   "votanti": 2395364,
+   "validi": 2306552,
+   "liste": {
+    "fdi": 577453,
+    "lega": 173379,
+    "fi": 134364,
+    "noimoderati": 12772,
+    "pd": 648837,
+    "avs": 99736,
+    "piueuropa": 72679,
+    "impegnocivico": 7988,
+    "m5s": 228578,
+    "azione-iv": 197316,
+    "italexit": 44689,
+    "up": 32331,
+    "altre": 76430
+   },
+   "altre_dettaglio": {
+    "ITALIA SOVRANA E POPOLARE": 32964,
+    "VITA": 25380,
+    "PARTITO ANIMALISTA - UCDL - 10 VOLTE MEGLIO": 14594,
+    "MASTELLA NOI DI CENTRO EUROPEISTI": 1892,
+    "SUD CHIAMA NORD": 1600
+   }
+  },
+  "Toscana": {
+   "elettori": 2811953,
+   "votanti": 1961281,
+   "validi": 1877990,
+   "liste": {
+    "fdi": 487156,
+    "lega": 123273,
+    "fi": 104749,
+    "noimoderati": 9356,
+    "pd": 490654,
+    "avs": 95985,
+    "piueuropa": 54392,
+    "impegnocivico": 9574,
+    "m5s": 209144,
+    "azione-iv": 176513,
+    "italexit": 32274,
+    "up": 42087,
+    "altre": 42833
+   },
+   "altre_dettaglio": {
+    "ITALIA SOVRANA E POPOLARE": 29233,
+    "VITA": 13600
+   }
+  },
+  "Umbria": {
+   "elettori": 662094,
+   "votanti": 455740,
+   "validi": 435948,
+   "liste": {
+    "fdi": 134370,
+    "lega": 33776,
+    "fi": 29802,
+    "noimoderati": 1806,
+    "pd": 91129,
+    "avs": 15499,
+    "piueuropa": 9001,
+    "impegnocivico": 1618,
+    "m5s": 55196,
+    "azione-iv": 35600,
+    "italexit": 7870,
+    "up": 5443,
+    "altre": 14838
+   },
+   "altre_dettaglio": {
+    "PARTITO COMUNISTA ITALIANO": 6029,
+    "ITALIA SOVRANA E POPOLARE": 5987,
+    "VITA": 2544,
+    "MASTELLA NOI DI CENTRO EUROPEISTI": 278
+   }
+  },
+  "Marche": {
+   "elettori": 1165397,
+   "votanti": 797054,
+   "validi": 762134,
+   "liste": {
+    "fdi": 222122,
+    "lega": 60402,
+    "fi": 51709,
+    "noimoderati": 5920,
+    "pd": 155269,
+    "avs": 25341,
+    "piueuropa": 19136,
+    "impegnocivico": 3646,
+    "m5s": 103534,
+    "azione-iv": 56434,
+    "italexit": 20053,
+    "up": 10422,
+    "altre": 28146
+   },
+   "altre_dettaglio": {
+    "ITALIA SOVRANA E POPOLARE": 10742,
+    "PARTITO COMUNISTA ITALIANO": 8225,
+    "VITA": 6489,
+    "ALTERNATIVA PER L'ITALIA - NO GREEN PASS": 2690
+   }
+  },
+  "Lazio 1": {
+   "elettori": 2867859,
+   "votanti": 1854085,
+   "validi": 1804012,
+   "liste": {
+    "fdi": 536350,
+    "lega": 94391,
+    "fi": 91654,
+    "noimoderati": 10157,
+    "pd": 388021,
+    "avs": 78147,
+    "piueuropa": 61931,
+    "impegnocivico": 10546,
+    "m5s": 266211,
+    "azione-iv": 169596,
+    "italexit": 28074,
+    "up": 32932,
+    "altre": 36002
+   },
+   "altre_dettaglio": {
+    "ITALIA SOVRANA E POPOLARE": 22858,
+    "VITA": 9379,
+    "ALTERNATIVA PER L'ITALIA - NO GREEN PASS": 2346,
+    "PARTITO DELLA FOLLIA CREATIVA": 1419
+   }
+  },
+  "Lazio 2": {
+   "elettori": 1483335,
+   "votanti": 945593,
+   "validi": 905944,
+   "liste": {
+    "fdi": 305157,
+    "lega": 80680,
+    "fi": 91933,
+    "noimoderati": 4404,
+    "pd": 135107,
+    "avs": 25486,
+    "piueuropa": 18312,
+    "impegnocivico": 5203,
+    "m5s": 140121,
+    "azione-iv": 56347,
+    "italexit": 17223,
+    "up": 13642,
+    "altre": 12329
+   },
+   "altre_dettaglio": {
+    "ITALIA SOVRANA E POPOLARE": 12329
+   }
+  },
+  "Abruzzo": {
+   "elettori": 1026974,
+   "votanti": 657134,
+   "validi": 625731,
+   "liste": {
+    "fdi": 173153,
+    "lega": 51764,
+    "fi": 69512,
+    "noimoderati": 4191,
+    "pd": 103956,
+    "avs": 16799,
+    "piueuropa": 12363,
+    "impegnocivico": 4218,
+    "m5s": 115336,
+    "azione-iv": 39295,
+    "italexit": 11500,
+    "up": 10761,
+    "altre": 12883
+   },
+   "altre_dettaglio": {
+    "ITALIA SOVRANA E POPOLARE": 6926,
+    "VITA": 2963,
+    "ALTERNATIVA PER L'ITALIA - NO GREEN PASS": 1832,
+    "SUD CHIAMA NORD": 1162
+   }
+  },
+  "Molise": {
+   "elettori": 243884,
+   "votanti": 138087,
+   "validi": 129295,
+   "liste": {
+    "fdi": 27818,
+    "lega": 10792,
+    "fi": 14777,
+    "noimoderati": 2080,
+    "pd": 23447,
+    "avs": 3777,
+    "piueuropa": 2059,
+    "impegnocivico": 907,
+    "m5s": 31265,
+    "azione-iv": 6247,
+    "italexit": 0,
+    "up": 2483,
+    "altre": 3643
+   },
+   "altre_dettaglio": {
+    "ITALIA SOVRANA E POPOLARE": 2127,
+    "MASTELLA NOI DI CENTRO EUROPEISTI": 1516
+   }
+  },
+  "Campania 1": {
+   "elettori": 2379167,
+   "votanti": 1208233,
+   "validi": 1169256,
+   "liste": {
+    "fdi": 161719,
+    "lega": 33715,
+    "fi": 111528,
+    "noimoderati": 7112,
+    "pd": 168336,
+    "avs": 35681,
+    "piueuropa": 24425,
+    "impegnocivico": 25209,
+    "m5s": 483496,
+    "azione-iv": 62752,
+    "italexit": 12825,
+    "up": 30398,
+    "altre": 12060
+   },
+   "altre_dettaglio": {
+    "ITALIA SOVRANA E POPOLARE": 8236,
+    "MASTELLA NOI DI CENTRO EUROPEISTI": 3824
+   }
+  },
+  "Campania 2": {
+   "elettori": 2131555,
+   "votanti": 1194890,
+   "validi": 1134417,
+   "liste": {
+    "fdi": 243139,
+    "lega": 67696,
+    "fi": 113004,
+    "noimoderati": 4941,
+    "pd": 194173,
+    "avs": 27092,
+    "piueuropa": 22011,
+    "impegnocivico": 13645,
+    "m5s": 312954,
+    "azione-iv": 57394,
+    "italexit": 12899,
+    "up": 16639,
+    "altre": 48830
+   },
+   "altre_dettaglio": {
+    "MASTELLA NOI DI CENTRO EUROPEISTI": 29402,
+    "ITALIA SOVRANA E POPOLARE": 9235,
+    "PARTITO ANIMALISTA - UCDL - 10 VOLTE MEGLIO": 4623,
+    "PARTITO COMUNISTA ITALIANO": 3329,
+    "VITA": 2241
+   }
+  },
+  "Puglia": {
+   "elettori": 3217704,
+   "votanti": 1819787,
+   "validi": 1742661,
+   "liste": {
+    "fdi": 408641,
+    "lega": 94753,
+    "fi": 199844,
+    "noimoderati": 12331,
+    "pd": 291186,
+    "avs": 54861,
+    "piueuropa": 33563,
+    "impegnocivico": 12481,
+    "m5s": 486673,
+    "azione-iv": 83958,
+    "italexit": 25624,
+    "up": 19489,
+    "altre": 19257
+   },
+   "altre_dettaglio": {
+    "ITALIA SOVRANA E POPOLARE": 19257
+   }
+  },
+  "Basilicata": {
+   "elettori": 446685,
+   "votanti": 262520,
+   "validi": 244425,
+   "liste": {
+    "fdi": 44419,
+    "lega": 21904,
+    "fi": 22881,
+    "noimoderati": 4430,
+    "pd": 37171,
+    "avs": 8378,
+    "piueuropa": 5114,
+    "impegnocivico": 2115,
+    "m5s": 61113,
+    "azione-iv": 23865,
+    "italexit": 3520,
+    "up": 3617,
+    "altre": 5898
+   },
+   "altre_dettaglio": {
+    "ITALIA SOVRANA E POPOLARE": 2638,
+    "PARTITO COMUNISTA ITALIANO": 2304,
+    "MASTELLA NOI DI CENTRO EUROPEISTI": 956
+   }
+  },
+  "Calabria": {
+   "elettori": 1496834,
+   "votanti": 760354,
+   "validi": 720332,
+   "liste": {
+    "fdi": 136746,
+    "lega": 41195,
+    "fi": 112643,
+    "noimoderati": 7343,
+    "pd": 103735,
+    "avs": 12558,
+    "piueuropa": 7957,
+    "impegnocivico": 6499,
+    "m5s": 211479,
+    "azione-iv": 29868,
+    "italexit": 10039,
+    "up": 16366,
+    "altre": 23904
+   },
+   "altre_dettaglio": {
+    "ITALIA SOVRANA E POPOLARE": 8589,
+    "PARTITO COMUNISTA ITALIANO": 4662,
+    "SUD CHIAMA NORD": 2431,
+    "PARTITO ANIMALISTA - UCDL - 10 VOLTE MEGLIO": 2234,
+    "ALTERNATIVA PER L'ITALIA - NO GREEN PASS": 2031,
+    "MASTELLA NOI DI CENTRO EUROPEISTI": 1654,
+    "VITA": 1484,
+    "FORZA DEL POPOLO": 819
+   }
+  },
+  "Sicilia 1": {
+   "elettori": 1847713,
+   "votanti": 1037592,
+   "validi": 938084,
+   "liste": {
+    "fdi": 168152,
+    "lega": 44378,
+    "fi": 107736,
+    "noimoderati": 8795,
+    "pd": 114908,
+    "avs": 19889,
+    "piueuropa": 16807,
+    "impegnocivico": 7183,
+    "m5s": 288597,
+    "azione-iv": 53132,
+    "italexit": 14504,
+    "up": 8325,
+    "altre": 85678
+   },
+   "altre_dettaglio": {
+    "SUD CHIAMA NORD": 75241,
+    "ITALIA SOVRANA E POPOLARE": 10437
+   }
+  },
+  "Sicilia 2": {
+   "elettori": 2073862,
+   "votanti": 1210069,
+   "validi": 1104711,
+   "liste": {
+    "fdi": 223054,
+    "lega": 58993,
+    "fi": 120250,
+    "noimoderati": 7381,
+    "pd": 127822,
+    "avs": 22770,
+    "piueuropa": 17765,
+    "impegnocivico": 8459,
+    "m5s": 287317,
+    "azione-iv": 51298,
+    "italexit": 21018,
+    "up": 10849,
+    "altre": 147735
+   },
+   "altre_dettaglio": {
+    "SUD CHIAMA NORD": 132520,
+    "ITALIA SOVRANA E POPOLARE": 11284,
+    "VITA": 3931
+   }
+  },
+  "Sardegna": {
+   "elettori": 1342551,
+   "votanti": 713789,
+   "validi": 685533,
+   "liste": {
+    "fdi": 161771,
+    "lega": 42860,
+    "fi": 58849,
+    "noimoderati": 14342,
+    "pd": 128438,
+    "avs": 34858,
+    "piueuropa": 15608,
+    "impegnocivico": 5949,
+    "m5s": 149460,
+    "azione-iv": 31571,
+    "italexit": 16671,
+    "up": 10735,
+    "altre": 14421
+   },
+   "altre_dettaglio": {
+    "ITALIA SOVRANA E POPOLARE": 10570,
+    "VITA": 3851
+   }
+  },
+  "Trentino-Alto Adige/Südtirol": {
+   "elettori": 811006,
+   "votanti": 535594,
+   "validi": 505845,
+   "liste": {
+    "fdi": 95208,
+    "lega": 43230,
+    "fi": 16947,
+    "noimoderati": 2403,
+    "pd": 86525,
+    "avs": 29462,
+    "piueuropa": 14781,
+    "impegnocivico": 2278,
+    "m5s": 25407,
+    "azione-iv": 30685,
+    "italexit": 8762,
+    "up": 4338,
+    "altre": 145819
+   },
+   "altre_dettaglio": {
+    "SÜDTIROLER VOLKSPARTEI (SVP) - PATT": 117032,
+    "VITA": 22340,
+    "ITALIA SOVRANA E POPOLARE": 6447
+   }
+  }
+ },
+ "camera_italia": {
+  "elettori": 46021956,
+  "votanti": 29413657,
+  "validi": 28098196,
+  "liste": {
+   "fdi": 7301303,
+   "lega": 2470318,
+   "fi": 2279266,
+   "noimoderati": 254127,
+   "pd": 5348676,
+   "avs": 1021808,
+   "piueuropa": 796057,
+   "impegnocivico": 173555,
+   "m5s": 4335494,
+   "azione-iv": 2186505,
+   "italexit": 534950,
+   "up": 403149,
+   "altre": 992988
+  },
+  "altre_dettaglio": {
+   "ITALIA SOVRANA E POPOLARE": 348831,
+   "SUD CHIAMA NORD": 212954,
+   "VITA": 201737,
+   "SÜDTIROLER VOLKSPARTEI (SVP) - PATT": 117032,
+   "MASTELLA NOI DI CENTRO EUROPEISTI": 46230,
+   "PARTITO COMUNISTA ITALIANO": 24549,
+   "PARTITO ANIMALISTA - UCDL - 10 VOLTE MEGLIO": 21451,
+   "ALTERNATIVA PER L'ITALIA - NO GREEN PASS": 17137,
+   "PARTITO DELLA FOLLIA CREATIVA": 1419,
+   "FREE": 829,
+   "FORZA DEL POPOLO": 819
+  },
+  "ambito": "Italia esclusi Estero e Valle d'Aosta (Trentino-Alto Adige incluso) = somma delle 27 circoscrizioni"
+ },
+ "collegi_speciali": {
+  "camera": [
+   {
+    "collegio": "Valle d'Aosta - U01 (Aosta)",
+    "vincitore": "MANES FRANCO",
+    "coalizione": "altro",
+    "contrassegno_vincitore": "VALLÉE D’AOSTE – AUTONOMIE PROGRÈS FÉDÉRALISME",
+    "voti_primo": 20763,
+    "secondo": "RINI EMILY MARINELLA",
+    "coalizione_secondo": "cdx",
+    "contrassegno_secondo": "LEGA PER SALVINI PREM.-FORZA IT.-NOI MODERATI-FRAT. D'ITALIA",
+    "voti_secondo": 16016,
+    "elettori": 98187,
+    "votanti": 59490,
+    "voti_validi_candidati": 53746,
+    "eletto_segnalato_da_eligendo": true,
+    "tutti_i_candidati": [
+     {
+      "candidato": "MANES FRANCO",
+      "contrassegno": "VALLÉE D’AOSTE – AUTONOMIE PROGRÈS FÉDÉRALISME",
+      "coalizione": "altro",
+      "voti": 20763
+     },
+     {
+      "candidato": "RINI EMILY MARINELLA",
+      "contrassegno": "LEGA PER SALVINI PREM.-FORZA IT.-NOI MODERATI-FRAT. D'ITALIA",
+      "coalizione": "cdx",
+      "voti": 16016
+     },
+     {
+      "candidato": "GIRARDINI GIOVANNI",
+      "contrassegno": "LA RENAISSANCE VALDÔTAINE",
+      "coalizione": "altro",
+      "voti": 6398
+     },
+     {
+      "candidato": "GUICHARDAZ ERIKA",
+      "contrassegno": "VALLE D'AOSTA APERTA",
+      "coalizione": "altro",
+      "voti": 5841
+     },
+     {
+      "candidato": "RONC LOREDANA AUGUSTA",
+      "contrassegno": "ITALIA SOVRANA E POPOLARE",
+      "coalizione": "altro",
+      "voti": 2302
+     },
+     {
+      "candidato": "DE ROSA LOREDANA",
+      "contrassegno": "UNIONE POPOLARE CON DE MAGISTRIS",
+      "coalizione": "altro",
+      "voti": 1375
+     },
+     {
+      "candidato": "IANNI DAVIDE",
+      "contrassegno": "PARTITO COMUNISTA ITALIANO",
+      "coalizione": "altro",
+      "voti": 1051
+     }
+    ]
+   },
+   {
+    "collegio": "Trentino-Alto Adige/Südtirol - U01 (Trento)",
+    "vincitore": "DE BERTOLDI ANDREA",
+    "coalizione": "cdx",
+    "contrassegno_vincitore": "FRATELLI D'ITALIA CON GIORGIA MELONI + LEGA PER SALVINI PREMIER + FORZA ITALIA + NOI MODERATI/LUPI - TOTI - BRUGNARO - UDC",
+    "voti_primo": 57083,
+    "secondo": "FERRARI SARA",
+    "coalizione_secondo": "csx",
+    "contrassegno_secondo": "PARTITO DEMOCRATICO - ITALIA DEMOCRATICA E PROGRESSISTA + ALLEANZA VERDI E SINISTRA + +EUROPA + IMPEGNO CIVICO LUIGI DI MAIO - CENTRO DEMOCRATICO",
+    "voti_secondo": 44347,
+    "elettori": 210471,
+    "votanti": 145886,
+    "voti_validi_candidati": 139463,
+    "eletto_segnalato_da_eligendo": null,
+    "tutti_i_candidati": [
+     {
+      "candidato": "DE BERTOLDI ANDREA",
+      "contrassegno": "FRATELLI D'ITALIA CON GIORGIA MELONI + LEGA PER SALVINI PREMIER + FORZA ITALIA + NOI MODERATI/LUPI - TOTI - BRUGNARO - UDC",
+      "coalizione": "cdx",
+      "voti": 57083
+     },
+     {
+      "candidato": "FERRARI SARA",
+      "contrassegno": "PARTITO DEMOCRATICO - ITALIA DEMOCRATICA E PROGRESSISTA + ALLEANZA VERDI E SINISTRA + +EUROPA + IMPEGNO CIVICO LUIGI DI MAIO - CENTRO DEMOCRATICO",
+      "coalizione": "csx",
+      "voti": 44347
+     },
+     {
+      "candidato": "SANI ROBERTO",
+      "contrassegno": "AZIONE - ITALIA VIVA - CALENDA",
+      "coalizione": "altro",
+      "voti": 12477
+     },
+     {
+      "candidato": "OSSANNA LORENZO",
+      "contrassegno": "SÜDTIROLER VOLKSPARTEI (SVP) - PATT",
+      "coalizione": "svp",
+      "voti": 8131
+     },
+     {
+      "candidato": "TRANQUILLINI RUDI",
+      "contrassegno": "MOVIMENTO 5 STELLE",
+      "coalizione": "altro",
+      "voti": 7932
+     },
+     {
+      "candidato": "BATTAN MARTINA",
+      "contrassegno": "ITALEXIT PER L'ITALIA",
+      "coalizione": "altro",
+      "voti": 3005
+     },
+     {
+      "candidato": "PECORARI ELIANA",
+      "contrassegno": "VITA",
+      "coalizione": "altro",
+      "voti": 2789
+     },
+     {
+      "candidato": "MERLIN GIANFRANCO",
+      "contrassegno": "ITALIA SOVRANA E POPOLARE",
+      "coalizione": "altro",
+      "voti": 2179
+     },
+     {
+      "candidato": "CESTARI IVO",
+      "contrassegno": "UNIONE POPOLARE CON DE MAGISTRIS",
+      "coalizione": "altro",
+      "voti": 1520
+     }
+    ]
+   },
+   {
+    "collegio": "Trentino-Alto Adige/Südtirol - U02 (Rovereto)",
+    "vincitore": "CATTOI VANESSA",
+    "coalizione": "cdx",
+    "contrassegno_vincitore": "FRATELLI D'ITALIA CON GIORGIA MELONI + LEGA PER SALVINI PREMIER + FORZA ITALIA + NOI MODERATI/LUPI - TOTI - BRUGNARO - UDC",
+    "voti_primo": 58640,
+    "secondo": "CALZA' MICHELA",
+    "coalizione_secondo": "csx",
+    "contrassegno_secondo": "PARTITO DEMOCRATICO - ITALIA DEMOCRATICA E PROGRESSISTA + ALLEANZA VERDI E SINISTRA + +EUROPA + IMPEGNO CIVICO LUIGI DI MAIO - CENTRO DEMOCRATICO",
+    "voti_secondo": 40293,
+    "elettori": 206683,
+    "votanti": 144572,
+    "voti_validi_candidati": 137683,
+    "eletto_segnalato_da_eligendo": null,
+    "tutti_i_candidati": [
+     {
+      "candidato": "CATTOI VANESSA",
+      "contrassegno": "FRATELLI D'ITALIA CON GIORGIA MELONI + LEGA PER SALVINI PREMIER + FORZA ITALIA + NOI MODERATI/LUPI - TOTI - BRUGNARO - UDC",
+      "coalizione": "cdx",
+      "voti": 58640
+     },
+     {
+      "candidato": "CALZA' MICHELA",
+      "contrassegno": "PARTITO DEMOCRATICO - ITALIA DEMOCRATICA E PROGRESSISTA + ALLEANZA VERDI E SINISTRA + +EUROPA + IMPEGNO CIVICO LUIGI DI MAIO - CENTRO DEMOCRATICO",
+      "coalizione": "csx",
+      "voti": 40293
+     },
+     {
+      "candidato": "TAROLLI ALESSIA",
+      "contrassegno": "AZIONE - ITALIA VIVA - CALENDA",
+      "coalizione": "altro",
+      "voti": 11072
+     },
+     {
+      "candidato": "DAL BIANCO MAURIZIO",
+      "contrassegno": "MOVIMENTO 5 STELLE",
+      "coalizione": "altro",
+      "voti": 8771
+     },
+     {
+      "candidato": "ALBERTINI ELENA",
+      "contrassegno": "SÜDTIROLER VOLKSPARTEI (SVP) - PATT",
+      "coalizione": "svp",
+      "voti": 8067
+     },
+     {
+      "candidato": "BISOFFI MAURIZIO",
+      "contrassegno": "ITALEXIT PER L'ITALIA",
+      "coalizione": "altro",
+      "voti": 3341
+     },
+     {
+      "candidato": "PAPPALARDO TOMMASO",
+      "contrassegno": "VITA",
+      "coalizione": "altro",
+      "voti": 3063
+     },
+     {
+      "candidato": "BERTI MICHELE",
+      "contrassegno": "ITALIA SOVRANA E POPOLARE",
+      "coalizione": "altro",
+      "voti": 2925
+     },
+     {
+      "candidato": "CASTELLANI IRENE",
+      "contrassegno": "UNIONE POPOLARE CON DE MAGISTRIS",
+      "coalizione": "altro",
+      "voti": 1511
+     }
+    ]
+   },
+   {
+    "collegio": "Trentino-Alto Adige/Südtirol - U03 (Bolzano/Bozen)",
+    "vincitore": "SCHULLIAN MANFRED",
+    "coalizione": "svp",
+    "contrassegno_vincitore": "SÜDTIROLER VOLKSPARTEI (SVP) - PATT",
+    "voti_primo": 40995,
+    "secondo": "ADAMI SABRINA",
+    "coalizione_secondo": "cdx",
+    "contrassegno_secondo": "FRATELLI D'ITALIA CON GIORGIA MELONI + LEGA PER SALVINI PREMIER + FORZA ITALIA + NOI MODERATI/LUPI - TOTI - BRUGNARO - UDC",
+    "voti_secondo": 31232,
+    "elettori": 202884,
+    "votanti": 131306,
+    "voti_validi_candidati": 124471,
+    "eletto_segnalato_da_eligendo": null,
+    "tutti_i_candidati": [
+     {
+      "candidato": "SCHULLIAN MANFRED",
+      "contrassegno": "SÜDTIROLER VOLKSPARTEI (SVP) - PATT",
+      "coalizione": "svp",
+      "voti": 40995
+     },
+     {
+      "candidato": "ADAMI SABRINA",
+      "contrassegno": "FRATELLI D'ITALIA CON GIORGIA MELONI + LEGA PER SALVINI PREMIER + FORZA ITALIA + NOI MODERATI/LUPI - TOTI - BRUGNARO - UDC",
+      "coalizione": "cdx",
+      "voti": 31232
+     },
+     {
+      "candidato": "MUSSNER ELIDE",
+      "contrassegno": "PARTITO DEMOCRATICO - ITALIA DEMOCRATICA E PROGRESSISTA + ALLEANZA VERDI E SINISTRA + +EUROPA + IMPEGNO CIVICO LUIGI DI MAIO - CENTRO DEMOCRATICO",
+      "coalizione": "csx",
+      "voti": 27933
+     },
+     {
+      "candidato": "HOLZEISEN RENATE",
+      "contrassegno": "VITA",
+      "coalizione": "altro",
+      "voti": 8228
+     },
+     {
+      "candidato": "RIZZO ANGELO",
+      "contrassegno": "MOVIMENTO 5 STELLE",
+      "coalizione": "altro",
+      "voti": 6434
+     },
+     {
+      "candidato": "RANDI MAURO",
+      "contrassegno": "AZIONE - ITALIA VIVA - CALENDA",
+      "coalizione": "altro",
+      "voti": 5791
+     },
+     {
+      "candidato": "SCHICK HANNES",
+      "contrassegno": "ITALEXIT PER L'ITALIA",
+      "coalizione": "altro",
+      "voti": 1850
+     },
+     {
+      "candidato": "ALBERTI FRANCESCO",
+      "contrassegno": "UNIONE POPOLARE CON DE MAGISTRIS",
+      "coalizione": "altro",
+      "voti": 1021
+     },
+     {
+      "candidato": "AVELLINO MARIA ROSA",
+      "contrassegno": "ITALIA SOVRANA E POPOLARE",
+      "coalizione": "altro",
+      "voti": 987
+     }
+    ]
+   },
+   {
+    "collegio": "Trentino-Alto Adige/Südtirol - U04 (Bressanone/Brixen)",
+    "vincitore": "GEBHARD RENATE",
+    "coalizione": "svp",
+    "contrassegno_vincitore": "SÜDTIROLER VOLKSPARTEI (SVP) - PATT",
+    "voti_primo": 59839,
+    "secondo": "PLONER FRANZ",
+    "coalizione_secondo": "csx",
+    "contrassegno_secondo": "ALLEANZA VERDI E SINISTRA + PARTITO DEMOCRATICO - ITALIA DEMOCRATICA E PROGRESSISTA + +EUROPA + IMPEGNO CIVICO LUIGI DI MAIO - CENTRO DEMOCRATICO",
+    "voti_secondo": 20473,
+    "elettori": 190968,
+    "votanti": 113830,
+    "voti_validi_candidati": 104228,
+    "eletto_segnalato_da_eligendo": null,
+    "tutti_i_candidati": [
+     {
+      "candidato": "GEBHARD RENATE",
+      "contrassegno": "SÜDTIROLER VOLKSPARTEI (SVP) - PATT",
+      "coalizione": "svp",
+      "voti": 59839
+     },
+     {
+      "candidato": "PLONER FRANZ",
+      "contrassegno": "ALLEANZA VERDI E SINISTRA + PARTITO DEMOCRATICO - ITALIA DEMOCRATICA E PROGRESSISTA + +EUROPA + IMPEGNO CIVICO LUIGI DI MAIO - CENTRO DEMOCRATICO",
+      "coalizione": "csx",
+      "voti": 20473
+     },
+     {
+      "candidato": "BINETTI PAOLA",
+      "contrassegno": "FRATELLI D'ITALIA CON GIORGIA MELONI + LEGA PER SALVINI PREMIER + FORZA ITALIA + NOI MODERATI/LUPI - TOTI - BRUGNARO - UDC",
+      "coalizione": "cdx",
+      "voti": 10833
+     },
+     {
+      "candidato": "CESARI FRANCESCO",
+      "contrassegno": "VITA",
+      "coalizione": "altro",
+      "voti": 8260
+     },
+     {
+      "candidato": "BARBIERI DAVIDE",
+      "contrassegno": "MOVIMENTO 5 STELLE",
+      "coalizione": "altro",
+      "voti": 2270
+     },
+     {
+      "candidato": "CHIODI ENNIO",
+      "contrassegno": "AZIONE - ITALIA VIVA - CALENDA",
+      "coalizione": "altro",
+      "voti": 1345
+     },
+     {
+      "candidato": "BATTISTETTI ILARIA",
+      "contrassegno": "ITALEXIT PER L'ITALIA",
+      "coalizione": "altro",
+      "voti": 566
+     },
+     {
+      "candidato": "CRISTIANO MARIA",
+      "contrassegno": "ITALIA SOVRANA E POPOLARE",
+      "coalizione": "altro",
+      "voti": 356
+     },
+     {
+      "candidato": "STARITA ELISABETTA",
+      "contrassegno": "UNIONE POPOLARE CON DE MAGISTRIS",
+      "coalizione": "altro",
+      "voti": 286
+     }
+    ]
+   }
+  ],
+  "camera_taa_proporzionale": [
+   {
+    "lista": "FRATELLI D'ITALIA CON GIORGIA MELONI",
+    "seggi": 1
+   },
+   {
+    "lista": "PARTITO DEMOCRATICO - ITALIA DEMOCRATICA E PROGRESSISTA",
+    "seggi": 1
+   },
+   {
+    "lista": "SÜDTIROLER VOLKSPARTEI (SVP) - PATT",
+    "seggi": 1
+   }
+  ],
+  "camera_taa_controllo_seggi_uninominali_per_coalizione": [
+   {
+    "liste_collegate": [
+     "FRATELLI D'ITALIA CON GIORGIA MELONI",
+     "LEGA PER SALVINI PREMIER",
+     "FORZA ITALIA",
+     "NOI MODERATI/LUPI - TOTI - BRUGNARO - UDC"
+    ],
+    "seggi_uninominali": 2,
+    "coalizione": "cdx"
+   },
+   {
+    "liste_collegate": [
+     "SÜDTIROLER VOLKSPARTEI (SVP) - PATT"
+    ],
+    "seggi_uninominali": 2,
+    "coalizione": "svp"
+   }
+  ],
+  "senato": [
+   {
+    "collegio": "Valle d'Aosta - U01 (Aosta)",
+    "vincitore": "SPELGATTI NICOLETTA",
+    "coalizione": "cdx",
+    "contrassegno_vincitore": "LEGA PER SALVINI PREM.-FORZA IT.-NOI MODERATI-FRAT. D'ITALIA",
+    "voti_primo": 18509,
+    "secondo": "VESAN PATRIK",
+    "coalizione_secondo": "altro",
+    "contrassegno_secondo": "VALLÉE D’AOSTE – AUTONOMIE PROGRÈS FÉDÉRALISME",
+    "voti_secondo": 18282,
+    "elettori": 98187,
+    "votanti": 59490,
+    "voti_validi_candidati": 54359,
+    "eletto_segnalato_da_eligendo": true,
+    "tutti_i_candidati": [
+     {
+      "candidato": "SPELGATTI NICOLETTA",
+      "contrassegno": "LEGA PER SALVINI PREM.-FORZA IT.-NOI MODERATI-FRAT. D'ITALIA",
+      "coalizione": "cdx",
+      "voti": 18509
+     },
+     {
+      "candidato": "VESAN PATRIK",
+      "contrassegno": "VALLÉE D’AOSTE – AUTONOMIE PROGRÈS FÉDÉRALISME",
+      "coalizione": "altro",
+      "voti": 18282
+     },
+     {
+      "candidato": "ROLLANDIN AUGUSTO",
+      "contrassegno": "POUR L’AUTONOMIE – PER L’AUTONOMIA",
+      "coalizione": "altro",
+      "voti": 7272
+     },
+     {
+      "candidato": "PULZ DARIA",
+      "contrassegno": "VALLE D'AOSTA APERTA",
+      "coalizione": "altro",
+      "voti": 5448
+     },
+     {
+      "candidato": "BICHINI ALESSANDRO",
+      "contrassegno": "ITALIA SOVRANA E POPOLARE",
+      "coalizione": "altro",
+      "voti": 1569
+     },
+     {
+      "candidato": "LUCAT FRANCESCO, MARIA, GIUSEPPE, CARLO",
+      "contrassegno": "UNIONE POPOLARE CON DE MAGISTRIS",
+      "coalizione": "altro",
+      "voti": 1311
+     },
+     {
+      "candidato": "LERAY GIOVANNI GUGLIELMO",
+      "contrassegno": "PARTITO COMUNISTA ITALIANO",
+      "coalizione": "altro",
+      "voti": 1051
+     },
+     {
+      "candidato": "BARGAN LARISA",
+      "contrassegno": "VITA",
+      "coalizione": "altro",
+      "voti": 917
+     }
+    ]
+   },
+   {
+    "collegio": "Trentino-Alto Adige/Südtirol - U01 (Trento)",
+    "vincitore": "PATTON PIETRO",
+    "coalizione": "csx",
+    "contrassegno_vincitore": "CAMPOBASE +EUROPA-ALL.VERDI E SIN.– PD-AZIONE-ITALIA VIVA",
+    "voti_primo": 48021,
+    "secondo": "LOSS MARTINA",
+    "coalizione_secondo": "cdx",
+    "contrassegno_secondo": "LEGA PER SALVINI PREM.-FORZA IT.-NOI MODERATI-FRAT. D'ITALIA",
+    "voti_secondo": 42512,
+    "elettori": 178714,
+    "votanti": 125101,
+    "voti_validi_candidati": 116545,
+    "eletto_segnalato_da_eligendo": true,
+    "tutti_i_candidati": [
+     {
+      "candidato": "PATTON PIETRO",
+      "contrassegno": "CAMPOBASE +EUROPA-ALL.VERDI E SIN.– PD-AZIONE-ITALIA VIVA",
+      "coalizione": "csx",
+      "voti": 48021
+     },
+     {
+      "candidato": "LOSS MARTINA",
+      "contrassegno": "LEGA PER SALVINI PREM.-FORZA IT.-NOI MODERATI-FRAT. D'ITALIA",
+      "coalizione": "cdx",
+      "voti": 42512
+     },
+     {
+      "candidato": "PACE PATRIZIA",
+      "contrassegno": "SÜDTIROLER VOLKSPARTEI (SVP) - PATT",
+      "coalizione": "svp",
+      "voti": 9830
+     },
+     {
+      "candidato": "MINOTTO PAOLO",
+      "contrassegno": "MOVIMENTO 5 STELLE",
+      "coalizione": "altro",
+      "voti": 8034
+     },
+     {
+      "candidato": "MAISTRI MATTIA",
+      "contrassegno": "ITALIA SOVRANA E POPOLARE",
+      "coalizione": "altro",
+      "voti": 5817
+     },
+     {
+      "candidato": "ALLOCATI VALERIA",
+      "contrassegno": "UNIONE POPOLARE CON DE MAGISTRIS",
+      "coalizione": "altro",
+      "voti": 2331
+     }
+    ]
+   },
+   {
+    "collegio": "Trentino-Alto Adige/Südtirol - U02 (Rovereto)",
+    "vincitore": "BIANCOFIORE MICHAELA",
+    "coalizione": "cdx",
+    "contrassegno_vincitore": "LEGA PER SALVINI PREM.-FORZA IT.-NOI MODERATI-FRAT. D'ITALIA",
+    "voti_primo": 33601,
+    "secondo": "CONZATTI DONATELLA",
+    "coalizione_secondo": "csx",
+    "contrassegno_secondo": "CAMPOBASE +EUROPA-ALL.VERDI E SIN.– PD-AZIONE-ITALIA VIVA",
+    "voti_secondo": 33385,
+    "elettori": 140721,
+    "votanti": 98310,
+    "voti_validi_candidati": 91326,
+    "eletto_segnalato_da_eligendo": true,
+    "tutti_i_candidati": [
+     {
+      "candidato": "BIANCOFIORE MICHAELA",
+      "contrassegno": "LEGA PER SALVINI PREM.-FORZA IT.-NOI MODERATI-FRAT. D'ITALIA",
+      "coalizione": "cdx",
+      "voti": 33601
+     },
+     {
+      "candidato": "CONZATTI DONATELLA",
+      "contrassegno": "CAMPOBASE +EUROPA-ALL.VERDI E SIN.– PD-AZIONE-ITALIA VIVA",
+      "coalizione": "csx",
+      "voti": 33385
+     },
+     {
+      "candidato": "BRESCIANI STEFANO",
+      "contrassegno": "SÜDTIROLER VOLKSPARTEI (SVP) - PATT",
+      "coalizione": "svp",
+      "voti": 8615
+     },
+     {
+      "candidato": "ANGELINI GIULIO",
+      "contrassegno": "MOVIMENTO 5 STELLE",
+      "coalizione": "altro",
+      "voti": 7294
+     },
+     {
+      "candidato": "GIUGNI GIOVANNA",
+      "contrassegno": "ITALIA SOVRANA E POPOLARE",
+      "coalizione": "altro",
+      "voti": 3687
+     },
+     {
+      "candidato": "FANTINI SUSANNA",
+      "contrassegno": "VITA",
+      "coalizione": "altro",
+      "voti": 3092
+     },
+     {
+      "candidato": "DELLA VOLPE CLAUDIO",
+      "contrassegno": "UNIONE POPOLARE CON DE MAGISTRIS",
+      "coalizione": "altro",
+      "voti": 1652
+     }
+    ]
+   },
+   {
+    "collegio": "Trentino-Alto Adige/Südtirol - U03 (Pergine Valsugana)",
+    "vincitore": "TESTOR ELENA",
+    "coalizione": "cdx",
+    "contrassegno_vincitore": "LEGA PER SALVINI PREM.-FORZA IT.-NOI MODERATI-FRAT. D'ITALIA",
+    "voti_primo": 27364,
+    "secondo": "SARTORI MICHELE",
+    "coalizione_secondo": "csx",
+    "contrassegno_secondo": "CAMPOBASE +EUROPA-ALL.VERDI E SIN.– PD-AZIONE-ITALIA VIVA",
+    "voti_secondo": 19315,
+    "elettori": 97719,
+    "votanti": 67036,
+    "voti_validi_candidati": 62143,
+    "eletto_segnalato_da_eligendo": true,
+    "tutti_i_candidati": [
+     {
+      "candidato": "TESTOR ELENA",
+      "contrassegno": "LEGA PER SALVINI PREM.-FORZA IT.-NOI MODERATI-FRAT. D'ITALIA",
+      "coalizione": "cdx",
+      "voti": 27364
+     },
+     {
+      "candidato": "SARTORI MICHELE",
+      "contrassegno": "CAMPOBASE +EUROPA-ALL.VERDI E SIN.– PD-AZIONE-ITALIA VIVA",
+      "coalizione": "csx",
+      "voti": 19315
+     },
+     {
+      "candidato": "BERGAMO ROBERTA",
+      "contrassegno": "SÜDTIROLER VOLKSPARTEI (SVP) - PATT",
+      "coalizione": "svp",
+      "voti": 6264
+     },
+     {
+      "candidato": "CAPPELLETTI ROBERTO",
+      "contrassegno": "ITALIA SOVRANA E POPOLARE",
+      "coalizione": "altro",
+      "voti": 4091
+     },
+     {
+      "candidato": "RIZZI ROSA MICHELA",
+      "contrassegno": "MOVIMENTO 5 STELLE",
+      "coalizione": "altro",
+      "voti": 3878
+     },
+     {
+      "candidato": "PANTANO GIULIANO",
+      "contrassegno": "UNIONE POPOLARE CON DE MAGISTRIS",
+      "coalizione": "altro",
+      "voti": 1231
+     }
+    ]
+   },
+   {
+    "collegio": "Trentino-Alto Adige/Südtirol - U04 (Bolzano/Bozen)",
+    "vincitore": "SPAGNOLLI LUIGI",
+    "coalizione": "csx",
+    "contrassegno_vincitore": "PARTITO DEMOCRATICO - +EUROPA - ALLEANZA VERDI E SINISTRA",
+    "voti_primo": 21894,
+    "secondo": "MAYR MANFRED",
+    "coalizione_secondo": "svp",
+    "contrassegno_secondo": "SÜDTIROLER VOLKSPARTEI (SVP) - PATT",
+    "voti_secondo": 21401,
+    "elettori": 131556,
+    "votanti": 87873,
+    "voti_validi_candidati": 83784,
+    "eletto_segnalato_da_eligendo": true,
+    "tutti_i_candidati": [
+     {
+      "candidato": "SPAGNOLLI LUIGI",
+      "contrassegno": "PARTITO DEMOCRATICO - +EUROPA - ALLEANZA VERDI E SINISTRA",
+      "coalizione": "csx",
+      "voti": 21894
+     },
+     {
+      "candidato": "MAYR MANFRED",
+      "contrassegno": "SÜDTIROLER VOLKSPARTEI (SVP) - PATT",
+      "coalizione": "svp",
+      "voti": 21401
+     },
+     {
+      "candidato": "BOSATRA MAURIZIO",
+      "contrassegno": "LEGA PER SALVINI PREM.-FORZA IT.-NOI MODERATI-FRAT. D'ITALIA",
+      "coalizione": "cdx",
+      "voti": 20785
+     },
+     {
+      "candidato": "RONCAT RENZO",
+      "contrassegno": "MOVIMENTO 5 STELLE",
+      "coalizione": "altro",
+      "voti": 5318
+     },
+     {
+      "candidato": "LOACKER HANNES",
+      "contrassegno": "VITA",
+      "coalizione": "altro",
+      "voti": 5200
+     },
+     {
+      "candidato": "GANDER STEFANIA",
+      "contrassegno": "AZIONE - ITALIA VIVA - CALENDA",
+      "coalizione": "altro",
+      "voti": 4393
+     },
+     {
+      "candidato": "MAHLKNECHT OTTO",
+      "contrassegno": "DIE FREIHEITLICHEN",
+      "coalizione": "altro",
+      "voti": 1997
+     },
+     {
+      "candidato": "FIORENZA IVO",
+      "contrassegno": "ITALIA SOVRANA E POPOLARE",
+      "coalizione": "altro",
+      "voti": 1657
+     },
+     {
+      "candidato": "ZANGHI MICHELANGELO",
+      "contrassegno": "UNIONE POPOLARE CON DE MAGISTRIS",
+      "coalizione": "altro",
+      "voti": 1139
+     }
+    ]
+   },
+   {
+    "collegio": "Trentino-Alto Adige/Südtirol - U05 (Merano/Meran)",
+    "vincitore": "UNTERBERGER JULIANE",
+    "coalizione": "svp",
+    "contrassegno_vincitore": "SÜDTIROLER VOLKSPARTEI (SVP) - PATT",
+    "voti_primo": 30869,
+    "secondo": "MATTEI RITA",
+    "coalizione_secondo": "cdx",
+    "contrassegno_secondo": "LEGA PER SALVINI PREM.-FORZA IT.-NOI MODERATI-FRAT. D'ITALIA",
+    "voti_secondo": 6737,
+    "elettori": 117567,
+    "votanti": 68189,
+    "voti_validi_candidati": 64526,
+    "eletto_segnalato_da_eligendo": true,
+    "tutti_i_candidati": [
+     {
+      "candidato": "UNTERBERGER JULIANE",
+      "contrassegno": "SÜDTIROLER VOLKSPARTEI (SVP) - PATT",
+      "coalizione": "svp",
+      "voti": 30869
+     },
+     {
+      "candidato": "MATTEI RITA",
+      "contrassegno": "LEGA PER SALVINI PREM.-FORZA IT.-NOI MODERATI-FRAT. D'ITALIA",
+      "coalizione": "cdx",
+      "voti": 6737
+     },
+     {
+      "candidato": "HAFNER MARKUS",
+      "contrassegno": "TEAM K",
+      "coalizione": "altro",
+      "voti": 5506
+     },
+     {
+      "candidato": "ZODERER SABINE",
+      "contrassegno": "DIE FREIHEITLICHEN",
+      "coalizione": "altro",
+      "voti": 4955
+     },
+     {
+      "candidato": "SINGER SUSANNA",
+      "contrassegno": "VITA",
+      "coalizione": "altro",
+      "voti": 4512
+     },
+     {
+      "candidato": "ROSSI DANIELA",
+      "contrassegno": "PARTITO DEMOCRATICO - ITALIA DEMOCRATICA E PROGRESSISTA",
+      "coalizione": "csx",
+      "voti": 4421
+     },
+     {
+      "candidato": "MESSNER MARLENE",
+      "contrassegno": "ALLEANZA VERDI E SINISTRA",
+      "coalizione": "csx",
+      "voti": 4387
+     },
+     {
+      "candidato": "MORRONE FRANCESCA",
+      "contrassegno": "MOVIMENTO 5 STELLE",
+      "coalizione": "altro",
+      "voti": 1885
+     },
+     {
+      "candidato": "VALENTINI GIOVANNA",
+      "contrassegno": "AZIONE - ITALIA VIVA - CALENDA",
+      "coalizione": "altro",
+      "voti": 1254
+     }
+    ]
+   },
+   {
+    "collegio": "Trentino-Alto Adige/Südtirol - U06 (Bressanone/Brixen)",
+    "vincitore": "DURNWALDER MEINHARD",
+    "coalizione": "svp",
+    "contrassegno_vincitore": "SÜDTIROLER VOLKSPARTEI (SVP) - PATT",
+    "voti_primo": 39024,
+    "secondo": "HEISS HANS",
+    "coalizione_secondo": "csx",
+    "contrassegno_secondo": "ALLEANZA VERDI E SINISTRA",
+    "voti_secondo": 13187,
+    "elettori": 144729,
+    "votanti": 89070,
+    "voti_validi_candidati": 84632,
+    "eletto_segnalato_da_eligendo": true,
+    "tutti_i_candidati": [
+     {
+      "candidato": "DURNWALDER MEINHARD",
+      "contrassegno": "SÜDTIROLER VOLKSPARTEI (SVP) - PATT",
+      "coalizione": "svp",
+      "voti": 39024
+     },
+     {
+      "candidato": "HEISS HANS",
+      "contrassegno": "ALLEANZA VERDI E SINISTRA",
+      "coalizione": "csx",
+      "voti": 13187
+     },
+     {
+      "candidato": "MAIR ULLI",
+      "contrassegno": "DIE FREIHEITLICHEN",
+      "coalizione": "altro",
+      "voti": 7527
+     },
+     {
+      "candidato": "CAUSIN ANDREA",
+      "contrassegno": "LEGA PER SALVINI PREM.-FORZA IT.-NOI MODERATI-FRAT. D'ITALIA",
+      "coalizione": "cdx",
+      "voti": 5915
+     },
+     {
+      "candidato": "SENFTER MONIKA",
+      "contrassegno": "TEAM K",
+      "coalizione": "altro",
+      "voti": 5635
+     },
+     {
+      "candidato": "PRADER RENATE",
+      "contrassegno": "PARTITO DEMOCRATICO - ITALIA DEMOCRATICA E PROGRESSISTA",
+      "coalizione": "csx",
+      "voti": 5190
+     },
+     {
+      "candidato": "SCHOPF RUDOLF",
+      "contrassegno": "VITA",
+      "coalizione": "altro",
+      "voti": 5072
+     },
+     {
+      "candidato": "FALK MARKUS",
+      "contrassegno": "MOVIMENTO 5 STELLE",
+      "coalizione": "altro",
+      "voti": 1946
+     },
+     {
+      "candidato": "RAPI MASSIMO",
+      "contrassegno": "AZIONE - ITALIA VIVA - CALENDA",
+      "coalizione": "altro",
+      "voti": 1136
+     }
+    ]
+   }
+  ],
+  "voti_regionali_per_coalizione": {
+   "camera_valle_daosta": {
+    "validi": 53746,
+    "per_coalizione": {
+     "altro": 37730,
+     "cdx": 16016
+    },
+    "per_contrassegno": {
+     "VALLÉE D’AOSTE – AUTONOMIE PROGRÈS FÉDÉRALISME": 20763,
+     "LEGA PER SALVINI PREM.-FORZA IT.-NOI MODERATI-FRAT. D'ITALIA": 16016,
+     "LA RENAISSANCE VALDÔTAINE": 6398,
+     "VALLE D'AOSTA APERTA": 5841,
+     "ITALIA SOVRANA E POPOLARE": 2302,
+     "UNIONE POPOLARE CON DE MAGISTRIS": 1375,
+     "PARTITO COMUNISTA ITALIANO": 1051
+    },
+    "nota": "Collegio unico con scheda unica: non esistono voti di lista separati; i voti sono quelli dei candidati per contrassegno."
+   },
+   "camera_trentino_alto_adige": {
+    "validi": 505845,
+    "per_coalizione": {
+     "cdx": 157788,
+     "csx": 133046,
+     "svp": 117032,
+     "azione-iv": 30685,
+     "altre": 28787,
+     "m5s": 25407,
+     "italexit": 8762,
+     "up": 4338
+    },
+    "per_lista": {
+     "fdi": 95208,
+     "lega": 43230,
+     "fi": 16947,
+     "noimoderati": 2403,
+     "pd": 86525,
+     "avs": 29462,
+     "piueuropa": 14781,
+     "impegnocivico": 2278,
+     "m5s": 25407,
+     "azione-iv": 30685,
+     "italexit": 8762,
+     "up": 4338,
+     "SÜDTIROLER VOLKSPARTEI (SVP) - PATT": 117032,
+     "VITA": 22340,
+     "ITALIA SOVRANA E POPOLARE": 6447
+    },
+    "nota": "Voti di lista (parte proporzionale) della circoscrizione Trentino-Alto Adige/Südtirol. cdx = FdI+Lega+FI+Noi Moderati; csx = PD+AVS+Più Europa+Impegno Civico; svp = SVP-PATT."
+   },
+   "senato_valle_daosta": {
+    "validi": 54359,
+    "per_coalizione": {
+     "altro": 35850,
+     "cdx": 18509
+    },
+    "per_contrassegno": {
+     "LEGA PER SALVINI PREM.-FORZA IT.-NOI MODERATI-FRAT. D'ITALIA": 18509,
+     "VALLÉE D’AOSTE – AUTONOMIE PROGRÈS FÉDÉRALISME": 18282,
+     "POUR L’AUTONOMIE – PER L’AUTONOMIA": 7272,
+     "VALLE D'AOSTA APERTA": 5448,
+     "ITALIA SOVRANA E POPOLARE": 1569,
+     "UNIONE POPOLARE CON DE MAGISTRIS": 1311,
+     "PARTITO COMUNISTA ITALIANO": 1051,
+     "VITA": 917
+    },
+    "nota": "Collegio unico, scheda unica: solo voti ai candidati per contrassegno."
+   },
+   "senato_trentino_alto_adige": {
+    "validi": 502956,
+    "per_coalizione": {
+     "csx": 149800,
+     "cdx": 136914,
+     "svp": 116003,
+     "altro": 100239
+    },
+    "per_contrassegno": {
+     "LEGA PER SALVINI PREM.-FORZA IT.-NOI MODERATI-FRAT. D'ITALIA": 136914,
+     "SÜDTIROLER VOLKSPARTEI (SVP) - PATT": 116003,
+     "CAMPOBASE +EUROPA-ALL.VERDI E SIN.– PD-AZIONE-ITALIA VIVA": 100721,
+     "MOVIMENTO 5 STELLE": 28355,
+     "PARTITO DEMOCRATICO - +EUROPA - ALLEANZA VERDI E SINISTRA": 21894,
+     "VITA": 17876,
+     "ALLEANZA VERDI E SINISTRA": 17574,
+     "ITALIA SOVRANA E POPOLARE": 15252,
+     "DIE FREIHEITLICHEN": 14479,
+     "TEAM K": 11141,
+     "PARTITO DEMOCRATICO - ITALIA DEMOCRATICA E PROGRESSISTA": 9611,
+     "AZIONE - ITALIA VIVA - CALENDA": 6783,
+     "UNIONE POPOLARE CON DE MAGISTRIS": 6353
+    },
+    "nota": "Somma dei voti ai candidati nei 6 collegi uninominali (al Senato in TAA non c'è voto di lista proporzionale nel 2022). Attenzione: nei 3 collegi trentini il contrassegno di centrosinistra 'CAMPOBASE +EUROPA-ALL.VERDI E SIN.– PD-AZIONE-ITALIA VIVA' comprende anche Azione-Italia Viva ed è contato come csx; a Bolzano il csx è 'PD - +EUROPA - AVS'; a Merano e Bressanone PD e AVS corrono separati e sono contati come csx."
+   }
+  }
+ },
+ "controlli": [
+  {
+   "ambito": "senato_regioni/Piemonte",
+   "somma_liste": 2100390,
+   "validi": 2100390,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 2100390
+  },
+  {
+   "ambito": "senato_regioni/Lombardia",
+   "somma_liste": 5059716,
+   "validi": 5059716,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 5059716
+  },
+  {
+   "ambito": "senato_regioni/Veneto",
+   "somma_liste": 2511026,
+   "validi": 2511026,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 2511026
+  },
+  {
+   "ambito": "senato_regioni/Friuli-Venezia Giulia",
+   "somma_liste": 592506,
+   "validi": 592506,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 592506
+  },
+  {
+   "ambito": "senato_regioni/Liguria",
+   "somma_liste": 735081,
+   "validi": 735081,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 735081
+  },
+  {
+   "ambito": "senato_regioni/Emilia-Romagna",
+   "somma_liste": 2304908,
+   "validi": 2304908,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 2304908
+  },
+  {
+   "ambito": "senato_regioni/Toscana",
+   "somma_liste": 1877492,
+   "validi": 1877492,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 1877492
+  },
+  {
+   "ambito": "senato_regioni/Umbria",
+   "somma_liste": 436170,
+   "validi": 436170,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 436170
+  },
+  {
+   "ambito": "senato_regioni/Marche",
+   "somma_liste": 761144,
+   "validi": 761144,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 761144
+  },
+  {
+   "ambito": "senato_regioni/Lazio",
+   "somma_liste": 2710989,
+   "validi": 2710989,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 2710989
+  },
+  {
+   "ambito": "senato_regioni/Abruzzo",
+   "somma_liste": 624700,
+   "validi": 624700,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 624700
+  },
+  {
+   "ambito": "senato_regioni/Molise",
+   "somma_liste": 129693,
+   "validi": 129693,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 129693
+  },
+  {
+   "ambito": "senato_regioni/Campania",
+   "somma_liste": 2301027,
+   "validi": 2301027,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 2301027
+  },
+  {
+   "ambito": "senato_regioni/Puglia",
+   "somma_liste": 1737554,
+   "validi": 1737554,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 1737554
+  },
+  {
+   "ambito": "senato_regioni/Basilicata",
+   "somma_liste": 244555,
+   "validi": 244555,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 244555
+  },
+  {
+   "ambito": "senato_regioni/Calabria",
+   "somma_liste": 718274,
+   "validi": 718274,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 718274
+  },
+  {
+   "ambito": "senato_regioni/Sicilia",
+   "somma_liste": 2040084,
+   "validi": 2040084,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 2040084
+  },
+  {
+   "ambito": "senato_regioni/Sardegna",
+   "somma_liste": 684366,
+   "validi": 684366,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 684366
+  },
+  {
+   "ambito": "senato_italia",
+   "somma_liste": 27569675,
+   "validi": 27569675,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 27569675
+  },
+  {
+   "ambito": "camera_circoscrizioni/Piemonte 1",
+   "somma_liste": 1092058,
+   "validi": 1092058,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 1092058
+  },
+  {
+   "ambito": "camera_circoscrizioni/Piemonte 2",
+   "somma_liste": 1009828,
+   "validi": 1009828,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 1009828
+  },
+  {
+   "ambito": "camera_circoscrizioni/Lombardia 1",
+   "somma_liste": 2003539,
+   "validi": 2003539,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 2003539
+  },
+  {
+   "ambito": "camera_circoscrizioni/Lombardia 2",
+   "somma_liste": 1078979,
+   "validi": 1078979,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 1078979
+  },
+  {
+   "ambito": "camera_circoscrizioni/Lombardia 3",
+   "somma_liste": 1166248,
+   "validi": 1166248,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 1166248
+  },
+  {
+   "ambito": "camera_circoscrizioni/Lombardia 4",
+   "somma_liste": 817349,
+   "validi": 817349,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 817349
+  },
+  {
+   "ambito": "camera_circoscrizioni/Veneto 1",
+   "somma_liste": 972048,
+   "validi": 972048,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 972048
+  },
+  {
+   "ambito": "camera_circoscrizioni/Veneto 2",
+   "somma_liste": 1539847,
+   "validi": 1539847,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 1539847
+  },
+  {
+   "ambito": "camera_circoscrizioni/Friuli-Venezia Giulia",
+   "somma_liste": 591649,
+   "validi": 591649,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 591649
+  },
+  {
+   "ambito": "camera_circoscrizioni/Liguria",
+   "somma_liste": 733781,
+   "validi": 733781,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 733781
+  },
+  {
+   "ambito": "camera_circoscrizioni/Emilia-Romagna",
+   "somma_liste": 2306552,
+   "validi": 2306552,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 2306552
+  },
+  {
+   "ambito": "camera_circoscrizioni/Toscana",
+   "somma_liste": 1877990,
+   "validi": 1877990,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 1877990
+  },
+  {
+   "ambito": "camera_circoscrizioni/Umbria",
+   "somma_liste": 435948,
+   "validi": 435948,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 435948
+  },
+  {
+   "ambito": "camera_circoscrizioni/Marche",
+   "somma_liste": 762134,
+   "validi": 762134,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 762134
+  },
+  {
+   "ambito": "camera_circoscrizioni/Lazio 1",
+   "somma_liste": 1804012,
+   "validi": 1804012,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 1804012
+  },
+  {
+   "ambito": "camera_circoscrizioni/Lazio 2",
+   "somma_liste": 905944,
+   "validi": 905944,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 905944
+  },
+  {
+   "ambito": "camera_circoscrizioni/Abruzzo",
+   "somma_liste": 625731,
+   "validi": 625731,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 625731
+  },
+  {
+   "ambito": "camera_circoscrizioni/Molise",
+   "somma_liste": 129295,
+   "validi": 129295,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 129295
+  },
+  {
+   "ambito": "camera_circoscrizioni/Campania 1",
+   "somma_liste": 1169256,
+   "validi": 1169256,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 1169256
+  },
+  {
+   "ambito": "camera_circoscrizioni/Campania 2",
+   "somma_liste": 1134417,
+   "validi": 1134417,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 1134417
+  },
+  {
+   "ambito": "camera_circoscrizioni/Puglia",
+   "somma_liste": 1742661,
+   "validi": 1742661,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 1742661
+  },
+  {
+   "ambito": "camera_circoscrizioni/Basilicata",
+   "somma_liste": 244425,
+   "validi": 244425,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 244425
+  },
+  {
+   "ambito": "camera_circoscrizioni/Calabria",
+   "somma_liste": 720332,
+   "validi": 720332,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 720332
+  },
+  {
+   "ambito": "camera_circoscrizioni/Sicilia 1",
+   "somma_liste": 938084,
+   "validi": 938084,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 938084
+  },
+  {
+   "ambito": "camera_circoscrizioni/Sicilia 2",
+   "somma_liste": 1104711,
+   "validi": 1104711,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 1104711
+  },
+  {
+   "ambito": "camera_circoscrizioni/Sardegna",
+   "somma_liste": 685533,
+   "validi": 685533,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 685533
+  },
+  {
+   "ambito": "camera_circoscrizioni/Trentino-Alto Adige/Südtirol",
+   "somma_liste": 505845,
+   "validi": 505845,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 505845
+  },
+  {
+   "ambito": "camera_regioni/Piemonte",
+   "somma_liste": 2101886,
+   "validi": 2101886,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 2101886
+  },
+  {
+   "ambito": "camera_regioni/Lombardia",
+   "somma_liste": 5066115,
+   "validi": 5066115,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 5066115
+  },
+  {
+   "ambito": "camera_regioni/Veneto",
+   "somma_liste": 2511895,
+   "validi": 2511895,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 2511895
+  },
+  {
+   "ambito": "camera_regioni/Friuli-Venezia Giulia",
+   "somma_liste": 591649,
+   "validi": 591649,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 591649
+  },
+  {
+   "ambito": "camera_regioni/Liguria",
+   "somma_liste": 733781,
+   "validi": 733781,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 733781
+  },
+  {
+   "ambito": "camera_regioni/Emilia-Romagna",
+   "somma_liste": 2306552,
+   "validi": 2306552,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 2306552
+  },
+  {
+   "ambito": "camera_regioni/Toscana",
+   "somma_liste": 1877990,
+   "validi": 1877990,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 1877990
+  },
+  {
+   "ambito": "camera_regioni/Umbria",
+   "somma_liste": 435948,
+   "validi": 435948,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 435948
+  },
+  {
+   "ambito": "camera_regioni/Marche",
+   "somma_liste": 762134,
+   "validi": 762134,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 762134
+  },
+  {
+   "ambito": "camera_regioni/Lazio",
+   "somma_liste": 2709956,
+   "validi": 2709956,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 2709956
+  },
+  {
+   "ambito": "camera_regioni/Abruzzo",
+   "somma_liste": 625731,
+   "validi": 625731,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 625731
+  },
+  {
+   "ambito": "camera_regioni/Molise",
+   "somma_liste": 129295,
+   "validi": 129295,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 129295
+  },
+  {
+   "ambito": "camera_regioni/Campania",
+   "somma_liste": 2303673,
+   "validi": 2303673,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 2303673
+  },
+  {
+   "ambito": "camera_regioni/Puglia",
+   "somma_liste": 1742661,
+   "validi": 1742661,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 1742661
+  },
+  {
+   "ambito": "camera_regioni/Basilicata",
+   "somma_liste": 244425,
+   "validi": 244425,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 244425
+  },
+  {
+   "ambito": "camera_regioni/Calabria",
+   "somma_liste": 720332,
+   "validi": 720332,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 720332
+  },
+  {
+   "ambito": "camera_regioni/Sicilia",
+   "somma_liste": 2042795,
+   "validi": 2042795,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 2042795
+  },
+  {
+   "ambito": "camera_regioni/Sardegna",
+   "somma_liste": 685533,
+   "validi": 685533,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 685533
+  },
+  {
+   "ambito": "camera_regioni/Trentino-Alto Adige",
+   "somma_liste": 505845,
+   "validi": 505845,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 505845
+  },
+  {
+   "ambito": "camera_italia",
+   "somma_liste": 28098196,
+   "validi": 28098196,
+   "differenza": 0,
+   "esito": "OK",
+   "totale_liste_riportato_da_eligendo": 28098196
+  },
+  {
+   "ambito": "senato: somma 18 regioni vs senato_italia",
+   "differenze_per_lista": {
+    "fdi": 0,
+    "lega": 0,
+    "fi": 0,
+    "noimoderati": 0,
+    "pd": 0,
+    "avs": 0,
+    "piueuropa": 0,
+    "impegnocivico": 0,
+    "m5s": 0,
+    "azione-iv": 0,
+    "italexit": 0,
+    "up": 0,
+    "altre": 0,
+    "validi": 0
+   },
+   "esito": "OK"
+  },
+  {
+   "ambito": "camera: somma 27 circoscrizioni vs camera_italia",
+   "differenze_per_lista": {
+    "fdi": 0,
+    "lega": 0,
+    "fi": 0,
+    "noimoderati": 0,
+    "pd": 0,
+    "avs": 0,
+    "piueuropa": 0,
+    "impegnocivico": 0,
+    "m5s": 0,
+    "azione-iv": 0,
+    "italexit": 0,
+    "up": 0,
+    "altre": 0,
+    "validi": 0
+   },
+   "esito": "OK"
+  },
+  {
+   "ambito": "collegi speciali: somma voti candidati = votanti - non valide in ogni collegio",
+   "esito": "OK"
+  },
+  {
+   "ambito": "camera TAA: voti di lista per coalizione nei 4 collegi = voti del candidato",
+   "esito": "OK"
+  },
+  {
+   "ambito": "confronto esterno a campione con Wikipedia (pagina Elezioni politiche in Italia del 2022)",
+   "esito": "OK: FdI Camera 7301303 e FdI Senato 7168875 compaiono identici"
+  }
+ ],
+ "note": [
+  "Tutti i numeri vengono dalle pagine di risultato di Eligendo Archivio (Ministero dell'Interno). Nessun dato è mancante, quindi non ci sono campi null.",
+  "validi = votanti - schede non valide (bianche incluse), come fa Eligendo; coincide sempre con il totale 'LISTE' riportato in pagina e con la somma delle liste (differenza 0 in tutti i controlli).",
+  "I voti di lista di Eligendo includono i voti dati al solo candidato uninominale, ripartiti tra le liste della coalizione (art. 77 DPR 361/1957). Per questo i file open data a livello comune (LivComune.csv) danno totali più bassi (es. FdI Senato 6.975.727 contro 7.168.875 ufficiali): non vanno usati per il riparto e non sono stati usati.",
+  "senato_italia esclude Valle d'Aosta e Trentino-Alto Adige perché lì il Senato ha solo collegi uninominali senza voto di lista; camera_italia esclude solo la Valle d'Aosta.",
+  "Senato Trentino-Alto Adige: dal 2022 (riduzione dei parlamentari) i seggi sono 6, tutti uninominali; non c'è un settimo seggio proporzionale.",
+  "Camera Trentino-Alto Adige: 4 collegi uninominali (2 cdx: Trento, Rovereto; 2 SVP-PATT: Bolzano, Bressanone) e 3 seggi proporzionali (FdI 1, PD 1, SVP-PATT 1). Le pagine dei collegi camera TAA non portano l'etichetta 'Eletto': il vincitore è il candidato più votato ed è coerente con i seggi uninominali per coalizione della pagina circoscrizionale (cdx 2, SVP 2).",
+  "Coalizione 'altro' per la Valle d'Aosta: il contrassegno 'VALLÉE D’AOSTE – AUTONOMIE PROGRÈS FÉDÉRALISME' (Manes, vincitore alla Camera; Vesan, secondo al Senato) è un raggruppamento autonomista; Eligendo non ne riporta la composizione partitica.",
+  "SVP-PATT alla Camera TAA (117.032 voti di lista) è conteggiato in 'altre' nelle tabelle a 13 chiavi; il valore separato è in altre_dettaglio.",
+  "Il campo camera_circoscrizioni è un'aggiunta: dà i dati delle 27 circoscrizioni prima della somma per regione."
+ ]
+}

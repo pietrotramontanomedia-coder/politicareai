@@ -1,219 +1,13 @@
 /**
- * Simulatore della legge elettorale approvata alla Camera il 16 luglio 2026.
- * Logica pura e deterministica: dalle percentuali di liste e coalizioni ai seggi.
+ * Simulatore della legge elettorale approvata in via definitiva l'8 ottobre 2026 (A.C. 2822-B).
+ * Il calcolo sta in simulatore-motore.ts; qui ci sono preset, emiciclo e testi di interfaccia.
  * Regole e semplificazioni sono dichiarate in TESTI_SIMULATORE e nella pagina.
  */
 
-export interface ListaInput {
-  id: string;
-  nome: string;
-  percentuale: number;
-  /** Id della coalizione, o null se la lista corre da sola. */
-  coalizione: string | null;
-  colore: string;
-  /** Somma di liste minori: non supera mai le soglie. */
-  aggregato?: boolean;
-}
+import { LOCALI as LOCALI_ID, type ListaInput, type SeggiSpeciali, type StatoLista } from './simulatore-motore';
 
-export interface Ramo {
-  /** Seggi assegnati in Italia, esclusa la circoscrizione Estero. */
-  seggiItalia: number;
-  premio: number;
-  tetto: number;
-  estero: number;
-  totale: number;
-  maggioranza: number;
-}
-
-export const REGOLE = {
-  camera: { seggiItalia: 392, premio: 70, tetto: 220, estero: 8, totale: 400, maggioranza: 201 },
-  senato: { seggiItalia: 196, premio: 35, tetto: 113, estero: 4, totale: 200, maggioranza: 101 },
-  sogliaPremio: 42,
-  sogliaLista: 3,
-  sogliaCoalizione: 10,
-} as const satisfies { camera: Ramo; senato: Ramo; sogliaPremio: number; sogliaLista: number; sogliaCoalizione: number };
-
-export type StatoLista = 'in-parlamento' | 'miglior-perdente' | 'sotto-soglia' | 'altre-liste';
-
-export type MotivoPremio = 'assegnato' | 'nessuno-al-42' | 'pareggio' | 'maggioranze-diverse' | 'nessun-voto';
-
-export interface Competitore {
-  id: string;
-  nome: string;
-  tipo: 'coalizione' | 'lista';
-  colore: string;
-  /** Voti utili: liste sopra soglia più, per le coalizioni, il miglior perdente. */
-  voti: number;
-  /** Quota sui voti validi, in percentuale. */
-  quota: number;
-  listeConSeggi: ListaInput[];
-  seggiCamera: number;
-  seggiSenato: number;
-}
-
-export interface EsitoLista {
-  lista: ListaInput;
-  stato: StatoLista;
-  competitore: string | null;
-  seggiCamera: number;
-  seggiSenato: number;
-}
-
-export interface Esito {
-  totaleVoti: number;
-  competitori: Competitore[];
-  liste: EsitoLista[];
-  premio: { motivo: MotivoPremio; vincitore: string | null };
-  tettoCamera: boolean;
-  tettoSenato: boolean;
-  /** Percentuale dei voti validi andata a liste senza seggi. */
-  votiDispersi: number;
-  coalizioniSottoSoglia: string[];
-}
-
-/** Quozienti interi e resti più alti. A parità di resto vince chi ha più voti. */
-export function ripartoResti(pesi: readonly number[], seggi: number): number[] {
-  const totale = pesi.reduce((a, b) => a + Math.max(0, b), 0);
-  if (seggi <= 0 || totale <= 0) return pesi.map(() => 0);
-
-  const quozienti = pesi.map((p) => (Math.max(0, p) * seggi) / totale);
-  const assegnati = quozienti.map((q) => Math.floor(q + 1e-9));
-  let restanti = seggi - assegnati.reduce((a, b) => a + b, 0);
-
-  const ordine = quozienti
-    .map((q, i) => ({ i, resto: q - assegnati[i], peso: pesi[i] }))
-    .sort((a, b) => b.resto - a.resto || b.peso - a.peso || a.i - b.i);
-
-  for (let k = 0; restanti > 0; k = (k + 1) % ordine.length, restanti--) {
-    assegnati[ordine[k].i]++;
-  }
-  return assegnati;
-}
-
-function assegnaRamo(voti: number[], ramo: Ramo, vincitore: number): { seggi: number[]; tetto: boolean } {
-  if (vincitore < 0) return { seggi: ripartoResti(voti, ramo.seggiItalia), tetto: false };
-
-  const seggi = ripartoResti(voti, ramo.seggiItalia - ramo.premio);
-  seggi[vincitore] += ramo.premio;
-
-  const altri = voti.map((v, i) => (i === vincitore ? 0 : v));
-  const eccedenza = seggi[vincitore] - ramo.tetto;
-  if (eccedenza <= 0 || altri.every((v) => v <= 0)) return { seggi, tetto: false };
-
-  seggi[vincitore] = ramo.tetto;
-  const extra = ripartoResti(altri, eccedenza);
-  return { seggi: seggi.map((s, i) => s + extra[i]), tetto: true };
-}
-
-export function simula(
-  liste: readonly ListaInput[],
-  opzioni: { coalizioni: Record<string, string>; maggioranzeDiverse?: boolean },
-): Esito {
-  const { sogliaLista, sogliaCoalizione, sogliaPremio } = REGOLE;
-  const totaleVoti = liste.reduce((a, l) => a + Math.max(0, l.percentuale), 0);
-  const stati = new Map<string, { stato: StatoLista; competitore: string | null }>();
-  const competitori: Competitore[] = [];
-  const coalizioniSottoSoglia: string[] = [];
-  const singole: ListaInput[] = [];
-
-  const perCoalizione = new Map<string, ListaInput[]>();
-  for (const l of liste) {
-    if (l.coalizione) perCoalizione.set(l.coalizione, [...(perCoalizione.get(l.coalizione) ?? []), l]);
-    else singole.push(l);
-  }
-
-  for (const [id, membri] of perCoalizione) {
-    const reali = membri.filter((l) => !l.aggregato);
-    membri.filter((l) => l.aggregato).forEach((l) => stati.set(l.id, { stato: 'altre-liste', competitore: null }));
-    if (reali.length < 2) {
-      singole.push(...reali);
-      continue;
-    }
-
-    const totale = reali.reduce((a, l) => a + l.percentuale, 0);
-    const sopra = reali.filter((l) => l.percentuale >= sogliaLista);
-    if (totale < sogliaCoalizione || sopra.length === 0) {
-      coalizioniSottoSoglia.push(opzioni.coalizioni[id] ?? id);
-      singole.push(...reali);
-      continue;
-    }
-
-    const sotto = reali.filter((l) => l.percentuale < sogliaLista && l.percentuale > 0).sort((a, b) => b.percentuale - a.percentuale);
-    const migliorPerdente = sotto[0];
-    const voti = sopra.reduce((a, l) => a + l.percentuale, 0) + (migliorPerdente?.percentuale ?? 0);
-    const principale = [...sopra].sort((a, b) => b.percentuale - a.percentuale)[0];
-
-    competitori.push({
-      id,
-      nome: opzioni.coalizioni[id] ?? id,
-      tipo: 'coalizione',
-      colore: principale.colore,
-      voti,
-      quota: 0,
-      listeConSeggi: sopra,
-      seggiCamera: 0,
-      seggiSenato: 0,
-    });
-    sopra.forEach((l) => stati.set(l.id, { stato: 'in-parlamento', competitore: id }));
-    sotto.forEach((l) => stati.set(l.id, { stato: l === migliorPerdente ? 'miglior-perdente' : 'sotto-soglia', competitore: id }));
-    reali.filter((l) => l.percentuale <= 0).forEach((l) => stati.set(l.id, { stato: 'sotto-soglia', competitore: id }));
-  }
-
-  for (const l of singole) {
-    if (l.aggregato) {
-      stati.set(l.id, { stato: 'altre-liste', competitore: null });
-    } else if (l.percentuale >= sogliaLista) {
-      competitori.push({ id: l.id, nome: l.nome, tipo: 'lista', colore: l.colore, voti: l.percentuale, quota: 0, listeConSeggi: [l], seggiCamera: 0, seggiSenato: 0 });
-      stati.set(l.id, { stato: 'in-parlamento', competitore: l.id });
-    } else {
-      stati.set(l.id, { stato: 'sotto-soglia', competitore: null });
-    }
-  }
-
-  for (const c of competitori) c.quota = totaleVoti > 0 ? (c.voti / totaleVoti) * 100 : 0;
-
-  // Premio: a chi arriva primo con almeno il 42% dei voti validi, in entrambe le Camere.
-  const ordinati = [...competitori].sort((a, b) => b.voti - a.voti);
-  const [primo, secondo] = ordinati;
-  let motivo: MotivoPremio;
-  if (!primo || totaleVoti <= 0) motivo = 'nessun-voto';
-  else if (primo.quota < sogliaPremio) motivo = 'nessuno-al-42';
-  else if (secondo && Math.abs(secondo.voti - primo.voti) < 1e-9) motivo = 'pareggio';
-  else if (opzioni.maggioranzeDiverse) motivo = 'maggioranze-diverse';
-  else motivo = 'assegnato';
-
-  const indiceVincitore = motivo === 'assegnato' ? competitori.indexOf(primo) : -1;
-  const voti = competitori.map((c) => c.voti);
-  const camera = assegnaRamo(voti, REGOLE.camera, indiceVincitore);
-  const senato = assegnaRamo(voti, REGOLE.senato, indiceVincitore);
-
-  const seggiListe = new Map<string, { camera: number; senato: number }>();
-  competitori.forEach((c, i) => {
-    c.seggiCamera = camera.seggi[i];
-    c.seggiSenato = senato.seggi[i];
-    const pesi = c.listeConSeggi.map((l) => l.percentuale);
-    const perListaCamera = ripartoResti(pesi, c.seggiCamera);
-    const perListaSenato = ripartoResti(pesi, c.seggiSenato);
-    c.listeConSeggi.forEach((l, j) => seggiListe.set(l.id, { camera: perListaCamera[j], senato: perListaSenato[j] }));
-  });
-
-  const votiUtiliConSeggi = competitori.reduce((a, c) => a + c.listeConSeggi.reduce((b, l) => b + l.percentuale, 0), 0);
-
-  return {
-    totaleVoti,
-    competitori: [...competitori].sort((a, b) => b.seggiCamera - a.seggiCamera || b.voti - a.voti),
-    liste: liste.map((lista) => {
-      const s = stati.get(lista.id) ?? { stato: 'sotto-soglia' as const, competitore: null };
-      const seggi = seggiListe.get(lista.id) ?? { camera: 0, senato: 0 };
-      return { lista, ...s, seggiCamera: seggi.camera, seggiSenato: seggi.senato };
-    }),
-    premio: { motivo, vincitore: motivo === 'assegnato' ? primo.id : null },
-    tettoCamera: camera.tetto,
-    tettoSenato: senato.tetto,
-    votiDispersi: totaleVoti > 0 ? ((totaleVoti - votiUtiliConSeggi) / totaleVoti) * 100 : 0,
-    coalizioniSottoSoglia,
-  };
-}
+export * from './simulatore-motore';
+export { REGIONI_SENATO } from './simulatore-regioni';
 
 /** Coordinate dei seggi di un emiciclo, ordinate da sinistra a destra. */
 export function puntiEmiciclo(totale: number, righe: number): { x: number; y: number }[] {
@@ -244,6 +38,8 @@ export interface Preset {
   fonte?: { citazione: string; url: string };
   coalizioni: Record<string, string>;
   liste: ListaInput[];
+  /** Chi vince i seggi di Valle d'Aosta e Trentino-Alto Adige, se il preset lo sa. */
+  speciali?: { camera?: SeggiSpeciali; senato?: SeggiSpeciali };
 }
 
 const GRIGIO = '#6b7280';
@@ -253,25 +49,30 @@ export function presetPolitiche2022(colori: Record<string, string>): Preset {
   return {
     id: 'politiche-2022',
     nome: 'Risultati 2022',
-    descrizione: 'I voti delle liste alla Camera nel 2022, con le coalizioni di allora, riletti con le regole nuove.',
+    descrizione:
+      'I voti delle liste alla Camera nel 2022, con le coalizioni di allora, riletti con le regole nuove. In Valle d’Aosta e Trentino-Alto Adige i seggi vanno a chi li ha vinti nel 2022.',
     fonte: {
-      citazione: 'Sky TG24, risultati delle elezioni politiche 2022 alla Camera',
-      url: 'https://tg24.sky.it/politica/2022/09/25/risultati-elezioni-politiche-2022',
+      citazione: 'Ministero dell’Interno, Eligendo: politiche 2022, Camera, Italia',
+      url: 'https://elezionistorico.interno.gov.it/index.php?tpel=C&dtel=25/09/2022&tpa=I&tpe=A&lev0=0&levsut0=0&es0=S&ms=S',
     },
     coalizioni: { cdx: 'Centrodestra', csx: 'Centrosinistra', terza: 'Terza coalizione' },
     liste: [
-      { id: 'fdi', nome: "Fratelli d'Italia", percentuale: 26, coalizione: 'cdx', colore: c('fdi') },
-      { id: 'lega', nome: 'Lega', percentuale: 8.78, coalizione: 'cdx', colore: c('lega') },
-      { id: 'fi', nome: 'Forza Italia', percentuale: 8.12, coalizione: 'cdx', colore: c('fi') },
-      { id: 'noimoderati', nome: 'Noi Moderati', percentuale: 0.91, coalizione: 'cdx', colore: c('noimoderati') },
-      { id: 'pd', nome: 'Partito Democratico', percentuale: 19.06, coalizione: 'csx', colore: c('pd') },
-      { id: 'avs', nome: 'Alleanza Verdi e Sinistra', percentuale: 3.63, coalizione: 'csx', colore: c('avs') },
+      { id: 'fdi', nome: "Fratelli d'Italia", percentuale: 25.98, coalizione: 'cdx', colore: c('fdi') },
+      { id: 'lega', nome: 'Lega', percentuale: 8.79, coalizione: 'cdx', colore: c('lega') },
+      { id: 'fi', nome: 'Forza Italia', percentuale: 8.11, coalizione: 'cdx', colore: c('fi') },
+      { id: 'noimoderati', nome: 'Noi Moderati', percentuale: 0.9, coalizione: 'cdx', colore: c('noimoderati') },
+      { id: 'pd', nome: 'Partito Democratico', percentuale: 19.04, coalizione: 'csx', colore: c('pd') },
+      { id: 'avs', nome: 'Alleanza Verdi e Sinistra', percentuale: 3.64, coalizione: 'csx', colore: c('avs') },
       { id: 'piueuropa', nome: '+Europa', percentuale: 2.83, coalizione: 'csx', colore: c('piueuropa') },
-      { id: 'impegnocivico', nome: 'Impegno Civico', percentuale: 0.6, coalizione: 'csx', colore: GRIGIO },
-      { id: 'm5s', nome: 'Movimento 5 Stelle', percentuale: 15.42, coalizione: null, colore: c('m5s') },
+      { id: 'impegnocivico', nome: 'Impegno Civico', percentuale: 0.62, coalizione: 'csx', colore: GRIGIO },
+      { id: 'm5s', nome: 'Movimento 5 Stelle', percentuale: 15.43, coalizione: null, colore: c('m5s') },
       { id: 'azione-iv', nome: 'Azione – Italia Viva', percentuale: 7.78, coalizione: null, colore: c('azione') },
-      { id: 'altri', nome: 'Altre liste', percentuale: 6.87, coalizione: null, colore: '#374151', aggregato: true },
+      { id: 'altri', nome: 'Altre liste', percentuale: 6.86, coalizione: null, colore: '#374151', aggregato: true },
     ],
+    // 2022: Camera, Valle d'Aosta a un autonomista, Trentino-Alto Adige 2 collegi al centrodestra e 2 a SVP-PATT,
+    // proporzionale 1 a FdI, 1 al PD, 1 a SVP-PATT. Senato: Valle d'Aosta al centrodestra, Trentino-Alto Adige
+    // 2 al centrodestra, 2 al centrosinistra, 2 a SVP-PATT (docs/dati-politiche-2022-regioni.json).
+    speciali: { camera: { cdx: 3, csx: 1, [LOCALI_ID]: 4 }, senato: { cdx: 3, csx: 2, [LOCALI_ID]: 2 } },
   };
 }
 
@@ -290,16 +91,20 @@ export function presetPartitiDiOggi(partiti: { id: string; nome: string; colore:
 
 export const FONTI_LEGGE = [
   {
-    citazione: 'CISE LUISS, analisi e simulazioni della riforma approvata alla Camera (23 luglio 2026)',
-    url: 'https://cise.luiss.it/2026/07/23/la-nuova-legge-elettorale-garantisce-davvero-stabilita-analisi-e-simulazioni-della-riforma-approvata-alla-camera/',
+    citazione: 'Camera dei deputati, testo A.C. 2822-B approvato in via definitiva l’8 ottobre 2026',
+    url: 'https://documenti.camera.it/apps/commonServices/getDocumento.ashx?sezione=lavori&tipoDoc=testo_pdl_pdf&idlegislatura=19&codice=leg.19.pdl.camera.2822.19PDL0213710',
   },
   {
-    citazione: 'AGI, Cosa prevede la nuova legge elettorale (16 luglio 2026)',
-    url: 'https://www.agi.it/politica/news/2026-07-16/legge-elettorale-cosa-prevede-38066645/',
+    citazione: 'Servizi Studi di Camera e Senato, dossier n. 666/4 sulla riforma (16 settembre 2026)',
+    url: 'https://documenti.camera.it/leg19/dossier/Pdf/AC0469f.pdf',
   },
   {
-    citazione: 'lavoce.info, La nuova legge elettorale a metà del guado',
-    url: 'https://lavoce.info/archives/111986/la-nuova-legge-elettorale-a-meta-del-guado/',
+    citazione: 'Testo a fronte tra norme vigenti e testo approvato (dossier n. 666/4)',
+    url: 'https://documenti.camera.it/leg19/dossier/Pdf/AC0469g.pdf',
+  },
+  {
+    citazione: 'Camera dei deputati, comunicato sull’approvazione definitiva (227 sì, 164 no)',
+    url: 'https://comunicazione.camera.it/archivio-prima-pagina/19-62971',
   },
 ];
 
@@ -312,8 +117,8 @@ export const TESTI_SIMULATORE = {
   etichetta: 'Simulatore',
   titolo: 'Simulatore della legge elettorale',
   descrizione:
-    'Inserisci i voti di liste e coalizioni e guarda come diventano seggi con la nuova legge elettorale: premio di maggioranza al 42%, soglie e tetti.',
-  stato: 'Regole del testo approvato dalla Camera il 16 luglio 2026, all’esame del Senato: possono ancora cambiare.',
+    'Inserisci i voti di liste e coalizioni e guarda come diventano seggi con la nuova legge elettorale: premio di maggioranza al 42%, soglie, tetti e Senato regione per regione.',
+  stato: 'Regole della legge approvata in via definitiva l’8 ottobre 2026 (A.C. 2822-B). In attesa della pubblicazione in Gazzetta Ufficiale.',
   partiDa: 'Parti da',
   liste: 'Liste e coalizioni',
   percentuale: 'Voti %',
@@ -322,49 +127,69 @@ export const TESTI_SIMULATORE = {
   totale: (t: number) => `Totale ${formattaPercentuale(t)}%`,
   totaleAvviso: 'Il totale non fa 100: i seggi si calcolano comunque in proporzione ai voti inseriti.',
   maggioranzeDiverse: 'Al Senato arriva prima un’altra coalizione',
-  maggioranzeDiverseNota: 'Il premio spetta solo a chi arriva primo con almeno il 42% in entrambe le Camere.',
+  maggioranzeDiverseNota: 'Il premio spetta solo a chi arriva primo con almeno il 42% in tutte e due le Camere. Se il primo è diverso, niente premio in nessuna delle due.',
   premio: {
     assegnato: (nome: string) => `Premio di maggioranza a ${nome}: +70 seggi alla Camera e +35 al Senato`,
-    'nessuno-al-42': 'Nessuno raggiunge il 42%: i seggi si ripartiscono in modo proporzionale puro',
-    pareggio: 'I primi due sono a pari voti: il premio non si assegna',
-    'maggioranze-diverse': 'Maggioranze diverse fra Camera e Senato: il premio non si assegna',
+    'nessuno-al-42': 'Nessuno raggiunge il 42%: i seggi si ripartiscono in modo proporzionale',
+    pareggio: 'I primi due sono a pari voti: la legge non dice chi vince, qui il premio non si assegna',
+    'maggioranze-diverse': 'Primo diverso fra Camera e Senato: il premio non si assegna in nessuna delle due',
     'nessun-voto': 'Inserisci i voti per vedere i seggi',
   },
-  tetto: (ramo: string, n: number) => `${ramo}: tetto raggiunto, il vincitore si ferma a ${n} seggi e l’eccedenza va agli altri`,
+  tetto: (ramo: string, n: number) => `${ramo}: tetto raggiunto, il vincitore si ferma a ${n} seggi e gli altri si dividono l’eccedenza`,
+  correzioniSenato: (n: number) => `Senato: ${n} ${n === 1 ? 'seggio tolto' : 'seggi tolti'} al vincitore nelle regioni con i resti più bassi e ${n === 1 ? 'dato' : 'dati'} ai perdenti della stessa regione`,
   camera: 'Camera',
   senato: 'Senato',
-  stima: 'stima',
-  votiUtili: 'Voti utili',
+  stima: 'stima regionale',
+  votiUtili: 'Voti',
   maggioranza: (n: number, tot: number) => `maggioranza ${n} su ${tot}`,
   conMaggioranza: 'ha la maggioranza',
+  maggioranzaSenato: 'maggioranza anche al Senato',
   estero: 'Estero, non simulati',
   coalizioneDi: (nomi: string) => `con ${nomi}`,
-  dispersi: (p: string) => `Voti a liste senza seggi: ${p}%`,
+  composizione: (prop: number, premio: number, speciali: number) =>
+    [`${prop} proporzionali`, premio ? `${premio} di premio` : '', speciali ? `${speciali} in Valle d’Aosta e Trentino-Alto Adige` : ''].filter(Boolean).join(' + '),
+  dispersi: (p: string) => `Voti a liste senza seggi alla Camera: ${p}%`,
   coalizioniSottoSoglia: (nomi: string) => `${nomi}: sotto il 10%, le liste corrono da sole`,
   stati: {
     'in-parlamento': 'entra in Parlamento',
-    'miglior-perdente': 'miglior perdente: i voti contano per la coalizione, nessun seggio',
+    'miglior-perdente': 'miglior perdente: sotto il 3% ma partecipa al riparto della coalizione',
     'sotto-soglia': 'sotto soglia',
     'altre-liste': 'nessuna lista supera le soglie',
   } satisfies Record<StatoLista, string>,
+  statoSenatoDiverso: 'al Senato entra con il 20% in una regione',
   dettaglioListe: 'Il dettaglio lista per lista',
+  dettaglioListeNota: 'Seggi proporzionali di ogni lista. I seggi di premio vanno ai listini della coalizione, quelli di Valle d’Aosta e Trentino-Alto Adige ai vincitori dei collegi.',
+  premioListino: 'Premio (listini di coalizione)',
+  specialiTitolo: 'Valle d’Aosta e Trentino-Alto Adige',
+  specialiNota:
+    'Qui si vota con collegi a parte: alla Camera 1 collegio in Valle d’Aosta, 4 collegi e 3 seggi proporzionali in Trentino-Alto Adige; al Senato 1 e 6 collegi. Scegli tu chi li vince. Contano per il tetto del vincitore.',
+  specialiLocali: 'Liste locali (es. SVP, autonomisti)',
+  regioniTitolo: 'Il Senato regione per regione',
+  regioniNota:
+    'Stima: i voti nazionali sono distribuiti nelle regioni con la geografia del voto 2022 al Senato. I seggi per regione sono quelli del dossier ufficiale (censimento 2021).',
+  regione: 'Regione',
+  seggiRegione: 'Seggi',
   regoleTitolo: 'Le regole che applichiamo',
   regole: [
-    'Proporzionale senza collegi uninominali: 400 deputati, 8 dei quali eletti all’Estero; 200 senatori, 4 all’Estero.',
-    'Soglie: 3% per le liste, 10% per le coalizioni che hanno almeno una lista al 3%. Per ogni coalizione contano anche i voti del “miglior perdente”, la prima lista sotto il 3%.',
-    'Premio: chi arriva primo con almeno il 42% dei voti validi in entrambe le Camere ottiene 70 seggi alla Camera e 35 al Senato, in aggiunta alla sua quota proporzionale.',
-    'Tetti: il vincitore non supera 220 seggi alla Camera e 113 al Senato; i seggi in eccesso vanno alle altre liste.',
-    'Se nessuno arriva al 42%, o se le due Camere danno maggioranze diverse, vale il proporzionale puro. Il ballottaggio non c’è più.',
+    'Camera: 400 deputati, 8 all’Estero. In Italia 384 seggi si dividono su base nazionale, 8 si votano a parte in Valle d’Aosta e Trentino-Alto Adige (art. 2 e 3 del testo unico Camera).',
+    'Senato: 200 senatori, 4 all’Estero. 189 seggi si dividono regione per regione, 7 sono collegi in Valle d’Aosta e Trentino-Alto Adige (art. 1 del testo unico Senato).',
+    'Soglie: 3% per le liste, 10% per le coalizioni con almeno una lista al 3%. Al Senato una lista supera lo sbarramento anche con il 20% in una regione (art. 83, c. 1, lett. e, Camera; art. 16-bis, c. 1, lett. e, Senato).',
+    'I voti di una coalizione sono la somma di tutte le sue liste, anche le più piccole (art. 83, c. 1, lett. c). Partecipano ai seggi le liste al 3% e la prima lista sotto il 3%, il «miglior perdente» (nn. 2-bis e 2-ter).',
+    'Premio: chi arriva primo con almeno il 42% in tutte e due le Camere ottiene 70 seggi alla Camera e 35 al Senato, che si aggiungono a 314 e 154 seggi proporzionali. Altrimenti si divide tutto in proporzione. Non c’è ballottaggio.',
+    'Tetti: il vincitore non supera 220 deputati e 113 senatori, Valle d’Aosta e Trentino-Alto Adige compresi. Alla Camera il vincitore si ferma a 150 seggi proporzionali meno quelli vinti nei collegi a parte. Al Senato si tolgono seggi nelle regioni dove il vincitore li ha presi con i resti più bassi (art. 83, c. 1-ter; art. 16-bis, c. 1-ter).',
+    'Riparto con quozienti interi e resti più alti, come prevede la legge. Dentro la coalizione i seggi si dividono tra le liste con lo stesso metodo; al Senato regione per regione.',
   ],
-  approssimazioniTitolo: 'Dove semplifichiamo',
+  approssimazioniTitolo: 'Dove stimiamo',
   approssimazioni: [
-    'Riparto con quozienti interi e resti più alti su base nazionale: le fonti consultate non indicano il metodo.',
-    'Il Senato nella realtà si ripartisce su base regionale: qui è una stima nazionale.',
-    'Il miglior perdente conta nei voti della coalizione ma non riceve seggi.',
-    'Le fonti non concordano sul peso di Trentino-Alto Adige e Valle d’Aosta: seguiamo il CISE, secondo cui nella realtà il vincitore può arrivare fino a 228 deputati.',
+    'Il Senato si calcola regione per regione, ma tu inserisci voti nazionali: li distribuiamo nelle regioni con la geografia del voto 2022. È una stima, non un risultato.',
+    'Alla Camera la legge toglie dal riparto i voti di Valle d’Aosta e Trentino-Alto Adige (circa il 2% del totale): qui usiamo le percentuali nazionali.',
+    'Chi vince i seggi di Valle d’Aosta e Trentino-Alto Adige lo scegli tu. Le liste delle minoranze linguistiche non sono simulate.',
+    'Usiamo gli stessi voti per Camera e Senato. Se vuoi un primo diverso al Senato, usa l’opzione apposita.',
+    'A parità di resti la legge prevede il sorteggio: qui vince chi è in alto nell’elenco. A pari voti per il primo posto la legge non dice nulla: qui il premio non si assegna.',
+    'I seggi di premio per regione sono quelli calcolati dal dossier sul censimento 2021: quelli veri li fisserà il decreto di convocazione delle elezioni.',
     'I parlamentari eletti all’Estero non sono simulati.',
   ],
-  verifica: 'Controllo automatico: una coalizione al 42% ottiene 205 deputati, come nell’esempio del CISE.',
+  verifica: 'Controllo automatico: senza voti dispersi una coalizione al 42% ottiene 132 + 70 = 202 deputati, come nel calcolo del dossier ufficiale.',
   fonti: 'Fonti sulla legge',
   fontePreset: 'Dati di partenza',
   collegamenti: { confronta: 'Confronta le posizioni dei partiti', test: 'Fai il test dei partiti' },
