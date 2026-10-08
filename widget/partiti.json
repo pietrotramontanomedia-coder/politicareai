@@ -1,0 +1,67 @@
+[
+  {
+    "id": "fdi",
+    "nome": "Fratelli d'Italia",
+    "colore": "#2E5CB3"
+  },
+  {
+    "id": "pd",
+    "nome": "Partito Democratico",
+    "colore": "#E4002B"
+  },
+  {
+    "id": "m5s",
+    "nome": "Movimento 5 Stelle",
+    "colore": "#F5C400"
+  },
+  {
+    "id": "lega",
+    "nome": "Lega",
+    "colore": "#1B7A3E"
+  },
+  {
+    "id": "fi",
+    "nome": "Forza Italia",
+    "colore": "#1E88E5"
+  },
+  {
+    "id": "avs",
+    "nome": "Alleanza Verdi e Sinistra",
+    "colore": "#D62828"
+  },
+  {
+    "id": "futuronazionale",
+    "nome": "Futuro Nazionale",
+    "colore": "#7B2D26"
+  },
+  {
+    "id": "azione",
+    "nome": "Azione",
+    "colore": "#0A3D91"
+  },
+  {
+    "id": "iv",
+    "nome": "Italia Viva",
+    "colore": "#E91E63"
+  },
+  {
+    "id": "piueuropa",
+    "nome": "+Europa",
+    "colore": "#F39200"
+  },
+  {
+    "id": "noimoderati",
+    "nome": "Noi Moderati",
+    "colore": "#2A9D8F"
+  },
+  {
+    "id": "pld",
+    "nome": "Partito Liberaldemocratico",
+    "colore": "#00A3E0"
+  },
+  {
+    "id": "ora",
+    "nome": "Ora!",
+    "colore": "#D4A20B"
+  }
+]
