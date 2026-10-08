@@ -16,10 +16,13 @@ export const maxDuration = 60;
 
 const SITO = process.env.SITO_URL ?? 'https://politicare-app.vercel.app';
 
-/** Minuti minimi fra un post e l'altro su X: due post nello stesso minuto sono la firma dello spam. */
+/**
+ * Minuti minimi fra un post e l'altro su X. Predefinito 0: ogni post del canale esce subito
+ * anche su X (decisione dell'8 ottobre 2026). Con un valore > 0 i post vengono distanziati.
+ */
 function distanzaMinima(): number {
-  const valore = Number(process.env.X_DISTANZA_MINUTI ?? 10);
-  return Number.isFinite(valore) && valore >= 0 ? valore : 10;
+  const valore = Number(process.env.X_DISTANZA_MINUTI ?? 0);
+  return Number.isFinite(valore) && valore >= 0 ? valore : 0;
 }
 
 /** Per quante ore indietro si controlla se la stessa notizia è già uscita (0 = nessun controllo). */

@@ -78,8 +78,17 @@ describe('webhook Telegram → X', () => {
     expect(pubblicaSuX).toHaveBeenCalledTimes(2);
   });
 
-  it('tiene almeno 10 minuti fra un post e l’altro: risponde 503 e Telegram riprova più tardi', async () => {
+  it('di base pubblica subito, anche se l’ultimo post su X è appena uscito', async () => {
     const { POST } = await import('@/app/api/telegram/x/route');
+    ultima = new Date();
+    const subito = await POST(richiesta({ channel_post: { message_id: 10, chat, text: 'Notizia' } }));
+    expect(subito.status).toBe(200);
+    expect(pubblicaSuX).toHaveBeenCalledTimes(1);
+  });
+
+  it('con X_DISTANZA_MINUTI=10 distanzia i post: risponde 503 e Telegram riprova più tardi', async () => {
+    const { POST } = await import('@/app/api/telegram/x/route');
+    vi.stubEnv('X_DISTANZA_MINUTI', '10');
     ultima = new Date(Date.now() - 4 * 60_000);
     const presto = await POST(richiesta({ channel_post: { message_id: 8, chat, text: 'Notizia' } }));
     expect(presto.status).toBe(503);

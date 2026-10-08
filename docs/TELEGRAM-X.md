@@ -66,10 +66,10 @@ viene scartato e Telegram riceve 200, così non riprova. Il confronto è sulle p
 emoji, accenti e cancelletti: riconosce anche una notizia ripubblicata con un refuso corretto, come gli
 exit poll di Berlino usciti due volte il 20 settembre 2026. `X_DOPPIONI_ORE=0` disattiva il controllo.
 
-Distanza fra i post: il sito pubblica al massimo un post ogni `X_DISTANZA_MINUTI` (predefinito 10).
-Se un post arriva prima, risponde 503 a Telegram, che lo ripresenta più tardi e tiene in coda quelli
-successivi, in ordine. Due post nello stesso minuto sono la firma dello spam per X: meglio distanziarli.
-`X_DISTANZA_MINUTI=0` disattiva l'attesa. Il registro si legge sempre dall'origine, mai dalla cache:
+Distanza fra i post: **nessuna attesa** (decisione dell'8 ottobre 2026): ogni post che esce su
+Telegram esce subito anche su X. Per distanziarli di nuovo basta impostare `X_DISTANZA_MINUTI`
+(es. `10`): se un post arriva prima, il sito risponde 503 a Telegram, che lo ripresenta più tardi e
+tiene in coda quelli successivi, in ordine. Il registro si legge sempre dall'origine, mai dalla cache:
 con la cache due post consegnati a pochi secondi l'uno dall'altro uscivano insieme (16 settembre 2026).
 
 Attenzione ai link: dal 2026 l'API di X fattura per singolo post, e un post **con link costa
@@ -111,7 +111,7 @@ Nel progetto `politicare-app` → Settings → Environment Variables (ambiente P
 | `ANTHROPIC_API_KEY` | chiave Claude da [console.anthropic.com](https://console.anthropic.com): riscrive i post troppo lunghi (pochi millesimi di dollaro a post) |
 | `X_LINK_NOTIZIE` | facoltativa: `mai` (predefinito) o `sempre` |
 | `X_HASHTAG` | facoltativa: quanti hashtag nel testo, predefinito `3` (`0` per nessuno) |
-| `X_DISTANZA_MINUTI` | facoltativa: minuti minimi fra un post e l'altro, predefinito `10` |
+| `X_DISTANZA_MINUTI` | facoltativa: minuti minimi fra un post e l'altro, predefinito `0` (nessuna attesa) |
 | `X_MENZIONI` | facoltativa: quanti politici citati vengono taggati, predefinito `2` (`0` per nessuno) |
 | `X_DOPPIONI_ORE` | facoltativa: ore entro cui una notizia ripetuta viene scartata, predefinito `24` (`0` per nessun controllo) |
 
