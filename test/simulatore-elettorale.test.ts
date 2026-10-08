@@ -5,6 +5,7 @@ import {
   puntiEmiciclo,
   REGIONI_SENATO,
   REGOLE,
+  ribilancia,
   riparto,
   ripartoResti,
   simula,
@@ -196,6 +197,38 @@ describe('verifica esterna: simulazioni CISE LUISS del 28 settembre 2026 (Camera
     );
     expect(esito.premio.motivo).toBe('nessuno-al-42');
     expect(['cl', 'cdx', 'fn', 'az'].map((id) => chi(esito, id).camera.proporzionali)).toEqual([171, 167, 33, 13]);
+  });
+});
+
+describe('totale sempre al 100%', () => {
+  const tot = (l: ListaInput[]) => Math.round(l.reduce((a, x) => a + x.percentuale, 0) * 100) / 100;
+
+  it('se una lista sale le altre scendono in proporzione', () => {
+    const liste = ribilancia([lista('a', 40), lista('b', 40), lista('c', 20)], 'a', 50);
+    expect(liste.map((l) => l.percentuale)).toEqual([50, 33.33, 16.67]);
+    expect(tot(liste)).toBe(100);
+  });
+
+  it('le liste bloccate non si muovono', () => {
+    const liste = ribilancia([lista('a', 40), lista('b', 40), lista('c', 20)], 'a', 50, new Set(['c']));
+    expect(liste.map((l) => l.percentuale)).toEqual([50, 30, 20]);
+  });
+
+  it('non si può superare lo spazio lasciato dalle liste bloccate', () => {
+    const liste = ribilancia([lista('a', 40), lista('b', 40), lista('c', 20)], 'a', 95, new Set(['b']));
+    expect(liste.map((l) => l.percentuale)).toEqual([60, 40, 0]);
+  });
+
+  it('partendo da tutti a zero i punti si tolgono alle altre liste', () => {
+    const liste = ribilancia([lista('a', 0), lista('b', 0), lista('altri', 100, null, { aggregato: true })], 'a', 30);
+    expect(liste.map((l) => l.percentuale)).toEqual([30, 0, 70]);
+  });
+
+  it('un totale iniziale diverso da 100 torna a 100 al primo cambio', () => {
+    const p = presetPolitiche2022({});
+    const liste = ribilancia(p.liste, 'pd', 20);
+    expect(tot(liste)).toBe(100);
+    expect(liste.find((l) => l.id === 'pd')!.percentuale).toBe(20);
   });
 });
 

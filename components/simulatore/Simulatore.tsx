@@ -8,6 +8,7 @@ import {
   LOCALI,
   puntiEmiciclo,
   REGOLE,
+  ribilancia,
   simula,
   TESTI_SIMULATORE as T,
   type Esito,
@@ -31,6 +32,7 @@ export default function Simulatore({ preset, geografia }: { preset: Preset[]; ge
   const [coalizioni, setCoalizioni] = useState(preset[0].coalizioni);
   const [maggioranzeDiverse, setMaggioranzeDiverse] = useState(false);
   const [speciali, setSpeciali] = useState<Speciali>(specialiDi(preset[0]));
+  const [bloccate, setBloccate] = useState<Set<string>>(new Set());
 
   const esito = useMemo(
     () => simula(liste, { coalizioni, maggioranzeDiverse, speciali, geografia }),
@@ -44,14 +46,23 @@ export default function Simulatore({ preset, geografia }: { preset: Preset[]; ge
     setCoalizioni(p.coalizioni);
     setMaggioranzeDiverse(false);
     setSpeciali(specialiDi(p));
+    setBloccate(new Set());
   };
+
+  const blocca = (id: string) =>
+    setBloccate((prec) => {
+      const nuove = new Set(prec);
+      if (nuove.has(id)) nuove.delete(id);
+      else nuove.add(id);
+      return nuove;
+    });
 
   const aggiorna = (id: string, modifica: Partial<ListaInput>) =>
     setListe((prec) => prec.map((l) => (l.id === id ? { ...l, ...modifica } : l)));
 
   const impostaPercentuale = (id: string, valore: string) => {
     const n = Number.parseFloat(valore.replace(',', '.'));
-    aggiorna(id, { percentuale: Number.isFinite(n) ? Math.min(100, Math.max(0, n)) : 0 });
+    setListe((prec) => ribilancia(prec, id, Number.isFinite(n) ? Math.min(100, Math.max(0, n)) : 0, bloccate));
   };
 
   return (
@@ -120,11 +131,9 @@ export default function Simulatore({ preset, geografia }: { preset: Preset[]; ge
               {T.totale(esito.totaleVoti)}
             </span>
           </div>
-          {Math.abs(esito.totaleVoti - 100) > 0.05 && esito.totaleVoti > 0 && (
-            <p className="mt-2 text-xs" style={{ color: '#fbbf24' }}>
-              {T.totaleAvviso}
-            </p>
-          )}
+          <p className="mt-2 text-xs" style={{ color: 'var(--fg-muta)' }}>
+            {T.ribilancia}
+          </p>
 
           <ul className="mt-4 space-y-2">
             {liste.map((l) => (
@@ -150,14 +159,32 @@ export default function Simulatore({ preset, geografia }: { preset: Preset[]; ge
                   <span className="text-sm" style={{ color: 'var(--fg-muta)' }}>
                     %
                   </span>
+                  <button
+                    type="button"
+                    onClick={() => blocca(l.id)}
+                    aria-pressed={bloccate.has(l.id)}
+                    aria-label={bloccate.has(l.id) ? T.sblocca(l.nome) : T.blocca(l.nome)}
+                    title={bloccate.has(l.id) ? T.sblocca(l.nome) : T.blocca(l.nome)}
+                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border transition-colors"
+                    style={
+                      bloccate.has(l.id)
+                        ? { background: 'var(--accento)', borderColor: 'var(--accento)', color: '#000' }
+                        : { borderColor: 'var(--bordo)', color: 'var(--fg-muta)' }
+                    }
+                  >
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                      <rect x="5" y="11" width="14" height="10" rx="2" />
+                      {bloccate.has(l.id) ? <path d="M8 11V7a4 4 0 0 1 8 0v4" /> : <path d="M8 11V7a4 4 0 0 1 7.5-2" />}
+                    </svg>
+                  </button>
                 </div>
                 <div className="mt-2 flex items-center gap-3">
                   <input
                     type="range"
                     min={0}
-                    max={60}
+                    max={l.aggregato ? 100 : 60}
                     step={0.1}
-                    value={Math.min(60, l.percentuale)}
+                    value={Math.min(l.aggregato ? 100 : 60, l.percentuale)}
                     onChange={(e) => impostaPercentuale(l.id, e.target.value)}
                     aria-label={`${T.percentuale} ${l.nome}`}
                     className="min-w-0 flex-1"

@@ -4,7 +4,7 @@
  * Regole e semplificazioni sono dichiarate in TESTI_SIMULATORE e nella pagina.
  */
 
-import { LOCALI as LOCALI_ID, type ListaInput, type SeggiSpeciali, type StatoLista } from './simulatore-motore';
+import { LOCALI as LOCALI_ID, riparto, type ListaInput, type SeggiSpeciali, type StatoLista } from './simulatore-motore';
 
 export * from './simulatore-motore';
 export { REGIONI_SENATO } from './simulatore-regioni';
@@ -80,13 +80,39 @@ export function presetPartitiDiOggi(partiti: { id: string; nome: string; colore:
   return {
     id: 'partiti-oggi',
     nome: 'Partiti di oggi',
-    descrizione: `I ${partiti.length} partiti del test, tutti a zero e senza coalizioni: scegli tu voti e alleanze.`,
+    descrizione: `I ${partiti.length} partiti del test, tutti a zero e senza coalizioni: scegli tu voti e alleanze. Ogni punto che dai a un partito lo togli alle «altre liste».`,
     coalizioni: { a: 'Coalizione A', b: 'Coalizione B', c: 'Coalizione C' },
     liste: [
       ...partiti.map((p) => ({ id: p.id, nome: p.nome, percentuale: 0, coalizione: null, colore: p.colore })),
-      { id: 'altri', nome: 'Altre liste', percentuale: 0, coalizione: null, colore: '#374151', aggregato: true },
+      { id: 'altri', nome: 'Altre liste', percentuale: 100, coalizione: null, colore: '#374151', aggregato: true },
     ],
   };
+}
+
+/**
+ * Cambia la percentuale di una lista e tiene il totale al 100%: la differenza si toglie o si aggiunge
+ * alle altre liste in proporzione al loro peso, lasciando ferme quelle bloccate. Lavora in centesimi
+ * di punto con il metodo dei resti più alti, così la somma fa sempre esattamente 100.
+ */
+export function ribilancia(liste: readonly ListaInput[], id: string, valore: number, bloccate: ReadonlySet<string> = new Set()): ListaInput[] {
+  const cent = (n: number) => Math.round(Math.max(0, n) * 100);
+  const libere = liste.filter((l) => l.id !== id && !bloccate.has(l.id));
+  if (!liste.some((l) => l.id === id) || libere.length === 0) return [...liste];
+
+  const spazio = 10000 - liste.filter((l) => l.id !== id && bloccate.has(l.id)).reduce((a, l) => a + cent(l.percentuale), 0);
+  const v = Math.max(0, Math.min(spazio, cent(valore)));
+  const resto = spazio - v;
+  const pesi = libere.map((l) => cent(l.percentuale));
+  let nuovi: number[];
+  if (pesi.some((p) => p > 0)) {
+    nuovi = riparto(pesi, resto).seggi;
+  } else {
+    // Tutte a zero: il resto va alle «altre liste», se ci sono; altrimenti in parti uguali.
+    const ia = libere.findIndex((l) => l.aggregato);
+    nuovi = ia >= 0 ? libere.map((_, i) => (i === ia ? resto : 0)) : riparto(libere.map(() => 1), resto).seggi;
+  }
+  const perId = new Map(libere.map((l, i) => [l.id, nuovi[i] / 100]));
+  return liste.map((l) => (l.id === id ? { ...l, percentuale: v / 100 } : perId.has(l.id) ? { ...l, percentuale: perId.get(l.id)! } : l));
 }
 
 export const FONTI_LEGGE = [
@@ -126,6 +152,9 @@ export const TESTI_SIMULATORE = {
   daSola: 'Da sola',
   totale: (t: number) => `Totale ${formattaPercentuale(t)}%`,
   totaleAvviso: 'Il totale non fa 100: i seggi si calcolano comunque in proporzione ai voti inseriti.',
+  ribilancia: 'Il totale resta sempre al 100%: quando alzi una lista, le altre scendono in proporzione. Usa il lucchetto per tenerne ferma una.',
+  blocca: (nome: string) => `Tieni ferma la percentuale di ${nome}`,
+  sblocca: (nome: string) => `Lascia che la percentuale di ${nome} si adatti`,
   maggioranzeDiverse: 'Al Senato arriva prima un’altra coalizione',
   maggioranzeDiverseNota: 'Il premio spetta solo a chi arriva primo con almeno il 42% in tutte e due le Camere. Se il primo è diverso, niente premio in nessuna delle due.',
   premio: {
