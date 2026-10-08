@@ -1,5 +1,5 @@
 import { after } from 'next/server';
-import { componiPagina, giorniDaPubblicare, MINIMO_NOTIZIE, notizieDelGiorno, riassunto, slugGiorno, titoloGiorno, type Giorno } from '@/lib/live-giornaliera';
+import { componiPagina, giorniDaPubblicare, inizioDiIeri, MINIMO_NOTIZIE, notizieDelGiorno, riassunto, slugGiorno, titoloGiorno, type Giorno } from '@/lib/live-giornaliera';
 import type { NotiziaUltimOra } from '@/lib/ultimora-server';
 import { leggiUltimOra } from '@/lib/ultimora-server';
 
@@ -130,7 +130,8 @@ export async function aggiornaLiveGiornaliera(adesso: Date = new Date(), opzioni
   const c = config();
   if (!c) return { stato: 'non configurato' };
 
-  const tutte = await leggiUltimOra(opzioni);
+  // Tutti i messaggi da ieri a mezzanotte: nelle giornate piene (una diretta) sono più dei 20 del feed.
+  const tutte = await leggiUltimOra({ ...opzioni, da: inizioDiIeri(adesso) });
   const [oggi, ...passati] = giorniDaPubblicare(tutte, adesso);
   const esitoOggi = await pubblicaGiorno(c, tutte, oggi, true);
   const giorniPassati: EsitoGiorno[] = [];

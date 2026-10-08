@@ -55,11 +55,29 @@ async function scarica(url: string, fresco = false): Promise<string | null> {
   return response.ok ? response.text() : null;
 }
 
-/** `fresco` salta la cache: serve quando un post nuovo è appena arrivato dal webhook. */
-export async function leggiMessaggiTelegram(opzioni: { fresco?: boolean } = {}): Promise<MessaggioTelegram[]> {
-  const html = await scarica(`https://t.me/s/${CANALE_TELEGRAM}`, opzioni.fresco);
-  if (!html) return [];
-  return estraiMessaggi(html).sort((a, b) => b.numero - a.numero);
+/** Pagine del canale lette al massimo con `da` (20 messaggi l'una). */
+const PAGINE_MAX = 6;
+
+/**
+ * `fresco` salta la cache: serve quando un post nuovo è appena arrivato dal webhook.
+ * La pagina pubblica del canale mostra solo gli ultimi 20 messaggi: con `da` si va indietro
+ * pagina per pagina finché non si arriva prima di quel momento.
+ */
+export async function leggiMessaggiTelegram(opzioni: { fresco?: boolean; da?: Date } = {}): Promise<MessaggioTelegram[]> {
+  const tutti = new Map<number, MessaggioTelegram>();
+  let prima: number | undefined;
+  for (let pagina = 0; pagina < (opzioni.da ? PAGINE_MAX : 1); pagina++) {
+    const html = await scarica(`https://t.me/s/${CANALE_TELEGRAM}${prima ? `?before=${prima}` : ''}`, opzioni.fresco);
+    if (!html) break;
+    const messaggi = estraiMessaggi(html);
+    if (messaggi.length === 0) break;
+    for (const m of messaggi) tutti.set(m.numero, m);
+    const minimo = Math.min(...messaggi.map((m) => m.numero));
+    const datata = messaggi.find((m) => m.numero === minimo)!;
+    if (!opzioni.da || new Date(datata.data) < opzioni.da || minimo === prima) break;
+    prima = minimo;
+  }
+  return [...tutti.values()].sort((a, b) => b.numero - a.numero);
 }
 
 export async function leggiMessaggioTelegram(id: string): Promise<MessaggioTelegram | null> {

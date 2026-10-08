@@ -42,6 +42,14 @@ export function titoloGiorno(g: Giorno, oggi = true): string {
   return `Politica oggi, ${g.giorno} ${g.mese} ${g.anno}: ${oggi ? 'le notizie in diretta' : 'le notizie del giorno'}`;
 }
 
+/** Mezzanotte di ieri a Roma: da lì si leggono i messaggi del canale per le pagine dei giorni. */
+export function inizioDiIeri(adesso: Date): Date {
+  const ieri = giornoDi(new Date(adesso.getTime() - 86_400_000));
+  const mezzogiorno = new Date(`${ieri.chiave}T12:00:00Z`);
+  const oraRoma = Number(new Intl.DateTimeFormat('en-GB', { timeZone: FUSO, hour: '2-digit', hourCycle: 'h23' }).format(mezzogiorno));
+  return new Date(mezzogiorno.getTime() - oraRoma * 3_600_000);
+}
+
 /** Quanti giorni indietro si guardano per chiudere le pagine dei giorni passati. */
 export const GIORNI_INDIETRO = 7;
 
