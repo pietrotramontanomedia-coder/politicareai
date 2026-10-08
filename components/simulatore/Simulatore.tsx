@@ -304,14 +304,14 @@ function Risultato({ esito }: { esito: Esito }) {
           <thead>
             <tr style={{ color: 'var(--fg-muta)' }}>
               <th scope="col" className="py-1.5 font-medium" />
-              <th scope="col" className="py-1.5 text-right font-medium">
+              <th scope="col" className="py-1.5 pl-3 text-right font-medium">
                 {T.votiUtili}
               </th>
-              <th scope="col" className="py-1.5 text-right font-medium">
+              <th scope="col" className="py-1.5 pl-3 text-right font-medium">
                 {T.camera}
               </th>
-              <th scope="col" className="py-1.5 text-right font-medium">
-                {T.senato} <span className="text-xs">({T.stima})</span>
+              <th scope="col" className="py-1.5 pl-3 text-right font-medium">
+                {T.senato} <span className="block text-xs font-normal">({T.stima})</span>
               </th>
             </tr>
           </thead>
@@ -501,6 +501,7 @@ function Speciali({ esito, speciali, onChange }: { esito: Esito; speciali: { cam
 
 function Regioni({ esito }: { esito: Esito }) {
   const competitori = esito.competitori.filter((c) => c.tipo !== 'locali' && c.senato.proporzionali > 0);
+  const vincitore = esito.competitori.find((c) => c.id === esito.premio.vincitore);
   return (
     <details className="group mt-4 rounded-3xl border p-4 sm:p-5" style={{ borderColor: 'var(--bordo)', background: 'var(--bg-card)' }}>
       <summary className="cursor-pointer list-none text-base font-semibold">
@@ -527,6 +528,11 @@ function Regioni({ esito }: { esito: Esito }) {
                   </span>
                 </th>
               ))}
+              {vincitore && (
+                <th scope="col" className="py-1.5 pl-3 text-right font-medium">
+                  {T.premioRegione(vincitore.nome)}
+                </th>
+              )}
             </tr>
           </thead>
           <tbody>
@@ -541,6 +547,7 @@ function Regioni({ esito }: { esito: Esito }) {
                     {r.seggi[c.id] ?? 0}
                   </td>
                 ))}
+                {vincitore && <td className="py-1.5 pl-3 text-right tabular-nums">+{r.regione.premio}</td>}
               </tr>
             ))}
           </tbody>

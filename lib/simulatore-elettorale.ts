@@ -168,7 +168,8 @@ export const TESTI_SIMULATORE = {
   regioniNota:
     'Stima: i voti nazionali sono distribuiti nelle regioni con la geografia del voto 2022 al Senato. I seggi per regione sono quelli del dossier ufficiale (censimento 2021).',
   regione: 'Regione',
-  seggiRegione: 'Seggi',
+  seggiRegione: 'Seggi proporzionali',
+  premioRegione: (nome: string) => `Premio a ${nome}`,
   regoleTitolo: 'Le regole che applichiamo',
   regole: [
     'Camera: 400 deputati, 8 all’Estero. In Italia 384 seggi si dividono su base nazionale, 8 si votano a parte in Valle d’Aosta e Trentino-Alto Adige (art. 2 e 3 del testo unico Camera).',
