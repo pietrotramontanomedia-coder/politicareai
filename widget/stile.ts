@@ -1,5 +1,16 @@
-/** Stile del simulatore dentro politicare.it: schede bianche, rosso del sito, tutto sotto .pcs. */
-export const CSS = `
+/**
+ * Stile del simulatore dentro politicare.it: schede bianche, rosso del sito.
+ * Ogni regola è preceduta dall'id del contenitore, così vince sugli stili del tema WordPress,
+ * e pulsanti, campi e titoli tornano prima allo stile di base del browser.
+ */
+const RADICE = '#politicare-simulatore';
+
+const RESET = `
+:where(.pcs button),:where(.pcs input),:where(.pcs select),:where(.pcs h3),:where(.pcs h4),:where(.pcs table),:where(.pcs th),:where(.pcs td),:where(.pcs details),:where(.pcs summary),:where(.pcs figure),:where(.pcs label),:where(.pcs ul),:where(.pcs li),:where(.pcs p){all:revert;font-family:inherit;box-sizing:border-box}
+:where(.pcs h3),:where(.pcs h4){color:inherit;letter-spacing:normal;text-transform:none}
+`;
+
+const BASE = `
 .pcs{--pcs-testo:#1f1f1f;--pcs-muto:#6f6f6f;--pcs-bordo:#ececec;--pcs-fondo:#f5f5f5;--pcs-rosso:#d32f2f;--pcs-verde:#1b7a3e;
   font-family:"Google Sans Local",system-ui,sans-serif;color:var(--pcs-testo);font-size:15px;line-height:1.5;margin:24px 0}
 .pcs *{box-sizing:border-box}
@@ -46,6 +57,7 @@ export const CSS = `
 .pcs-avvisi li+li{margin-top:2px}
 .pcs-scorri{overflow-x:auto;margin-top:12px}
 .pcs-tabella{width:100%;border-collapse:collapse;font-size:14px}
+.pcs-tabella td{white-space:nowrap}
 .pcs-tabella th,.pcs-tabella td{padding:8px 6px;border-top:1px solid var(--pcs-bordo);text-align:right;vertical-align:top;font-variant-numeric:tabular-nums}
 .pcs-tabella thead th{border-top:0;font-size:12px;font-weight:600;color:var(--pcs-muto);white-space:nowrap}
 .pcs-tabella th[scope="row"],.pcs-tabella thead th:first-child{text-align:left;font-weight:400}
@@ -68,3 +80,15 @@ export const CSS = `
 .pcs-regole li::before{content:"";position:absolute;left:0;top:9px;width:6px;height:6px;border-radius:50%;background:var(--pcs-rosso)}
 @media(max-width:600px){.pcs-scheda{padding:14px;border-radius:18px}.pcs-select{width:118px}.pcs-numero{width:62px}.pcs-liste li{padding:10px}.pcs-tabella{font-size:13px}}
 `;
+
+/** Mette l'id del contenitore davanti a ogni selettore, anche dentro le @media. */
+function conRadice(css: string): string {
+  return css.replace(/(^|[{}])\s*([^{}@]+)\{/g, (_, chiusa: string, selettori: string) =>
+    `${chiusa}\n${selettori
+      .split(',')
+      .map((s) => `${RADICE} ${s.trim()}`)
+      .join(',')}{`,
+  );
+}
+
+export const CSS = conRadice(RESET + BASE);
