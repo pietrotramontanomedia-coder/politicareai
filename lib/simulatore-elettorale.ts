@@ -76,6 +76,46 @@ export function presetPolitiche2022(colori: Record<string, string>): Preset {
   };
 }
 
+/** Supermedia YouTrend/Agi del 1° ottobre 2026 (sondaggi dal 17 al 30 settembre). */
+export const SUPERMEDIA_1_OTTOBRE_2026: Record<string, number> = {
+  fdi: 26.8,
+  pd: 20.4,
+  m5s: 12.8,
+  futuronazionale: 7.7,
+  fi: 7.4,
+  avs: 6.3,
+  lega: 5.7,
+  azione: 3.2,
+  iv: 2.2,
+  piueuropa: 1.7,
+  pld: 1.3,
+  noimoderati: 1.1,
+};
+
+export function presetSondaggi(partiti: { id: string; nome: string; colore: string }[]): Preset {
+  const coalizione: Record<string, string> = { fdi: 'cdx', fi: 'cdx', lega: 'cdx', noimoderati: 'cdx', pd: 'csx', m5s: 'csx', avs: 'csx', iv: 'csx', piueuropa: 'csx' };
+  const noti = partiti.filter((p) => SUPERMEDIA_1_OTTOBRE_2026[p.id] !== undefined);
+  const somma = noti.reduce((a, p) => a + SUPERMEDIA_1_OTTOBRE_2026[p.id], 0);
+  return {
+    id: 'sondaggi',
+    nome: 'Sondaggi di oggi',
+    descrizione:
+      'I partiti di oggi con la media dei sondaggi. Le coalizioni sono un’ipotesi: il centrodestra di governo e il campo largo come nelle simulazioni del CISE. Cambiale come vuoi. In Valle d’Aosta e Trentino-Alto Adige partiamo da chi ha vinto nel 2022.',
+    fonte: {
+      citazione: 'Supermedia YouTrend/Agi del 1° ottobre 2026',
+      url: 'https://www.youtrend.it/2026/10/07/supermedia-youtrend-agi-il-pd-scende-al-204/',
+    },
+    coalizioni: { cdx: 'Centrodestra', csx: 'Campo largo', terza: 'Terza coalizione' },
+    liste: [
+      ...[...noti]
+        .sort((a, b) => SUPERMEDIA_1_OTTOBRE_2026[b.id] - SUPERMEDIA_1_OTTOBRE_2026[a.id])
+        .map((p) => ({ id: p.id, nome: p.nome, percentuale: SUPERMEDIA_1_OTTOBRE_2026[p.id], coalizione: coalizione[p.id] ?? null, colore: p.colore })),
+      { id: 'altri', nome: 'Altre liste', percentuale: Math.round((100 - somma) * 100) / 100, coalizione: null, colore: '#374151', aggregato: true },
+    ],
+    speciali: { camera: { cdx: 3, csx: 1, [LOCALI_ID]: 4 }, senato: { cdx: 3, csx: 2, [LOCALI_ID]: 2 } },
+  };
+}
+
 export function presetPartitiDiOggi(partiti: { id: string; nome: string; colore: string }[]): Preset {
   return {
     id: 'partiti-oggi',

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   LOCALI,
   presetPolitiche2022,
+  presetSondaggi,
   puntiEmiciclo,
   REGIONI_SENATO,
   REGOLE,
@@ -274,6 +275,23 @@ describe('risultati 2022 con le regole nuove', () => {
   });
 
   it('assegna tutti i seggi', () => {
+    expect(somma(esito, 'seggiCamera')).toBe(392);
+    expect(somma(esito, 'seggiSenato')).toBe(196);
+  });
+});
+
+describe('sondaggi di oggi (Supermedia YouTrend/Agi del 1° ottobre 2026)', () => {
+  const partiti = ['fdi', 'pd', 'm5s', 'lega', 'fi', 'avs', 'futuronazionale', 'azione', 'iv', 'piueuropa', 'noimoderati', 'pld', 'ora'].map((id) => ({ id, nome: id, colore: '#000' }));
+  const p = presetSondaggi(partiti);
+
+  it('somma al 100% con le altre liste e lascia fuori chi non è nella Supermedia', () => {
+    expect(Math.round(p.liste.reduce((a, l) => a + l.percentuale, 0) * 100) / 100).toBe(100);
+    expect(p.liste.find((l) => l.id === 'altri')!.percentuale).toBeCloseTo(3.4);
+    expect(p.liste.map((l) => l.id)).not.toContain('ora');
+  });
+
+  it('assegna tutti i seggi', () => {
+    const esito = simula(p.liste, { coalizioni: p.coalizioni, speciali: p.speciali, geografia: GEOGRAFIA_SENATO_2022 });
     expect(somma(esito, 'seggiCamera')).toBe(392);
     expect(somma(esito, 'seggiSenato')).toBe(196);
   });
