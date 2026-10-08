@@ -1,6 +1,6 @@
 import { spezzaMessaggi, testoInHtml } from '@/lib/avviso-telegram';
 import { autorizzatoCron } from '@/lib/cron';
-import { avvisiTelegramConfigurati, inviaAvvisoTelegram } from '@/lib/radar-telegram-server';
+import { avvisiTelegramConfigurati, chiHaScrittoAlBot, inviaAvvisoTelegram } from '@/lib/radar-telegram-server';
 
 /**
  * Avviso privato a Pietro su Telegram, con il bot del radar (@politicareradar_bot).
@@ -27,4 +27,16 @@ export async function POST(request: Request) {
   const messaggi = spezzaMessaggi(testo);
   for (const messaggio of messaggi) await inviaAvvisoTelegram(testoInHtml(messaggio));
   return Response.json({ ok: true, messaggi: messaggi.length });
+}
+
+/** GET con lo stesso Bearer: elenca chi ha scritto al bot (per aggiungere destinatari in RADAR_TELEGRAM_CHAT_EXTRA). */
+export async function GET(request: Request) {
+  if (!autorizzatoCron(request.headers.get('authorization'), process.env.CRON_SECRET)) {
+    return Response.json({ ok: false, error: 'non autorizzato' }, { status: 401 });
+  }
+  try {
+    return Response.json({ ok: true, chat: await chiHaScrittoAlBot() });
+  } catch (e) {
+    return Response.json({ ok: false, error: (e as Error).message }, { status: 500 });
+  }
 }
