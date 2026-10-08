@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import {
   FONTI_LEGGE,
@@ -33,6 +33,8 @@ export default function Simulatore({ preset, geografia, incorporato = false }: {
   const [maggioranzeDiverse, setMaggioranzeDiverse] = useState(false);
   const [speciali, setSpeciali] = useState<Speciali>(specialiDi(preset[0]));
   const [bloccate, setBloccate] = useState<Set<string>>(new Set());
+  // Il riequilibrio legge sempre i lucchetti più recenti, anche se il clic arriva nello stesso istante.
+  const lucchetti = useRef<Set<string>>(new Set());
 
   const esito = useMemo(
     () => simula(liste, { coalizioni, maggioranzeDiverse, speciali, geografia }),
@@ -46,6 +48,7 @@ export default function Simulatore({ preset, geografia, incorporato = false }: {
     setCoalizioni(p.coalizioni);
     setMaggioranzeDiverse(false);
     setSpeciali(specialiDi(p));
+    lucchetti.current = new Set();
     setBloccate(new Set());
   };
 
@@ -54,6 +57,7 @@ export default function Simulatore({ preset, geografia, incorporato = false }: {
       const nuove = new Set(prec);
       if (nuove.has(id)) nuove.delete(id);
       else nuove.add(id);
+      lucchetti.current = nuove;
       return nuove;
     });
 
@@ -62,7 +66,7 @@ export default function Simulatore({ preset, geografia, incorporato = false }: {
 
   const impostaPercentuale = (id: string, valore: string) => {
     const n = Number.parseFloat(valore.replace(',', '.'));
-    setListe((prec) => ribilancia(prec, id, Number.isFinite(n) ? Math.min(100, Math.max(0, n)) : 0, bloccate));
+    setListe((prec) => ribilancia(prec, id, Number.isFinite(n) ? Math.min(100, Math.max(0, n)) : 0, lucchetti.current));
   };
 
   return (
