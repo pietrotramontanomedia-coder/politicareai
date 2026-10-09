@@ -90,27 +90,24 @@ export default function VisoreStorie({
     <Finestra titolo={T.di(gruppo.autore, gruppo.storie.length)} onChiudi={onChiudi} scura>
       <div className="relative mx-auto flex h-dvh w-full max-w-[min(100%,calc(92dvh*9/16))] flex-col justify-center sm:h-auto">
         <div className="relative">
-          {versione.storia && (
-            <AnteprimaStoria
-              storia={versione.storia}
-              immagine={versione.immagini[0] ? urlMedia(versione.immagini[0]) : null}
-              autore={gruppo.autore}
-              quando={formattaDataRelativa(versione.inviataIl)}
-              className="w-full"
-              sopra={
-                <div className="flex gap-1" aria-hidden>
-                  {gruppo.storie.map((s, i) => (
-                    <span key={s.id} className="h-0.5 flex-1 overflow-hidden rounded-full" style={{ background: 'rgba(255,255,255,0.35)' }}>
-                      <span
-                        className="block h-full bg-white"
-                        style={{ width: i < posizione.s ? '100%' : i === posizione.s ? `${(posizione.trascorso / DURATA_MS) * 100}%` : '0%', transition: 'none' }}
-                      />
-                    </span>
-                  ))}
-                </div>
-              }
-            />
-          )}
+          <AnteprimaStoria
+            immagine={versione.immagini[0] ? urlMedia(versione.immagini[0]) : null}
+            autore={gruppo.autore}
+            quando={formattaDataRelativa(versione.inviataIl)}
+            className="w-full"
+            sopra={
+              <div className="flex gap-1" aria-hidden>
+                {gruppo.storie.map((s, i) => (
+                  <span key={s.id} className="h-0.5 flex-1 overflow-hidden rounded-full" style={{ background: 'rgba(255,255,255,0.35)' }}>
+                    <span
+                      className="block h-full bg-white"
+                      style={{ width: i < posizione.s ? '100%' : i === posizione.s ? `${(posizione.trascorso / DURATA_MS) * 100}%` : '0%', transition: 'none' }}
+                    />
+                  </span>
+                ))}
+              </div>
+            }
+          />
           {/* Metà sinistra e destra della storia per andare indietro e avanti, come nell'app. */}
           <button type="button" onClick={() => vai(-1)} className="absolute inset-y-0 left-0 w-1/3" aria-label={T.precedente} />
           <button type="button" onClick={() => vai(1)} className="absolute inset-y-0 right-0 w-2/3" aria-label={T.successiva} />

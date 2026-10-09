@@ -2,19 +2,20 @@
 
 `/redazione` è la palestra interna dei ragazzi della redazione: pubblicano post e storie come
 su Instagram, e chi coordina vede tutto, lascia correzioni e consigli e segue come lavora
-ognuno. Nulla esce dal portale: niente viene pubblicato sui social, le foto sono private e la
+ognuno. Le grafiche si fanno nel generatore (https://politicare-storie.vercel.app): qui si
+pubblicano soltanto. Nulla esce dal portale: niente viene pubblicato sui social, le foto sono private e la
 pagina non è indicizzata. Non ha legami con il profilo pubblico dell'app né con il test partiti.
 
 ## Come funziona
 
 **Chi scrive (redattore)** entra con il proprio nome e il codice della redazione.
 
-- *+ Post*: fino a 10 foto (carosello), formato 4:5 o 1:1, didascalia con i limiti di
-  Instagram (2200 caratteri, 30 hashtag). Anteprima dal vivo com'è nell'app.
-- *+ Storia*: foto di sfondo facoltativa, testo, posizione, colori, riquadro dietro il testo.
+- *+ Post*: le card fatte col generatore (fino a 10, carosello 4:5) più il copy, obbligatorio,
+  con i limiti di Instagram (2200 caratteri, 30 hashtag). Anteprima dal vivo com'è nell'app.
+- *+ Storia*: una sola immagine 9:16 fatta col generatore, nient'altro.
 - *Feed*: i post di tutti e, in cima, i cerchi con le storie delle ultime 24 ore.
-- *Il mio profilo*: la griglia dei propri contenuti con lo stato di ciascuno. Se qualcosa è
-  *da correggere* compare un avviso; si apre, si leggono le correzioni e si pubblica una
+- *Il mio profilo*: il pulsante *Apri il generatore* e la griglia dei propri contenuti con lo
+  stato di ciascuno. Se qualcosa è *da correggere* compare un avviso; si apre, si leggono le correzioni e si pubblica una
   nuova versione. Le versioni precedenti restano consultabili.
 
 **Chi corregge (revisore)** entra con il codice dei revisori e ha in più:
@@ -63,7 +64,7 @@ components/redazione/    portale, compositore, anteprime, dettaglio, visore dell
 test/redazione.test.ts
 ```
 
-- **Foto**: il browser le riduce (lato lungo 1920 px, JPEG) prima di caricarle, una per
+- **Foto**: il browser le riduce (lato lungo 1920 px, JPEG di qualità alta perché sono card con testo) prima di caricarle, una per
   richiesta, così si resta sotto il limite di 4,5 MB delle funzioni Vercel e i dati EXIF
   (posizione compresa) non arrivano al server. Il server accetta solo JPEG, PNG e WebP veri,
   riconosciuti dai primi byte.

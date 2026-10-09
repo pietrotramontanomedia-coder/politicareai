@@ -3,11 +3,9 @@ import type {
   Commento,
   Contenuto,
   FormatoPost,
-  PosizioneTesto,
   SessioneRedazione,
   StatistichePersona,
   StatoContenuto,
-  Storia,
   TipoCommento,
   TipoContenuto,
 } from './tipi';
@@ -23,7 +21,6 @@ export const LIMITI = {
   didascalia: 2200,
   hashtag: 30,
   immaginiPost: 10,
-  testoStoria: 300,
   commento: 2000,
   /** Byte massimi di un'immagine già ridotta dal browser: sotto il tetto di 4,5 MB delle funzioni Vercel. */
   byteImmagine: 4 * 1024 * 1024,
@@ -32,15 +29,13 @@ export const LIMITI = {
 /** Ore in cui una storia resta nel cerchio in cima al feed, come su Instagram. */
 export const ORE_STORIA = 24;
 
-export const COLORI_SFONDO_STORIA = ['#0a0a0a', '#FEDC01', '#1E3A8A', '#B91C1C', '#15803D', '#7C3AED', '#F5F5F4'] as const;
-export const COLORI_TESTO_STORIA = ['#FFFFFF', '#0a0a0a', '#FEDC01'] as const;
+/** Dove si fanno card e storie: nel portale si pubblicano soltanto. */
+export const URL_GENERATORE = 'https://politicare-storie.vercel.app';
 
 export const STATI: StatoContenuto[] = ['da_rivedere', 'da_correggere', 'approvato'];
 export const TIPI_COMMENTO_REVISORE: TipoCommento[] = ['correzione', 'consiglio', 'complimento'];
 
 const FORMATI: FormatoPost[] = ['1:1', '4:5'];
-const POSIZIONI: PosizioneTesto[] = ['alto', 'centro', 'basso'];
-const ESADECIMALE = /^#[0-9a-fA-F]{6}$/;
 /** Identificativi generati dal server (UUID senza trattini): nient'altro entra nei percorsi dell'archivio. */
 export const ID_VALIDO = /^[a-f0-9]{32}$/;
 
@@ -77,28 +72,18 @@ export function validaBozza(tipo: TipoContenuto, dati: unknown): Esito<BozzaVers
   if (new Set(immagini).size !== immagini.length) return errore('La stessa immagine compare due volte.');
 
   if (tipo === 'post') {
-    if (immagini.length === 0) return errore('Un post ha bisogno di almeno una foto.');
-    if (immagini.length > LIMITI.immaginiPost) return errore(`Al massimo ${LIMITI.immaginiPost} foto per post.`);
+    if (immagini.length === 0) return errore('Un post ha bisogno di almeno una card.');
+    if (immagini.length > LIMITI.immaginiPost) return errore(`Al massimo ${LIMITI.immaginiPost} card per post.`);
     const didascalia = testo(d.didascalia);
-    if (didascalia.length > LIMITI.didascalia) return errore(`La didascalia supera i ${LIMITI.didascalia} caratteri.`);
+    if (!didascalia) return errore('Scrivi il copy del post.');
+    if (didascalia.length > LIMITI.didascalia) return errore(`Il copy supera i ${LIMITI.didascalia} caratteri.`);
     if (contaHashtag(didascalia) > LIMITI.hashtag) return errore(`Al massimo ${LIMITI.hashtag} hashtag.`);
     const formato = FORMATI.includes(d.formato as FormatoPost) ? (d.formato as FormatoPost) : '4:5';
-    return { ok: true, valore: { immagini: immagini as string[], didascalia, formato, storia: null } };
+    return { ok: true, valore: { immagini: immagini as string[], didascalia, formato } };
   }
 
-  if (immagini.length > 1) return errore('Una storia ha una sola immagine.');
-  const s = (d.storia && typeof d.storia === 'object' ? d.storia : {}) as Record<string, unknown>;
-  const scritta = testo(s.testo);
-  if (scritta.length > LIMITI.testoStoria) return errore(`Il testo della storia supera i ${LIMITI.testoStoria} caratteri.`);
-  if (immagini.length === 0 && !scritta) return errore('Una storia ha bisogno di una foto o di un testo.');
-  const storia: Storia = {
-    testo: scritta,
-    posizione: POSIZIONI.includes(s.posizione as PosizioneTesto) ? (s.posizione as PosizioneTesto) : 'centro',
-    sfondo: typeof s.sfondo === 'string' && ESADECIMALE.test(s.sfondo) ? s.sfondo : COLORI_SFONDO_STORIA[0],
-    coloreTesto: typeof s.coloreTesto === 'string' && ESADECIMALE.test(s.coloreTesto) ? s.coloreTesto : COLORI_TESTO_STORIA[0],
-    riquadro: s.riquadro === true,
-  };
-  return { ok: true, valore: { immagini: immagini as string[], didascalia: '', formato: '1:1', storia } };
+  if (immagini.length !== 1) return errore('Una storia è una sola immagine.');
+  return { ok: true, valore: { immagini: immagini as string[], didascalia: '', formato: '1:1' } };
 }
 
 export function nuovoContenuto(id: string, tipo: TipoContenuto, autore: string, bozza: BozzaVersione, adesso: Date): Contenuto {

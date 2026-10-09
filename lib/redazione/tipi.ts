@@ -19,29 +19,18 @@ export type StatoContenuto = 'da_rivedere' | 'da_correggere' | 'approvato';
 
 export type FormatoPost = '1:1' | '4:5';
 
-export type PosizioneTesto = 'alto' | 'centro' | 'basso';
-
-export interface Storia {
-  testo: string;
-  posizione: PosizioneTesto;
-  /** Sfondo quando non c'è un'immagine (o dietro un'immagine che non copre tutto). */
-  sfondo: string;
-  coloreTesto: string;
-  /** Riquadro scuro dietro il testo, per leggerlo sopra una foto. */
-  riquadro: boolean;
-}
-
 /** Una stesura: ogni correzione dell'autore aggiunge una versione, le precedenti restano. */
 export interface Versione {
   numero: number;
   inviataIl: string;
-  /** Identificativi delle immagini nell'archivio, nell'ordine del carosello. */
+  /**
+   * Identificativi delle immagini nell'archivio: le card del post nell'ordine del carosello, o
+   * l'unica immagine della storia. Le grafiche si fanno nel generatore, qui si pubblicano.
+   */
   immagini: string[];
-  /** Solo per i post. */
+  /** Il copy del post (vuoto per le storie). */
   didascalia: string;
   formato: FormatoPost;
-  /** Solo per le storie. */
-  storia: Storia | null;
 }
 
 export type TipoCommento = 'correzione' | 'consiglio' | 'complimento' | 'risposta';
@@ -75,7 +64,6 @@ export interface BozzaVersione {
   immagini: string[];
   didascalia: string;
   formato: FormatoPost;
-  storia: Storia | null;
 }
 
 export interface StatistichePersona {
