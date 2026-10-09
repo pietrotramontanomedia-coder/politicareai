@@ -5,8 +5,9 @@ import type { Contenuto } from './tipi';
 
 /*
  * Avviso su Telegram a ogni pubblicazione della redazione: le card (o la storia) con il copy e il
- * link al portale, in un canale di chi corregge. Usa il bot del radar (o uno suo, se impostato),
- * mai quello del ponte Telegram → X: un post della redazione non deve poter finire su X.
+ * link al portale, in un canale di chi corregge. Ha un bot tutto suo (@politicareredazione_bot),
+ * separato dal radar e soprattutto dal ponte Telegram → X: un post della redazione non deve poter
+ * finire su X.
  */
 
 const API = 'https://api.telegram.org';
@@ -14,7 +15,7 @@ const API = 'https://api.telegram.org';
 const MASSIMO_DIDASCALIA = 1024;
 
 function configurazione(): { token: string; chat: string } | null {
-  const token = process.env.REDAZIONE_TELEGRAM_BOT_TOKEN || process.env.RADAR_TELEGRAM_BOT_TOKEN;
+  const token = process.env.REDAZIONE_TELEGRAM_BOT_TOKEN;
   const chat = process.env.REDAZIONE_TELEGRAM_CHAT;
   return token && chat ? { token, chat } : null;
 }
@@ -44,14 +45,15 @@ export function testoAvviso(contenuto: Contenuto, link: string): string {
   return `${titolo}\n\n${html(copy)}${coda}`;
 }
 
-async function chiama(token: string, metodo: string, corpo: FormData | object): Promise<void> {
+async function chiama<T = unknown>(token: string, metodo: string, corpo: FormData | object = {}): Promise<T> {
   const risposta = await fetch(`${API}/bot${token}/${metodo}`, {
     method: 'POST',
     ...(corpo instanceof FormData ? { body: corpo } : { headers: { 'content-type': 'application/json' }, body: JSON.stringify(corpo) }),
     cache: 'no-store',
   });
-  const esito = (await risposta.json().catch(() => ({}))) as { ok?: boolean; description?: string };
+  const esito = (await risposta.json().catch(() => ({}))) as { ok?: boolean; description?: string; result?: T };
   if (!esito.ok) throw new Error(`${metodo} fallito: ${esito.description ?? risposta.status}`);
+  return esito.result as T;
 }
 
 /**
@@ -109,4 +111,33 @@ export function avvisaDopoLaRisposta(request: Request, contenuto: Contenuto): vo
   } catch {
     void invia();
   }
+}
+
+type Chat = { id: number; type?: string; title?: string; first_name?: string; username?: string };
+
+/**
+ * Per accendere gli avvisi: il nome del bot, la chat impostata e le chat dove il bot è stato
+ * aggiunto di recente (getUpdates), così si trova l'id del canale da mettere in REDAZIONE_TELEGRAM_CHAT.
+ */
+export async function statoBotRedazione(): Promise<{ bot: string; chatImpostata: string | null; chatViste: { id: number; nome: string; tipo: string }[] }> {
+  const token = process.env.REDAZIONE_TELEGRAM_BOT_TOKEN;
+  if (!token) throw new Error('REDAZIONE_TELEGRAM_BOT_TOKEN mancante');
+  const io = await chiama<{ username?: string }>(token, 'getMe');
+  const aggiornamenti = await chiama<{ message?: { chat?: Chat }; channel_post?: { chat?: Chat }; my_chat_member?: { chat?: Chat } }[]>(token, 'getUpdates');
+  const viste = new Map<number, { id: number; nome: string; tipo: string }>();
+  for (const u of aggiornamenti) {
+    const c = u.channel_post?.chat ?? u.my_chat_member?.chat ?? u.message?.chat;
+    if (c) viste.set(c.id, { id: c.id, nome: c.title ?? c.first_name ?? c.username ?? '', tipo: c.type ?? '' });
+  }
+  return { bot: `@${io.username}`, chatImpostata: process.env.REDAZIONE_TELEGRAM_CHAT ?? null, chatViste: [...viste.values()] };
+}
+
+/** Messaggio di prova nella chat impostata. */
+export async function provaBotRedazione(): Promise<void> {
+  const conf = configurazione();
+  if (!conf) throw new Error('REDAZIONE_TELEGRAM_BOT_TOKEN o REDAZIONE_TELEGRAM_CHAT mancante');
+  await chiama(conf.token, 'sendMessage', {
+    chat_id: conf.chat,
+    text: '✅ Avvisi della redazione attivi: qui arriverà ogni post, storia e nuova versione pubblicata nel portale.',
+  });
 }

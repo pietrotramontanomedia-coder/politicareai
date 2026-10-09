@@ -46,15 +46,17 @@ chi coordina. Il portale si aggiorna da solo ogni minuto.
 ## Avvisi su Telegram
 
 A ogni post, storia o nuova versione arriva nel canale della redazione un messaggio con le card
-(o la storia), il copy e il link che apre il contenuto nel portale. Usa il bot del radar
-(@politicareradar_bot), mai quello del ponte verso X.
+(o la storia), il copy e il link che apre il contenuto nel portale. Il bot è tutto suo,
+@politicareredazione_bot: niente in comune con il radar né con il ponte verso X.
 
-1. Creare un canale Telegram (privato va benissimo) e aggiungere @politicareradar_bot come
-   amministratore con il permesso di pubblicare.
-2. Trovare l'id del canale: `GET /api/avviso` con `Authorization: Bearer <CRON_SECRET>` elenca
-   anche i canali in cui il bot è stato aggiunto (id che inizia con -100).
-3. Su Vercel: `REDAZIONE_TELEGRAM_CHAT` = quell'id (facoltativo `REDAZIONE_TELEGRAM_BOT_TOKEN`
-   per un bot dedicato), poi rifare il deploy.
+1. Creare il bot con @BotFather (`/newbot`, username `politicareredazione_bot`) e mettere il
+   token su Vercel in `REDAZIONE_TELEGRAM_BOT_TOKEN`.
+2. Creare un canale (privato va benissimo) e aggiungere il bot come amministratore con il
+   permesso di pubblicare.
+3. Trovare l'id del canale: `GET /api/redazione/telegram` con `Authorization: Bearer <CRON_SECRET>`
+   elenca le chat in cui il bot è stato aggiunto (l'id di un canale inizia con -100).
+4. Su Vercel: `REDAZIONE_TELEGRAM_CHAT` = quell'id, poi rifare il deploy. `POST` sullo stesso
+   indirizzo manda un messaggio di prova.
 
 Se Telegram non risponde la pubblicazione va comunque a buon fine; se le foto non partono
 arriva almeno il testo.
