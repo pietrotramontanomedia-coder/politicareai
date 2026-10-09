@@ -14,8 +14,16 @@ const API = 'https://api.telegram.org';
 /** Tetto di Telegram per la didascalia di una foto. */
 const MASSIMO_DIDASCALIA = 1024;
 
+/** Il token copiato da BotFather arriva spesso con spazi, a capo o virgolette attorno: si tolgono. */
+function tokenBot(): string | undefined {
+  return process.env.REDAZIONE_TELEGRAM_BOT_TOKEN?.replace(/[\s"'`]/g, '') || undefined;
+}
+
+/** Forma di un token di BotFather: numeri, due punti, 35 caratteri. */
+const FORMA_TOKEN = /^\d{6,}:[A-Za-z0-9_-]{30,}$/;
+
 function configurazione(): { token: string; chat: string } | null {
-  const token = process.env.REDAZIONE_TELEGRAM_BOT_TOKEN;
+  const token = tokenBot();
   const chat = process.env.REDAZIONE_TELEGRAM_CHAT;
   return token && chat ? { token, chat } : null;
 }
@@ -120,8 +128,10 @@ type Chat = { id: number; type?: string; title?: string; first_name?: string; us
  * aggiunto di recente (getUpdates), così si trova l'id del canale da mettere in REDAZIONE_TELEGRAM_CHAT.
  */
 export async function statoBotRedazione(): Promise<{ bot: string; chatImpostata: string | null; chatViste: { id: number; nome: string; tipo: string }[] }> {
-  const token = process.env.REDAZIONE_TELEGRAM_BOT_TOKEN;
+  const token = tokenBot();
   if (!token) throw new Error('REDAZIONE_TELEGRAM_BOT_TOKEN mancante');
+  // Senza mai mostrare il token: dice solo se ha la forma giusta, per capire un «Not Found».
+  if (!FORMA_TOKEN.test(token)) throw new Error(`il token non ha la forma di BotFather (numeri:lettere); lunghezza ${token.length}, due punti ${token.includes(':') ? 'presenti' : 'assenti'}`);
   const io = await chiama<{ username?: string }>(token, 'getMe');
   const aggiornamenti = await chiama<{ message?: { chat?: Chat }; channel_post?: { chat?: Chat }; my_chat_member?: { chat?: Chat } }[]>(token, 'getUpdates');
   const viste = new Map<number, { id: number; nome: string; tipo: string }>();
