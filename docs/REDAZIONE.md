@@ -47,14 +47,14 @@ chi coordina. Il portale si aggiorna da solo ogni minuto.
 
 A ogni post, storia o nuova versione arriva nel canale della redazione un messaggio con le card
 (o la storia), il copy e il link che apre il contenuto nel portale. Il bot è tutto suo,
-@politicareredazione_bot: niente in comune con il radar né con il ponte verso X.
+@redazionepoliticare_bot: niente in comune con il radar né con il ponte verso X.
 
-1. Creare il bot con @BotFather (`/newbot`, username `politicareredazione_bot`) e mettere il
+1. Creare il bot con @BotFather (`/newbot`, username `redazionepoliticare_bot`) e mettere il
    token su Vercel in `REDAZIONE_TELEGRAM_BOT_TOKEN`.
-2. Creare un canale (privato va benissimo) e aggiungere il bot come amministratore con il
-   permesso di pubblicare.
+2. Aggiungere il bot a un gruppo (oggi «POLITICARE TRAINING») o, se si preferisce un canale,
+   come amministratore con il permesso di pubblicare.
 3. Trovare l'id del canale: `GET /api/redazione/telegram` con `Authorization: Bearer <CRON_SECRET>`
-   elenca le chat in cui il bot è stato aggiunto (l'id di un canale inizia con -100).
+   elenca le chat in cui il bot è stato aggiunto (l'id di un gruppo o di un canale è negativo).
 4. Su Vercel: `REDAZIONE_TELEGRAM_CHAT` = quell'id, poi rifare il deploy. `POST` sullo stesso
    indirizzo manda un messaggio di prova.
 

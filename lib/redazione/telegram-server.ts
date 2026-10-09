@@ -5,7 +5,7 @@ import type { Contenuto } from './tipi';
 
 /*
  * Avviso su Telegram a ogni pubblicazione della redazione: le card (o la storia) con il copy e il
- * link al portale, in un canale di chi corregge. Ha un bot tutto suo (@politicareredazione_bot),
+ * link al portale, in un canale di chi corregge. Ha un bot tutto suo (@redazionepoliticare_bot),
  * separato dal radar e soprattutto dal ponte Telegram → X: un post della redazione non deve poter
  * finire su X.
  */
