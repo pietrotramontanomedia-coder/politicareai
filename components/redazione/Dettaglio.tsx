@@ -3,8 +3,8 @@
 import { useId, useState } from 'react';
 import Avatar from '@/components/profilo/Avatar';
 import { formattaDataEstesa, formattaDataRelativa } from '@/lib/data-ora';
-import { coloreDaNome, commenta, eliminaContenuto, urlMedia } from '@/lib/redazione/client';
-import { chiaveNome, puoEliminare, puoModificare, puoVedereCommenti, TIPI_COMMENTO_REVISORE } from '@/lib/redazione/regole';
+import { coloreDaNome, commenta, eliminaContenuto, ripristinaContenuto, urlMedia } from '@/lib/redazione/client';
+import { chiaveNome, eliminato, puoEliminare, puoModificare, puoVedereCommenti, TIPI_COMMENTO_REVISORE } from '@/lib/redazione/regole';
 import { TESTI_REDAZIONE } from '@/lib/redazione/testi';
 import type { Contenuto, SessioneRedazione, StatoContenuto, TipoCommento } from '@/lib/redazione/tipi';
 import AnteprimaPost from './AnteprimaPost';
@@ -69,7 +69,20 @@ export default function Dettaglio({
     }
   }
 
+  async function rimetti() {
+    setInvio(true);
+    setErrore(null);
+    try {
+      onAggiornato(await ripristinaContenuto(contenuto.id));
+    } catch (e) {
+      setErrore(e instanceof Error ? e.message : T.errore);
+    } finally {
+      setInvio(false);
+    }
+  }
+
   const immagini = versione.immagini.map(urlMedia);
+  const nelCestino = eliminato(contenuto);
 
   return (
     <Finestra titolo={`${TESTI_REDAZIONE.feed.apri}: ${contenuto.autore}`} onChiudi={onChiudi} larga>
@@ -110,13 +123,25 @@ export default function Dettaglio({
             <AnteprimaStoria immagine={immagini[0] ?? null} autore={contenuto.autore} className="mx-auto max-w-[20rem]" />
           )}
 
+          {nelCestino && (
+            <div className="mt-4 flex flex-wrap items-center gap-3 rounded-2xl border p-3 text-sm" role="status" style={{ borderColor: 'var(--bordo)' }}>
+              <span className="flex-1">{T.eliminatoDa(contenuto.eliminatoDa ?? '', formattaDataRelativa(contenuto.eliminatoIl!))}</span>
+              {revisore && (
+                <button type="button" onClick={rimetti} disabled={invio} className="rounded-full px-4 py-2 font-bold" style={{ background: 'var(--accento)', color: '#0a0a0a' }}>
+                  {T.ripristina}
+                </button>
+              )}
+            </div>
+          )}
+
           <div className="mt-4 flex flex-wrap gap-2">
-            {puoModificare(sessione, contenuto) && (
+            {!nelCestino && puoModificare(sessione, contenuto) && (
               <button type="button" onClick={() => onCorreggi(contenuto)} className="rounded-full px-4 py-2 text-sm font-bold" style={{ background: 'var(--accento)', color: '#0a0a0a' }}>
                 {T.correggi}
               </button>
             )}
-            {puoEliminare(sessione, contenuto) &&
+            {!nelCestino &&
+              puoEliminare(sessione, contenuto) &&
               (conferma ? (
                 <span className="flex flex-wrap items-center gap-2 text-sm" role="alert">
                   {T.confermaElimina}

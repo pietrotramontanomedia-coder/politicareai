@@ -51,12 +51,25 @@ export async function eliminaContenuto(id: string): Promise<void> {
   await api(`/api/redazione/contenuti/${id}`, { method: 'DELETE' });
 }
 
+export async function ripristinaContenuto(id: string): Promise<Contenuto> {
+  return (await api<{ contenuto: Contenuto }>(`/api/redazione/contenuti/${id}`, { method: 'PATCH' })).contenuto;
+}
+
 export async function commenta(id: string, dati: { tipo: TipoCommento; testo: string; stato: StatoContenuto | null }): Promise<Contenuto> {
   return (await api<{ contenuto: Contenuto }>(`/api/redazione/contenuti/${id}/commenti`, json('POST', dati))).contenuto;
 }
 
+/** Carica un'immagine; se cade la rete o il server inciampa riprova, così la pubblicazione non salta. */
 export async function caricaFoto(foto: Blob): Promise<string> {
-  return (await api<{ id: string }>('/api/redazione/media', { method: 'POST', headers: { 'content-type': foto.type }, body: foto })).id;
+  for (let tentativo = 1; ; tentativo++) {
+    try {
+      return (await api<{ id: string }>('/api/redazione/media', { method: 'POST', headers: { 'content-type': foto.type }, body: foto })).id;
+    } catch (errore) {
+      const definitivo = errore instanceof ErroreApi && errore.status >= 400 && errore.status < 500;
+      if (definitivo || tentativo >= 3) throw errore;
+      await new Promise((r) => setTimeout(r, 1000 * tentativo));
+    }
+  }
 }
 
 /** Lato lungo massimo delle foto caricate: abbastanza per una storia a 1080×1920. */
