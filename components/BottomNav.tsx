@@ -63,7 +63,7 @@ export default function BottomNav() {
   const chiudi = () => setAperto(false);
   const inPannello = ROTTE_PANNELLO.some((r) => pathname.startsWith(r));
 
-  if (pathname.startsWith('/incorpora')) return null;
+  if (pathname.startsWith('/incorpora') || pathname.startsWith('/redazione')) return null;
 
   return (
     <MotionConfig reducedMotion="user">

@@ -7,8 +7,9 @@ import NotificationBell from './NotificationBell';
 import PulsanteProfilo from './profilo/PulsanteProfilo';
 
 export default function Header() {
-  // Le pagine incorporate in politicare.it non hanno il menu dell'app.
-  if (usePathname()?.startsWith('/incorpora')) return null;
+  // Le pagine incorporate in politicare.it e il portale della redazione non hanno il menu dell'app.
+  const pathname = usePathname();
+  if (pathname?.startsWith('/incorpora') || pathname?.startsWith('/redazione')) return null;
   return (
     <header
       className="sticky top-0 z-50 border-b backdrop-blur-md"
