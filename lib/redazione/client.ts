@@ -62,7 +62,10 @@ export async function caricaFoto(foto: Blob): Promise<string> {
 /** Lato lungo massimo delle foto caricate: abbastanza per una storia a 1080×1920. */
 const LATO_MASSIMO = 1920;
 
-/** Riduce e ricomprime la foto nel browser: meno attesa, meno spazio, niente dati EXIF (posizione compresa). */
+/**
+ * Riduce e ricomprime l'immagine nel browser: meno attesa, meno spazio, niente dati EXIF (posizione
+ * compresa). Qualità alta perché sono card con testo, dove la compressione si vede.
+ */
 export async function riduciFoto(file: File): Promise<Blob> {
   const bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
   try {
@@ -76,7 +79,7 @@ export async function riduciFoto(file: File): Promise<Blob> {
     if (!ctx) throw new Error('canvas non disponibile');
     ctx.drawImage(bitmap, 0, 0, larghezza, altezza);
     return await new Promise<Blob>((risolvi, rifiuta) =>
-      tela.toBlob((blob) => (blob ? risolvi(blob) : rifiuta(new Error('compressione non riuscita'))), 'image/jpeg', 0.85),
+      tela.toBlob((blob) => (blob ? risolvi(blob) : rifiuta(new Error('compressione non riuscita'))), 'image/jpeg', 0.92),
     );
   } finally {
     bitmap.close();

@@ -107,7 +107,7 @@ export default function Dettaglio({
           {contenuto.tipo === 'post' ? (
             <AnteprimaPost key={numero} autore={contenuto.autore} immagini={immagini} didascalia={versione.didascalia} formato={versione.formato} />
           ) : (
-            versione.storia && <AnteprimaStoria storia={versione.storia} immagine={immagini[0] ?? null} autore={contenuto.autore} className="mx-auto max-w-[20rem]" />
+            <AnteprimaStoria immagine={immagini[0] ?? null} autore={contenuto.autore} className="mx-auto max-w-[20rem]" />
           )}
 
           <div className="mt-4 flex flex-wrap gap-2">

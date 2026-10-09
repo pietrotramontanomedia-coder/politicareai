@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import Avatar from '@/components/profilo/Avatar';
 import { formattaDataRelativa } from '@/lib/data-ora';
 import { caricaContenuti, coloreDaNome, ErroreApi, esci, urlMedia } from '@/lib/redazione/client';
-import { chiaveNome, codaRevisione, puoVedereCommenti, statistiche, storieRecenti, versioneCorrente } from '@/lib/redazione/regole';
+import { chiaveNome, codaRevisione, puoVedereCommenti, statistiche, storieRecenti, URL_GENERATORE, versioneCorrente } from '@/lib/redazione/regole';
 import { TESTI_REDAZIONE } from '@/lib/redazione/testi';
 import type { Contenuto, SessioneRedazione, TipoContenuto } from '@/lib/redazione/tipi';
 import AccessoRedazione from './AccessoRedazione';
@@ -23,14 +23,14 @@ type Vista = 'feed' | 'profilo' | 'revisione' | 'squadra';
 
 /* ---------- Pezzi ---------- */
 
-/** Copertina di un contenuto per griglie ed elenchi: prima foto, o la storia in piccolo. */
+/** Copertina di un contenuto per griglie ed elenchi: prima card, o la storia in piccolo. */
 function Copertina({ contenuto, conStato }: { contenuto: Contenuto; conStato: boolean }) {
   const v = versioneCorrente(contenuto);
   const prima = v.immagini[0] ? urlMedia(v.immagini[0]) : null;
   return (
     <span className="relative block w-full overflow-hidden bg-black">
-      {contenuto.tipo === 'storia' && v.storia ? (
-        <AnteprimaStoria storia={v.storia} immagine={prima} piccola />
+      {contenuto.tipo === 'storia' ? (
+        <AnteprimaStoria immagine={prima} piccola />
       ) : (
         <span className="block" style={{ aspectRatio: '4 / 5' }}>
           {/* eslint-disable-next-line @next/next/no-img-element -- foto private servite dalle API del portale */}
@@ -270,6 +270,23 @@ export default function PortaleRedazione({ sessioneIniziale, configurata }: { se
             </p>
           </div>
         </div>
+
+        {mio && (
+          <div className="mt-5">
+            <a
+              href={URL_GENERATORE}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block w-full rounded-xl py-2 text-center text-sm font-bold"
+              style={{ background: 'rgba(255,255,255,0.08)' }}
+            >
+              {T.profilo.generatore}
+            </a>
+            <p className="mt-1.5 text-center text-xs" style={{ color: 'var(--fg-muta)' }}>
+              {T.profilo.generatoreAiuto}
+            </p>
+          </div>
+        )}
 
         {mio && mieDaCorreggere > 0 && (
           <p className="mt-5 rounded-2xl border p-3 text-sm" role="status" style={{ borderColor: 'rgba(245,158,11,0.4)', background: 'rgba(245,158,11,0.08)' }}>

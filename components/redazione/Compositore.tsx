@@ -2,9 +2,9 @@
 
 import { useEffect, useId, useRef, useState } from 'react';
 import { caricaFoto, creaContenuto, nuovaVersione, riduciFoto, urlMedia } from '@/lib/redazione/client';
-import { COLORI_SFONDO_STORIA, COLORI_TESTO_STORIA, contaHashtag, LIMITI, versioneCorrente } from '@/lib/redazione/regole';
+import { contaHashtag, LIMITI, URL_GENERATORE, versioneCorrente } from '@/lib/redazione/regole';
 import { TESTI_REDAZIONE } from '@/lib/redazione/testi';
-import type { BozzaVersione, Contenuto, FormatoPost, PosizioneTesto, Storia, TipoContenuto } from '@/lib/redazione/tipi';
+import type { BozzaVersione, Contenuto, TipoContenuto } from '@/lib/redazione/tipi';
 import AnteprimaPost from './AnteprimaPost';
 import AnteprimaStoria from './AnteprimaStoria';
 import Finestra from './Finestra';
@@ -20,59 +20,13 @@ interface Foto {
   url: string;
 }
 
-const STORIA_VUOTA: Storia = { testo: '', posizione: 'centro', sfondo: COLORI_SFONDO_STORIA[0], coloreTesto: COLORI_TESTO_STORIA[0], riquadro: false };
-
 const campo = 'w-full rounded-xl border px-3 py-2.5 text-sm outline-none focus-visible:ring-2';
 const stileCampo = { borderColor: 'var(--bordo)', background: 'var(--bg)', color: 'var(--fg)' };
 
-function Scelta<V extends string>({ etichetta, valori, valore, nomi, onCambia }: { etichetta: string; valori: readonly V[]; valore: V; nomi: Record<V, string>; onCambia: (v: V) => void }) {
-  return (
-    <fieldset>
-      <legend className="mb-1.5 text-xs font-semibold" style={{ color: 'var(--fg-muta)' }}>
-        {etichetta}
-      </legend>
-      <div className="flex flex-wrap gap-2">
-        {valori.map((v) => (
-          <button
-            key={v}
-            type="button"
-            aria-pressed={v === valore}
-            onClick={() => onCambia(v)}
-            className="rounded-full border px-3 py-1.5 text-xs font-semibold"
-            style={v === valore ? { background: 'var(--accento)', color: '#0a0a0a', borderColor: 'var(--accento)' } : { borderColor: 'var(--bordo)' }}
-          >
-            {nomi[v]}
-          </button>
-        ))}
-      </div>
-    </fieldset>
-  );
-}
-
-function Colori({ etichetta, colori, valore, onCambia }: { etichetta: string; colori: readonly string[]; valore: string; onCambia: (c: string) => void }) {
-  return (
-    <fieldset>
-      <legend className="mb-1.5 text-xs font-semibold" style={{ color: 'var(--fg-muta)' }}>
-        {etichetta}
-      </legend>
-      <div className="flex flex-wrap gap-2">
-        {colori.map((c) => (
-          <button
-            key={c}
-            type="button"
-            aria-pressed={c === valore}
-            aria-label={T.colore(c)}
-            onClick={() => onCambia(c)}
-            className="h-8 w-8 rounded-full"
-            style={{ background: c, boxShadow: c === valore ? '0 0 0 2px var(--bg-elevated), 0 0 0 4px var(--accento)' : 'inset 0 0 0 1px rgba(255,255,255,0.25)' }}
-          />
-        ))}
-      </div>
-    </fieldset>
-  );
-}
-
-/** Scrittura di un post o di una storia, con l'anteprima com'è su Instagram. Serve anche per le nuove versioni. */
+/**
+ * Pubblicazione di un post (card del generatore + copy) o di una storia (una sola immagine), con
+ * l'anteprima com'è su Instagram. Serve anche per le nuove versioni.
+ */
 export default function Compositore({
   tipo,
   autore,
@@ -90,8 +44,6 @@ export default function Compositore({
   const ultima = base ? versioneCorrente(base) : null;
   const [foto, setFoto] = useState<Foto[]>(() => (ultima?.immagini ?? []).map((id) => ({ chiave: id, id, url: urlMedia(id) })));
   const [didascalia, setDidascalia] = useState(ultima?.didascalia ?? '');
-  const [formato, setFormato] = useState<FormatoPost>(ultima?.formato ?? '4:5');
-  const [storia, setStoria] = useState<Storia>(ultima?.storia ?? STORIA_VUOTA);
   const [avanzamento, setAvanzamento] = useState<string | null>(null);
   const [errore, setErrore] = useState<string | null>(null);
   const inputFoto = useRef<HTMLInputElement>(null);
@@ -107,7 +59,8 @@ export default function Compositore({
   const massimo = tipo === 'post' ? LIMITI.immaginiPost : 1;
   const hashtag = contaHashtag(didascalia);
   const occupato = avanzamento !== null;
-  const pronto = tipo === 'post' ? foto.length > 0 && didascalia.length <= LIMITI.didascalia && hashtag <= LIMITI.hashtag : foto.length > 0 || storia.testo.trim().length > 0;
+  const pronto =
+    tipo === 'post' ? foto.length > 0 && didascalia.trim().length > 0 && didascalia.length <= LIMITI.didascalia && hashtag <= LIMITI.hashtag : foto.length === 1;
 
   async function aggiungi(files: FileList | null) {
     if (!files || files.length === 0) return;
@@ -165,7 +118,8 @@ export default function Compositore({
         fatte++;
       }
       setAvanzamento(T.salvataggio);
-      const bozza: BozzaVersione = tipo === 'post' ? { immagini: ids, didascalia, formato, storia: null } : { immagini: ids, didascalia: '', formato: '1:1', storia };
+      // Le card del generatore sono 4:5; il formato resta nei dati per i post già pubblicati.
+      const bozza: BozzaVersione = tipo === 'post' ? { immagini: ids, didascalia, formato: '4:5' } : { immagini: ids, didascalia: '', formato: '1:1' };
       const contenuto = base ? await nuovaVersione(base.id, bozza) : await creaContenuto(tipo, bozza);
       onPubblicato(contenuto);
     } catch (err) {
@@ -202,6 +156,12 @@ export default function Compositore({
 
         <div className="grid gap-6 p-4 sm:grid-cols-[1fr_minmax(0,22rem)]">
           <div className="space-y-5">
+            <p className="rounded-xl border p-3 text-sm" style={{ borderColor: 'var(--bordo)', color: 'var(--fg-muta)' }}>
+              {tipo === 'post' ? T.dalGeneratorePost : T.dalGeneratoreStoria}{' '}
+              <a href={URL_GENERATORE} target="_blank" rel="noopener noreferrer" className="font-semibold underline" style={{ color: 'var(--accento)' }}>
+                {T.apriGeneratore}
+              </a>
+            </p>
             <div>
               <span className="mb-1.5 block text-xs font-semibold" style={{ color: 'var(--fg-muta)' }}>
                 {tipo === 'post' ? T.fotoPost : T.fotoStoria}
@@ -240,7 +200,7 @@ export default function Compositore({
                     <span className="text-2xl" aria-hidden>
                       +
                     </span>
-                    {tipo === 'storia' && foto.length > 0 ? T.cambiaFoto : T.aggiungiFoto}
+                    {tipo === 'post' ? T.aggiungiFoto : foto.length > 0 ? T.cambiaFoto : T.caricaStoria}
                   </button>
                 )}
               </div>
@@ -257,56 +217,25 @@ export default function Compositore({
               />
             </div>
 
-            {tipo === 'post' ? (
-              <>
-                <Scelta etichetta={T.formato} valori={['4:5', '1:1'] as const} valore={formato} nomi={T.formati} onCambia={setFormato} />
-                <div>
-                  <label htmlFor={`${id}-didascalia`} className="mb-1.5 block text-xs font-semibold" style={{ color: 'var(--fg-muta)' }}>
-                    {T.didascalia}
-                  </label>
-                  <textarea
-                    id={`${id}-didascalia`}
-                    value={didascalia}
-                    onChange={(e) => setDidascalia(e.target.value)}
-                    rows={8}
-                    placeholder={T.didascaliaSegnaposto}
-                    className={campo}
-                    style={stileCampo}
-                  />
-                  <p className="mt-1 flex justify-between text-xs" style={{ color: 'var(--fg-muta)' }} aria-live="polite">
-                    <span style={{ color: didascalia.length > LIMITI.didascalia ? '#F87171' : undefined }}>{T.caratteri(didascalia.length, LIMITI.didascalia)}</span>
-                    <span style={{ color: hashtag > LIMITI.hashtag ? '#F87171' : undefined }}>{T.hashtag(hashtag, LIMITI.hashtag)}</span>
-                  </p>
-                </div>
-              </>
-            ) : (
-              <>
-                <div>
-                  <label htmlFor={`${id}-testo`} className="mb-1.5 block text-xs font-semibold" style={{ color: 'var(--fg-muta)' }}>
-                    {T.testoStoria}
-                  </label>
-                  <textarea
-                    id={`${id}-testo`}
-                    value={storia.testo}
-                    maxLength={LIMITI.testoStoria}
-                    onChange={(e) => setStoria({ ...storia, testo: e.target.value })}
-                    rows={4}
-                    placeholder={T.testoStoriaSegnaposto}
-                    className={campo}
-                    style={stileCampo}
-                  />
-                  <p className="mt-1 text-xs" style={{ color: 'var(--fg-muta)' }}>
-                    {T.caratteri(storia.testo.length, LIMITI.testoStoria)}
-                  </p>
-                </div>
-                <Scelta etichetta={T.posizione} valori={['alto', 'centro', 'basso'] as const} valore={storia.posizione} nomi={T.posizioni} onCambia={(p: PosizioneTesto) => setStoria({ ...storia, posizione: p })} />
-                <Colori etichetta={T.sfondo} colori={COLORI_SFONDO_STORIA} valore={storia.sfondo} onCambia={(c) => setStoria({ ...storia, sfondo: c })} />
-                <Colori etichetta={T.coloreTesto} colori={COLORI_TESTO_STORIA} valore={storia.coloreTesto} onCambia={(c) => setStoria({ ...storia, coloreTesto: c })} />
-                <label className="flex items-center gap-2 text-sm">
-                  <input type="checkbox" checked={storia.riquadro} onChange={(e) => setStoria({ ...storia, riquadro: e.target.checked })} className="h-4 w-4 accent-[var(--accento)]" />
-                  {T.riquadro}
+            {tipo === 'post' && (
+              <div>
+                <label htmlFor={`${id}-didascalia`} className="mb-1.5 block text-xs font-semibold" style={{ color: 'var(--fg-muta)' }}>
+                  {T.didascalia}
                 </label>
-              </>
+                <textarea
+                  id={`${id}-didascalia`}
+                  value={didascalia}
+                  onChange={(e) => setDidascalia(e.target.value)}
+                  rows={8}
+                  placeholder={T.didascaliaSegnaposto}
+                  className={campo}
+                  style={stileCampo}
+                />
+                <p className="mt-1 flex justify-between text-xs" style={{ color: 'var(--fg-muta)' }} aria-live="polite">
+                  <span style={{ color: didascalia.length > LIMITI.didascalia ? '#F87171' : undefined }}>{T.caratteri(didascalia.length, LIMITI.didascalia)}</span>
+                  <span style={{ color: hashtag > LIMITI.hashtag ? '#F87171' : undefined }}>{T.hashtag(hashtag, LIMITI.hashtag)}</span>
+                </p>
+              </div>
             )}
           </div>
 
@@ -315,9 +244,9 @@ export default function Compositore({
               {T.anteprima}
             </p>
             {tipo === 'post' ? (
-              <AnteprimaPost autore={autore} immagini={foto.map((f) => f.url)} didascalia={didascalia} formato={formato} />
+              <AnteprimaPost autore={autore} immagini={foto.map((f) => f.url)} didascalia={didascalia} formato="4:5" />
             ) : (
-              <AnteprimaStoria storia={storia} immagine={foto[0]?.url ?? null} autore={autore} className="mx-auto max-w-[18rem]" />
+              <AnteprimaStoria immagine={foto[0]?.url ?? null} autore={autore} className="mx-auto max-w-[18rem]" />
             )}
           </div>
         </div>

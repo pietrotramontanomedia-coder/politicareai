@@ -29,12 +29,12 @@ const marco: SessioneRedazione = { nome: 'Marco', ruolo: 'redattore' };
 const capo: SessioneRedazione = { nome: 'Pietro', ruolo: 'revisore' };
 
 function post(immagini = [ID(1)], didascalia = 'Ciao #politica'): BozzaVersione {
-  return { immagini, didascalia, formato: '4:5', storia: null };
+  return { immagini, didascalia, formato: '4:5' };
 }
 
 function contenuto(autore = giulia.nome, id = ID(100), quando = ADESSO, tipo: 'post' | 'storia' = 'post'): Contenuto {
   const bozza: BozzaVersione =
-    tipo === 'post' ? post() : { immagini: [], didascalia: '', formato: '1:1', storia: { testo: 'ciao', posizione: 'centro', sfondo: '#0a0a0a', coloreTesto: '#FFFFFF', riquadro: false } };
+    tipo === 'post' ? post() : { immagini: [ID(2)], didascalia: '', formato: '1:1' };
   return nuovoContenuto(id, tipo, autore, bozza, quando);
 }
 
@@ -43,22 +43,23 @@ describe('regole', () => {
     expect(chiaveNome('  Giùlia   Rossi ')).toBe('giulia rossi');
   });
 
-  it('valida i post: almeno una foto, limiti di Instagram, solo id generati dal server', () => {
+  it('valida i post: almeno una card, copy obbligatorio, limiti di Instagram, solo id generati dal server', () => {
     expect(validaBozza('post', { immagini: [], didascalia: 'x' }).ok).toBe(false);
     expect(validaBozza('post', { immagini: ['../segreti'], didascalia: 'x' }).ok).toBe(false);
+    expect(validaBozza('post', { immagini: [ID(1)], didascalia: '   ' }).ok).toBe(false);
     expect(validaBozza('post', { immagini: [ID(1), ID(1)] }).ok).toBe(false);
     expect(validaBozza('post', { immagini: Array.from({ length: 11 }, (_, i) => ID(i)) }).ok).toBe(false);
     expect(validaBozza('post', { immagini: [ID(1)], didascalia: 'a'.repeat(LIMITI.didascalia + 1) }).ok).toBe(false);
     expect(validaBozza('post', { immagini: [ID(1)], didascalia: Array.from({ length: 31 }, (_, i) => `#t${i}`).join(' ') }).ok).toBe(false);
     const ok = validaBozza('post', { immagini: [ID(1)], didascalia: '  Ciao  ', formato: '1:1', extra: 'ignorato' });
-    expect(ok).toEqual({ ok: true, valore: { immagini: [ID(1)], didascalia: 'Ciao', formato: '1:1', storia: null } });
+    expect(ok).toEqual({ ok: true, valore: { immagini: [ID(1)], didascalia: 'Ciao', formato: '1:1' } });
   });
 
-  it('valida le storie: foto o testo, colori solo esadecimali', () => {
-    expect(validaBozza('storia', { immagini: [], storia: { testo: '' } }).ok).toBe(false);
-    expect(validaBozza('storia', { immagini: [ID(1), ID(2)], storia: {} }).ok).toBe(false);
-    const ok = validaBozza('storia', { immagini: [], storia: { testo: 'Oggi in aula', sfondo: 'url(javascript:x)', posizione: 'basso' } });
-    expect(ok.ok && ok.valore.storia).toMatchObject({ testo: 'Oggi in aula', sfondo: '#0a0a0a', posizione: 'basso' });
+  it('valida le storie: esattamente una immagine, nessun testo', () => {
+    expect(validaBozza('storia', { immagini: [] }).ok).toBe(false);
+    expect(validaBozza('storia', { immagini: [ID(1), ID(2)] }).ok).toBe(false);
+    const ok = validaBozza('storia', { immagini: [ID(1)], didascalia: 'ignorata', storia: { testo: 'vecchio campo' } });
+    expect(ok).toEqual({ ok: true, valore: { immagini: [ID(1)], didascalia: '', formato: '1:1' } });
   });
 
   it('una nuova versione torna da rivedere e conserva le precedenti', () => {
