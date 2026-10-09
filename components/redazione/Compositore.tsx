@@ -20,6 +20,26 @@ interface Foto {
   url: string;
 }
 
+/** Il copy si salva nel browser mentre si scrive: se la finestra si chiude o la rete cade, non va perso. */
+const chiaveBozza = (tipo: TipoContenuto, base?: Contenuto) => `redazione-bozza-${base ? base.id : tipo}`;
+
+function leggiBozza(chiave: string): string | null {
+  try {
+    return window.localStorage.getItem(chiave);
+  } catch {
+    return null;
+  }
+}
+
+function scriviBozza(chiave: string, testo: string | null): void {
+  try {
+    if (testo) window.localStorage.setItem(chiave, testo);
+    else window.localStorage.removeItem(chiave);
+  } catch {
+    // Archivio del browser non disponibile (navigazione privata): si scrive senza rete di sicurezza.
+  }
+}
+
 const campo = 'w-full rounded-xl border px-3 py-2.5 text-sm outline-none focus-visible:ring-2';
 const stileCampo = { borderColor: 'var(--bordo)', background: 'var(--bg)', color: 'var(--fg)' };
 
@@ -43,9 +63,11 @@ export default function Compositore({
 }) {
   const ultima = base ? versioneCorrente(base) : null;
   const [foto, setFoto] = useState<Foto[]>(() => (ultima?.immagini ?? []).map((id) => ({ chiave: id, id, url: urlMedia(id) })));
-  const [didascalia, setDidascalia] = useState(ultima?.didascalia ?? '');
+  const [bozzaSalvata] = useState(() => (tipo === 'post' ? leggiBozza(chiaveBozza(tipo, base)) : null));
+  const [didascalia, setDidascalia] = useState(bozzaSalvata ?? ultima?.didascalia ?? '');
   const [avanzamento, setAvanzamento] = useState<string | null>(null);
   const [errore, setErrore] = useState<string | null>(null);
+  const [avviso] = useState(bozzaSalvata && bozzaSalvata !== (ultima?.didascalia ?? '') ? T.bozzaRipresa : null);
   const inputFoto = useRef<HTMLInputElement>(null);
   const id = useId();
 
@@ -55,6 +77,25 @@ export default function Compositore({
     fotoCorrenti.current = foto;
   }, [foto]);
   useEffect(() => () => fotoCorrenti.current.forEach((f) => f.blob && URL.revokeObjectURL(f.url)), []);
+
+  useEffect(() => {
+    if (tipo === 'post') scriviBozza(chiaveBozza(tipo, base), didascalia !== (ultima?.didascalia ?? '') ? didascalia : null);
+  }, [tipo, base, ultima, didascalia]);
+
+  // Lavoro non pubblicato: card nuove o copy cambiato. Chiudere per sbaglio non deve buttarlo.
+  const daSalvare = foto.some((f) => !f.id) || foto.length !== (ultima?.immagini.length ?? 0) || didascalia !== (ultima?.didascalia ?? '');
+  useEffect(() => {
+    if (!daSalvare) return;
+    const avvisa = (e: BeforeUnloadEvent) => e.preventDefault();
+    window.addEventListener('beforeunload', avvisa);
+    return () => window.removeEventListener('beforeunload', avvisa);
+  }, [daSalvare]);
+
+  function chiudi() {
+    if (avanzamento !== null) return;
+    if (daSalvare && !window.confirm(T.confermaChiudi)) return;
+    onChiudi();
+  }
 
   const massimo = tipo === 'post' ? LIMITI.immaginiPost : 1;
   const hashtag = contaHashtag(didascalia);
@@ -114,13 +155,17 @@ export default function Compositore({
           continue;
         }
         setAvanzamento(T.caricamento(fatte, daCaricare.length));
-        ids.push(await caricaFoto(f.blob!));
+        const nuovoId = await caricaFoto(f.blob!);
+        ids.push(nuovoId);
+        // Se poi qualcosa va storto, al nuovo tentativo questa card non si ricarica.
+        setFoto((attuali) => attuali.map((x) => (x.chiave === f.chiave ? { ...x, id: nuovoId } : x)));
         fatte++;
       }
       setAvanzamento(T.salvataggio);
       // Le card del generatore sono 4:5; il formato resta nei dati per i post già pubblicati.
       const bozza: BozzaVersione = tipo === 'post' ? { immagini: ids, didascalia, formato: '4:5' } : { immagini: ids, didascalia: '', formato: '1:1' };
       const contenuto = base ? await nuovaVersione(base.id, bozza) : await creaContenuto(tipo, bozza);
+      scriviBozza(chiaveBozza(tipo, base), null);
       onPubblicato(contenuto);
     } catch (err) {
       setErrore(err instanceof Error ? err.message : T.erroreInvio);
@@ -131,10 +176,10 @@ export default function Compositore({
   const titolo = base ? T.titoloVersione(base.versioni.length + 1) : tipo === 'post' ? T.titoloPost : T.titoloStoria;
 
   return (
-    <Finestra titolo={titolo} onChiudi={() => !occupato && onChiudi()} larga>
+    <Finestra titolo={titolo} onChiudi={chiudi} larga>
       <form onSubmit={pubblica} className="flex min-h-full flex-col">
         <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b px-4 py-3" style={{ borderColor: 'var(--bordo)', background: 'var(--bg-elevated)' }}>
-          <button type="button" onClick={onChiudi} disabled={occupato} className="text-sm font-semibold" style={{ color: 'var(--fg-muta)' }}>
+          <button type="button" onClick={chiudi} disabled={occupato} className="text-sm font-semibold" style={{ color: 'var(--fg-muta)' }}>
             {T.annulla}
           </button>
           <h2 className="text-base font-bold">{titolo}</h2>
@@ -148,9 +193,9 @@ export default function Compositore({
           </button>
         </div>
 
-        {(avanzamento || errore) && (
+        {(avanzamento || errore || avviso) && (
           <p role={errore ? 'alert' : 'status'} className="px-4 pt-3 text-sm" style={{ color: errore ? '#F87171' : 'var(--fg-muta)' }}>
-            {errore ?? avanzamento}
+            {errore ?? avanzamento ?? avviso}
           </p>
         )}
 

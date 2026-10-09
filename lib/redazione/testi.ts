@@ -115,6 +115,11 @@ export const TESTI_REDAZIONE = {
     apri: (nome: string) => `Apri i contenuti di ${nome}`,
   },
 
+  cestino: {
+    titolo: (n: number) => `Cestino (${n})`,
+    spiegazione: 'I contenuti eliminati non spariscono: restano qui, con foto, versioni e correzioni. Aprili per ripristinarli.',
+  },
+
   dettaglio: {
     chiudi: 'Chiudi',
     versioni: 'Versioni',
@@ -125,7 +130,9 @@ export const TESTI_REDAZIONE = {
     suVersione: (n: number) => `sulla versione ${n}`,
     correggi: 'Correggi: pubblica una nuova versione',
     elimina: 'Elimina',
-    confermaElimina: 'Eliminare definitivamente? Spariscono anche versioni e commenti.',
+    confermaElimina: 'Eliminare? Sparisce dal feed, ma resta salvato nel cestino di chi coordina.',
+    eliminatoDa: (nome: string, quando: string) => `Eliminato da ${nome} ${quando}.`,
+    ripristina: 'Ripristina',
     scriviCommento: 'Scrivi una correzione o un consiglio',
     scriviRisposta: 'Rispondi',
     segnapostoRevisore: 'Cosa funziona, cosa cambiare, come riscriverlo…',
@@ -167,6 +174,8 @@ export const TESTI_REDAZIONE = {
     anteprima: 'Anteprima',
     erroreFoto: 'Questa immagine non si apre: prova con un JPEG o un PNG.',
     erroreInvio: 'Pubblicazione non riuscita, riprova.',
+    confermaChiudi: 'Chiudere? Le card e il copy non pubblicati vanno persi (il copy resta salvato come bozza).',
+    bozzaRipresa: 'Ho ripreso il copy che avevi lasciato a metà.',
   },
 
   storie: {

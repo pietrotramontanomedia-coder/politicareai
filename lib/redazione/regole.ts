@@ -187,6 +187,25 @@ export function perLettore(sessione: SessioneRedazione, contenuto: Contenuto): C
   return puoVedereCommenti(sessione, contenuto) ? contenuto : { ...contenuto, commenti: [] };
 }
 
+/** Quello che arriva al browser: i contenuti eliminati (il cestino) solo a chi corregge. */
+export function perElenco(sessione: SessioneRedazione, contenuti: Contenuto[]): Contenuto[] {
+  return contenuti.filter((c) => !c.eliminatoIl || sessione.ruolo === 'revisore').map((c) => perLettore(sessione, c));
+}
+
+export function eliminato(contenuto: Contenuto): boolean {
+  return Boolean(contenuto.eliminatoIl);
+}
+
+/** Eliminazione morbida: il contenuto esce da feed e profili ma resta tutto nell'archivio. */
+export function segnaEliminato(contenuto: Contenuto, sessione: SessioneRedazione, adesso: Date): Contenuto {
+  return { ...contenuto, eliminatoIl: adesso.toISOString(), eliminatoDa: normalizzaNome(sessione.nome) };
+}
+
+export function ripristina(contenuto: Contenuto, adesso: Date): Contenuto {
+  // undefined non finisce nel JSON salvato: i due campi spariscono.
+  return { ...contenuto, eliminatoIl: undefined, eliminatoDa: undefined, aggiornatoIl: adesso.toISOString() };
+}
+
 /** Feed: prima l'ultima stesura arrivata. */
 export function ordinaFeed(contenuti: Contenuto[]): Contenuto[] {
   return [...contenuti].sort((a, b) => versioneCorrente(b).inviataIl.localeCompare(versioneCorrente(a).inviataIl));
@@ -245,12 +264,6 @@ export function statistiche(contenuti: Contenuto[], adesso: Date): StatistichePe
     persone.set(c.chiaveAutore, p);
   }
   return [...persone.values()].sort((a, b) => b.settimana - a.settimana || a.nome.localeCompare(b.nome, 'it'));
-}
-
-/** Immagini di un contenuto cancellato che nessun altro contenuto usa: si possono togliere dall'archivio. */
-export function immaginiOrfane(eliminato: Contenuto, rimasti: Contenuto[]): string[] {
-  const usate = new Set(rimasti.flatMap((c) => c.versioni.flatMap((v) => v.immagini)));
-  return [...new Set(eliminato.versioni.flatMap((v) => v.immagini))].filter((id) => !usate.has(id));
 }
 
 /** Riconosce JPEG, PNG e WebP dai primi byte: il tipo dichiarato dal browser non basta. */

@@ -29,6 +29,36 @@ pagina non è indicizzata. Non ha legami con il profilo pubblico dell'app né co
 I colleghi vedono il lavoro degli altri ma non le correzioni: quelle restano fra l'autore e
 chi coordina. Il portale si aggiorna da solo ogni minuto.
 
+## Non si perde niente
+
+- **Eliminare non cancella.** Il contenuto sparisce da feed e profili ma resta nell'archivio con
+  foto, versioni e correzioni. Chi corregge lo trova in *Squadra → Cestino* e lo ripristina.
+  Nessuna funzione del portale cancella file dallo storage.
+- **Storico.** Ogni salvataggio (pubblicazione, nuova versione, commento, cambio di stato,
+  eliminazione, ripristino) lascia una copia datata in `redazione/storico/<id>/`: si può
+  ricostruire qualsiasi momento passato.
+- **Letture robuste.** Se un contenuto non si legge, il server riprova; se non ci riesce, il
+  portale tiene quello che mostrava invece di farlo sparire.
+- **Bozze.** Il copy si salva nel browser mentre si scrive e torna se la finestra si chiude.
+  Chiudere il compositore con card o copy non pubblicati chiede conferma; ogni card caricata
+  riprova da sola se cade la rete e non si ricarica al secondo tentativo.
+
+## Avvisi su Telegram
+
+A ogni post, storia o nuova versione arriva nel canale della redazione un messaggio con le card
+(o la storia), il copy e il link che apre il contenuto nel portale. Usa il bot del radar
+(@politicareradar_bot), mai quello del ponte verso X.
+
+1. Creare un canale Telegram (privato va benissimo) e aggiungere @politicareradar_bot come
+   amministratore con il permesso di pubblicare.
+2. Trovare l'id del canale: `GET /api/avviso` con `Authorization: Bearer <CRON_SECRET>` elenca
+   anche i canali in cui il bot è stato aggiunto (id che inizia con -100).
+3. Su Vercel: `REDAZIONE_TELEGRAM_CHAT` = quell'id (facoltativo `REDAZIONE_TELEGRAM_BOT_TOKEN`
+   per un bot dedicato), poi rifare il deploy.
+
+Se Telegram non risponde la pubblicazione va comunque a buon fine; se le foto non partono
+arriva almeno il testo.
+
 Stati: **da rivedere** (appena inviato o nuova versione) → **da correggere** (il revisore ha
 chiesto modifiche) → **approvato**.
 

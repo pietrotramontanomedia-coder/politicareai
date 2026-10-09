@@ -57,6 +57,12 @@ export interface Contenuto {
   stato: StatoContenuto;
   versioni: Versione[];
   commenti: Commento[];
+  /**
+   * Eliminare non cancella: il contenuto sparisce da feed e profili ma resta nell'archivio, con
+   * foto, versioni e commenti, e chi corregge lo può ripristinare dal cestino.
+   */
+  eliminatoIl?: string;
+  eliminatoDa?: string;
 }
 
 /** Quello che l'autore invia per una nuova stesura, prima di ogni controllo. */

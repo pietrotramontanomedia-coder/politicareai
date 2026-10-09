@@ -1,10 +1,10 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Avatar from '@/components/profilo/Avatar';
 import { formattaDataRelativa } from '@/lib/data-ora';
 import { caricaContenuti, coloreDaNome, ErroreApi, esci, urlMedia } from '@/lib/redazione/client';
-import { chiaveNome, codaRevisione, puoVedereCommenti, statistiche, storieRecenti, URL_GENERATORE, versioneCorrente } from '@/lib/redazione/regole';
+import { chiaveNome, codaRevisione, eliminato, puoVedereCommenti, statistiche, storieRecenti, URL_GENERATORE, versioneCorrente } from '@/lib/redazione/regole';
 import { TESTI_REDAZIONE } from '@/lib/redazione/testi';
 import type { Contenuto, SessioneRedazione, TipoContenuto } from '@/lib/redazione/tipi';
 import AccessoRedazione from './AccessoRedazione';
@@ -129,17 +129,30 @@ export default function PortaleRedazione({ sessioneIniziale, configurata }: { se
   }, [sessione, aggiorna]);
 
   const adesso = useMemo(() => new Date(), [contenuti]); // eslint-disable-line react-hooks/exhaustive-deps
-  const tutti = useMemo(() => contenuti ?? [], [contenuti]);
+  // Feed, profili e statistiche ignorano i contenuti eliminati; chi corregge li ritrova nel cestino.
+  const tutti = useMemo(() => (contenuti ?? []).filter((c) => !eliminato(c)), [contenuti]);
+  const cestino = useMemo(() => (contenuti ?? []).filter(eliminato), [contenuti]);
   const gruppiStorie: GruppoStorie[] = useMemo(() => storieRecenti(tutti, adesso), [tutti, adesso]);
   const coda = useMemo(() => codaRevisione(tutti), [tutti]);
   const squadra = useMemo(() => statistiche(tutti, adesso), [tutti, adesso]);
+
+  // Link dall'avviso Telegram (/redazione?apri=<id>): apre il contenuto appena arriva il feed.
+  const linkAperto = useRef(false);
+  useEffect(() => {
+    if (!contenuti || linkAperto.current) return;
+    linkAperto.current = true;
+    const id = new URLSearchParams(window.location.search).get('apri');
+    if (!id) return;
+    if (contenuti.some((c) => c.id === id)) setAperto(id); // eslint-disable-line react-hooks/set-state-in-effect
+    window.history.replaceState(null, '', window.location.pathname);
+  }, [contenuti]);
 
   if (!sessione) return <AccessoRedazione configurata={configurata} onEntrato={setSessione} />;
 
   const mia = chiaveNome(sessione.nome);
   const revisore = sessione.ruolo === 'revisore';
   const mieDaCorreggere = tutti.filter((c) => c.chiaveAutore === mia && c.stato === 'da_correggere').length;
-  const contenutoAperto = aperto ? tutti.find((c) => c.id === aperto) : undefined;
+  const contenutoAperto = aperto ? (contenuti ?? []).find((c) => c.id === aperto) : undefined;
 
   function sostituisci(c: Contenuto) {
     setContenuti((attuali) => {
@@ -421,6 +434,24 @@ export default function PortaleRedazione({ sessioneIniziale, configurata }: { se
             </table>
           </div>
         )}
+
+        {cestino.length > 0 && (
+          <section className="mt-10" aria-labelledby="cestino-titolo">
+            <h3 id="cestino-titolo" className="text-lg font-bold">
+              {T.cestino.titolo(cestino.length)}
+            </h3>
+            <p className="mt-1 text-sm" style={{ color: 'var(--fg-muta)' }}>
+              {T.cestino.spiegazione}
+            </p>
+            <div className="mt-3 grid grid-cols-4 gap-1 sm:grid-cols-6">
+              {cestino.map((c) => (
+                <button key={c.id} type="button" onClick={() => setAperto(c.id)} className="block opacity-60 hover:opacity-100" aria-label={T.miniatura(c.tipo, c.autore)}>
+                  <Copertina contenuto={c} conStato={false} />
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
       </div>
     );
   }
@@ -522,7 +553,9 @@ export default function PortaleRedazione({ sessioneIniziale, configurata }: { se
           onAggiornato={sostituisci}
           onEliminato={(id) => {
             setAperto(null);
-            setContenuti((attuali) => (attuali ?? []).filter((c) => c.id !== id));
+            // Resta nell'archivio: qui si segna come eliminato, l'aggiornamento successivo lo conferma.
+            const adesso = new Date().toISOString();
+            setContenuti((attuali) => (attuali ?? []).map((c) => (c.id === id ? { ...c, eliminatoIl: adesso, eliminatoDa: sessione.nome } : c)));
           }}
           onCorreggi={(c) => setComposizione({ tipo: c.tipo, base: c })}
           onChiudi={() => setAperto(null)}

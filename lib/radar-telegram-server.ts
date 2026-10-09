@@ -28,20 +28,26 @@ export async function inviaAvvisoTelegram(testo: string): Promise<void> {
   }
 }
 
-/** Chi ha scritto al bot di recente (getUpdates): serve a trovare l'id di chi ha fatto /start. */
+/**
+ * Chi ha scritto al bot di recente (getUpdates): serve a trovare l'id di chi ha fatto /start, e
+ * quello dei canali in cui il bot è stato aggiunto (per esempio il canale della redazione).
+ */
 export async function chiHaScrittoAlBot(): Promise<{ id: number; nome: string; testo: string }[]> {
   const token = process.env.RADAR_TELEGRAM_BOT_TOKEN;
   if (!token) throw new Error('RADAR_TELEGRAM_BOT_TOKEN mancante');
   const r = await fetch(`${API}/bot${token}/getUpdates`, { cache: 'no-store' });
+  type Chat = { id: number; type?: string; title?: string; first_name?: string; last_name?: string; username?: string };
   const d = (await r.json().catch(() => ({}))) as {
     ok?: boolean; description?: string;
-    result?: { message?: { chat?: { id: number; first_name?: string; last_name?: string; username?: string }; text?: string } }[];
+    result?: { message?: { chat?: Chat; text?: string }; channel_post?: { chat?: Chat; text?: string }; my_chat_member?: { chat?: Chat } }[];
   };
   if (!d.ok) throw new Error(`getUpdates fallito: ${d.description ?? r.status}`);
   return (d.result ?? []).flatMap((u) => {
-    const c = u.message?.chat;
+    const evento = u.message ?? u.channel_post;
+    const c = evento?.chat ?? u.my_chat_member?.chat;
     if (!c) return [];
-    return [{ id: c.id, nome: [c.first_name, c.last_name, c.username && `@${c.username}`].filter(Boolean).join(' '), testo: (u.message?.text ?? '').slice(0, 40) }];
+    const nome = [c.title, c.first_name, c.last_name, c.username && `@${c.username}`, c.type && c.type !== 'private' && `(${c.type})`].filter(Boolean).join(' ');
+    return [{ id: c.id, nome, testo: (evento?.text ?? '').slice(0, 40) }];
   });
 }
 

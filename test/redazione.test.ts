@@ -5,18 +5,21 @@ import {
   aggiungiVersione,
   chiaveNome,
   codaRevisione,
-  immaginiOrfane,
   LIMITI,
   nuovoContenuto,
+  perElenco,
   perLettore,
   puoEliminare,
   puoModificare,
+  ripristina,
+  segnaEliminato,
   statistiche,
   storieRecenti,
   tipoImmagine,
   validaBozza,
   validaCommento,
 } from '@/lib/redazione/regole';
+import { testoAvviso } from '@/lib/redazione/telegram-server';
 import { cookieEntrata, creaToken, leggiToken, ruoloDaCodice } from '@/lib/redazione/sessione-server';
 import type { BozzaVersione, Contenuto, SessioneRedazione } from '@/lib/redazione/tipi';
 
@@ -109,10 +112,26 @@ describe('regole', () => {
     ]);
   });
 
-  it('le immagini si cancellano solo se nessun altro contenuto le usa', () => {
-    const a = nuovoContenuto(ID(1), 'post', 'A', post([ID(10), ID(11)]), ADESSO);
-    const b = nuovoContenuto(ID(2), 'post', 'B', post([ID(11)]), ADESSO);
-    expect(immaginiOrfane(a, [b])).toEqual([ID(10)]);
+  it('eliminare non cancella: il contenuto finisce nel cestino che vedono solo i revisori', () => {
+    const c = nuovoContenuto(ID(1), 'post', giulia.nome, post(), ADESSO);
+    const via = segnaEliminato(c, giulia, ADESSO);
+    expect(via).toMatchObject({ eliminatoIl: ADESSO.toISOString(), eliminatoDa: 'Giulia Rossi', versioni: c.versioni });
+    expect(perElenco(marco, [c, via].map((x, i) => ({ ...x, id: ID(i) })))).toHaveLength(1);
+    expect(perElenco(capo, [via])).toHaveLength(1);
+    const tornato = JSON.parse(JSON.stringify(ripristina(via, ADESSO))) as Contenuto;
+    expect(tornato.eliminatoIl).toBeUndefined();
+    expect(perElenco(marco, [tornato])).toHaveLength(1);
+  });
+
+  it('avviso Telegram: chi, cosa, copy accorciato e link, dentro i 1024 caratteri', () => {
+    const c = nuovoContenuto(ID(1), 'post', 'Giulia <b>', post([ID(1)], 'x'.repeat(3000)), ADESSO);
+    const testo = testoAvviso(c, 'https://sito/redazione?apri=1');
+    expect(testo.length).toBeLessThanOrEqual(1024);
+    expect(testo).toContain('Giulia &lt;b&gt;</b> ha pubblicato un post');
+    expect(testo).toContain('…');
+    expect(testo).toMatch(/Apri nel portale<\/a>$/);
+    const v2 = aggiungiVersione(c, post([ID(1)], 'corto'), ADESSO);
+    expect(testoAvviso(v2, 'l')).toContain('ha corretto il post (versione 2)');
   });
 
   it('riconosce le immagini dai primi byte', () => {
@@ -205,7 +224,7 @@ describe('API', () => {
     expect((await media.GET(richiesta(`/api/redazione/media/${ID(1)}`, null), parametri(ID(1)))).status).toBe(401);
   });
 
-  it('giro completo: foto, post, correzione, nuova versione, approvazione, eliminazione', async () => {
+  it('giro completo: foto, post, correzione, nuova versione, approvazione, cestino e ripristino', async () => {
     const media = await import('@/app/api/redazione/media/route');
     const mediaId = await import('@/app/api/redazione/media/[id]/route');
     const contenuti = await import('@/app/api/redazione/contenuti/route');
@@ -275,9 +294,20 @@ describe('API', () => {
       ['complimento', 2],
     ]);
 
-    // Il revisore elimina: spariscono anche le foto.
+    // Il revisore elimina: sparisce dal feed dei ragazzi, ma foto e contenuto restano.
     expect((await uno.DELETE(richiesta(`/api/redazione/contenuti/${contenuto.id}`, capo, { method: 'DELETE' }), parametri(contenuto.id))).status).toBe(200);
-    expect((await mediaId.GET(richiesta(`/api/redazione/media/${foto}`, capo), parametri(foto))).status).toBe(404);
+    expect((await mediaId.GET(richiesta(`/api/redazione/media/${foto}`, capo), parametri(foto))).status).toBe(200);
+    const feedDopo = (await (await contenuti.GET(richiesta('/api/redazione/contenuti', marco))).json()) as { contenuti: Contenuto[] };
+    expect(feedDopo.contenuti).toHaveLength(0);
+    expect((await uno.GET(richiesta(`/api/redazione/contenuti/${contenuto.id}`, giulia), parametri(contenuto.id))).status).toBe(404);
+    const cestino = (await (await contenuti.GET(richiesta('/api/redazione/contenuti', capo))).json()) as { contenuti: Contenuto[] };
+    expect(cestino.contenuti[0].eliminatoDa).toBe('Pietro');
+
+    // Solo il revisore ripristina, e torna tutto com'era.
+    expect((await uno.PATCH(richiesta(`/api/redazione/contenuti/${contenuto.id}`, giulia, { method: 'PATCH' }), parametri(contenuto.id))).status).toBe(403);
+    const ripristinato = await uno.PATCH(richiesta(`/api/redazione/contenuti/${contenuto.id}`, capo, { method: 'PATCH' }), parametri(contenuto.id));
+    expect(((await ripristinato.json()) as { contenuto: Contenuto }).contenuto).toMatchObject({ stato: 'approvato', versioni: [{}, {}] });
+    expect(((await (await contenuti.GET(richiesta('/api/redazione/contenuti', marco))).json()) as { contenuti: Contenuto[] }).contenuti).toHaveLength(1);
   });
 
   it('identificativi strani non arrivano all\'archivio', async () => {
