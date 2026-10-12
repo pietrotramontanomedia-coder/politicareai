@@ -2,6 +2,11 @@ import type {
   BozzaVersione,
   Commento,
   Contenuto,
+  Evento,
+  GiornoAndamento,
+  Persona,
+  PersonaPubblica,
+  VoceAttivita,
   FormatoPost,
   Obiettivi,
   SessioneRedazione,
@@ -99,6 +104,7 @@ export function nuovoContenuto(id: string, tipo: TipoContenuto, autore: string, 
     stato: 'da_rivedere',
     versioni: [{ numero: 1, inviataIl: quando, ...bozza }],
     commenti: [],
+    eventi: [{ tipo: 'pubblicato', chi: normalizzaNome(autore), ruolo: 'redattore', quando, versione: 1 }],
   };
 }
 
@@ -110,6 +116,7 @@ export function aggiungiVersione(contenuto: Contenuto, bozza: BozzaVersione, ade
     aggiornatoIl: quando,
     stato: 'da_rivedere',
     versioni: [...contenuto.versioni, { numero: versioneCorrente(contenuto).numero + 1, inviataIl: quando, ...bozza }],
+    eventi: [...eventiDi(contenuto), { tipo: 'nuova_versione', chi: contenuto.autore, ruolo: 'redattore', quando, versione: versioneCorrente(contenuto).numero + 1 }],
   };
 }
 
@@ -182,7 +189,12 @@ export function aggiungiCommento(
         },
       ]
     : contenuto.commenti;
-  return { ...contenuto, commenti, stato: richiesta.stato ?? contenuto.stato, aggiornatoIl: quando };
+  const chi = normalizzaNome(sessione.nome);
+  const versione = versioneCorrente(contenuto).numero;
+  const eventi: Evento[] = [...eventiDi(contenuto)];
+  if (richiesta.testo) eventi.push({ tipo: 'commento', chi, ruolo: sessione.ruolo, quando, versione, tipoCommento: richiesta.tipo, testo: richiesta.testo });
+  if (richiesta.stato && richiesta.stato !== contenuto.stato) eventi.push({ tipo: 'stato', chi, ruolo: sessione.ruolo, quando, versione, stato: richiesta.stato });
+  return { ...contenuto, commenti, stato: richiesta.stato ?? contenuto.stato, aggiornatoIl: quando, eventi };
 }
 
 /** Quello che una persona vede di un contenuto: senza commenti se non è sua e non corregge. */
@@ -204,12 +216,50 @@ export function eliminato(contenuto: Contenuto): boolean {
 
 /** Eliminazione morbida: il contenuto esce da feed e profili ma resta tutto nell'archivio. */
 export function segnaEliminato(contenuto: Contenuto, sessione: SessioneRedazione, adesso: Date): Contenuto {
-  return { ...contenuto, eliminatoIl: adesso.toISOString(), eliminatoDa: normalizzaNome(sessione.nome) };
+  const quando = adesso.toISOString();
+  const chi = normalizzaNome(sessione.nome);
+  return { ...contenuto, eliminatoIl: quando, eliminatoDa: chi, eventi: [...eventiDi(contenuto), { tipo: 'eliminato', chi, ruolo: sessione.ruolo, quando }] };
 }
 
-export function ripristina(contenuto: Contenuto, adesso: Date): Contenuto {
+export function ripristina(contenuto: Contenuto, sessione: SessioneRedazione, adesso: Date): Contenuto {
+  const quando = adesso.toISOString();
   // undefined non finisce nel JSON salvato: i due campi spariscono.
-  return { ...contenuto, eliminatoIl: undefined, eliminatoDa: undefined, aggiornatoIl: adesso.toISOString() };
+  return {
+    ...contenuto,
+    eliminatoIl: undefined,
+    eliminatoDa: undefined,
+    aggiornatoIl: quando,
+    eventi: [...eventiDi(contenuto), { tipo: 'ripristinato', chi: normalizzaNome(sessione.nome), ruolo: sessione.ruolo, quando }],
+  };
+}
+
+/**
+ * Il registro di un contenuto. Quelli nati prima del registro lo ricostruiscono da versioni,
+ * commenti ed eliminazione: i cambi di stato senza commento di allora non si possono recuperare.
+ */
+export function eventiDi(contenuto: Contenuto): Evento[] {
+  if (contenuto.eventi) return contenuto.eventi;
+  const eventi: Evento[] = contenuto.versioni.map((v) => ({
+    tipo: v.numero === 1 ? 'pubblicato' : 'nuova_versione',
+    chi: contenuto.autore,
+    ruolo: 'redattore',
+    quando: v.inviataIl,
+    versione: v.numero,
+  }));
+  for (const c of contenuto.commenti) {
+    eventi.push({ tipo: 'commento', chi: c.autore, ruolo: c.ruolo, quando: c.creatoIl, versione: c.versione, tipoCommento: c.tipo, testo: c.testo });
+  }
+  if (contenuto.eliminatoIl) eventi.push({ tipo: 'eliminato', chi: contenuto.eliminatoDa ?? '', ruolo: 'revisore', quando: contenuto.eliminatoIl });
+  return eventi.sort((a, b) => a.quando.localeCompare(b.quando));
+}
+
+/** Tutto quello che è successo in redazione, dal più recente: la cronologia di chi coordina. */
+export function cronologia(contenuti: Contenuto[]): VoceAttivita[] {
+  return contenuti
+    .flatMap((c) =>
+      eventiDi(c).map((e) => ({ ...e, contenutoId: c.id, tipoContenuto: c.tipo, autore: c.autore, chiaveAutore: c.chiaveAutore })),
+    )
+    .sort((a, b) => b.quando.localeCompare(a.quando));
 }
 
 /** Feed: prima l'ultima stesura arrivata. */
@@ -246,10 +296,17 @@ export function giornoRoma(d: Date | string): string {
 }
 
 /** Quadro della squadra: quanto pubblica ognuno, a che punto è, come va rispetto agli obiettivi. */
-export function statistiche(contenuti: Contenuto[], adesso: Date): StatistichePersona[] {
+export function statistiche(contenuti: Contenuto[], adesso: Date, registrate: Pick<Persona, 'nome' | 'chiave' | 'attiva'>[] = []): StatistichePersona[] {
   const settimanaFa = adesso.getTime() - 7 * 24 * 3600_000;
   const oggi = giornoRoma(adesso);
   const persone = new Map<string, StatistichePersona>();
+  // Chi è registrato compare anche se non ha ancora pubblicato niente.
+  for (const r of registrate.filter((x) => x.attiva)) {
+    persone.set(r.chiave, {
+      nome: r.nome, chiave: r.chiave, post: 0, storie: 0, settimana: 0, daRivedere: 0, daCorreggere: 0, approvati: 0,
+      nonVaBene: 0, eliminati: 0, totale: 0, storieOggi: 0, postOggi: 0, ultimoInvio: null,
+    });
+  }
   for (const c of contenuti) {
     const p = persone.get(c.chiaveAutore) ?? {
       nome: c.autore,
@@ -294,6 +351,61 @@ export function statistiche(contenuti: Contenuto[], adesso: Date): StatistichePe
   return [...persone.values()].sort((a, b) => b.settimana - a.settimana || a.nome.localeCompare(b.nome, 'it'));
 }
 
+/**
+ * Giorno per giorno, dal più vecchio a oggi: storie e post pubblicati (eliminati esclusi) rispetto
+ * agli obiettivi di quel giorno (feriale o weekend).
+ */
+export function andamentoGiornaliero(contenuti: Contenuto[], chiave: string, obiettivi: Obiettivi, adesso: Date, giorni = 14): GiornoAndamento[] {
+  const conteggi = new Map<string, { storie: number; post: number }>();
+  for (const c of contenuti) {
+    if (c.chiaveAutore !== chiave || eliminato(c)) continue;
+    const g = giornoRoma(c.creatoIl);
+    const n = conteggi.get(g) ?? { storie: 0, post: 0 };
+    if (c.tipo === 'post') n.post++;
+    else n.storie++;
+    conteggi.set(g, n);
+  }
+  const risultato: GiornoAndamento[] = [];
+  for (let i = giorni - 1; i >= 0; i--) {
+    // Mezzogiorno UTC: lontano dalla mezzanotte, il giorno a Roma è sempre quello giusto.
+    const d = new Date(`${giornoRoma(adesso)}T12:00:00Z`);
+    d.setUTCDate(d.getUTCDate() - i);
+    const giorno = giornoRoma(d);
+    const o = obiettiviDiOggi(obiettivi, d);
+    const n = conteggi.get(giorno) ?? { storie: 0, post: 0 };
+    risultato.push({ giorno, ...n, obiettivoStorie: o.storie, obiettivoPost: o.post, inPari: n.storie >= o.storie && n.post >= o.post });
+  }
+  return risultato;
+}
+
+/** Quanti contenuti approvati alla prima versione, sui contenuti approvati. */
+export function approvatiAlPrimoColpo(contenuti: Contenuto[], chiave: string): { primoColpo: number; approvati: number } {
+  const approvati = contenuti.filter((c) => c.chiaveAutore === chiave && !eliminato(c) && c.stato === 'approvato');
+  return { primoColpo: approvati.filter((c) => c.versioni.length === 1).length, approvati: approvati.length };
+}
+
+export const LUNGHEZZA_MINIMA_PASSWORD = 6;
+
+export function perBrowser(persone: Persona[]): PersonaPubblica[] {
+  return persone.map(({ password, ...resto }) => ({ ...resto, conPassword: Boolean(password) }));
+}
+
+/** Elenco delle persone: nomi puliti, niente doppioni, chi c'era resta (al massimo disattivato). */
+export function aggiungiPersona(persone: Persona[], nome: string, da: string, adesso: Date): Esito<Persona[]> {
+  const pulito = normalizzaNome(nome);
+  if (pulito.length < 2) return errore('Scrivi nome e cognome.');
+  const chiave = chiaveNome(pulito);
+  const esistente = persone.find((p) => p.chiave === chiave);
+  if (esistente?.attiva) return errore(`${esistente.nome} è già in elenco.`);
+  if (esistente) return { ok: true, valore: persone.map((p) => (p.chiave === chiave ? { ...p, attiva: true } : p)) };
+  return { ok: true, valore: [...persone, { nome: pulito, chiave, attiva: true, aggiuntaIl: adesso.toISOString(), aggiuntaDa: normalizzaNome(da) }] };
+}
+
+export function cambiaAttiva(persone: Persona[], chiave: string, attiva: boolean): Esito<Persona[]> {
+  if (!persone.some((p) => p.chiave === chiave)) return errore('Persona non trovata.');
+  return { ok: true, valore: persone.map((p) => (p.chiave === chiave ? { ...p, attiva } : p)) };
+}
+
 /** Percentuale intera su tutti i contenuti della persona (0 se non ha ancora pubblicato). */
 export function percentuale(parte: number, totale: number): number {
   return totale > 0 ? Math.round((parte / totale) * 100) : 0;
@@ -336,9 +448,17 @@ export function obiettivoRaggiunto(p: StatistichePersona, o: Obiettivi, adesso: 
  * Resoconto serale per il gruppo Telegram (HTML di Telegram): per ognuno storie e post di oggi
  * rispetto agli obiettivi, chi è in pari e chi no, quanti contenuti aspettano una revisione.
  */
-export function testoResoconto(contenuti: Contenuto[], obiettivi: Obiettivi, adesso: Date, link: string): string {
+export function testoResoconto(
+  contenuti: Contenuto[],
+  obiettivi: Obiettivi,
+  adesso: Date,
+  link: string,
+  registrate: Pick<Persona, 'nome' | 'chiave' | 'attiva'>[] = [],
+): string {
   const html = (t: string) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  const squadra = statistiche(contenuti, adesso).filter((p) => p.totale > p.eliminati);
+  const attive = new Set(registrate.filter((r) => r.attiva).map((r) => r.chiave));
+  // Con l'elenco delle persone contano solo loro (anche chi non ha pubblicato); senza, chi ha pubblicato.
+  const squadra = statistiche(contenuti, adesso, registrate).filter((p) => (attive.size > 0 ? attive.has(p.chiave) : p.totale > p.eliminati));
   const giorno = adesso.toLocaleDateString('it-IT', { timeZone: 'Europe/Rome', weekday: 'long', day: 'numeric', month: 'long' });
   const oggi = obiettiviDiOggi(obiettivi, adesso);
   const righe = [`📊 <b>Resoconto di ${giorno}</b>`, `Obiettivo${oggi.weekend ? ' del weekend' : ''}: ${oggi.storie} storie e ${oggi.post} post a testa`, ''];

@@ -4,15 +4,18 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Avatar from '@/components/profilo/Avatar';
 import { formattaDataRelativa } from '@/lib/data-ora';
 import { caricaContenuti, coloreDaNome, ErroreApi, esci, salvaObiettivi, urlMedia } from '@/lib/redazione/client';
-import { chiaveNome, codaRevisione, eliminato, OBIETTIVI_PREDEFINITI, obiettiviDiOggi, percentuale, puoVedereCommenti, statistiche, storieRecenti, URL_GENERATORE, versioneCorrente } from '@/lib/redazione/regole';
+import { chiaveNome, codaRevisione, cronologia, eliminato, OBIETTIVI_PREDEFINITI, obiettiviDiOggi, percentuale, puoVedereCommenti, statistiche, storieRecenti, URL_GENERATORE, versioneCorrente } from '@/lib/redazione/regole';
 import { TESTI_REDAZIONE } from '@/lib/redazione/testi';
-import type { Contenuto, Obiettivi, SessioneRedazione, TipoContenuto } from '@/lib/redazione/tipi';
+import type { Contenuto, Obiettivi, PersonaPubblica, SessioneRedazione, TipoContenuto } from '@/lib/redazione/tipi';
 import AccessoRedazione from './AccessoRedazione';
 import Andamento from './Andamento';
+import Attivita from './Attivita';
 import AnteprimaPost from './AnteprimaPost';
 import AnteprimaStoria from './AnteprimaStoria';
 import Compositore from './Compositore';
 import Dettaglio from './Dettaglio';
+import Persone from './Persone';
+import SchedaPersona from './SchedaPersona';
 import { BadgeRuolo, BadgeStato } from './Distintivi';
 import VisoreStorie, { type GruppoStorie } from './VisoreStorie';
 
@@ -20,7 +23,7 @@ const T = TESTI_REDAZIONE;
 /** Ogni minuto il portale si aggiorna da solo, così chi corregge vede arrivare i contenuti. */
 const AGGIORNAMENTO_MS = 60_000;
 
-type Vista = 'feed' | 'profilo' | 'revisione' | 'squadra';
+type Vista = 'feed' | 'profilo' | 'revisione' | 'attivita' | 'squadra';
 
 /* ---------- Pezzi ---------- */
 
@@ -182,6 +185,7 @@ export default function PortaleRedazione({ sessioneIniziale, configurata }: { se
   const [contenuti, setContenuti] = useState<Contenuto[] | null>(null);
   const [errore, setErrore] = useState(false);
   const [obiettivi, setObiettivi] = useState<Obiettivi>(OBIETTIVI_PREDEFINITI);
+  const [persone, setPersone] = useState<PersonaPubblica[]>([]);
   const [vista, setVista] = useState<Vista>('feed');
   const [persona, setPersona] = useState<string | null>(null);
   const [schedaProfilo, setSchedaProfilo] = useState<TipoContenuto>('post');
@@ -195,6 +199,7 @@ export default function PortaleRedazione({ sessioneIniziale, configurata }: { se
       const dati = await caricaContenuti();
       setContenuti(dati.contenuti);
       setObiettivi(dati.obiettivi);
+      setPersone(dati.persone);
       setErrore(false);
     } catch (e) {
       if (e instanceof ErroreApi && e.status === 401) setSessione(null);
@@ -223,7 +228,8 @@ export default function PortaleRedazione({ sessioneIniziale, configurata }: { se
   const gruppiStorie: GruppoStorie[] = useMemo(() => storieRecenti(tutti, adesso), [tutti, adesso]);
   const coda = useMemo(() => codaRevisione(tutti), [tutti]);
   // Le statistiche contano anche gli eliminati, per le percentuali.
-  const squadra = useMemo(() => statistiche(contenuti ?? [], adesso), [contenuti, adesso]);
+  const squadra = useMemo(() => statistiche(contenuti ?? [], adesso, persone), [contenuti, adesso, persone]);
+  const voci = useMemo(() => cronologia(contenuti ?? []), [contenuti]);
 
   // Link dall'avviso Telegram (/redazione?apri=<id>): apre il contenuto appena arriva il feed.
   const linkAperto = useRef(false);
@@ -268,6 +274,7 @@ export default function PortaleRedazione({ sessioneIniziale, configurata }: { se
     ...(revisore
       ? [
           { id: 'revisione' as const, etichetta: T.schede.revisione, conta: coda.length || undefined },
+          { id: 'attivita' as const, etichetta: T.schede.attivita },
           { id: 'squadra' as const, etichetta: T.schede.squadra },
         ]
       : []),
@@ -341,8 +348,36 @@ export default function PortaleRedazione({ sessioneIniziale, configurata }: { se
     );
   }
 
+  function vistaAttivita() {
+    return (
+      <div className="mx-auto max-w-3xl">
+        <h2 className="text-2xl font-bold">{T.attivita.titolo}</h2>
+        <p className="mb-4 mt-1 text-sm" style={{ color: 'var(--fg-muta)' }}>
+          {T.attivita.spiegazione}
+        </p>
+        <Attivita voci={voci} contenuti={contenuti ?? []} persone={squadra.map((p) => [p.chiave, p.nome])} onApri={setAperto} />
+      </div>
+    );
+  }
+
   function vistaProfilo() {
     const chiave = persona ?? mia;
+    // Chi coordina, sul profilo di un ragazzo, vede la sua scheda completa.
+    if (revisore && chiave !== mia) {
+      const stat = squadra.find((s) => s.chiave === chiave);
+      return (
+        <SchedaPersona
+          chiave={chiave}
+          nome={stat?.nome ?? persone.find((p) => p.chiave === chiave)?.nome ?? chiave}
+          stat={stat}
+          contenuti={contenuti ?? []}
+          obiettivi={obiettivi}
+          adesso={adesso}
+          onApri={setAperto}
+          onIndietro={() => setVista('squadra')}
+        />
+      );
+    }
     const suoi = tutti.filter((c) => c.chiaveAutore === chiave);
     const nome = suoi[0]?.autore ?? sessione!.nome;
     const mio = chiave === mia;
@@ -489,6 +524,9 @@ export default function PortaleRedazione({ sessioneIniziale, configurata }: { se
     return (
       <div className="mx-auto max-w-5xl">
         <ModificaObiettivi obiettivi={obiettivi} onSalvati={setObiettivi} />
+        <div className="mt-4">
+          <Persone persone={persone} onCambiate={setPersone} onApri={apriProfilo} />
+        </div>
         <h2 className="mt-8 text-2xl font-bold">{T.squadra.titolo}</h2>
         <p className="mt-1 text-sm" style={{ color: 'var(--fg-muta)' }}>
           {T.squadra.spiegazione}
@@ -640,6 +678,8 @@ export default function PortaleRedazione({ sessioneIniziale, configurata }: { se
           vistaProfilo()
         ) : vista === 'revisione' && revisore ? (
           vistaRevisione()
+        ) : vista === 'attivita' && revisore ? (
+          vistaAttivita()
         ) : vista === 'squadra' && revisore ? (
           vistaSquadra()
         ) : (

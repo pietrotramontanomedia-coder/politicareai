@@ -1,6 +1,6 @@
 import { archivio, ErroreRedazione } from '@/lib/redazione/archivio-server';
 import { conSessione, corpoJson, nuovoId } from '@/lib/redazione/api-server';
-import { nuovoContenuto, ordinaFeed, perElenco, validaBozza } from '@/lib/redazione/regole';
+import { nuovoContenuto, ordinaFeed, perBrowser, perElenco, validaBozza } from '@/lib/redazione/regole';
 import { avvisaDopoLaRisposta } from '@/lib/redazione/telegram-server';
 
 /** Feed della redazione (GET) e nuovo post o nuova storia (POST). */
@@ -9,8 +9,8 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
   return conSessione(request, async (sessione) => {
-    const [tutti, obiettivi] = await Promise.all([archivio().elenca(), archivio().leggiObiettivi()]);
-    return Response.json({ ok: true, sessione, contenuti: perElenco(sessione, ordinaFeed(tutti)), obiettivi });
+    const [tutti, obiettivi, persone] = await Promise.all([archivio().elenca(), archivio().leggiObiettivi(), archivio().leggiPersone()]);
+    return Response.json({ ok: true, sessione, contenuti: perElenco(sessione, ordinaFeed(tutti)), obiettivi, persone: perBrowser(persone) });
   });
 }
 

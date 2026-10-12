@@ -64,6 +64,55 @@ export interface Contenuto {
    */
   eliminatoIl?: string;
   eliminatoDa?: string;
+  /** Registro di tutto quello che è successo al contenuto, in ordine. Mai riscritto, solo allungato. */
+  eventi?: Evento[];
+}
+
+export type TipoEvento = 'pubblicato' | 'nuova_versione' | 'commento' | 'stato' | 'eliminato' | 'ripristinato';
+
+export interface Evento {
+  tipo: TipoEvento;
+  chi: string;
+  ruolo: Ruolo;
+  quando: string;
+  versione?: number;
+  /** Per «stato»: il nuovo stato. */
+  stato?: StatoContenuto;
+  /** Per «commento»: il tipo e il testo. */
+  tipoCommento?: TipoCommento;
+  testo?: string;
+}
+
+/** Una riga della cronologia di chi coordina: l'evento e il contenuto a cui si riferisce. */
+export interface VoceAttivita extends Evento {
+  contenutoId: string;
+  tipoContenuto: TipoContenuto;
+  autore: string;
+  chiaveAutore: string;
+}
+
+/** Un ragazzo della redazione registrato da chi coordina. Non si cancella: si disattiva. */
+export interface Persona {
+  nome: string;
+  chiave: string;
+  attiva: boolean;
+  aggiuntaIl: string;
+  aggiuntaDa: string;
+  /** Password personale, solo come impronta (scrypt con sale): non lascia mai il server. */
+  password?: { sale: string; impronta: string };
+}
+
+/** Quello che arriva al browser di una persona: senza password, solo se ce l'ha. */
+export type PersonaPubblica = Omit<Persona, 'password'> & { conPassword: boolean };
+
+/** Un giorno nella scheda di una persona: quanto ha pubblicato e quanto serviva. */
+export interface GiornoAndamento {
+  giorno: string;
+  storie: number;
+  post: number;
+  obiettivoStorie: number;
+  obiettivoPost: number;
+  inPari: boolean;
 }
 
 /** Quello che l'autore invia per una nuova stesura, prima di ogni controllo. */
