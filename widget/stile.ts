@@ -75,10 +75,26 @@ const BASE = `
 .pcs-passi{display:inline-flex;align-items:center;gap:6px}
 .pcs-passi button{width:26px;height:26px;border:1px solid var(--pcs-bordo);border-radius:50%;background:#fff;cursor:pointer;font:inherit;line-height:1;padding:0;color:var(--pcs-testo)}
 .pcs-passi span{min-width:14px;text-align:center}
+.pcs-tabella--liste th[scope="row"]{min-width:9.5em;white-space:normal}
+.pcs-tabella--liste .pcs-sotto{padding-left:19px}
+.pcs-condividi{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:999px;background:var(--pcs-rosso);color:#fff!important;font:inherit;font-size:14px;font-weight:700;padding:9px 18px;cursor:pointer;text-decoration:none!important;margin:0 0 12px}
+.pcs-condividi:disabled{opacity:.5;cursor:default}
+.pcs-pannello{border:1px solid var(--pcs-bordo);border-radius:16px;padding:12px;margin:0 0 12px;background:var(--pcs-fondo)}
+.pcs-pannello>.pcs-riga{justify-content:space-between;margin-bottom:10px}
+.pcs-chiudi{width:30px;height:30px;border:1px solid var(--pcs-bordo);border-radius:50%;background:#fff;cursor:pointer;font:inherit;font-size:18px;line-height:1;padding:0;color:var(--pcs-testo)}
+.pcs-anteprima{display:flex;align-items:center;justify-content:center;margin:12px auto 0;background:#0a0a0a;border-radius:12px;overflow:hidden;width:100%;max-width:240px}
+.pcs-anteprima--storia{aspect-ratio:9/16}
+.pcs-anteprima--post{aspect-ratio:4/5}
+.pcs-anteprima img{width:100%;height:100%;object-fit:contain;display:block}
+.pcs-anteprima .pcs-muto{color:#bbb;padding:12px;text-align:center}
+.pcs-azioni{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:12px}
+.pcs-azioni .pcs-condividi{margin:0}
+.pcs-azioni a.pcs-pillola{text-decoration:none!important;color:var(--pcs-testo)!important}
+.pcs-pannello .pcs-nota{text-align:center}
 .pcs-regole ul{margin-top:10px!important}
 .pcs-regole li{font-size:14px;color:#3a3a3a;padding-left:14px;position:relative;margin-top:8px}
 .pcs-regole li::before{content:"";position:absolute;left:0;top:9px;width:6px;height:6px;border-radius:50%;background:var(--pcs-rosso)}
-@media(max-width:600px){.pcs-scheda{padding:14px;border-radius:18px}.pcs-select{width:118px}.pcs-numero{width:62px}.pcs-liste li{padding:10px}.pcs-tabella{font-size:13px}}
+@media(max-width:600px){.pcs-scheda{padding:14px;border-radius:18px}.pcs-select{width:118px}.pcs-numero{width:62px}.pcs-liste li{padding:10px}.pcs-tabella{font-size:13px}.pcs-tabella th,.pcs-tabella td{padding:8px 4px}.pcs-tabella--liste th[scope="row"]{min-width:8em}}
 `;
 
 /** Mette l'id del contenitore davanti a ogni selettore, anche dentro le @media. */
