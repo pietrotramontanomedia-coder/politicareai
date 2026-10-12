@@ -22,6 +22,7 @@ import {
   segnaEliminato,
   statistiche,
   storieRecenti,
+  testoPromemoria,
   testoResoconto,
   tipoImmagine,
   validaBozza,
@@ -207,6 +208,20 @@ describe('regole', () => {
     const una = aggiungiPersona([], ' matteo ', 'Pietro', ADESSO);
     expect(una.ok && una.valore[0]).toMatchObject({ nome: 'matteo', chiave: 'matteo', attiva: true });
     expect(aggiungiPersona(una.ok ? una.valore : [], 'Matteo', 'Pietro', ADESSO).ok).toBe(false);
+  });
+
+  it('promemoria dei revisori: solo ciò che aspetta da più di 24 ore, dal più vecchio; niente se è tutto in pari', () => {
+    const adesso = new Date('2026-10-13T07:00:00Z');
+    const recente = nuovoContenuto(ID(1), 'post', giulia.nome, post(), new Date('2026-10-12T20:00:00Z'));
+    const vecchio = nuovoContenuto(ID(2), 'storia', marco.nome, { immagini: [ID(2)], didascalia: '', formato: '1:1' }, new Date('2026-10-10T07:00:00Z'));
+    const ieri = nuovoContenuto(ID(3), 'post', giulia.nome, post(), new Date('2026-10-12T05:00:00Z'));
+    const testo = testoPromemoria([recente, vecchio, ieri], adesso, 'l')!;
+    expect(testo).toContain('Da rivedere da più di 24 ore: 2');
+    expect(testo.indexOf('Marco')).toBeLessThan(testo.indexOf('Giulia'));
+    expect(testo).toContain('da 3 giorni');
+    expect(testo).toContain('da 26 ore');
+    expect(testoPromemoria([recente], adesso, 'l')).toBeNull();
+    expect(testoResoconto([recente, vecchio], OBIETTIVI_PREDEFINITI, adesso, 'l')).toContain('⏰ In attesa da più di 24 ore: 1');
   });
 
   it('obiettivi: solo numeri interi ragionevoli', () => {
