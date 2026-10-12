@@ -111,8 +111,30 @@ export const TESTI_REDAZIONE = {
       daCorreggere: 'Da correggere',
       approvati: 'Approvati',
       ultimo: 'Ultimo invio',
+      oggi: 'Oggi',
+      eliminati: 'Eliminati',
     },
     apri: (nome: string) => `Apri i contenuti di ${nome}`,
+  },
+
+  andamento: {
+    oggi: 'Obiettivi di oggi',
+    storie: 'Storie',
+    post: 'Post',
+    approvati: 'Approvati',
+    daCorreggere: 'Da correggere',
+    eliminati: 'Eliminati',
+    base: (n: number) => (n === 1 ? 'Su 1 contenuto pubblicato' : `Su ${n} contenuti pubblicati`),
+  },
+
+  obiettivi: {
+    titolo: 'Obiettivi giornalieri',
+    spiegazione: 'Quanto pubblica ognuno ogni giorno. Ogni sera verso le 21 arriva il resoconto nel gruppo Telegram.',
+    storie: 'Storie al giorno',
+    post: 'Post al giorno',
+    salva: 'Salva',
+    salvato: 'Salvato',
+    errore: 'Non sono riuscito a salvare, riprova.',
   },
 
   cestino: {

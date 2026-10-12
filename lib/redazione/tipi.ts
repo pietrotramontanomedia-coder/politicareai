@@ -82,5 +82,20 @@ export interface StatistichePersona {
   daRivedere: number;
   daCorreggere: number;
   approvati: number;
+  /** Contenuti eliminati (nel cestino): contano nelle percentuali, non negli obiettivi. */
+  eliminati: number;
+  /** Tutti i contenuti mai pubblicati, eliminati compresi: la base delle percentuali. */
+  totale: number;
+  /** Pubblicati oggi (giornata italiana), per gli obiettivi. */
+  storieOggi: number;
+  postOggi: number;
   ultimoInvio: string | null;
+}
+
+/** Quanto deve pubblicare ognuno ogni giorno: li decide chi corregge. */
+export interface Obiettivi {
+  storieGiorno: number;
+  postGiorno: number;
+  aggiornatoIl?: string;
+  aggiornatoDa?: string;
 }

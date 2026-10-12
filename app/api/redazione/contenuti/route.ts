@@ -9,8 +9,8 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
   return conSessione(request, async (sessione) => {
-    const contenuti = perElenco(sessione, ordinaFeed(await archivio().elenca()));
-    return Response.json({ ok: true, sessione, contenuti });
+    const [tutti, obiettivi] = await Promise.all([archivio().elenca(), archivio().leggiObiettivi()]);
+    return Response.json({ ok: true, sessione, contenuti: perElenco(sessione, ordinaFeed(tutti)), obiettivi });
   });
 }
 

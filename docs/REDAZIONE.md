@@ -29,6 +29,18 @@ pagina non è indicizzata. Non ha legami con il profilo pubblico dell'app né co
 I colleghi vedono il lavoro degli altri ma non le correzioni: quelle restano fra l'autore e
 chi coordina. Il portale si aggiorna da solo ogni minuto.
 
+## Obiettivi e resoconto
+
+- Chi corregge fissa in *Squadra → Obiettivi giornalieri* quante storie e quanti post deve
+  pubblicare ognuno al giorno (all'inizio 5 storie e 2 post). La giornata è quella italiana.
+- Ognuno vede in cima al feed le barre di oggi e, nel profilo, anche le percentuali dei suoi
+  contenuti approvati, da correggere ed eliminati (sul totale pubblicato, eliminati compresi).
+  Nella tabella della Squadra ci sono la colonna *Oggi* e le percentuali per persona.
+- Ogni sera il cron di Vercel chiama `/api/redazione/resoconto` (19:00 UTC: le 21 d'estate, le 20
+  d'inverno) e nel gruppo Telegram arriva chi è in pari ✅, chi è indietro ⚠️ e chi non ha
+  pubblicato niente ⛔️, più quanti contenuti aspettano una revisione. Con `?anteprima=1` e il
+  Bearer `CRON_SECRET` si legge il testo senza mandarlo.
+
 ## Non si perde niente
 
 - **Eliminare non cancella.** Il contenuto sparisce da feed e profili ma resta nell'archivio con

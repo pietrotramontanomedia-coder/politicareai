@@ -3,6 +3,7 @@ import type {
   Commento,
   Contenuto,
   FormatoPost,
+  Obiettivi,
   SessioneRedazione,
   StatistichePersona,
   StatoContenuto,
@@ -187,9 +188,12 @@ export function perLettore(sessione: SessioneRedazione, contenuto: Contenuto): C
   return puoVedereCommenti(sessione, contenuto) ? contenuto : { ...contenuto, commenti: [] };
 }
 
-/** Quello che arriva al browser: i contenuti eliminati (il cestino) solo a chi corregge. */
+/**
+ * Quello che arriva al browser: i contenuti eliminati solo a chi corregge (il cestino) e
+ * all'autore (contano nelle sue percentuali); i colleghi non li vedono.
+ */
 export function perElenco(sessione: SessioneRedazione, contenuti: Contenuto[]): Contenuto[] {
-  return contenuti.filter((c) => !c.eliminatoIl || sessione.ruolo === 'revisore').map((c) => perLettore(sessione, c));
+  return contenuti.filter((c) => !c.eliminatoIl || sessione.ruolo === 'revisore' || eAutore(sessione, c)).map((c) => perLettore(sessione, c));
 }
 
 export function eliminato(contenuto: Contenuto): boolean {
@@ -234,9 +238,15 @@ export function storieRecenti(contenuti: Contenuto[], adesso: Date): { autore: s
     .sort((a, b) => ultima(b).localeCompare(ultima(a)));
 }
 
-/** Quadro della squadra per chi corregge: quanto pubblica ognuno e a che punto è. */
+/** Giorno nel fuso di Roma, "2026-10-12": la giornata degli obiettivi finisce a mezzanotte italiana. */
+export function giornoRoma(d: Date | string): string {
+  return new Date(d).toLocaleDateString('en-CA', { timeZone: 'Europe/Rome' });
+}
+
+/** Quadro della squadra: quanto pubblica ognuno, a che punto è, come va rispetto agli obiettivi. */
 export function statistiche(contenuti: Contenuto[], adesso: Date): StatistichePersona[] {
   const settimanaFa = adesso.getTime() - 7 * 24 * 3600_000;
+  const oggi = giornoRoma(adesso);
   const persone = new Map<string, StatistichePersona>();
   for (const c of contenuti) {
     const p = persone.get(c.chiaveAutore) ?? {
@@ -248,11 +258,25 @@ export function statistiche(contenuti: Contenuto[], adesso: Date): StatistichePe
       daRivedere: 0,
       daCorreggere: 0,
       approvati: 0,
+      eliminati: 0,
+      totale: 0,
+      storieOggi: 0,
+      postOggi: 0,
       ultimoInvio: null,
     };
+    p.totale++;
+    if (eliminato(c)) {
+      p.eliminati++;
+      persone.set(c.chiaveAutore, p);
+      continue;
+    }
     if (c.tipo === 'post') p.post++;
     else p.storie++;
     if (Date.parse(c.creatoIl) >= settimanaFa) p.settimana++;
+    if (giornoRoma(c.creatoIl) === oggi) {
+      if (c.tipo === 'post') p.postOggi++;
+      else p.storieOggi++;
+    }
     if (c.stato === 'da_rivedere') p.daRivedere++;
     else if (c.stato === 'da_correggere') p.daCorreggere++;
     else p.approvati++;
@@ -264,6 +288,48 @@ export function statistiche(contenuti: Contenuto[], adesso: Date): StatistichePe
     persone.set(c.chiaveAutore, p);
   }
   return [...persone.values()].sort((a, b) => b.settimana - a.settimana || a.nome.localeCompare(b.nome, 'it'));
+}
+
+/** Percentuale intera su tutti i contenuti della persona (0 se non ha ancora pubblicato). */
+export function percentuale(parte: number, totale: number): number {
+  return totale > 0 ? Math.round((parte / totale) * 100) : 0;
+}
+
+export const OBIETTIVI_PREDEFINITI: Obiettivi = { storieGiorno: 5, postGiorno: 2 };
+const MASSIMO_OBIETTIVO = 30;
+
+export function validaObiettivi(dati: unknown): Esito<Obiettivi> {
+  const d = (dati && typeof dati === 'object' ? dati : {}) as Record<string, unknown>;
+  const numero = (v: unknown) => (typeof v === 'number' && Number.isInteger(v) && v >= 0 && v <= MASSIMO_OBIETTIVO ? v : null);
+  const storieGiorno = numero(d.storieGiorno);
+  const postGiorno = numero(d.postGiorno);
+  if (storieGiorno === null || postGiorno === null) return errore(`Gli obiettivi sono numeri interi da 0 a ${MASSIMO_OBIETTIVO}.`);
+  return { ok: true, valore: { storieGiorno, postGiorno } };
+}
+
+export function obiettivoRaggiunto(p: StatistichePersona, o: Obiettivi): boolean {
+  return p.storieOggi >= o.storieGiorno && p.postOggi >= o.postGiorno;
+}
+
+/**
+ * Resoconto serale per il gruppo Telegram (HTML di Telegram): per ognuno storie e post di oggi
+ * rispetto agli obiettivi, chi è in pari e chi no, quanti contenuti aspettano una revisione.
+ */
+export function testoResoconto(contenuti: Contenuto[], obiettivi: Obiettivi, adesso: Date, link: string): string {
+  const html = (t: string) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const squadra = statistiche(contenuti, adesso).filter((p) => p.totale > p.eliminati);
+  const giorno = adesso.toLocaleDateString('it-IT', { timeZone: 'Europe/Rome', weekday: 'long', day: 'numeric', month: 'long' });
+  const righe = [`📊 <b>Resoconto di ${giorno}</b>`, `Obiettivo: ${obiettivi.storieGiorno} storie e ${obiettivi.postGiorno} post a testa`, ''];
+  if (squadra.length === 0) righe.push('Nessuno ha ancora pubblicato nel portale.');
+  const ordinati = [...squadra].sort((a, b) => b.storieOggi + b.postOggi - (a.storieOggi + a.postOggi) || a.nome.localeCompare(b.nome, 'it'));
+  for (const p of ordinati) {
+    const segno = obiettivoRaggiunto(p, obiettivi) ? '✅' : p.storieOggi + p.postOggi === 0 ? '⛔️' : '⚠️';
+    righe.push(`${segno} <b>${html(p.nome)}</b>: storie ${p.storieOggi}/${obiettivi.storieGiorno} · post ${p.postOggi}/${obiettivi.postGiorno}`);
+  }
+  const inPari = squadra.filter((p) => obiettivoRaggiunto(p, obiettivi)).length;
+  const coda = contenuti.filter((c) => !eliminato(c) && c.stato === 'da_rivedere').length;
+  righe.push('', `In pari: ${inPari} su ${squadra.length}`, `Da rivedere: ${coda}`, '', `<a href="${html(link)}">Apri il portale</a>`);
+  return righe.join('\n');
 }
 
 /** Riconosce JPEG, PNG e WebP dai primi byte: il tipo dichiarato dal browser non basta. */

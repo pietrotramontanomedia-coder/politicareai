@@ -151,3 +151,10 @@ export async function provaBotRedazione(): Promise<void> {
     text: '✅ Avvisi della redazione attivi: qui arriverà ogni post, storia e nuova versione pubblicata nel portale.',
   });
 }
+
+/** Messaggio di solo testo (HTML di Telegram) nel gruppo della redazione: il resoconto serale. */
+export async function inviaTestoRedazione(testo: string): Promise<void> {
+  const conf = configurazione();
+  if (!conf) throw new Error('REDAZIONE_TELEGRAM_BOT_TOKEN o REDAZIONE_TELEGRAM_CHAT mancante');
+  await chiama(conf.token, 'sendMessage', { chat_id: conf.chat, text: testo, parse_mode: 'HTML', link_preview_options: { is_disabled: true } });
+}
