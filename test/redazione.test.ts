@@ -8,6 +8,7 @@ import {
   LIMITI,
   nuovoContenuto,
   OBIETTIVI_PREDEFINITI,
+  obiettiviDiOggi,
   percentuale,
   perElenco,
   perLettore,
@@ -143,11 +144,30 @@ describe('regole', () => {
     const testo = testoResoconto(contenuti, OBIETTIVI_PREDEFINITI, sera, 'https://sito/redazione');
     expect(testo).toContain('⚠️ <b>Giulia Rossi</b>: storie 2/5 · post 1/2');
     expect(testo).toContain('In pari: 0 su 1');
-    expect(testoResoconto(contenuti, { storieGiorno: 2, postGiorno: 1 }, sera, 'l')).toContain('✅ <b>Giulia Rossi</b>');
+    expect(testoResoconto(contenuti, { ...OBIETTIVI_PREDEFINITI, storieGiorno: 2, postGiorno: 1 }, sera, 'l')).toContain('✅ <b>Giulia Rossi</b>');
+    // Sabato 17 ottobre valgono gli obiettivi del weekend: 2 storie e 1 post.
+    expect(obiettiviDiOggi(OBIETTIVI_PREDEFINITI, new Date('2026-10-17T10:00:00Z'))).toEqual({ storie: 2, post: 1, weekend: true });
+    expect(obiettiviDiOggi(OBIETTIVI_PREDEFINITI, sera)).toEqual({ storie: 5, post: 2, weekend: false });
+    // Lunedì alle 00:30 a Roma (domenica sera in UTC) il weekend è finito.
+    expect(obiettiviDiOggi(OBIETTIVI_PREDEFINITI, new Date('2026-10-18T22:30:00Z')).weekend).toBe(false);
+  });
+
+  it('«Non va bene»: solo con il perché, chiude il contenuto e conta a parte', () => {
+    const c = nuovoContenuto(ID(1), 'post', giulia.nome, post(), ADESSO);
+    expect(validaCommento(capo, c, { stato: 'non_va_bene', testo: '  ' }).ok).toBe(false);
+    const r = validaCommento(capo, c, { stato: 'non_va_bene', testo: 'Fuori tema', tipo: 'consiglio' });
+    expect(r).toEqual({ ok: true, valore: { tipo: 'bocciatura', testo: 'Fuori tema', stato: 'non_va_bene' } });
+    expect(validaCommento(giulia, c, { stato: 'non_va_bene', testo: 'no' })).toMatchObject({ ok: true, valore: { stato: null } });
+    const bocciato = aggiungiCommento(c, capo, (r as { valore: Parameters<typeof aggiungiCommento>[2] }).valore, ID(9), ADESSO);
+    expect(bocciato.stato).toBe('non_va_bene');
+    expect(puoModificare(giulia, bocciato)).toBe(false);
+    const [g] = statistiche([bocciato], ADESSO);
+    expect([g.nonVaBene, g.approvati]).toEqual([1, 0]);
   });
 
   it('obiettivi: solo numeri interi ragionevoli', () => {
-    expect(validaObiettivi({ storieGiorno: 5, postGiorno: 2 })).toEqual({ ok: true, valore: { storieGiorno: 5, postGiorno: 2 } });
+    expect(validaObiettivi({ storieGiorno: 5, postGiorno: 2 })).toEqual({ ok: true, valore: { storieGiorno: 5, postGiorno: 2, storieWeekend: 2, postWeekend: 1 } });
+    expect(validaObiettivi({ storieGiorno: 5, postGiorno: 2, storieWeekend: 31, postWeekend: 1 }).ok).toBe(false);
     expect(validaObiettivi({ storieGiorno: -1, postGiorno: 2 }).ok).toBe(false);
     expect(validaObiettivi({ storieGiorno: 2.5, postGiorno: 2 }).ok).toBe(false);
     expect(validaObiettivi({ storieGiorno: '5', postGiorno: 2 }).ok).toBe(false);

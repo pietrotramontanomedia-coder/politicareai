@@ -15,7 +15,8 @@ export interface SessioneRedazione {
 export type TipoContenuto = 'post' | 'storia';
 
 /** Dove si trova il contenuto nel giro di correzione. */
-export type StatoContenuto = 'da_rivedere' | 'da_correggere' | 'approvato';
+/** «Non va bene» chiude il contenuto: non si corregge, il perché è nel commento del revisore. */
+export type StatoContenuto = 'da_rivedere' | 'da_correggere' | 'approvato' | 'non_va_bene';
 
 export type FormatoPost = '1:1' | '4:5';
 
@@ -33,7 +34,7 @@ export interface Versione {
   formato: FormatoPost;
 }
 
-export type TipoCommento = 'correzione' | 'consiglio' | 'complimento' | 'risposta';
+export type TipoCommento = 'correzione' | 'consiglio' | 'complimento' | 'risposta' | 'bocciatura';
 
 export interface Commento {
   id: string;
@@ -82,6 +83,7 @@ export interface StatistichePersona {
   daRivedere: number;
   daCorreggere: number;
   approvati: number;
+  nonVaBene: number;
   /** Contenuti eliminati (nel cestino): contano nelle percentuali, non negli obiettivi. */
   eliminati: number;
   /** Tutti i contenuti mai pubblicati, eliminati compresi: la base delle percentuali. */
@@ -94,8 +96,12 @@ export interface StatistichePersona {
 
 /** Quanto deve pubblicare ognuno ogni giorno: li decide chi corregge. */
 export interface Obiettivi {
+  /** Da lunedì a venerdì. */
   storieGiorno: number;
   postGiorno: number;
+  /** Sabato e domenica. */
+  storieWeekend: number;
+  postWeekend: number;
   aggiornatoIl?: string;
   aggiornatoDa?: string;
 }

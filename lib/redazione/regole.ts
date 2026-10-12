@@ -33,7 +33,7 @@ export const ORE_STORIA = 24;
 /** Dove si fanno card e storie: nel portale si pubblicano soltanto. */
 export const URL_GENERATORE = 'https://politicare-storie.vercel.app';
 
-export const STATI: StatoContenuto[] = ['da_rivedere', 'da_correggere', 'approvato'];
+export const STATI: StatoContenuto[] = ['da_rivedere', 'da_correggere', 'approvato', 'non_va_bene'];
 export const TIPI_COMMENTO_REVISORE: TipoCommento[] = ['correzione', 'consiglio', 'complimento'];
 
 const FORMATI: FormatoPost[] = ['1:1', '4:5'];
@@ -121,9 +121,9 @@ export function eAutore(sessione: SessioneRedazione, contenuto: Contenuto): bool
   return chiaveNome(sessione.nome) === contenuto.chiaveAutore;
 }
 
-/** Solo l'autore scrive nuove versioni: chi corregge suggerisce, non riscrive. */
+/** Solo l'autore scrive nuove versioni (chi corregge suggerisce, non riscrive); un contenuto che non va bene è chiuso. */
 export function puoModificare(sessione: SessioneRedazione, contenuto: Contenuto): boolean {
-  return eAutore(sessione, contenuto);
+  return eAutore(sessione, contenuto) && contenuto.stato !== 'non_va_bene';
 }
 
 export function puoEliminare(sessione: SessioneRedazione, contenuto: Contenuto): boolean {
@@ -151,6 +151,8 @@ export function validaCommento(sessione: SessioneRedazione, contenuto: Contenuto
   if (sessione.ruolo === 'revisore') {
     const stato = STATI.includes(d.stato as StatoContenuto) ? (d.stato as StatoContenuto) : null;
     if (!scritto && !stato) return errore('Scrivi un commento o cambia lo stato.');
+    // «Non va bene» senza spiegazione non serve a chi l'ha scritto.
+    if (stato === 'non_va_bene') return scritto ? { ok: true, valore: { tipo: 'bocciatura', testo: scritto, stato } } : errore('Scrivi perché non va bene.');
     const tipo = TIPI_COMMENTO_REVISORE.includes(d.tipo as TipoCommento) ? (d.tipo as TipoCommento) : 'consiglio';
     return { ok: true, valore: { tipo, testo: scritto, stato } };
   }
@@ -258,6 +260,7 @@ export function statistiche(contenuti: Contenuto[], adesso: Date): StatistichePe
       daRivedere: 0,
       daCorreggere: 0,
       approvati: 0,
+      nonVaBene: 0,
       eliminati: 0,
       totale: 0,
       storieOggi: 0,
@@ -279,6 +282,7 @@ export function statistiche(contenuti: Contenuto[], adesso: Date): StatistichePe
     }
     if (c.stato === 'da_rivedere') p.daRivedere++;
     else if (c.stato === 'da_correggere') p.daCorreggere++;
+    else if (c.stato === 'non_va_bene') p.nonVaBene++;
     else p.approvati++;
     const invio = versioneCorrente(c).inviataIl;
     if (!p.ultimoInvio || invio > p.ultimoInvio) {
@@ -295,7 +299,19 @@ export function percentuale(parte: number, totale: number): number {
   return totale > 0 ? Math.round((parte / totale) * 100) : 0;
 }
 
-export const OBIETTIVI_PREDEFINITI: Obiettivi = { storieGiorno: 5, postGiorno: 2 };
+export const OBIETTIVI_PREDEFINITI: Obiettivi = { storieGiorno: 5, postGiorno: 2, storieWeekend: 2, postWeekend: 1 };
+
+/** Sabato o domenica, a Roma. */
+export function eWeekend(adesso: Date): boolean {
+  const giorno = adesso.toLocaleDateString('en-US', { timeZone: 'Europe/Rome', weekday: 'short' });
+  return giorno === 'Sat' || giorno === 'Sun';
+}
+
+/** Quante storie e quanti post servono oggi: nel weekend valgono gli obiettivi ridotti. */
+export function obiettiviDiOggi(o: Obiettivi, adesso: Date): { storie: number; post: number; weekend: boolean } {
+  const weekend = eWeekend(adesso);
+  return weekend ? { storie: o.storieWeekend, post: o.postWeekend, weekend } : { storie: o.storieGiorno, post: o.postGiorno, weekend };
+}
 const MASSIMO_OBIETTIVO = 30;
 
 export function validaObiettivi(dati: unknown): Esito<Obiettivi> {
@@ -303,12 +319,17 @@ export function validaObiettivi(dati: unknown): Esito<Obiettivi> {
   const numero = (v: unknown) => (typeof v === 'number' && Number.isInteger(v) && v >= 0 && v <= MASSIMO_OBIETTIVO ? v : null);
   const storieGiorno = numero(d.storieGiorno);
   const postGiorno = numero(d.postGiorno);
-  if (storieGiorno === null || postGiorno === null) return errore(`Gli obiettivi sono numeri interi da 0 a ${MASSIMO_OBIETTIVO}.`);
-  return { ok: true, valore: { storieGiorno, postGiorno } };
+  const storieWeekend = numero(d.storieWeekend ?? OBIETTIVI_PREDEFINITI.storieWeekend);
+  const postWeekend = numero(d.postWeekend ?? OBIETTIVI_PREDEFINITI.postWeekend);
+  if (storieGiorno === null || postGiorno === null || storieWeekend === null || postWeekend === null) {
+    return errore(`Gli obiettivi sono numeri interi da 0 a ${MASSIMO_OBIETTIVO}.`);
+  }
+  return { ok: true, valore: { storieGiorno, postGiorno, storieWeekend, postWeekend } };
 }
 
-export function obiettivoRaggiunto(p: StatistichePersona, o: Obiettivi): boolean {
-  return p.storieOggi >= o.storieGiorno && p.postOggi >= o.postGiorno;
+export function obiettivoRaggiunto(p: StatistichePersona, o: Obiettivi, adesso: Date): boolean {
+  const oggi = obiettiviDiOggi(o, adesso);
+  return p.storieOggi >= oggi.storie && p.postOggi >= oggi.post;
 }
 
 /**
@@ -319,14 +340,15 @@ export function testoResoconto(contenuti: Contenuto[], obiettivi: Obiettivi, ade
   const html = (t: string) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   const squadra = statistiche(contenuti, adesso).filter((p) => p.totale > p.eliminati);
   const giorno = adesso.toLocaleDateString('it-IT', { timeZone: 'Europe/Rome', weekday: 'long', day: 'numeric', month: 'long' });
-  const righe = [`📊 <b>Resoconto di ${giorno}</b>`, `Obiettivo: ${obiettivi.storieGiorno} storie e ${obiettivi.postGiorno} post a testa`, ''];
+  const oggi = obiettiviDiOggi(obiettivi, adesso);
+  const righe = [`📊 <b>Resoconto di ${giorno}</b>`, `Obiettivo${oggi.weekend ? ' del weekend' : ''}: ${oggi.storie} storie e ${oggi.post} post a testa`, ''];
   if (squadra.length === 0) righe.push('Nessuno ha ancora pubblicato nel portale.');
   const ordinati = [...squadra].sort((a, b) => b.storieOggi + b.postOggi - (a.storieOggi + a.postOggi) || a.nome.localeCompare(b.nome, 'it'));
   for (const p of ordinati) {
-    const segno = obiettivoRaggiunto(p, obiettivi) ? '✅' : p.storieOggi + p.postOggi === 0 ? '⛔️' : '⚠️';
-    righe.push(`${segno} <b>${html(p.nome)}</b>: storie ${p.storieOggi}/${obiettivi.storieGiorno} · post ${p.postOggi}/${obiettivi.postGiorno}`);
+    const segno = obiettivoRaggiunto(p, obiettivi, adesso) ? '✅' : p.storieOggi + p.postOggi === 0 ? '⛔️' : '⚠️';
+    righe.push(`${segno} <b>${html(p.nome)}</b>: storie ${p.storieOggi}/${oggi.storie} · post ${p.postOggi}/${oggi.post}`);
   }
-  const inPari = squadra.filter((p) => obiettivoRaggiunto(p, obiettivi)).length;
+  const inPari = squadra.filter((p) => obiettivoRaggiunto(p, obiettivi, adesso)).length;
   const coda = contenuti.filter((c) => !eliminato(c) && c.stato === 'da_rivedere').length;
   righe.push('', `In pari: ${inPari} su ${squadra.length}`, `Da rivedere: ${coda}`, '', `<a href="${html(link)}">Apri il portale</a>`);
   return righe.join('\n');
