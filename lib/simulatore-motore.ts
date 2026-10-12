@@ -455,19 +455,27 @@ function calcolaSenato(
 
     // 1. Si tolgono i seggi presi con i resti, partendo dai resti più piccoli (graduatoria nazionale).
     const conResti = riparti.filter((r) => r.restoUsato[iv] && r.seggi[iv] > 0).sort((a, b) => a.resti[iv] - b.resti[iv]);
+    const toccate = new Set<RipartoRegionale>();
     for (const rr of conResti) {
       if (eccedenza <= 0) break;
       rr.restoUsato[iv] = false;
-      if (cedi(rr)) eccedenza--;
+      if (cedi(rr)) {
+        eccedenza--;
+        toccate.add(rr);
+      }
     }
-    // 2. Poi un seggio per regione dove il vincitore ha la percentuale più bassa,
-    //    escluse le regioni dove ha un solo seggio (art. 16-bis, c. 1-ter, lett. a).
+    // 2. Poi un seggio per regione dove il vincitore ha la percentuale più bassa, escluse le regioni
+    //    dove ha un solo seggio. Al primo giro sono escluse anche quelle già toccate al passo 1;
+    //    dal secondo giro solo quelle con un seggio (art. 16-bis, c. 1-ter, lett. a, periodi 3-5).
     for (let giro = 0; eccedenza > 0 && giro < 50; giro++) {
       const totaleRegione = (r: RipartoRegionale) => r.cifre.reduce((a, b) => a + b, 0);
       const regioni = riparti
-        .filter((r) => r.seggi[iv] > 1)
+        .filter((r) => r.seggi[iv] > 1 && (giro > 0 || !toccate.has(r)))
         .sort((a, b) => a.cifre[iv] / (totaleRegione(a) || 1) - b.cifre[iv] / (totaleRegione(b) || 1));
-      if (!regioni.length) break;
+      if (!regioni.length) {
+        if (giro === 0) continue;
+        break;
+      }
       for (const rr of regioni) {
         if (eccedenza <= 0) break;
         if (cedi(rr)) eccedenza--;

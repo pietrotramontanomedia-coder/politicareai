@@ -164,6 +164,15 @@ describe('Senato regione per regione (art. 16-bis TU Senato)', () => {
     expect(esito.correzioniTettoSenato.every((c) => c.a === 'b')).toBe(true);
   });
 
+  it('tetto di 113: finiti i resti, al primo giro non si tocca una regione già toccata (c. 1-ter, lett. a)', () => {
+    const esito = simula([lista('a', 60), lista('b', 40)], { coalizioni: {}, geografia: GEOGRAFIA_SENATO_2022 });
+    const perRegione = new Map<string, number>();
+    for (const c of esito.correzioniTettoSenato) perRegione.set(c.regione, (perRegione.get(c.regione) ?? 0) + 1);
+    expect(esito.correzioniTettoSenato.length).toBeLessThanOrEqual(REGIONI_SENATO.length);
+    expect(Math.max(...perRegione.values())).toBe(1);
+    expect(chi(esito, 'a').seggiSenato).toBe(113);
+  });
+
   it('al Senato una lista entra con il 20% in una regione anche sotto il 3% nazionale', () => {
     const geografia: GeografiaSenato = {
       regioni: Object.fromEntries(
