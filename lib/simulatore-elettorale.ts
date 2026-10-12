@@ -157,6 +157,10 @@ export function ribilancia(liste: readonly ListaInput[], id: string, valore: num
 
 export const FONTI_LEGGE = [
   {
+    citazione: 'Gazzetta Ufficiale n. 235 del 9 ottobre 2026: legge 9 ottobre 2026, n. 180',
+    url: 'https://www.gazzettaufficiale.it/eli/id/2026/10/09/26G00201/sg',
+  },
+  {
     citazione: 'Camera dei deputati, testo A.C. 2822-B approvato in via definitiva l’8 ottobre 2026',
     url: 'https://documenti.camera.it/apps/commonServices/getDocumento.ashx?sezione=lavori&tipoDoc=testo_pdl_pdf&idlegislatura=19&codice=leg.19.pdl.camera.2822.19PDL0213710',
   },
@@ -184,7 +188,7 @@ export const TESTI_SIMULATORE = {
   titolo: 'Simulatore della legge elettorale',
   descrizione:
     'Inserisci i voti di liste e coalizioni e guarda come diventano seggi con la nuova legge elettorale: premio di maggioranza al 42%, soglie, tetti e Senato regione per regione.',
-  stato: 'Regole della legge approvata in via definitiva l’8 ottobre 2026 (A.C. 2822-B). In attesa della pubblicazione in Gazzetta Ufficiale.',
+  stato: 'Regole della legge 9 ottobre 2026, n. 180 (Gazzetta Ufficiale n. 235 del 9 ottobre), in vigore dal 24 ottobre 2026.',
   partiDa: 'Parti da',
   liste: 'Liste e coalizioni',
   percentuale: 'Voti %',
