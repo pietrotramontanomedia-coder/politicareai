@@ -6,6 +6,10 @@
       "schedule": "0 4 * * 1"
     },
     {
+      "path": "/api/redazione/promemoria",
+      "schedule": "0 7 * * *"
+    },
+    {
       "path": "/api/redazione/resoconto",
       "schedule": "0 19 * * *"
     },

@@ -444,6 +444,34 @@ export function obiettivoRaggiunto(p: StatistichePersona, o: Obiettivi, adesso: 
   return p.storieOggi >= oggi.storie && p.postOggi >= oggi.post;
 }
 
+/** Dopo quante ore un contenuto da rivedere è in arretrato per chi coordina. */
+export const ORE_ATTESA = 24;
+
+/** Contenuti che aspettano una revisione da più di ORE_ATTESA ore, dal più vecchio. */
+export function inAttesa(contenuti: Contenuto[], adesso: Date): Contenuto[] {
+  const soglia = adesso.getTime() - ORE_ATTESA * 3600_000;
+  return codaRevisione(contenuti.filter((c) => !eliminato(c))).filter((c) => Date.parse(versioneCorrente(c).inviataIl) < soglia);
+}
+
+/** Promemoria del mattino per chi coordina; null se non c'è niente in arretrato (e allora non si manda). */
+export function testoPromemoria(contenuti: Contenuto[], adesso: Date, link: string): string | null {
+  const arretrati = inAttesa(contenuti, adesso);
+  if (arretrati.length === 0) return null;
+  const html = (t: string) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const da = (iso: string) => {
+    const ore = Math.floor((adesso.getTime() - Date.parse(iso)) / 3600_000);
+    return ore < 48 ? `da ${ore} ore` : `da ${Math.floor(ore / 24)} giorni`;
+  };
+  const righe = [`⏰ <b>Da rivedere da più di ${ORE_ATTESA} ore: ${arretrati.length}</b>`, ''];
+  for (const c of arretrati.slice(0, 15)) {
+    const v = versioneCorrente(c);
+    righe.push(`• ${c.tipo === 'post' ? 'Post' : 'Storia'} di <b>${html(c.autore)}</b>${v.numero > 1 ? ` (versione ${v.numero})` : ''}, ${da(v.inviataIl)}`);
+  }
+  if (arretrati.length > 15) righe.push(`… e altri ${arretrati.length - 15}`);
+  righe.push('', `<a href="${html(link)}">Apri la coda</a>`);
+  return righe.join('\n');
+}
+
 /**
  * Resoconto serale per il gruppo Telegram (HTML di Telegram): per ognuno storie e post di oggi
  * rispetto agli obiettivi, chi è in pari e chi no, quanti contenuti aspettano una revisione.
@@ -470,7 +498,10 @@ export function testoResoconto(
   }
   const inPari = squadra.filter((p) => obiettivoRaggiunto(p, obiettivi, adesso)).length;
   const coda = contenuti.filter((c) => !eliminato(c) && c.stato === 'da_rivedere').length;
-  righe.push('', `In pari: ${inPari} su ${squadra.length}`, `Da rivedere: ${coda}`, '', `<a href="${html(link)}">Apri il portale</a>`);
+  const arretrati = inAttesa(contenuti, adesso).length;
+  righe.push('', `In pari: ${inPari} su ${squadra.length}`, `Da rivedere: ${coda}`);
+  if (arretrati > 0) righe.push(`⏰ In attesa da più di ${ORE_ATTESA} ore: ${arretrati}`);
+  righe.push('', `<a href="${html(link)}">Apri il portale</a>`);
   return righe.join('\n');
 }
 

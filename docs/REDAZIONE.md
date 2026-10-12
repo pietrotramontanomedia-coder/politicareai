@@ -54,6 +54,10 @@ chi coordina. Il portale si aggiorna da solo ogni minuto.
   pubblicato niente ⛔️, più quanti contenuti aspettano una revisione. Con `?anteprima=1` e il
   Bearer `CRON_SECRET` si legge il testo senza mandarlo.
 
+Ogni mattina (cron 07:00 UTC, le 9 d'estate) `/api/redazione/promemoria` manda nel gruppo i
+contenuti che aspettano una revisione da più di 24 ore, dal più vecchio; se non ce ne sono non
+manda niente. Il resoconto della sera ne riporta il numero.
+
 ## Non si perde niente
 
 - **Eliminare non cancella.** Il contenuto sparisce da feed e profili ma resta nell'archivio con
