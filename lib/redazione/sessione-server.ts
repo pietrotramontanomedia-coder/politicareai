@@ -1,5 +1,5 @@
 import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
-import { normalizzaNome } from './regole';
+import { chiaveNome, normalizzaNome } from './regole';
 import type { Ruolo, SessioneRedazione } from './tipi';
 
 /*
@@ -48,6 +48,27 @@ export function ruoloDaCodice(codice: string): Ruolo | null {
   const revisore = uguali(inserito, c.codiceRevisori);
   const redattore = uguali(inserito, c.codiceRedattori);
   return revisore ? 'revisore' : redattore ? 'redattore' : null;
+}
+
+/**
+ * Chi può correggere: i nomi in REDAZIONE_REVISORI (separati da virgola). Se la lista c'è, la
+ * password dei revisori vale solo con uno di quei nomi, e quei nomi non entrano come redattori:
+ * nessuno dei ragazzi può presentarsi come un revisore.
+ */
+function nomiRevisori(): Set<string> | null {
+  const elenco = (process.env.REDAZIONE_REVISORI ?? '').split(',').map((n) => chiaveNome(n)).filter(Boolean);
+  return elenco.length > 0 ? new Set(elenco) : null;
+}
+
+export function ruoloPerAccesso(nome: string, codice: string): { ruolo: Ruolo } | { errore: string } {
+  const ruolo = ruoloDaCodice(codice);
+  if (!ruolo) return { errore: 'Codice non valido.' };
+  const revisori = nomiRevisori();
+  if (!revisori) return { ruolo };
+  const capo = revisori.has(chiaveNome(nome));
+  if (ruolo === 'revisore' && !capo) return { errore: 'Questo nome non è tra i revisori: scrivi nome e cognome come ti sono stati dati.' };
+  if (ruolo === 'redattore' && capo) return { errore: 'Questo nome è riservato a chi corregge.' };
+  return { ruolo };
 }
 
 function firma(chiave: Buffer, dati: string): string {

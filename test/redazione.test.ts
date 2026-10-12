@@ -24,7 +24,7 @@ import {
   validaObiettivi,
 } from '@/lib/redazione/regole';
 import { testoAvviso } from '@/lib/redazione/telegram-server';
-import { cookieEntrata, creaToken, leggiToken, ruoloDaCodice } from '@/lib/redazione/sessione-server';
+import { cookieEntrata, creaToken, leggiToken, ruoloDaCodice, ruoloPerAccesso } from '@/lib/redazione/sessione-server';
 import type { BozzaVersione, Contenuto, SessioneRedazione } from '@/lib/redazione/tipi';
 
 /* Portale della redazione: chi scrive, chi corregge, chi vede cosa. */
@@ -183,6 +183,16 @@ describe('sessione', () => {
     expect(ruoloDaCodice('ragazzi-2026')).toBe('redattore');
     expect(ruoloDaCodice(' capi-2026 ')).toBe('revisore');
     expect(ruoloDaCodice('sbagliato')).toBeNull();
+  });
+
+  it('con l\'elenco dei revisori la loro password vale solo per quei nomi, e quei nomi non entrano come redattori', () => {
+    expect(ruoloPerAccesso('Chiunque', 'capi-2026')).toEqual({ ruolo: 'revisore' });
+    vi.stubEnv('REDAZIONE_REVISORI', 'Pietro Tramontano, Jacopo Esposito,Federico Brignacca');
+    expect(ruoloPerAccesso('  pietro  TRAMONTANO', 'capi-2026')).toEqual({ ruolo: 'revisore' });
+    expect(ruoloPerAccesso('Giulia Rossi', 'capi-2026')).toHaveProperty('errore');
+    expect(ruoloPerAccesso('Jacopo Esposito', 'ragazzi-2026')).toHaveProperty('errore');
+    expect(ruoloPerAccesso('Giulia Rossi', 'ragazzi-2026')).toEqual({ ruolo: 'redattore' });
+    expect(ruoloPerAccesso('Federico Brignacca', 'sbagliato')).toEqual({ errore: 'Codice non valido.' });
   });
 
   it('senza codici configurati non si entra', () => {
