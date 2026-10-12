@@ -4,7 +4,7 @@
  * Si monta in <div id="politicare-simulatore"></div>. Build: node scripts/build-widget-simulatore.mjs
  */
 
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import {
   FONTI_LEGGE,
@@ -24,6 +24,10 @@ import {
   type SeggiSpeciali,
 } from '@/lib/simulatore-elettorale';
 import { GEOGRAFIA_SENATO_2022 } from '@/lib/simulatore-geografia-2022';
+import { datiSimulazione, type Formato } from '@/lib/condivisione/dati';
+import { disegnaSimulazione } from '@/lib/condivisione/grafiche';
+import { impostaOrigineRisorse } from '@/lib/condivisione/tela';
+import { TESTI_CONDIVISIONE as TC } from '@/lib/condivisione/testi';
 import partiti from './partiti.json';
 import { CSS } from './stile';
 
@@ -34,6 +38,10 @@ const colori = Object.fromEntries(partiti.map((p) => [p.id, p.colore]));
 const PRESET: Preset[] = [presetSondaggi(partiti), presetPolitiche2022(colori), { ...presetPartitiDiOggi(partiti), nome: 'Da zero' }];
 const EMICICLO = { camera: puntiEmiciclo(REGOLE.camera.totale, 12), senato: puntiEmiciclo(REGOLE.senato.totale, 8) };
 const DA_SOLA = '';
+
+// Logo e immagini della grafica arrivano dall'app che serve questo file, non da politicare.it.
+const scriptCorrente = document.currentScript as HTMLScriptElement | null;
+impostaOrigineRisorse(scriptCorrente?.src ? new URL(scriptCorrente.src).origin : 'https://politicare-app.vercel.app');
 
 const specialiDi = (p: Preset): Speciali => ({ camera: { ...(p.speciali?.camera ?? {}) }, senato: { ...(p.speciali?.senato ?? {}) } });
 
@@ -252,6 +260,7 @@ function Risultato({ esito }: { esito: Esito }) {
     esito.premio.motivo === 'assegnato' && vincitore ? T.premio.assegnato(vincitore.nome) : T.premio[esito.premio.motivo as Exclude<typeof esito.premio.motivo, 'assegnato'>];
   return (
     <>
+      <Condividi esito={esito} />
       <p className={esito.premio.motivo === 'assegnato' ? 'pcs-esito pcs-esito--premio' : 'pcs-esito'}>{messaggio}</p>
       <div className="pcs-emicicli">
         <Emiciclo esito={esito} ramo="camera" />
@@ -387,12 +396,11 @@ function DettaglioListe({ esito }: { esito: Esito }) {
     <details className="pcs-scheda pcs-dettagli">
       <summary>{T.dettaglioListe}</summary>
       <div className="pcs-scorri">
-        <table className="pcs-tabella">
+        <table className="pcs-tabella pcs-tabella--liste">
           <thead>
             <tr>
               <th scope="col" />
               <th scope="col">%</th>
-              <th scope="col" />
               <th scope="col">{T.camera}</th>
               <th scope="col">{T.senato}</th>
             </tr>
@@ -403,14 +411,14 @@ function DettaglioListe({ esito }: { esito: Esito }) {
                 <th scope="row">
                   <span className="pcs-riga">
                     <span className="pcs-pallino" style={{ background: lista.colore }} aria-hidden />
-                    {lista.nome}
+                    <span>{lista.nome}</span>
+                  </span>
+                  <span className={stato === 'in-parlamento' ? 'pcs-sotto pcs-stato--ok' : 'pcs-sotto'}>
+                    {T.stati[stato]}
+                    {statoSenato !== stato && statoSenato === 'in-parlamento' && ` · ${T.statoSenatoDiverso}`}
                   </span>
                 </th>
                 <td>{formattaPercentuale(lista.percentuale)}</td>
-                <td className={stato === 'in-parlamento' ? 'pcs-stato pcs-stato--ok' : 'pcs-stato'}>
-                  {T.stati[stato]}
-                  {statoSenato !== stato && statoSenato === 'in-parlamento' && <span className="pcs-sotto">{T.statoSenatoDiverso}</span>}
-                </td>
                 <td className="pcs-forte">{seggiCamera}</td>
                 <td>{seggiSenato}</td>
               </tr>
@@ -419,7 +427,7 @@ function DettaglioListe({ esito }: { esito: Esito }) {
               .filter((c) => c.camera.premio > 0 || c.senato.premio > 0)
               .map((c) => (
                 <tr key={`premio-${c.id}`}>
-                  <th scope="row" colSpan={3}>
+                  <th scope="row" colSpan={2}>
                     {T.premioListino}: {c.nome}
                   </th>
                   <td className="pcs-forte">{c.camera.premio}</td>
@@ -431,6 +439,109 @@ function DettaglioListe({ esito }: { esito: Esito }) {
       </div>
       <p className="pcs-nota">{T.dettaglioListeNota}</p>
     </details>
+  );
+}
+
+interface Immagine {
+  url: string;
+  file: File;
+}
+
+/** Crea sul dispositivo l'immagine della simulazione: condivisione nativa sul telefono, download altrove. */
+function Condividi({ esito }: { esito: Esito }) {
+  const [aperto, setAperto] = useState(false);
+  const [formato, setFormato] = useState<Formato>('storia');
+  const [immagine, setImmagine] = useState<Immagine | null>(null);
+  const [stato, setStato] = useState<'generazione' | 'pronta' | 'errore'>('generazione');
+  const richiesta = useRef(0);
+
+  // Ogni modifica ai numeri o al formato rifà l'immagine, solo a pannello aperto.
+  // Breve attesa: mentre si trascina un cursore non si ridisegna a ogni passo.
+  useEffect(() => {
+    if (!aperto) return;
+    const numero = ++richiesta.current;
+    const attesa = window.setTimeout(() => {
+      setStato('generazione');
+      disegnaSimulazione(datiSimulazione(esito), formato)
+        .then((canvas) => new Promise<Blob | null>((ok) => canvas.toBlob(ok, 'image/png')))
+        .then((blob) => {
+          if (numero !== richiesta.current) return;
+          if (!blob) throw new Error('Immagine vuota');
+          setImmagine((prec) => {
+            if (prec) URL.revokeObjectURL(prec.url);
+            return { url: URL.createObjectURL(blob), file: new File([blob], `${TC.simulatore.file}-${formato}.png`, { type: 'image/png' }) };
+          });
+          setStato('pronta');
+        })
+        .catch(() => {
+          if (numero === richiesta.current) setStato('errore');
+        });
+    }, 250);
+    return () => window.clearTimeout(attesa);
+  }, [aperto, esito, formato]);
+
+  const puoCondividere = Boolean(immagine && typeof navigator !== 'undefined' && navigator.canShare?.({ files: [immagine.file] }));
+
+  async function condividi() {
+    if (!immagine) return;
+    const link = window.location.origin + window.location.pathname;
+    try {
+      await navigator.share({ files: [immagine.file], title: TC.simulatore.titolo, text: `${TC.simulatore.testo} ${link}` });
+    } catch {
+      // Condivisione annullata: nessuna azione.
+    }
+  }
+
+  if (!aperto) {
+    return (
+      <button type="button" className="pcs-condividi" onClick={() => setAperto(true)}>
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+          <path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7" />
+          <path d="M12 3v12" />
+          <path d="m7 8 5-5 5 5" />
+        </svg>
+        {TC.simulatore.pulsante}
+      </button>
+    );
+  }
+
+  return (
+    <div className="pcs-pannello" role="region" aria-label={TC.titoloPannello}>
+      <div className="pcs-riga">
+        <strong>{TC.titoloPannello}</strong>
+        <button type="button" className="pcs-chiudi" onClick={() => setAperto(false)} aria-label={TC.chiudi}>
+          ×
+        </button>
+      </div>
+      <div className="pcs-preset" role="group" aria-label={TC.titoloPannello}>
+        {(['storia', 'post'] as const).map((f) => (
+          <button key={f} type="button" className="pcs-pillola" aria-pressed={f === formato} onClick={() => setFormato(f)}>
+            {TC.formati[f]}
+          </button>
+        ))}
+      </div>
+      <div className={`pcs-anteprima pcs-anteprima--${formato}`}>
+        {stato === 'pronta' && immagine ? (
+          // eslint-disable-next-line @next/next/no-img-element -- anteprima di un'immagine creata nel browser
+          <img src={immagine.url} alt={TC.anteprima} />
+        ) : (
+          <span className="pcs-muto">{stato === 'errore' ? TC.errore : TC.generazione}</span>
+        )}
+      </div>
+      <div className="pcs-azioni">
+        {puoCondividere && (
+          <button type="button" className="pcs-condividi" onClick={condividi} disabled={stato !== 'pronta'}>
+            {TC.condividi}
+          </button>
+        )}
+        {immagine && stato === 'pronta' && (
+          <a className={puoCondividere ? 'pcs-pillola' : 'pcs-condividi'} href={immagine.url} download={immagine.file.name}>
+            {TC.scarica}
+          </a>
+        )}
+      </div>
+      <p className="pcs-nota">{TC.suDispositivo}</p>
+    </div>
   );
 }
 

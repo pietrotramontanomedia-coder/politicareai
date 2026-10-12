@@ -47,9 +47,20 @@ export function carattere(t: Tela, peso: number, px: number): void {
   t.ctx.font = `${peso} ${Math.round(px)}px ${t.famiglia}`;
 }
 
+/** Indirizzo da cui prendere logo e immagini. Vuoto nell'app; il widget di politicare.it lo punta all'app. */
+let origineRisorse = '';
+export function impostaOrigineRisorse(origine: string): void {
+  origineRisorse = origine.replace(/\/$/, '');
+}
+
 export function caricaImmagine(src: string): Promise<HTMLImageElement | null> {
   return new Promise((resolve) => {
     const img = new Image();
+    // Da un altro dominio l'immagine va chiesta con CORS, altrimenti il canvas non si può più esportare.
+    if (src.startsWith('/') && origineRisorse) {
+      src = origineRisorse + src;
+      img.crossOrigin = 'anonymous';
+    }
     img.onload = () => resolve(img);
     img.onerror = () => resolve(null);
     img.src = src;
