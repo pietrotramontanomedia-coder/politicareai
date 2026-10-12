@@ -3,11 +3,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Avatar from '@/components/profilo/Avatar';
 import { formattaDataRelativa } from '@/lib/data-ora';
-import { caricaContenuti, coloreDaNome, ErroreApi, esci, urlMedia } from '@/lib/redazione/client';
-import { chiaveNome, codaRevisione, eliminato, puoVedereCommenti, statistiche, storieRecenti, URL_GENERATORE, versioneCorrente } from '@/lib/redazione/regole';
+import { caricaContenuti, coloreDaNome, ErroreApi, esci, salvaObiettivi, urlMedia } from '@/lib/redazione/client';
+import { chiaveNome, codaRevisione, eliminato, OBIETTIVI_PREDEFINITI, percentuale, puoVedereCommenti, statistiche, storieRecenti, URL_GENERATORE, versioneCorrente } from '@/lib/redazione/regole';
 import { TESTI_REDAZIONE } from '@/lib/redazione/testi';
-import type { Contenuto, SessioneRedazione, TipoContenuto } from '@/lib/redazione/tipi';
+import type { Contenuto, Obiettivi, SessioneRedazione, TipoContenuto } from '@/lib/redazione/tipi';
 import AccessoRedazione from './AccessoRedazione';
+import Andamento from './Andamento';
 import AnteprimaPost from './AnteprimaPost';
 import AnteprimaStoria from './AnteprimaStoria';
 import Compositore from './Compositore';
@@ -22,6 +23,56 @@ const AGGIORNAMENTO_MS = 60_000;
 type Vista = 'feed' | 'profilo' | 'revisione' | 'squadra';
 
 /* ---------- Pezzi ---------- */
+
+/** Chi corregge decide quante storie e quanti post al giorno a testa. */
+function ModificaObiettivi({ obiettivi, onSalvati }: { obiettivi: Obiettivi; onSalvati: (o: Obiettivi) => void }) {
+  const O = T.obiettivi;
+  const [storie, setStorie] = useState(String(obiettivi.storieGiorno));
+  const [post, setPost] = useState(String(obiettivi.postGiorno));
+  const [esito, setEsito] = useState<string | null>(null);
+  const [invio, setInvio] = useState(false);
+  async function salva(e: React.FormEvent) {
+    e.preventDefault();
+    setInvio(true);
+    setEsito(null);
+    try {
+      onSalvati(await salvaObiettivi({ storieGiorno: Number(storie), postGiorno: Number(post) }));
+      setEsito(O.salvato);
+    } catch (err) {
+      setEsito(err instanceof Error ? err.message : O.errore);
+    } finally {
+      setInvio(false);
+    }
+  }
+  const campo = 'w-20 rounded-xl border px-3 py-2 text-sm outline-none focus-visible:ring-2';
+  const stile = { borderColor: 'var(--bordo)', background: 'var(--bg)', color: 'var(--fg)' };
+  return (
+    <form onSubmit={salva} className="rounded-2xl border p-4" style={{ borderColor: 'var(--bordo)' }}>
+      <h2 className="text-lg font-bold">{O.titolo}</h2>
+      <p className="mt-1 text-sm" style={{ color: 'var(--fg-muta)' }}>
+        {O.spiegazione}
+      </p>
+      <div className="mt-3 flex flex-wrap items-end gap-4">
+        <label className="text-xs font-semibold" style={{ color: 'var(--fg-muta)' }}>
+          {O.storie}
+          <input type="number" min={0} max={30} value={storie} onChange={(e) => setStorie(e.target.value)} className={`${campo} mt-1 block`} style={stile} />
+        </label>
+        <label className="text-xs font-semibold" style={{ color: 'var(--fg-muta)' }}>
+          {O.post}
+          <input type="number" min={0} max={30} value={post} onChange={(e) => setPost(e.target.value)} className={`${campo} mt-1 block`} style={stile} />
+        </label>
+        <button type="submit" disabled={invio} className="rounded-full px-4 py-2 text-sm font-bold disabled:opacity-40" style={{ background: 'var(--accento)', color: '#0a0a0a' }}>
+          {O.salva}
+        </button>
+        {esito && (
+          <span role="status" className="text-sm" style={{ color: 'var(--fg-muta)' }}>
+            {esito}
+          </span>
+        )}
+      </div>
+    </form>
+  );
+}
 
 /** Copertina di un contenuto per griglie ed elenchi: prima card, o la storia in piccolo. */
 function Copertina({ contenuto, conStato }: { contenuto: Contenuto; conStato: boolean }) {
@@ -96,6 +147,7 @@ export default function PortaleRedazione({ sessioneIniziale, configurata }: { se
   const [sessione, setSessione] = useState(sessioneIniziale);
   const [contenuti, setContenuti] = useState<Contenuto[] | null>(null);
   const [errore, setErrore] = useState(false);
+  const [obiettivi, setObiettivi] = useState<Obiettivi>(OBIETTIVI_PREDEFINITI);
   const [vista, setVista] = useState<Vista>('feed');
   const [persona, setPersona] = useState<string | null>(null);
   const [schedaProfilo, setSchedaProfilo] = useState<TipoContenuto>('post');
@@ -106,7 +158,9 @@ export default function PortaleRedazione({ sessioneIniziale, configurata }: { se
 
   const aggiorna = useCallback(async () => {
     try {
-      setContenuti(await caricaContenuti());
+      const dati = await caricaContenuti();
+      setContenuti(dati.contenuti);
+      setObiettivi(dati.obiettivi);
       setErrore(false);
     } catch (e) {
       if (e instanceof ErroreApi && e.status === 401) setSessione(null);
@@ -134,7 +188,8 @@ export default function PortaleRedazione({ sessioneIniziale, configurata }: { se
   const cestino = useMemo(() => (contenuti ?? []).filter(eliminato), [contenuti]);
   const gruppiStorie: GruppoStorie[] = useMemo(() => storieRecenti(tutti, adesso), [tutti, adesso]);
   const coda = useMemo(() => codaRevisione(tutti), [tutti]);
-  const squadra = useMemo(() => statistiche(tutti, adesso), [tutti, adesso]);
+  // Le statistiche contano anche gli eliminati, per le percentuali.
+  const squadra = useMemo(() => statistiche(contenuti ?? [], adesso), [contenuti, adesso]);
 
   // Link dall'avviso Telegram (/redazione?apri=<id>): apre il contenuto appena arriva il feed.
   const linkAperto = useRef(false);
@@ -191,6 +246,11 @@ export default function PortaleRedazione({ sessioneIniziale, configurata }: { se
     const mieStorie = gruppiStorie.findIndex((g) => g.chiave === mia);
     return (
       <div className="mx-auto max-w-xl">
+        {!revisore && (
+          <div className="mb-4">
+            <Andamento persona={squadra.find((p) => p.chiave === mia)} obiettivi={obiettivi} conPercentuali={false} />
+          </div>
+        )}
         <div className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-4" role="list" aria-label={T.storie.elenco}>
           <div role="listitem">
             <CerchioStoria nome={sessione!.nome} anello={mieStorie >= 0 ? 'nuove' : 'nessuno'} piu={mieStorie < 0} etichetta={T.laTuaStoria} onClick={() => (mieStorie >= 0 ? setStorieAperte(mieStorie) : setComposizione({ tipo: 'storia' }))} />
@@ -301,6 +361,10 @@ export default function PortaleRedazione({ sessioneIniziale, configurata }: { se
           </div>
         )}
 
+        <div className="mt-5">
+          <Andamento persona={stat} obiettivi={obiettivi} />
+        </div>
+
         {mio && mieDaCorreggere > 0 && (
           <p className="mt-5 rounded-2xl border p-3 text-sm" role="status" style={{ borderColor: 'rgba(245,158,11,0.4)', background: 'rgba(245,158,11,0.08)' }}>
             {T.profilo.avvisoCorrezioni(mieDaCorreggere)}
@@ -389,7 +453,8 @@ export default function PortaleRedazione({ sessioneIniziale, configurata }: { se
     const C = T.squadra.colonne;
     return (
       <div className="mx-auto max-w-5xl">
-        <h2 className="text-2xl font-bold">{T.squadra.titolo}</h2>
+        <ModificaObiettivi obiettivi={obiettivi} onSalvati={setObiettivi} />
+        <h2 className="mt-8 text-2xl font-bold">{T.squadra.titolo}</h2>
         <p className="mt-1 text-sm" style={{ color: 'var(--fg-muta)' }}>
           {T.squadra.spiegazione}
         </p>
@@ -403,12 +468,14 @@ export default function PortaleRedazione({ sessioneIniziale, configurata }: { se
               <thead>
                 <tr className="text-left text-xs uppercase tracking-wider" style={{ color: 'var(--fg-muta)' }}>
                   <th scope="col" className="p-3">{C.persona}</th>
+                  <th scope="col" className="p-3 text-right">{C.oggi}</th>
                   <th scope="col" className="p-3 text-right">{C.settimana}</th>
                   <th scope="col" className="p-3 text-right">{C.post}</th>
                   <th scope="col" className="p-3 text-right">{C.storie}</th>
                   <th scope="col" className="p-3 text-right">{C.daRivedere}</th>
                   <th scope="col" className="p-3 text-right">{C.daCorreggere}</th>
                   <th scope="col" className="p-3 text-right">{C.approvati}</th>
+                  <th scope="col" className="p-3 text-right">{C.eliminati}</th>
                   <th scope="col" className="p-3 text-right">{C.ultimo}</th>
                 </tr>
               </thead>
@@ -421,12 +488,20 @@ export default function PortaleRedazione({ sessioneIniziale, configurata }: { se
                         {p.nome}
                       </button>
                     </th>
+                    <td className="p-3 text-right whitespace-nowrap" style={{ color: p.storieOggi >= obiettivi.storieGiorno && p.postOggi >= obiettivi.postGiorno ? T.coloreStato.approvato : undefined }}>
+                      {p.storieOggi}/{obiettivi.storieGiorno} · {p.postOggi}/{obiettivi.postGiorno}
+                    </td>
                     <td className="p-3 text-right font-bold">{p.settimana}</td>
                     <td className="p-3 text-right">{p.post}</td>
                     <td className="p-3 text-right">{p.storie}</td>
                     <td className="p-3 text-right" style={{ color: p.daRivedere ? T.coloreStato.da_rivedere : undefined }}>{p.daRivedere}</td>
                     <td className="p-3 text-right" style={{ color: p.daCorreggere ? T.coloreStato.da_correggere : undefined }}>{p.daCorreggere}</td>
-                    <td className="p-3 text-right" style={{ color: p.approvati ? T.coloreStato.approvato : undefined }}>{p.approvati}</td>
+                    <td className="p-3 text-right" style={{ color: p.approvati ? T.coloreStato.approvato : undefined }}>
+                      {p.approvati} <span style={{ color: 'var(--fg-muta)' }}>({percentuale(p.approvati, p.totale)}%)</span>
+                    </td>
+                    <td className="p-3 text-right" style={{ color: p.eliminati ? '#F87171' : undefined }}>
+                      {p.eliminati} <span style={{ color: 'var(--fg-muta)' }}>({percentuale(p.eliminati, p.totale)}%)</span>
+                    </td>
                     <td className="p-3 text-right" style={{ color: 'var(--fg-muta)' }}>{p.ultimoInvio ? formattaDataRelativa(p.ultimoInvio, adesso) : '—'}</td>
                   </tr>
                 ))}

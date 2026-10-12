@@ -1,4 +1,4 @@
-import type { BozzaVersione, Contenuto, SessioneRedazione, StatoContenuto, TipoCommento, TipoContenuto } from './tipi';
+import type { BozzaVersione, Contenuto, Obiettivi, SessioneRedazione, StatoContenuto, TipoCommento, TipoContenuto } from './tipi';
 
 /** Chiamate del browser alle API del portale della redazione. */
 
@@ -35,8 +35,13 @@ export async function esci(): Promise<void> {
   await api('/api/redazione/accesso', { method: 'DELETE' });
 }
 
-export async function caricaContenuti(): Promise<Contenuto[]> {
-  return (await api<{ contenuti: Contenuto[] }>('/api/redazione/contenuti')).contenuti;
+export async function caricaContenuti(): Promise<{ contenuti: Contenuto[]; obiettivi: Obiettivi }> {
+  const { contenuti, obiettivi } = await api<{ contenuti: Contenuto[]; obiettivi: Obiettivi }>('/api/redazione/contenuti');
+  return { contenuti, obiettivi };
+}
+
+export async function salvaObiettivi(obiettivi: Pick<Obiettivi, 'storieGiorno' | 'postGiorno'>): Promise<Obiettivi> {
+  return (await api<{ obiettivi: Obiettivi }>('/api/redazione/obiettivi', json('PUT', obiettivi))).obiettivi;
 }
 
 export async function creaContenuto(tipo: TipoContenuto, bozza: BozzaVersione): Promise<Contenuto> {

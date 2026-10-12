@@ -7,6 +7,8 @@ import {
   codaRevisione,
   LIMITI,
   nuovoContenuto,
+  OBIETTIVI_PREDEFINITI,
+  percentuale,
   perElenco,
   perLettore,
   puoEliminare,
@@ -15,9 +17,11 @@ import {
   segnaEliminato,
   statistiche,
   storieRecenti,
+  testoResoconto,
   tipoImmagine,
   validaBozza,
   validaCommento,
+  validaObiettivi,
 } from '@/lib/redazione/regole';
 import { testoAvviso } from '@/lib/redazione/telegram-server';
 import { cookieEntrata, creaToken, leggiToken, ruoloDaCodice } from '@/lib/redazione/sessione-server';
@@ -121,6 +125,32 @@ describe('regole', () => {
     const tornato = JSON.parse(JSON.stringify(ripristina(via, ADESSO))) as Contenuto;
     expect(tornato.eliminatoIl).toBeUndefined();
     expect(perElenco(marco, [tornato])).toHaveLength(1);
+  });
+
+  it('obiettivi del giorno e percentuali: la giornata è quella italiana, gli eliminati contano solo nelle percentuali', () => {
+    const sera = new Date('2026-10-12T21:30:00Z'); // 23:30 a Roma
+    const storia = (n: number, quando: string) => nuovoContenuto(ID(n), 'storia', giulia.nome, { immagini: [ID(n)], didascalia: '', formato: '1:1' }, new Date(quando));
+    const contenuti = [
+      storia(1, '2026-10-12T06:00:00Z'),
+      storia(2, '2026-10-11T22:30:00Z'), // 00:30 del 12 a Roma: conta per oggi
+      storia(3, '2026-10-11T21:30:00Z'), // 23:30 dell'11 a Roma: ieri
+      aggiungiCommento(nuovoContenuto(ID(4), 'post', giulia.nome, post(), sera), capo, { tipo: 'complimento', testo: '', stato: 'approvato' }, ID(9), sera),
+      segnaEliminato(nuovoContenuto(ID(5), 'post', giulia.nome, post(), sera), giulia, sera),
+    ];
+    const [g] = statistiche(contenuti, sera);
+    expect([g.storieOggi, g.postOggi, g.totale, g.eliminati, g.approvati]).toEqual([2, 1, 5, 1, 1]);
+    expect([percentuale(g.approvati, g.totale), percentuale(g.eliminati, g.totale), percentuale(1, 0)]).toEqual([20, 20, 0]);
+    const testo = testoResoconto(contenuti, OBIETTIVI_PREDEFINITI, sera, 'https://sito/redazione');
+    expect(testo).toContain('⚠️ <b>Giulia Rossi</b>: storie 2/5 · post 1/2');
+    expect(testo).toContain('In pari: 0 su 1');
+    expect(testoResoconto(contenuti, { storieGiorno: 2, postGiorno: 1 }, sera, 'l')).toContain('✅ <b>Giulia Rossi</b>');
+  });
+
+  it('obiettivi: solo numeri interi ragionevoli', () => {
+    expect(validaObiettivi({ storieGiorno: 5, postGiorno: 2 })).toEqual({ ok: true, valore: { storieGiorno: 5, postGiorno: 2 } });
+    expect(validaObiettivi({ storieGiorno: -1, postGiorno: 2 }).ok).toBe(false);
+    expect(validaObiettivi({ storieGiorno: 2.5, postGiorno: 2 }).ok).toBe(false);
+    expect(validaObiettivi({ storieGiorno: '5', postGiorno: 2 }).ok).toBe(false);
   });
 
   it('avviso Telegram: chi, cosa, copy accorciato e link, dentro i 1024 caratteri', () => {
@@ -308,6 +338,16 @@ describe('API', () => {
     const ripristinato = await uno.PATCH(richiesta(`/api/redazione/contenuti/${contenuto.id}`, capo, { method: 'PATCH' }), parametri(contenuto.id));
     expect(((await ripristinato.json()) as { contenuto: Contenuto }).contenuto).toMatchObject({ stato: 'approvato', versioni: [{}, {}] });
     expect(((await (await contenuti.GET(richiesta('/api/redazione/contenuti', marco))).json()) as { contenuti: Contenuto[] }).contenuti).toHaveLength(1);
+  });
+
+  it('obiettivi: li cambia solo chi corregge e arrivano a tutti con il feed', async () => {
+    const route = await import('@/app/api/redazione/obiettivi/route');
+    const contenuti = await import('@/app/api/redazione/contenuti/route');
+    const corpo = JSON.stringify({ storieGiorno: 3, postGiorno: 1 });
+    expect((await route.PUT(richiesta('/api/redazione/obiettivi', giulia, { method: 'PUT', body: corpo }))).status).toBe(403);
+    expect((await route.PUT(richiesta('/api/redazione/obiettivi', capo, { method: 'PUT', body: corpo }))).status).toBe(200);
+    const feed = (await (await contenuti.GET(richiesta('/api/redazione/contenuti', giulia))).json()) as { obiettivi: { storieGiorno: number; aggiornatoDa: string } };
+    expect(feed.obiettivi).toMatchObject({ storieGiorno: 3, aggiornatoDa: 'Pietro' });
   });
 
   it('identificativi strani non arrivano all\'archivio', async () => {

@@ -1,6 +1,6 @@
 import { BlobPreconditionFailedError, get, list, put } from '@vercel/blob';
-import { ID_VALIDO } from './regole';
-import type { Contenuto } from './tipi';
+import { ID_VALIDO, OBIETTIVI_PREDEFINITI } from './regole';
+import type { Contenuto, Obiettivi } from './tipi';
 
 /*
  * Archivio del portale della redazione nello storage privato di Vercel Blob: un file JSON per
@@ -16,6 +16,7 @@ import type { Contenuto } from './tipi';
 const CARTELLA_CONTENUTI = 'redazione/contenuti/';
 const CARTELLA_MEDIA = 'redazione/media/';
 const CARTELLA_STORICO = 'redazione/storico/';
+const FILE_OBIETTIVI = 'redazione/impostazioni/obiettivi.json';
 const TENTATIVI = 4;
 /** Letture ripetute prima di arrendersi: un intoppo di rete non deve far sparire un contenuto dal feed. */
 const TENTATIVI_LETTURA = 3;
@@ -44,6 +45,9 @@ export interface Archivio {
   aggiorna(id: string, modifica: (contenuto: Contenuto) => Contenuto): Promise<Contenuto>;
   salvaMedia(id: string, dati: Uint8Array, tipo: string): Promise<void>;
   leggiMedia(id: string): Promise<Media | null>;
+  /** Obiettivi giornalieri decisi da chi corregge; finché nessuno li cambia, quelli predefiniti. */
+  leggiObiettivi(): Promise<Obiettivi>;
+  salvaObiettivi(obiettivi: Obiettivi): Promise<void>;
 }
 
 function percorsoContenuto(id: string): string {
@@ -156,6 +160,23 @@ const archivioBlob: Archivio = {
     if (!risultato || risultato.statusCode !== 200) return null;
     return { corpo: risultato.stream, tipo: risultato.blob.contentType };
   },
+
+  async leggiObiettivi() {
+    const risultato = await get(FILE_OBIETTIVI, { access: 'private', useCache: false });
+    if (!risultato || risultato.statusCode !== 200) return OBIETTIVI_PREDEFINITI;
+    return { ...OBIETTIVI_PREDEFINITI, ...((await new Response(risultato.stream).json()) as Partial<Obiettivi>) };
+  },
+
+  async salvaObiettivi(obiettivi) {
+    const corpo = JSON.stringify(obiettivi);
+    await put(FILE_OBIETTIVI, corpo, { access: 'private', contentType: 'application/json', addRandomSuffix: false, allowOverwrite: true });
+    // Anche gli obiettivi lasciano la loro copia datata.
+    await put(`${CARTELLA_STORICO}obiettivi/${new Date().toISOString().replace(/[:.]/g, '-')}.json`, corpo, {
+      access: 'private',
+      contentType: 'application/json',
+      addRandomSuffix: true,
+    }).catch((errore) => console.error('[redazione] copia degli obiettivi non riuscita', errore));
+  },
 };
 
 /* ---------- Memoria (sviluppo e test) ---------- */
@@ -163,6 +184,7 @@ const archivioBlob: Archivio = {
 interface Memoria {
   contenuti: Map<string, Contenuto>;
   media: Map<string, { dati: Uint8Array; tipo: string }>;
+  obiettivi?: Obiettivi;
 }
 
 const globale = globalThis as typeof globalThis & { __memoriaRedazione?: Memoria };
@@ -204,6 +226,12 @@ const archivioMemoria: Archivio = {
     percorsoMedia(id);
     const m = memoria().media.get(id);
     return m ? { corpo: m.dati, tipo: m.tipo } : null;
+  },
+  async leggiObiettivi() {
+    return memoria().obiettivi ?? OBIETTIVI_PREDEFINITI;
+  },
+  async salvaObiettivi(obiettivi) {
+    memoria().obiettivi = obiettivi;
   },
 };
 
