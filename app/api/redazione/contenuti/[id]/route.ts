@@ -53,7 +53,7 @@ export async function PATCH(request: Request, { params }: Parametri) {
   return conSessione(request, async (sessione) => {
     if (sessione.ruolo !== 'revisore') throw new ErroreRedazione(403, 'Solo chi corregge può ripristinare.');
     const { id } = await params;
-    const contenuto = await archivio().aggiorna(id, (attuale) => ripristina(attuale, new Date()));
+    const contenuto = await archivio().aggiorna(id, (attuale) => ripristina(attuale, sessione, new Date()));
     return Response.json({ ok: true, contenuto });
   });
 }

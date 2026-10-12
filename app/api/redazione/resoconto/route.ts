@@ -17,9 +17,9 @@ export async function GET(request: Request) {
     return Response.json({ ok: false, errore: 'non autorizzato' }, { status: 401 });
   }
   try {
-    const [contenuti, obiettivi] = await Promise.all([archivio().elenca(), archivio().leggiObiettivi()]);
+    const [contenuti, obiettivi, persone] = await Promise.all([archivio().elenca(), archivio().leggiObiettivi(), archivio().leggiPersone()]);
     const base = process.env.SITO_URL?.replace(/\/$/, '') || new URL(request.url).origin;
-    const testo = testoResoconto(contenuti, obiettivi, new Date(), `${base}/redazione`);
+    const testo = testoResoconto(contenuti, obiettivi, new Date(), `${base}/redazione`, persone);
     if (new URL(request.url).searchParams.has('anteprima')) return Response.json({ ok: true, testo });
     if (!avvisiRedazioneConfigurati()) return Response.json({ ok: false, errore: 'bot della redazione non configurato' }, { status: 503 });
     await inviaTestoRedazione(testo);

@@ -1,4 +1,4 @@
-import type { BozzaVersione, Contenuto, Obiettivi, SessioneRedazione, StatoContenuto, TipoCommento, TipoContenuto } from './tipi';
+import type { BozzaVersione, Contenuto, Obiettivi, PersonaPubblica, SessioneRedazione, StatoContenuto, TipoCommento, TipoContenuto } from './tipi';
 
 /** Chiamate del browser alle API del portale della redazione. */
 
@@ -35,9 +35,17 @@ export async function esci(): Promise<void> {
   await api('/api/redazione/accesso', { method: 'DELETE' });
 }
 
-export async function caricaContenuti(): Promise<{ contenuti: Contenuto[]; obiettivi: Obiettivi }> {
-  const { contenuti, obiettivi } = await api<{ contenuti: Contenuto[]; obiettivi: Obiettivi }>('/api/redazione/contenuti');
-  return { contenuti, obiettivi };
+export async function caricaContenuti(): Promise<{ contenuti: Contenuto[]; obiettivi: Obiettivi; persone: PersonaPubblica[] }> {
+  const { contenuti, obiettivi, persone } = await api<{ contenuti: Contenuto[]; obiettivi: Obiettivi; persone: PersonaPubblica[] }>('/api/redazione/contenuti');
+  return { contenuti, obiettivi, persone };
+}
+
+export async function aggiungiPersona(nome: string, password: string): Promise<PersonaPubblica[]> {
+  return (await api<{ persone: PersonaPubblica[] }>('/api/redazione/persone', json('POST', { nome, password }))).persone;
+}
+
+export async function modificaPersona(chiave: string, modifica: { attiva: boolean } | { password: string }): Promise<PersonaPubblica[]> {
+  return (await api<{ persone: PersonaPubblica[] }>('/api/redazione/persone', json('PATCH', { chiave, ...modifica }))).persone;
 }
 
 export async function salvaObiettivi(obiettivi: Pick<Obiettivi, 'storieGiorno' | 'postGiorno' | 'storieWeekend' | 'postWeekend'>): Promise<Obiettivi> {

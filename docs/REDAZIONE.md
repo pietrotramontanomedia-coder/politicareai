@@ -29,6 +29,19 @@ pagina non è indicizzata. Non ha legami con il profilo pubblico dell'app né co
 I colleghi vedono il lavoro degli altri ma non le correzioni: quelle restano fra l'autore e
 chi coordina. Il portale si aggiorna da solo ogni minuto.
 
+## Ragazzi, password e schede (per chi coordina)
+
+- *Squadra → Ragazzi della redazione*: si aggiunge ognuno con nome e password personale (salvata
+  solo come impronta scrypt). Con l'elenco, il codice comune non vale più per nomi non registrati;
+  chi ha una password entra solo con quella. Chi esce si disattiva, il suo lavoro resta.
+- *Attività*: la cronologia di tutto (pubblicazioni, versioni, commenti, cambi di stato,
+  eliminazioni, ripristini), per giorno, filtrabile per persona. Ogni contenuto tiene un registro
+  `eventi` che si allunga e non si riscrive; i contenuti di prima lo ricostruiscono da versioni e
+  commenti.
+- Cliccando un nome nella Squadra si apre la **scheda** della persona: obiettivi di oggi,
+  percentuali, ultimi 14 giorni, giorni in pari, approvati al primo colpo, versioni medie, tutti
+  i contenuti con i loro commenti e tutte le sue attività.
+
 ## Obiettivi e resoconto
 
 - Chi corregge fissa in *Squadra → Obiettivi giornalieri* quante storie e quanti post deve

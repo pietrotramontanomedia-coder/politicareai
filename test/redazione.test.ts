@@ -2,9 +2,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { svuotaMemoria } from '@/lib/redazione/archivio-server';
 import {
   aggiungiCommento,
+  aggiungiPersona,
+  andamentoGiornaliero,
   aggiungiVersione,
   chiaveNome,
   codaRevisione,
+  cronologia,
+  eventiDi,
   LIMITI,
   nuovoContenuto,
   OBIETTIVI_PREDEFINITI,
@@ -123,7 +127,7 @@ describe('regole', () => {
     expect(via).toMatchObject({ eliminatoIl: ADESSO.toISOString(), eliminatoDa: 'Giulia Rossi', versioni: c.versioni });
     expect(perElenco(marco, [c, via].map((x, i) => ({ ...x, id: ID(i) })))).toHaveLength(1);
     expect(perElenco(capo, [via])).toHaveLength(1);
-    const tornato = JSON.parse(JSON.stringify(ripristina(via, ADESSO))) as Contenuto;
+    const tornato = JSON.parse(JSON.stringify(ripristina(via, capo, ADESSO))) as Contenuto;
     expect(tornato.eliminatoIl).toBeUndefined();
     expect(perElenco(marco, [tornato])).toHaveLength(1);
   });
@@ -163,6 +167,46 @@ describe('regole', () => {
     expect(puoModificare(giulia, bocciato)).toBe(false);
     const [g] = statistiche([bocciato], ADESSO);
     expect([g.nonVaBene, g.approvati]).toEqual([1, 0]);
+  });
+
+  it('registro: ogni azione resta, in ordine, e la cronologia mette insieme tutto', () => {
+    const t = (m: number) => new Date(ADESSO.getTime() + m * 60_000);
+    let c = nuovoContenuto(ID(1), 'post', giulia.nome, post(), t(0));
+    c = aggiungiCommento(c, capo, { tipo: 'correzione', testo: 'Accorcia', stato: 'da_correggere' }, ID(8), t(1));
+    c = aggiungiVersione(c, post([ID(1)], 'Più corto'), t(2));
+    c = aggiungiCommento(c, capo, { tipo: 'complimento', testo: '', stato: 'approvato' }, ID(9), t(3));
+    c = segnaEliminato(c, capo, t(4));
+    c = ripristina(c, capo, t(5));
+    expect(eventiDi(c).map((e) => [e.tipo, e.chi, e.stato ?? e.tipoCommento ?? e.versione ?? null])).toEqual([
+      ['pubblicato', 'Giulia Rossi', 1],
+      ['commento', 'Pietro', 'correzione'],
+      ['stato', 'Pietro', 'da_correggere'],
+      ['nuova_versione', 'Giulia Rossi', 2],
+      ['stato', 'Pietro', 'approvato'],
+      ['eliminato', 'Pietro', null],
+      ['ripristinato', 'Pietro', null],
+    ]);
+    // I contenuti di prima del registro lo ricostruiscono da versioni e commenti.
+    const vecchio = { ...c, id: ID(2), eventi: undefined };
+    expect(eventiDi(vecchio).map((e) => e.tipo)).toEqual(['pubblicato', 'commento', 'nuova_versione']);
+    const voci = cronologia([c, vecchio]);
+    expect(voci[0]).toMatchObject({ tipo: 'ripristinato', contenutoId: ID(1), autore: 'Giulia Rossi' });
+    expect(voci).toHaveLength(10);
+  });
+
+  it('andamento: 14 giorni con gli obiettivi di ciascun giorno, weekend compreso', () => {
+    const lunedi = new Date('2026-10-12T18:00:00Z');
+    const c = [nuovoContenuto(ID(1), 'post', giulia.nome, post(), new Date('2026-10-11T09:00:00Z'))];
+    const giorni = andamentoGiornaliero(c, 'giulia rossi', OBIETTIVI_PREDEFINITI, lunedi);
+    expect(giorni).toHaveLength(14);
+    expect(giorni.at(-1)).toMatchObject({ giorno: '2026-10-12', obiettivoStorie: 5, inPari: false });
+    expect(giorni.at(-2)).toMatchObject({ giorno: '2026-10-11', post: 1, obiettivoStorie: 2, obiettivoPost: 1, inPari: false });
+  });
+
+  it('persone: niente doppioni, chi esce si disattiva e torna', () => {
+    const una = aggiungiPersona([], ' matteo ', 'Pietro', ADESSO);
+    expect(una.ok && una.valore[0]).toMatchObject({ nome: 'matteo', chiave: 'matteo', attiva: true });
+    expect(aggiungiPersona(una.ok ? una.valore : [], 'Matteo', 'Pietro', ADESSO).ok).toBe(false);
   });
 
   it('obiettivi: solo numeri interi ragionevoli', () => {
@@ -378,6 +422,25 @@ describe('API', () => {
     expect((await route.PUT(richiesta('/api/redazione/obiettivi', capo, { method: 'PUT', body: corpo }))).status).toBe(200);
     const feed = (await (await contenuti.GET(richiesta('/api/redazione/contenuti', giulia))).json()) as { obiettivi: { storieGiorno: number; aggiornatoDa: string } };
     expect(feed.obiettivi).toMatchObject({ storieGiorno: 3, aggiornatoDa: 'Pietro' });
+  });
+
+  it('password personali: chi è in elenco entra solo con la sua, gli altri ragazzi non entrano più', async () => {
+    const accesso = await import('@/app/api/redazione/accesso/route');
+    const persone = await import('@/app/api/redazione/persone/route');
+    const entra = (nome: string, codice: string) => accesso.POST(richiesta('/api/redazione/accesso', null, { method: 'POST', body: JSON.stringify({ nome, codice }) }));
+    expect((await persone.POST(richiesta('/api/redazione/persone', giulia, { method: 'POST', body: JSON.stringify({ nome: 'Matteo', password: 'Matteo2026' }) }))).status).toBe(403);
+    expect((await persone.POST(richiesta('/api/redazione/persone', capo, { method: 'POST', body: JSON.stringify({ nome: 'Matteo', password: '123' }) }))).status).toBe(400);
+    const creata = await persone.POST(richiesta('/api/redazione/persone', capo, { method: 'POST', body: JSON.stringify({ nome: 'Matteo', password: 'Matteo2026' }) }));
+    const elenco = (await creata.json()) as { persone: Record<string, unknown>[] };
+    expect(elenco.persone[0]).toMatchObject({ nome: 'Matteo', conPassword: true });
+    expect(elenco.persone[0]).not.toHaveProperty('password');
+    expect((await entra('matteo', 'Matteo2026')).status).toBe(200);
+    expect((await entra('Matteo', 'ragazzi-2026')).status).toBe(401);
+    expect((await entra('Giulia', 'ragazzi-2026')).status).toBe(401);
+    expect((await entra('Pietro', 'capi-2026')).status).toBe(200);
+    // Disattivato non entra più, ma il suo lavoro resta.
+    await persone.PATCH(richiesta('/api/redazione/persone', capo, { method: 'PATCH', body: JSON.stringify({ chiave: 'matteo', attiva: false }) }));
+    expect((await entra('Matteo', 'Matteo2026')).status).toBe(401);
   });
 
   it('identificativi strani non arrivano all\'archivio', async () => {

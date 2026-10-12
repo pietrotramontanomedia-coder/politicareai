@@ -1,6 +1,6 @@
 import { BlobPreconditionFailedError, get, list, put } from '@vercel/blob';
 import { ID_VALIDO, OBIETTIVI_PREDEFINITI } from './regole';
-import type { Contenuto, Obiettivi } from './tipi';
+import type { Contenuto, Obiettivi, Persona } from './tipi';
 
 /*
  * Archivio del portale della redazione nello storage privato di Vercel Blob: un file JSON per
@@ -17,6 +17,7 @@ const CARTELLA_CONTENUTI = 'redazione/contenuti/';
 const CARTELLA_MEDIA = 'redazione/media/';
 const CARTELLA_STORICO = 'redazione/storico/';
 const FILE_OBIETTIVI = 'redazione/impostazioni/obiettivi.json';
+const FILE_PERSONE = 'redazione/impostazioni/persone.json';
 const TENTATIVI = 4;
 /** Letture ripetute prima di arrendersi: un intoppo di rete non deve far sparire un contenuto dal feed. */
 const TENTATIVI_LETTURA = 3;
@@ -48,6 +49,9 @@ export interface Archivio {
   /** Obiettivi giornalieri decisi da chi corregge; finché nessuno li cambia, quelli predefiniti. */
   leggiObiettivi(): Promise<Obiettivi>;
   salvaObiettivi(obiettivi: Obiettivi): Promise<void>;
+  /** I ragazzi registrati da chi coordina (vuoto = chiunque abbia il codice). */
+  leggiPersone(): Promise<Persona[]>;
+  salvaPersone(persone: Persona[]): Promise<void>;
 }
 
 function percorsoContenuto(id: string): string {
@@ -168,16 +172,30 @@ const archivioBlob: Archivio = {
   },
 
   async salvaObiettivi(obiettivi) {
-    const corpo = JSON.stringify(obiettivi);
-    await put(FILE_OBIETTIVI, corpo, { access: 'private', contentType: 'application/json', addRandomSuffix: false, allowOverwrite: true });
-    // Anche gli obiettivi lasciano la loro copia datata.
-    await put(`${CARTELLA_STORICO}obiettivi/${new Date().toISOString().replace(/[:.]/g, '-')}.json`, corpo, {
-      access: 'private',
-      contentType: 'application/json',
-      addRandomSuffix: true,
-    }).catch((errore) => console.error('[redazione] copia degli obiettivi non riuscita', errore));
+    await scriviImpostazione(FILE_OBIETTIVI, 'obiettivi', obiettivi);
+  },
+
+  async leggiPersone() {
+    const risultato = await get(FILE_PERSONE, { access: 'private', useCache: false });
+    if (!risultato || risultato.statusCode !== 200) return [];
+    return (await new Response(risultato.stream).json()) as Persona[];
+  },
+
+  async salvaPersone(persone) {
+    await scriviImpostazione(FILE_PERSONE, 'persone', persone);
   },
 };
+
+/** Un file di impostazioni, più la sua copia datata nello storico. */
+async function scriviImpostazione(percorso: string, nome: string, dati: unknown): Promise<void> {
+  const corpo = JSON.stringify(dati);
+  await put(percorso, corpo, { access: 'private', contentType: 'application/json', addRandomSuffix: false, allowOverwrite: true });
+  await put(`${CARTELLA_STORICO}${nome}/${new Date().toISOString().replace(/[:.]/g, '-')}.json`, corpo, {
+    access: 'private',
+    contentType: 'application/json',
+    addRandomSuffix: true,
+  }).catch((errore) => console.error(`[redazione] copia di ${nome} non riuscita`, errore));
+}
 
 /* ---------- Memoria (sviluppo e test) ---------- */
 
@@ -185,6 +203,7 @@ interface Memoria {
   contenuti: Map<string, Contenuto>;
   media: Map<string, { dati: Uint8Array; tipo: string }>;
   obiettivi?: Obiettivi;
+  persone?: Persona[];
 }
 
 const globale = globalThis as typeof globalThis & { __memoriaRedazione?: Memoria };
@@ -232,6 +251,12 @@ const archivioMemoria: Archivio = {
   },
   async salvaObiettivi(obiettivi) {
     memoria().obiettivi = obiettivi;
+  },
+  async leggiPersone() {
+    return structuredClone(memoria().persone ?? []);
+  },
+  async salvaPersone(persone) {
+    memoria().persone = structuredClone(persone);
   },
 };
 

@@ -1,4 +1,4 @@
-import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
+import { createHash, createHmac, randomBytes, scryptSync, timingSafeEqual } from 'node:crypto';
 import { chiaveNome, normalizzaNome } from './regole';
 import type { Ruolo, SessioneRedazione } from './tipi';
 
@@ -69,6 +69,18 @@ export function ruoloPerAccesso(nome: string, codice: string): { ruolo: Ruolo } 
   if (ruolo === 'revisore' && !capo) return { errore: 'Questo nome non è tra i revisori: scrivi nome e cognome come ti sono stati dati.' };
   if (ruolo === 'redattore' && capo) return { errore: 'Questo nome è riservato a chi corregge.' };
   return { ruolo };
+}
+
+/** Impronta di una password personale: scrypt con un sale suo, la password non si salva mai. */
+export function improntaPassword(password: string): { sale: string; impronta: string } {
+  const sale = randomBytes(16).toString('base64url');
+  return { sale, impronta: scryptSync(password.trim(), sale, 32).toString('base64url') };
+}
+
+export function passwordGiusta(password: string, salvata: { sale: string; impronta: string }): boolean {
+  const prova = scryptSync(password.trim(), salvata.sale, 32);
+  const attesa = Buffer.from(salvata.impronta, 'base64url');
+  return attesa.length === prova.length && timingSafeEqual(prova, attesa);
 }
 
 function firma(chiave: Buffer, dati: string): string {

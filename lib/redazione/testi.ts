@@ -1,4 +1,4 @@
-import type { Ruolo, StatoContenuto, TipoCommento, TipoContenuto } from './tipi';
+import type { Ruolo, StatoContenuto, TipoCommento, TipoContenuto, VoceAttivita } from './tipi';
 
 /** Testi del portale della redazione. */
 export const TESTI_REDAZIONE = {
@@ -11,8 +11,8 @@ export const TESTI_REDAZIONE = {
     nome: 'Il tuo nome',
     nomeSegnaposto: 'Nome e cognome',
     nomeAiuto: 'Usa sempre lo stesso: è così che ritrovi i tuoi contenuti.',
-    codice: 'Codice della redazione',
-    codiceAiuto: 'Te lo dà chi coordina.',
+    codice: 'Password',
+    codiceAiuto: 'La tua password personale. Te la dà chi coordina.',
     entra: 'Entra',
     entrando: 'Entro…',
     nonConfigurato: 'Il portale non è ancora attivo: mancano i codici di accesso sul server (REDAZIONE_CODICE e REDAZIONE_CODICE_REVISORI).',
@@ -26,7 +26,73 @@ export const TESTI_REDAZIONE = {
     feed: 'Feed',
     profilo: 'Il mio profilo',
     revisione: 'Da rivedere',
+    attivita: 'Attività',
     squadra: 'Squadra',
+  },
+
+  attivita: {
+    titolo: 'Tutte le attività',
+    spiegazione: 'Ogni pubblicazione, versione, commento, cambio di stato ed eliminazione, dal più recente. Non si cancella niente.',
+    tutti: 'Tutta la redazione',
+    filtro: 'Persona',
+    vuota: 'Ancora nessuna attività.',
+    altre: 'Mostra le precedenti',
+    /** «ha pubblicato un post», «ha scritto Correzione sul post di Giulia», … (chi lo fa è a parte). */
+    frase: (v: VoceAttivita, stati: Record<StatoContenuto, string>, commenti: Record<TipoCommento, string>): string => {
+      const post = v.tipoContenuto === 'post';
+      const suo = post ? 'il suo post' : 'la sua storia';
+      const di = `${post ? 'il post' : 'la storia'} di ${v.autore}`;
+      const proprio = v.chi === v.autore;
+      switch (v.tipo) {
+        case 'pubblicato':
+          return `ha pubblicato ${post ? 'un post' : 'una storia'}`;
+        case 'nuova_versione':
+          return `ha pubblicato la versione ${v.versione} ${post ? 'del suo post' : 'della sua storia'}`;
+        case 'commento':
+          return `ha scritto «${commenti[v.tipoCommento ?? 'consiglio']}» ${proprio ? (post ? 'sul suo post' : 'sulla sua storia') : `${post ? 'sul post' : 'sulla storia'} di ${v.autore}`}`;
+        case 'stato':
+          return `ha segnato «${stati[v.stato ?? 'da_rivedere']}» ${proprio ? suo : di}`;
+        case 'eliminato':
+          return `ha eliminato ${proprio ? suo : di}`;
+        case 'ripristinato':
+          return `ha ripristinato ${di}`;
+      }
+    },
+  },
+
+  scheda: {
+    indietro: '← Torna alla squadra',
+    giorni: 'Ultimi 14 giorni',
+    legenda: 'Barre: storie (chiaro) e post (giallo) pubblicati; ✓ = obiettivo del giorno raggiunto.',
+    giorniInPari: 'Giorni in pari',
+    primoColpo: 'Approvati al primo colpo',
+    versioniMedie: 'Versioni per contenuto',
+    ultimoInvio: 'Ultimo invio',
+    mai: 'mai',
+    contenuti: 'Tutti i contenuti, con versioni e commenti',
+    nessunContenuto: 'Non ha ancora pubblicato niente.',
+    versioni: (n: number) => (n === 1 ? '1 versione' : `${n} versioni`),
+    nessunCommento: 'Nessun commento',
+    apri: 'Apri',
+    attivita: 'Le sue attività',
+  },
+
+  persone: {
+    titolo: 'Ragazzi della redazione',
+    spiegazione:
+      'Con l\'elenco, il codice della redazione vale solo per questi nomi: ognuno entra scrivendo il suo nome esattamente così. Chi non c\'è più si disattiva: il suo lavoro resta.',
+    nome: 'Nome',
+    password: 'Password',
+    aggiungi: 'Aggiungi',
+    cambiaPassword: 'Nuova password',
+    chiediPassword: (nome: string) => `Nuova password per ${nome}:`,
+    passwordCambiata: 'Password cambiata.',
+    conPassword: 'password personale',
+    senzaPassword: 'entra con il codice comune',
+    disattiva: 'Disattiva',
+    riattiva: 'Riattiva',
+    disattivata: 'disattivato',
+    vuoto: 'Nessuno in elenco: per ora entra chiunque abbia il codice.',
   },
 
   nuovo: 'Nuovo',
