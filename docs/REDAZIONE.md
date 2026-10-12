@@ -32,7 +32,7 @@ chi coordina. Il portale si aggiorna da solo ogni minuto.
 ## Obiettivi e resoconto
 
 - Chi corregge fissa in *Squadra → Obiettivi giornalieri* quante storie e quanti post deve
-  pubblicare ognuno al giorno (all'inizio 5 storie e 2 post). La giornata è quella italiana.
+  pubblicare ognuno al giorno (all'inizio 5 storie e 2 post nei giorni feriali, 2 storie e 1 post sabato e domenica). La giornata è quella italiana.
 - Ognuno vede in cima al feed le barre di oggi e, nel profilo, anche le percentuali dei suoi
   contenuti approvati, da correggere ed eliminati (sul totale pubblicato, eliminati compresi).
   Nella tabella della Squadra ci sono la colonna *Oggi* e le percentuali per persona.
@@ -72,6 +72,8 @@ A ogni post, storia o nuova versione arriva nel canale della redazione un messag
 
 Se Telegram non risponde la pubblicazione va comunque a buon fine; se le foto non partono
 arriva almeno il testo.
+
+Il revisore può anche dire **Non va bene**, solo scrivendo il perché: il contenuto si chiude, non si corregge e conta a parte nelle percentuali.
 
 Stati: **da rivedere** (appena inviato o nuova versione) → **da correggere** (il revisore ha
 chiesto modifiche) → **approvato**.

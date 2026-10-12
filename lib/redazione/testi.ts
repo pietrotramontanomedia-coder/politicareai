@@ -42,11 +42,13 @@ export const TESTI_REDAZIONE = {
     da_rivedere: 'Da rivedere',
     da_correggere: 'Da correggere',
     approvato: 'Approvato',
+    non_va_bene: 'Non va bene',
   } satisfies Record<StatoContenuto, string>,
   coloreStato: {
     da_rivedere: '#60A5FA',
     da_correggere: '#F59E0B',
     approvato: '#22C55E',
+    non_va_bene: '#EF4444',
   } satisfies Record<StatoContenuto, string>,
 
   tipoCommento: {
@@ -54,12 +56,14 @@ export const TESTI_REDAZIONE = {
     consiglio: 'Consiglio',
     complimento: 'Bravo!',
     risposta: 'Risposta',
+    bocciatura: 'Non va bene',
   } satisfies Record<TipoCommento, string>,
   coloreCommento: {
     correzione: '#F59E0B',
     consiglio: '#60A5FA',
     complimento: '#22C55E',
     risposta: '#A3A3A3',
+    bocciatura: '#EF4444',
   } satisfies Record<TipoCommento, string>,
 
   feed: {
@@ -112,6 +116,7 @@ export const TESTI_REDAZIONE = {
       approvati: 'Approvati',
       ultimo: 'Ultimo invio',
       oggi: 'Oggi',
+      nonVaBene: 'Non va bene',
       eliminati: 'Eliminati',
     },
     apri: (nome: string) => `Apri i contenuti di ${nome}`,
@@ -119,10 +124,12 @@ export const TESTI_REDAZIONE = {
 
   andamento: {
     oggi: 'Obiettivi di oggi',
+    weekend: 'Obiettivi di oggi (weekend)',
     storie: 'Storie',
     post: 'Post',
     approvati: 'Approvati',
     daCorreggere: 'Da correggere',
+    nonVaBene: 'Non va bene',
     eliminati: 'Eliminati',
     base: (n: number) => (n === 1 ? 'Su 1 contenuto pubblicato' : `Su ${n} contenuti pubblicati`),
   },
@@ -130,8 +137,10 @@ export const TESTI_REDAZIONE = {
   obiettivi: {
     titolo: 'Obiettivi giornalieri',
     spiegazione: 'Quanto pubblica ognuno ogni giorno. Ogni sera verso le 21 arriva il resoconto nel gruppo Telegram.',
-    storie: 'Storie al giorno',
-    post: 'Post al giorno',
+    feriali: 'Da lunedì a venerdì',
+    weekend: 'Sabato e domenica',
+    storie: 'Storie',
+    post: 'Post',
     salva: 'Salva',
     salvato: 'Salvato',
     errore: 'Non sono riuscito a salvare, riprova.',
@@ -163,6 +172,8 @@ export const TESTI_REDAZIONE = {
     invia: 'Invia',
     inviaECorreggi: 'Invia e chiedi correzione',
     approva: 'Approva',
+    nonVaBene: 'Non va bene',
+    nonVaBeneAiuto: 'Per «Non va bene» scrivi prima il perché.',
     riapri: 'Rimetti da rivedere',
     invio: 'Invio…',
     errore: 'Non sono riuscito a salvare, riprova.',

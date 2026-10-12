@@ -243,6 +243,16 @@ export default function Dettaglio({
                     >
                       {T.inviaECorreggi}
                     </button>
+                    <button
+                      type="button"
+                      disabled={invio || !testo.trim()}
+                      title={testo.trim() ? undefined : T.nonVaBeneAiuto}
+                      onClick={() => invia('non_va_bene')}
+                      className="rounded-full px-4 py-2 text-sm font-bold disabled:opacity-40"
+                      style={{ background: TESTI_REDAZIONE.coloreStato.non_va_bene, color: '#fff' }}
+                    >
+                      {T.nonVaBene}
+                    </button>
                     {contenuto.stato !== 'approvato' ? (
                       <button type="button" disabled={invio} onClick={() => invia('approvato')} className="rounded-full px-4 py-2 text-sm font-bold disabled:opacity-40" style={{ background: TESTI_REDAZIONE.coloreStato.approvato, color: '#0a0a0a' }}>
                         {T.approva}

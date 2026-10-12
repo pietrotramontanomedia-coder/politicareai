@@ -40,7 +40,7 @@ export async function caricaContenuti(): Promise<{ contenuti: Contenuto[]; obiet
   return { contenuti, obiettivi };
 }
 
-export async function salvaObiettivi(obiettivi: Pick<Obiettivi, 'storieGiorno' | 'postGiorno'>): Promise<Obiettivi> {
+export async function salvaObiettivi(obiettivi: Pick<Obiettivi, 'storieGiorno' | 'postGiorno' | 'storieWeekend' | 'postWeekend'>): Promise<Obiettivi> {
   return (await api<{ obiettivi: Obiettivi }>('/api/redazione/obiettivi', json('PUT', obiettivi))).obiettivi;
 }
 

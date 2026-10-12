@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Avatar from '@/components/profilo/Avatar';
 import { formattaDataRelativa } from '@/lib/data-ora';
 import { caricaContenuti, coloreDaNome, ErroreApi, esci, salvaObiettivi, urlMedia } from '@/lib/redazione/client';
-import { chiaveNome, codaRevisione, eliminato, OBIETTIVI_PREDEFINITI, percentuale, puoVedereCommenti, statistiche, storieRecenti, URL_GENERATORE, versioneCorrente } from '@/lib/redazione/regole';
+import { chiaveNome, codaRevisione, eliminato, OBIETTIVI_PREDEFINITI, obiettiviDiOggi, percentuale, puoVedereCommenti, statistiche, storieRecenti, URL_GENERATORE, versioneCorrente } from '@/lib/redazione/regole';
 import { TESTI_REDAZIONE } from '@/lib/redazione/testi';
 import type { Contenuto, Obiettivi, SessioneRedazione, TipoContenuto } from '@/lib/redazione/tipi';
 import AccessoRedazione from './AccessoRedazione';
@@ -27,8 +27,12 @@ type Vista = 'feed' | 'profilo' | 'revisione' | 'squadra';
 /** Chi corregge decide quante storie e quanti post al giorno a testa. */
 function ModificaObiettivi({ obiettivi, onSalvati }: { obiettivi: Obiettivi; onSalvati: (o: Obiettivi) => void }) {
   const O = T.obiettivi;
-  const [storie, setStorie] = useState(String(obiettivi.storieGiorno));
-  const [post, setPost] = useState(String(obiettivi.postGiorno));
+  const [valori, setValori] = useState({
+    storieGiorno: String(obiettivi.storieGiorno),
+    postGiorno: String(obiettivi.postGiorno),
+    storieWeekend: String(obiettivi.storieWeekend),
+    postWeekend: String(obiettivi.postWeekend),
+  });
   const [esito, setEsito] = useState<string | null>(null);
   const [invio, setInvio] = useState(false);
   async function salva(e: React.FormEvent) {
@@ -36,7 +40,14 @@ function ModificaObiettivi({ obiettivi, onSalvati }: { obiettivi: Obiettivi; onS
     setInvio(true);
     setEsito(null);
     try {
-      onSalvati(await salvaObiettivi({ storieGiorno: Number(storie), postGiorno: Number(post) }));
+      onSalvati(
+        await salvaObiettivi({
+          storieGiorno: Number(valori.storieGiorno),
+          postGiorno: Number(valori.postGiorno),
+          storieWeekend: Number(valori.storieWeekend),
+          postWeekend: Number(valori.postWeekend),
+        }),
+      );
       setEsito(O.salvato);
     } catch (err) {
       setEsito(err instanceof Error ? err.message : O.errore);
@@ -52,15 +63,38 @@ function ModificaObiettivi({ obiettivi, onSalvati }: { obiettivi: Obiettivi; onS
       <p className="mt-1 text-sm" style={{ color: 'var(--fg-muta)' }}>
         {O.spiegazione}
       </p>
-      <div className="mt-3 flex flex-wrap items-end gap-4">
-        <label className="text-xs font-semibold" style={{ color: 'var(--fg-muta)' }}>
-          {O.storie}
-          <input type="number" min={0} max={30} value={storie} onChange={(e) => setStorie(e.target.value)} className={`${campo} mt-1 block`} style={stile} />
-        </label>
-        <label className="text-xs font-semibold" style={{ color: 'var(--fg-muta)' }}>
-          {O.post}
-          <input type="number" min={0} max={30} value={post} onChange={(e) => setPost(e.target.value)} className={`${campo} mt-1 block`} style={stile} />
-        </label>
+      <div className="mt-3 flex flex-wrap items-end gap-6">
+        {(
+          [
+            [O.feriali, 'storieGiorno', 'postGiorno'],
+            [O.weekend, 'storieWeekend', 'postWeekend'],
+          ] as const
+        ).map(([gruppo, chiaveStorie, chiavePost]) => (
+          <fieldset key={gruppo}>
+            <legend className="mb-1 text-xs font-bold">{gruppo}</legend>
+            <div className="flex gap-3">
+              {(
+                [
+                  [O.storie, chiaveStorie],
+                  [O.post, chiavePost],
+                ] as const
+              ).map(([etichetta, chiave]) => (
+                <label key={chiave} className="text-xs font-semibold" style={{ color: 'var(--fg-muta)' }}>
+                  {etichetta}
+                  <input
+                    type="number"
+                    min={0}
+                    max={30}
+                    value={valori[chiave]}
+                    onChange={(e) => setValori({ ...valori, [chiave]: e.target.value })}
+                    className={`${campo} mt-1 block`}
+                    style={stile}
+                  />
+                </label>
+              ))}
+            </div>
+          </fieldset>
+        ))}
         <button type="submit" disabled={invio} className="rounded-full px-4 py-2 text-sm font-bold disabled:opacity-40" style={{ background: 'var(--accento)', color: '#0a0a0a' }}>
           {O.salva}
         </button>
@@ -451,6 +485,7 @@ export default function PortaleRedazione({ sessioneIniziale, configurata }: { se
 
   function vistaSquadra() {
     const C = T.squadra.colonne;
+    const oggi = obiettiviDiOggi(obiettivi, adesso);
     return (
       <div className="mx-auto max-w-5xl">
         <ModificaObiettivi obiettivi={obiettivi} onSalvati={setObiettivi} />
@@ -475,6 +510,7 @@ export default function PortaleRedazione({ sessioneIniziale, configurata }: { se
                   <th scope="col" className="p-3 text-right">{C.daRivedere}</th>
                   <th scope="col" className="p-3 text-right">{C.daCorreggere}</th>
                   <th scope="col" className="p-3 text-right">{C.approvati}</th>
+                  <th scope="col" className="p-3 text-right">{C.nonVaBene}</th>
                   <th scope="col" className="p-3 text-right">{C.eliminati}</th>
                   <th scope="col" className="p-3 text-right">{C.ultimo}</th>
                 </tr>
@@ -488,8 +524,8 @@ export default function PortaleRedazione({ sessioneIniziale, configurata }: { se
                         {p.nome}
                       </button>
                     </th>
-                    <td className="p-3 text-right whitespace-nowrap" style={{ color: p.storieOggi >= obiettivi.storieGiorno && p.postOggi >= obiettivi.postGiorno ? T.coloreStato.approvato : undefined }}>
-                      {p.storieOggi}/{obiettivi.storieGiorno} · {p.postOggi}/{obiettivi.postGiorno}
+                    <td className="p-3 text-right whitespace-nowrap" style={{ color: p.storieOggi >= oggi.storie && p.postOggi >= oggi.post ? T.coloreStato.approvato : undefined }}>
+                      {p.storieOggi}/{oggi.storie} · {p.postOggi}/{oggi.post}
                     </td>
                     <td className="p-3 text-right font-bold">{p.settimana}</td>
                     <td className="p-3 text-right">{p.post}</td>
@@ -498,6 +534,9 @@ export default function PortaleRedazione({ sessioneIniziale, configurata }: { se
                     <td className="p-3 text-right" style={{ color: p.daCorreggere ? T.coloreStato.da_correggere : undefined }}>{p.daCorreggere}</td>
                     <td className="p-3 text-right" style={{ color: p.approvati ? T.coloreStato.approvato : undefined }}>
                       {p.approvati} <span style={{ color: 'var(--fg-muta)' }}>({percentuale(p.approvati, p.totale)}%)</span>
+                    </td>
+                    <td className="p-3 text-right" style={{ color: p.nonVaBene ? T.coloreStato.non_va_bene : undefined }}>
+                      {p.nonVaBene} <span style={{ color: 'var(--fg-muta)' }}>({percentuale(p.nonVaBene, p.totale)}%)</span>
                     </td>
                     <td className="p-3 text-right" style={{ color: p.eliminati ? '#F87171' : undefined }}>
                       {p.eliminati} <span style={{ color: 'var(--fg-muta)' }}>({percentuale(p.eliminati, p.totale)}%)</span>
