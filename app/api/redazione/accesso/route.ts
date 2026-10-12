@@ -5,7 +5,7 @@ import {
   cookieUscita,
   creaToken,
   redazioneConfigurata,
-  ruoloDaCodice,
+  ruoloPerAccesso,
   sessioneDaRichiesta,
 } from '@/lib/redazione/sessione-server';
 
@@ -23,9 +23,9 @@ export async function POST(request: Request) {
     const dati = (await request.json().catch(() => ({}))) as { nome?: unknown; codice?: unknown };
     const nome = normalizzaNome(typeof dati.nome === 'string' ? dati.nome : '');
     if (nome.length < 2) return Response.json({ ok: false, errore: 'Scrivi il tuo nome.' }, { status: 400 });
-    const ruolo = ruoloDaCodice(typeof dati.codice === 'string' ? dati.codice : '');
-    if (!ruolo) return Response.json({ ok: false, errore: 'Codice non valido.' }, { status: 401 });
-    const sessione = { nome, ruolo };
+    const accesso = ruoloPerAccesso(nome, typeof dati.codice === 'string' ? dati.codice : '');
+    if ('errore' in accesso) return Response.json({ ok: false, errore: accesso.errore }, { status: 401 });
+    const sessione = { nome, ruolo: accesso.ruolo };
     const token = creaToken(sessione, new Date());
     if (!token) return Response.json({ ok: false, errore: 'Il portale non è configurato.' }, { status: 503 });
     return Response.json({ ok: true, sessione }, { headers: { 'set-cookie': cookieEntrata(token) } });

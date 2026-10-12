@@ -83,6 +83,9 @@ chiesto modifiche) → **approvato**.
 2. In *Settings → Environment Variables* aggiungere:
    - `REDAZIONE_CODICE`: il codice da dare ai ragazzi;
    - `REDAZIONE_CODICE_REVISORI`: il codice di chi corregge, diverso dal primo;
+   - `REDAZIONE_REVISORI`: i nomi di chi corregge, separati da virgola (oggi Pietro Tramontano,
+     Jacopo Esposito, Federico Brignacca). La password dei revisori vale solo con questi nomi, e
+     questi nomi non possono entrare con il codice dei ragazzi;
    - `REDAZIONE_SEGRETO` (facoltativo): stringa casuale lunga che rafforza la firma delle sessioni.
 3. Rifare il deploy e mandare ai ragazzi il link `…/redazione` con il loro codice.
 
