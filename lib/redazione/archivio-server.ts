@@ -1,4 +1,4 @@
-import { BlobPreconditionFailedError, get, list, put } from '@vercel/blob';
+import { BlobNotFoundError, BlobPreconditionFailedError, get, head, list, put } from '@vercel/blob';
 import { ID_VALIDO, OBIETTIVI_PREDEFINITI } from './regole';
 import type { Contenuto, Obiettivi, Persona } from './tipi';
 
@@ -74,13 +74,13 @@ async function aGruppi<T, R>(elementi: T[], quanti: number, fn: (e: T) => Promis
 
 /* ---------- Vercel Blob ---------- */
 
-async function leggiBlob(percorso: string): Promise<{ contenuto: Contenuto; etag: string } | null> {
+async function leggiBlob(percorso: string): Promise<Contenuto | null> {
   const risultato = await get(percorso, { access: 'private', useCache: false });
   if (!risultato || risultato.statusCode !== 200) return null;
-  return { contenuto: (await new Response(risultato.stream).json()) as Contenuto, etag: risultato.blob.etag };
+  return (await new Response(risultato.stream).json()) as Contenuto;
 }
 
-async function leggiConTentativi(percorso: string): Promise<{ contenuto: Contenuto; etag: string } | null> {
+async function leggiConTentativi(percorso: string): Promise<Contenuto | null> {
   for (let tentativo = 1; ; tentativo++) {
     try {
       return await leggiBlob(percorso);
@@ -89,6 +89,25 @@ async function leggiConTentativi(percorso: string): Promise<{ contenuto: Contenu
       await new Promise((r) => setTimeout(r, 250 * tentativo));
     }
   }
+}
+
+/**
+ * Contenuto da modificare, con l'ETag da passare alla scrittura condizionata. L'ETag non è quello
+ * della lettura: la lettura passa dalla CDN, che comprime il JSON e ne dà un ETag diverso da quello
+ * che l'API confronta, e allora ogni commento falliva. head() parla con la stessa API che controlla
+ * ifMatch, e va prima della lettura: se qualcuno scrive in mezzo, l'ETag è il vecchio e la scrittura
+ * riprova; al contrario si salverebbe sopra un contenuto più nuovo di quello letto.
+ */
+async function leggiPerModificare(percorso: string): Promise<{ contenuto: Contenuto; etag: string } | null> {
+  let etag: string;
+  try {
+    etag = (await head(percorso)).etag;
+  } catch (errore) {
+    if (errore instanceof BlobNotFoundError) return null;
+    throw errore;
+  }
+  const contenuto = await leggiConTentativi(percorso);
+  return contenuto ? { contenuto, etag } : null;
 }
 
 async function scriviBlob(percorso: string, contenuto: Contenuto, etag: string | null): Promise<void> {
@@ -127,11 +146,11 @@ const archivioBlob: Archivio = {
     // Se un contenuto non si legge neanche riprovando, meglio un errore (il browser tiene quello che
     // aveva già) che un feed in cui quel contenuto sembra sparito.
     const letti = await aGruppi(percorsi, LETTURE_IN_PARALLELO, (p) => leggiConTentativi(p));
-    return letti.flatMap((l) => (l ? [l.contenuto] : []));
+    return letti.flatMap((c) => (c ? [c] : []));
   },
 
   async leggi(id) {
-    return (await leggiConTentativi(percorsoContenuto(id)))?.contenuto ?? null;
+    return leggiConTentativi(percorsoContenuto(id));
   },
 
   async crea(contenuto) {
@@ -142,16 +161,22 @@ const archivioBlob: Archivio = {
   async aggiorna(id, modifica) {
     const percorso = percorsoContenuto(id);
     for (let tentativo = 1; ; tentativo++) {
-      const letto = await leggiBlob(percorso);
+      const letto = await leggiPerModificare(percorso);
       if (!letto) throw new ErroreRedazione(404, 'Contenuto non trovato.');
       const nuovo = modifica(letto.contenuto);
       try {
         await scriviBlob(percorso, nuovo, letto.etag);
-        await scriviStorico(nuovo);
-        return nuovo;
       } catch (e) {
-        if (!(e instanceof BlobPreconditionFailedError) || tentativo >= TENTATIVI) throw e;
+        if (!(e instanceof BlobPreconditionFailedError)) throw e;
+        if (tentativo >= TENTATIVI) {
+          console.error('[redazione] scrittura condizionata rifiutata a ogni tentativo', id);
+          throw new ErroreRedazione(409, 'Qualcun altro sta modificando questo contenuto: riprova fra un attimo.');
+        }
+        await new Promise((r) => setTimeout(r, 100 * tentativo + Math.random() * 100));
+        continue;
       }
+      await scriviStorico(nuovo);
+      return nuovo;
     }
   },
 
