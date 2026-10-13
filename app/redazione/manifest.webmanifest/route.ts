@@ -16,7 +16,7 @@ const manifest: MetadataRoute.Manifest = {
   scope: '/redazione',
   display: 'standalone',
   background_color: '#0a0a0a',
-  theme_color: '#15803d',
+  theme_color: '#14532d',
   orientation: 'portrait',
   icons: [
     { src: '/redazione/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },

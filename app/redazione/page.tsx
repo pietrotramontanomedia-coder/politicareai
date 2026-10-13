@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   },
 };
 
-export const viewport: Viewport = { themeColor: '#15803d' };
+export const viewport: Viewport = { themeColor: '#14532d' };
 
 export const dynamic = 'force-dynamic';
 
