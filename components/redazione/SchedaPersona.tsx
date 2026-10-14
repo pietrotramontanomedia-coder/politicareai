@@ -3,9 +3,9 @@
 import Avatar from '@/components/profilo/Avatar';
 import { formattaDataEstesa, formattaDataRelativa } from '@/lib/data-ora';
 import { coloreDaNome, urlMedia } from '@/lib/redazione/client';
-import { andamentoGiornaliero, approvatiAlPrimoColpo, cronologia, eliminato, percentuale, versioneCorrente } from '@/lib/redazione/regole';
+import { eliminato, percentuale, versioneCorrente } from '@/lib/redazione/regole';
 import { TESTI_REDAZIONE } from '@/lib/redazione/testi';
-import type { Contenuto, Obiettivi, StatistichePersona } from '@/lib/redazione/tipi';
+import type { Contenuto, GiornoAndamento, Obiettivi, SchedaDati, StatistichePersona, VoceAttivita } from '@/lib/redazione/tipi';
 import Andamento from './Andamento';
 import Attivita from './Attivita';
 import { BadgeStato } from './Distintivi';
@@ -25,7 +25,7 @@ function Numero({ etichetta, valore, nota }: { etichetta: string; valore: string
 }
 
 /** Le barre degli ultimi 14 giorni: storie e post affiancati, l'obiettivo come linea. */
-function Giorni({ giorni }: { giorni: ReturnType<typeof andamentoGiornaliero> }) {
+function Giorni({ giorni }: { giorni: GiornoAndamento[] }) {
   const massimo = Math.max(1, ...giorni.flatMap((g) => [g.storie, g.post, g.obiettivoStorie, g.obiettivoPost]));
   const altezza = (n: number) => `${(n / massimo) * 100}%`;
   return (
@@ -54,32 +54,45 @@ function Giorni({ giorni }: { giorni: ReturnType<typeof andamentoGiornaliero> })
   );
 }
 
-/** La scheda di un ragazzo per chi coordina: andamento, numeri, ogni contenuto con i commenti, ogni attività. */
+/**
+ * La scheda di un ragazzo per chi coordina: andamento, numeri, ogni contenuto con i commenti, ogni
+ * attività. I numeri arrivano dal server, calcolati su tutto; i contenuti a pagine.
+ */
 export default function SchedaPersona({
   chiave,
   nome,
   stat,
-  contenuti,
+  contenuti: suoi,
+  numeri,
+  voci,
+  tutti,
   obiettivi,
   adesso,
+  piede,
   onApri,
   onIndietro,
 }: {
   chiave: string;
   nome: string;
   stat: StatistichePersona | undefined;
+  /** I suoi contenuti arrivati finora, dal più recente, eliminati compresi. */
   contenuti: Contenuto[];
+  /** Andamento e numeri dal server; null finché non arrivano. */
+  numeri: SchedaDati | null;
+  voci: VoceAttivita[];
+  /** Tutti i contenuti arrivati, per le miniature delle attività sui contenuti degli altri. */
+  tutti: Contenuto[];
   obiettivi: Obiettivi;
   adesso: Date;
+  /** «Mostra i precedenti», caricamento ed errori. */
+  piede: React.ReactNode;
   onApri: (id: string) => void;
   onIndietro: () => void;
 }) {
-  const suoi = contenuti.filter((c) => c.chiaveAutore === chiave).sort((a, b) => versioneCorrente(b).inviataIl.localeCompare(versioneCorrente(a).inviataIl));
-  const giorni = andamentoGiornaliero(contenuti, chiave, obiettivi, adesso);
-  const { primoColpo, approvati } = approvatiAlPrimoColpo(contenuti, chiave);
-  const vivi = suoi.filter((c) => !eliminato(c));
-  const versioniMedie = vivi.length ? (vivi.reduce((n, c) => n + c.versioni.length, 0) / vivi.length).toFixed(1).replace('.', ',') : '—';
-  const voci = cronologia(contenuti);
+  const giorni = numeri?.andamento ?? [];
+  const primoColpo = numeri?.primoColpo ?? 0;
+  const approvati = numeri?.approvati ?? 0;
+  const versioniMedie = numeri?.versioniMedie != null ? numeri.versioniMedie.toFixed(1).replace('.', ',') : '—';
 
   return (
     <div className="mx-auto max-w-4xl">
@@ -91,7 +104,7 @@ export default function SchedaPersona({
         <div>
           <h2 className="text-2xl font-bold">{nome}</h2>
           <p className="text-sm" style={{ color: 'var(--fg-muta)' }}>
-            {stat?.post ?? 0} post · {stat?.storie ?? 0} storie · {T.ultimoInvio.toLowerCase()} {stat?.ultimoInvio ? formattaDataRelativa(stat.ultimoInvio, adesso) : T.mai}
+            {stat?.post ?? 0} post · {stat?.storie ?? 0} {TESTI_REDAZIONE.profilo.contaStorie(stat?.storie ?? 0)} · {T.ultimoInvio.toLowerCase()} {stat?.ultimoInvio ? formattaDataRelativa(stat.ultimoInvio, adesso) : T.mai}
           </p>
         </div>
       </div>
@@ -107,7 +120,7 @@ export default function SchedaPersona({
       </div>
 
       <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Numero etichetta={T.giorniInPari} valore={`${giorni.filter((g) => g.inPari).length}/${giorni.length}`} />
+        <Numero etichetta={T.giorniInPari} valore={numeri ? `${giorni.filter((g) => g.inPari).length}/${giorni.length}` : '—'} />
         <Numero etichetta={T.primoColpo} valore={`${percentuale(primoColpo, approvati)}%`} nota={`${primoColpo}/${approvati}`} />
         <Numero etichetta={T.versioniMedie} valore={versioniMedie} />
         <Numero etichetta={T.ultimoInvio} valore={stat?.ultimoInvio ? formattaDataRelativa(stat.ultimoInvio, adesso) : T.mai} />
@@ -115,9 +128,11 @@ export default function SchedaPersona({
 
       <h3 className="mt-8 text-lg font-bold">{T.contenuti}</h3>
       {suoi.length === 0 ? (
-        <p className="py-6" style={{ color: 'var(--fg-muta)' }}>
-          {T.nessunContenuto}
-        </p>
+        numeri && (
+          <p className="py-6" style={{ color: 'var(--fg-muta)' }}>
+            {T.nessunContenuto}
+          </p>
+        )
       ) : (
         <ul className="mt-3 space-y-3">
           {suoi.map((c) => {
@@ -166,8 +181,10 @@ export default function SchedaPersona({
         </ul>
       )}
 
+      {piede}
+
       <h3 className="mb-3 mt-8 text-lg font-bold">{T.attivita}</h3>
-      <Attivita voci={voci} contenuti={contenuti} persone={[]} filtroIniziale={chiave} conFiltro={false} onApri={onApri} />
+      <Attivita voci={voci} contenuti={tutti} persone={[]} filtroIniziale={chiave} conFiltro={false} onApri={onApri} />
     </div>
   );
 }

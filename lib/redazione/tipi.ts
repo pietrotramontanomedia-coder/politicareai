@@ -66,6 +66,11 @@ export interface Contenuto {
   eliminatoDa?: string;
   /** Registro di tutto quello che è successo al contenuto, in ordine. Mai riscritto, solo allungato. */
   eventi?: Evento[];
+  /**
+   * Revisione dell'archivio all'ultima modifica: cresce a ogni scrittura. Il browser chiede solo
+   * quello che è cambiato dopo la revisione che ha già, e fra due copie tiene la più recente.
+   */
+  rev?: number;
 }
 
 export type TipoEvento = 'pubblicato' | 'nuova_versione' | 'commento' | 'stato' | 'eliminato' | 'ripristinato';
@@ -153,4 +158,27 @@ export interface Obiettivi {
   postWeekend: number;
   aggiornatoIl?: string;
   aggiornatoDa?: string;
+}
+
+/** Risposta dell'elenco: tutto (prima volta) o solo quello che è cambiato dopo `dal`. */
+export interface Sincronizzazione {
+  /** Revisione dell'archivio letta: la prossima richiesta parte da qui. */
+  revisione: number;
+  contenuti: Contenuto[];
+  /** Contenuti che chi legge non deve più vedere (eliminati da altri): [id, revisione]. */
+  rimossi: [string, number][];
+  /** Numeri della squadra su tutto l'archivio: per chi scrive solo la sua riga. */
+  statistiche: StatistichePersona[];
+}
+
+/** La scheda di una persona: i suoi contenuti a pagine, più i numeri calcolati su tutto. */
+export interface SchedaDati {
+  contenuti: Contenuto[];
+  /** Ci sono contenuti più vecchi da chiedere con `prima`. */
+  altri: boolean;
+  andamento: GiornoAndamento[];
+  primoColpo: number;
+  approvati: number;
+  /** Versioni per contenuto, in media (null se non ha pubblicato). */
+  versioniMedie: number | null;
 }

@@ -8,6 +8,7 @@ import {
   creaToken,
   redazioneConfigurata,
   passwordGiusta,
+  ruoloDaCodice,
   ruoloPerAccesso,
   sessioneDaRichiesta,
 } from '@/lib/redazione/sessione-server';
@@ -27,33 +28,37 @@ export async function POST(request: Request) {
     const nome = normalizzaNome(typeof dati.nome === 'string' ? dati.nome : '');
     if (nome.length < 2) return Response.json({ ok: false, errore: 'Scrivi il tuo nome.' }, { status: 400 });
     const codice = typeof dati.codice === 'string' ? dati.codice : '';
+    const no = (errore: string) => Response.json({ ok: false, errore }, { status: 401 });
+
+    // Chi corregge entra con il codice dei revisori, anche se il suo nome fosse finito fra i ragazzi.
+    if (ruoloDaCodice(codice) === 'revisore') {
+      const accesso = ruoloPerAccesso(nome, codice);
+      return 'errore' in accesso ? no(accesso.errore) : entra({ nome, ruolo: 'revisore' });
+    }
+
     const persone = await archivio().leggiPersone();
     const registrata = persone.find((p) => p.attiva && p.chiave === chiaveNome(nome));
     // Chi ha una password personale entra solo con quella.
     if (registrata?.password) {
-      if (!passwordGiusta(codice, registrata.password)) return Response.json({ ok: false, errore: 'Password sbagliata.' }, { status: 401 });
-      return entra({ nome: registrata.nome, ruolo: 'redattore' });
+      if (!passwordGiusta(codice, registrata.password)) return no('Password sbagliata.');
+      return entra({ nome: registrata.nome, ruolo: 'redattore' }, registrata.password);
     }
     const accesso = ruoloPerAccesso(nome, codice);
-    if ('errore' in accesso) return Response.json({ ok: false, errore: accesso.errore }, { status: 401 });
+    if ('errore' in accesso) return no(accesso.errore);
     // Con l'elenco dei ragazzi, il codice della redazione vale solo per i nomi registrati e attivi.
-    if (accesso.ruolo === 'redattore' && persone.length > 0 && !registrata) {
-      return Response.json({ ok: false, errore: 'Questo nome non è nell\'elenco della redazione: scrivilo come te l\'hanno dato o chiedi a chi coordina.' }, { status: 401 });
+    if (persone.length > 0 && !registrata) {
+      return no('Questo nome non è nell\'elenco della redazione: scrivilo come te l\'hanno dato o chiedi a chi coordina.');
     }
-    return entra({ nome, ruolo: accesso.ruolo });
+    return entra({ nome: registrata?.nome ?? nome, ruolo: accesso.ruolo });
   } catch (errore) {
     return rispostaErrore(errore);
   }
 }
 
-function entra(sessione: SessioneRedazione): Response {
-  try {
-    const token = creaToken(sessione, new Date());
-    if (!token) return Response.json({ ok: false, errore: 'Il portale non è configurato.' }, { status: 503 });
-    return Response.json({ ok: true, sessione }, { headers: { 'set-cookie': cookieEntrata(token) } });
-  } catch (errore) {
-    return rispostaErrore(errore);
-  }
+function entra(sessione: SessioneRedazione, password?: { impronta: string }): Response {
+  const token = creaToken(sessione, new Date(), password);
+  if (!token) return Response.json({ ok: false, errore: 'Il portale non è configurato.' }, { status: 503 });
+  return Response.json({ ok: true, sessione }, { headers: { 'set-cookie': cookieEntrata(token) } });
 }
 
 export async function DELETE() {

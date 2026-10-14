@@ -6,6 +6,8 @@ import type {
   GiornoAndamento,
   Persona,
   PersonaPubblica,
+  SchedaDati,
+  Sincronizzazione,
   VoceAttivita,
   FormatoPost,
   Obiettivi,
@@ -151,6 +153,7 @@ export interface RichiestaCommento {
 
 export function validaCommento(sessione: SessioneRedazione, contenuto: Contenuto, dati: unknown): Esito<RichiestaCommento> {
   if (!puoVedereCommenti(sessione, contenuto)) return errore('Non puoi commentare questo contenuto.');
+  if (eliminato(contenuto)) return errore('Il contenuto è nel cestino: va ripristinato prima.');
   const d = (dati && typeof dati === 'object' ? dati : {}) as Record<string, unknown>;
   const scritto = testo(d.testo);
   if (scritto.length > LIMITI.commento) return errore(`Il commento supera i ${LIMITI.commento} caratteri.`);
@@ -218,7 +221,7 @@ export function eliminato(contenuto: Contenuto): boolean {
 export function segnaEliminato(contenuto: Contenuto, sessione: SessioneRedazione, adesso: Date): Contenuto {
   const quando = adesso.toISOString();
   const chi = normalizzaNome(sessione.nome);
-  return { ...contenuto, eliminatoIl: quando, eliminatoDa: chi, eventi: [...eventiDi(contenuto), { tipo: 'eliminato', chi, ruolo: sessione.ruolo, quando }] };
+  return { ...contenuto, eliminatoIl: quando, eliminatoDa: chi, aggiornatoIl: quando, eventi: [...eventiDi(contenuto), { tipo: 'eliminato', chi, ruolo: sessione.ruolo, quando }] };
 }
 
 export function ripristina(contenuto: Contenuto, sessione: SessioneRedazione, adesso: Date): Contenuto {
@@ -260,6 +263,104 @@ export function cronologia(contenuti: Contenuto[]): VoceAttivita[] {
       eventiDi(c).map((e) => ({ ...e, contenutoId: c.id, tipoContenuto: c.tipo, autore: c.autore, chiaveAutore: c.chiaveAutore })),
     )
     .sort((a, b) => b.quando.localeCompare(a.quando));
+}
+
+/**
+ * Giorni di contenuti che il portale carica all'apertura: bastano per feed, storie, coda,
+ * obiettivi e andamento di due settimane. I più vecchi restano nei profili e nelle schede, che li
+ * chiedono a pagine: così la risposta resta piccola anche dopo anni di lavoro.
+ */
+export const GIORNI_FINESTRA = 21;
+
+/** Ancora aperto: aspetta una revisione o una correzione, a prescindere dall'età. */
+function aperto(c: Contenuto): boolean {
+  return !eliminato(c) && (c.stato === 'da_rivedere' || c.stato === 'da_correggere');
+}
+
+function nellaFinestra(c: Contenuto, adesso: Date): boolean {
+  const soglia = adesso.getTime() - GIORNI_FINESTRA * 24 * 3600_000;
+  return [c.aggiornatoIl, c.eliminatoIl, versioneCorrente(c).inviataIl].some((t) => t && Date.parse(t) >= soglia);
+}
+
+/**
+ * Quello che il browser riceve a ogni aggiornamento. Alla prima richiesta (dal = null) i contenuti
+ * delle ultime settimane più quelli ancora aperti; poi solo quelli cambiati dopo la revisione che ha
+ * già, e gli id di quelli che non deve più vedere. Le statistiche si calcolano su tutto l'archivio.
+ */
+export function sincronizza(
+  sessione: SessioneRedazione,
+  archivio: { revisione: number; contenuti: Contenuto[] },
+  dal: number | null,
+  adesso: Date,
+  registrate: Pick<Persona, 'nome' | 'chiave' | 'attiva'>[] = [],
+): Sincronizzazione & { completo: boolean } {
+  const visibile = (c: Contenuto) => !eliminato(c) || sessione.ruolo === 'revisore' || eAutore(sessione, c);
+  // Una revisione più avanti di quella dell'archivio vuol dire archivio ricostruito: si riparte da capo.
+  const completo = dal === null || dal > archivio.revisione;
+  const rimossi: [string, number][] = [];
+  let scelti: Contenuto[];
+  if (completo) {
+    scelti = archivio.contenuti.filter((c) => visibile(c) && (nellaFinestra(c, adesso) || aperto(c)));
+  } else {
+    const cambiati = archivio.contenuti.filter((c) => (c.rev ?? 0) > dal);
+    scelti = cambiati.filter(visibile);
+    for (const c of cambiati) if (!visibile(c)) rimossi.push([c.id, c.rev ?? 0]);
+  }
+  const squadra = statistiche(archivio.contenuti, adesso, registrate);
+  const mia = chiaveNome(sessione.nome);
+  return {
+    revisione: archivio.revisione,
+    completo,
+    contenuti: perElenco(sessione, ordinaFeed(scelti)),
+    rimossi,
+    statistiche: sessione.ruolo === 'revisore' ? squadra : squadra.filter((p) => p.chiave === mia),
+  };
+}
+
+/**
+ * Nel browser: aggiunge o sostituisce quello che arriva e toglie i rimossi. Fra due copie dello
+ * stesso contenuto vince quella con la revisione più alta, così una risposta partita prima di una
+ * modifica non la cancella.
+ */
+export function unisci(attuali: Contenuto[], arrivati: Contenuto[], rimossi: [string, number][] = []): Contenuto[] {
+  const mappa = new Map(attuali.map((c) => [c.id, c]));
+  for (const c of arrivati) {
+    const prima = mappa.get(c.id);
+    if (!prima || (c.rev ?? 0) >= (prima.rev ?? 0)) mappa.set(c.id, c);
+  }
+  for (const [id, rev] of rimossi) {
+    const prima = mappa.get(id);
+    if (prima && (prima.rev ?? 0) <= rev) mappa.delete(id);
+  }
+  return [...mappa.values()];
+}
+
+/** Contenuti di una persona per pagina, dal più recente. */
+export const PAGINA_SCHEDA = 120;
+
+/**
+ * La scheda di una persona: i suoi contenuti a pagine (prima = creatoIl dell'ultimo già ricevuto)
+ * e i numeri su tutto il suo lavoro, che con le pagine nel browser non si potrebbero calcolare.
+ */
+export function schedaPersona(
+  sessione: SessioneRedazione,
+  contenuti: Contenuto[],
+  chiave: string,
+  obiettivi: Obiettivi,
+  adesso: Date,
+  prima: string | null = null,
+  limite = PAGINA_SCHEDA,
+): SchedaDati {
+  const suoi = perElenco(sessione, contenuti.filter((c) => c.chiaveAutore === chiave)).sort((a, b) => b.creatoIl.localeCompare(a.creatoIl) || b.id.localeCompare(a.id));
+  const restanti = prima ? suoi.filter((c) => c.creatoIl < prima) : suoi;
+  const vivi = suoi.filter((c) => !eliminato(c));
+  return {
+    contenuti: restanti.slice(0, limite),
+    altri: restanti.length > limite,
+    andamento: andamentoGiornaliero(contenuti, chiave, obiettivi, adesso),
+    ...approvatiAlPrimoColpo(contenuti, chiave),
+    versioniMedie: vivi.length ? vivi.reduce((n, c) => n + c.versioni.length, 0) / vivi.length : null,
+  };
 }
 
 /** Feed: prima l'ultima stesura arrivata. */

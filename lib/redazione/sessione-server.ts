@@ -1,6 +1,6 @@
 import { createHash, createHmac, randomBytes, scryptSync, timingSafeEqual } from 'node:crypto';
 import { chiaveNome, normalizzaNome } from './regole';
-import type { Ruolo, SessioneRedazione } from './tipi';
+import type { Persona, Ruolo, SessioneRedazione } from './tipi';
 
 /*
  * Accesso al portale della redazione: nome + codice condiviso. Il codice dei redattori apre la
@@ -60,6 +60,11 @@ function nomiRevisori(): Set<string> | null {
   return elenco.length > 0 ? new Set(elenco) : null;
 }
 
+/** Il nome è fra quelli di REDAZIONE_REVISORI: entra col codice dei revisori, non va fra i ragazzi. */
+export function nomeDiRevisore(nome: string): boolean {
+  return nomiRevisori()?.has(chiaveNome(nome)) ?? false;
+}
+
 export function ruoloPerAccesso(nome: string, codice: string): { ruolo: Ruolo } | { errore: string } {
   const ruolo = ruoloDaCodice(codice);
   if (!ruolo) return { errore: 'Codice non valido.' };
@@ -87,15 +92,27 @@ function firma(chiave: Buffer, dati: string): string {
   return createHmac('sha256', chiave).update(dati).digest('base64url');
 }
 
-export function creaToken(sessione: SessioneRedazione, adesso: Date): string | null {
+/** Segno della password personale con cui si è entrati: cambiarla rende vecchie le sessioni aperte. */
+function segnoPassword(chiave: Buffer, password: { impronta: string }): string {
+  return firma(chiave, `password|${password.impronta}`).slice(0, 22);
+}
+
+/** La sessione firmata nel cookie, con il segno della password personale se si è entrati con quella. */
+export interface Gettone {
+  sessione: SessioneRedazione;
+  password?: string;
+}
+
+export function creaToken(sessione: SessioneRedazione, adesso: Date, password?: { impronta: string }): string | null {
   const c = configurazione();
   if (!c) return null;
   const scade = adesso.getTime() + DURATA_GIORNI * 24 * 3600_000;
-  const dati = Buffer.from(JSON.stringify({ n: normalizzaNome(sessione.nome), r: sessione.ruolo, s: scade })).toString('base64url');
+  const segno = password ? { p: segnoPassword(c.chiave, password) } : {};
+  const dati = Buffer.from(JSON.stringify({ n: normalizzaNome(sessione.nome), r: sessione.ruolo, s: scade, ...segno })).toString('base64url');
   return `${dati}.${firma(c.chiave, dati)}`;
 }
 
-export function leggiToken(token: string | undefined | null, adesso: Date): SessioneRedazione | null {
+export function leggiGettone(token: string | undefined | null, adesso: Date): Gettone | null {
   const c = configurazione();
   if (!c || !token) return null;
   const [dati, firmato, ...resto] = token.split('.');
@@ -104,13 +121,38 @@ export function leggiToken(token: string | undefined | null, adesso: Date): Sess
   const ricevuto = Buffer.from(firmato);
   if (atteso.length !== ricevuto.length || !timingSafeEqual(atteso, ricevuto)) return null;
   try {
-    const { n, r, s } = JSON.parse(Buffer.from(dati, 'base64url').toString('utf8')) as { n: unknown; r: unknown; s: unknown };
+    const { n, r, s, p } = JSON.parse(Buffer.from(dati, 'base64url').toString('utf8')) as { n: unknown; r: unknown; s: unknown; p: unknown };
     if (typeof n !== 'string' || !n || (r !== 'redattore' && r !== 'revisore') || typeof s !== 'number') return null;
     if (s < adesso.getTime()) return null;
-    return { nome: n, ruolo: r };
+    return { sessione: { nome: n, ruolo: r }, ...(typeof p === 'string' ? { password: p } : {}) };
   } catch {
     return null;
   }
+}
+
+export function leggiToken(token: string | undefined | null, adesso: Date): SessioneRedazione | null {
+  return leggiGettone(token, adesso)?.sessione ?? null;
+}
+
+/**
+ * Una sessione firmata vale finché chi l'ha aperta ha ancora diritto di entrare: un ragazzo
+ * disattivato, o a cui è stata cambiata la password, esce subito invece che dopo 30 giorni; un
+ * revisore tolto da REDAZIONE_REVISORI pure.
+ */
+export function sessioneAncoraValida(gettone: Gettone, persone: Persona[]): boolean {
+  const c = configurazione();
+  if (!c) return false;
+  const { sessione } = gettone;
+  const revisori = nomiRevisori();
+  if (sessione.ruolo === 'revisore') return !revisori || revisori.has(chiaveNome(sessione.nome));
+  if (revisori?.has(chiaveNome(sessione.nome))) return false;
+  if (persone.length === 0) return true;
+  const persona = persone.find((p) => p.attiva && p.chiave === chiaveNome(sessione.nome));
+  if (!persona) return false;
+  if (!persona.password) return true;
+  const atteso = Buffer.from(segnoPassword(c.chiave, persona.password));
+  const ricevuto = Buffer.from(gettone.password ?? '');
+  return atteso.length === ricevuto.length && timingSafeEqual(atteso, ricevuto);
 }
 
 export function tokenDaRichiesta(request: Request): string | null {
@@ -122,8 +164,12 @@ export function tokenDaRichiesta(request: Request): string | null {
   return null;
 }
 
+export function gettoneDaRichiesta(request: Request, adesso = new Date()): Gettone | null {
+  return leggiGettone(tokenDaRichiesta(request), adesso);
+}
+
 export function sessioneDaRichiesta(request: Request, adesso = new Date()): SessioneRedazione | null {
-  return leggiToken(tokenDaRichiesta(request), adesso);
+  return gettoneDaRichiesta(request, adesso)?.sessione ?? null;
 }
 
 function attributiCookie(): string {
