@@ -1,4 +1,5 @@
-import { BlobPreconditionFailedError, get, list, put } from '@vercel/blob';
+import { BlobPreconditionFailedError } from '@vercel/blob';
+import { blobConfigurato, elencaBlob, leggiBlob, leggiBlobJson, scriviBlob } from './blob-server';
 import { ID_VALIDO, OBIETTIVI_PREDEFINITI } from './regole';
 import type { Contenuto, Obiettivi, Persona } from './tipi';
 
@@ -11,6 +12,8 @@ import type { Contenuto, Obiettivi, Persona } from './tipi';
  * dell'archivio un passo avanti. Il server tiene l'indice in memoria e a ogni richiesta chiede
  * allo storage solo se è cambiato (If-None-Match): un aggiornamento del portale costa una sola
  * domanda leggera, non una lettura per contenuto.
+ *
+ * Lo storage si raggiunge solo attraverso blob-server.ts, che si adatta a come è fatto lo store.
  *
  * Non si perde niente: nessuna funzione cancella file. Ogni contenuto ha anche la sua copia in
  * redazione/contenuti/<id>.json, e ogni scrittura lascia una copia datata in
@@ -145,35 +148,31 @@ function applica(stato: StatoArchivio, contenuto: Contenuto): { stato: StatoArch
 /* ---------- Vercel Blob ---------- */
 
 /**
- * File JSON letti di recente, con il loro ETag: si richiedono con If-None-Match e, se non sono
- * cambiati, lo storage risponde 304 senza mandarli di nuovo.
+ * File JSON letti di recente, con il loro ETag: se i metadati dicono che il file non è cambiato,
+ * non si scarica di nuovo.
  */
 const cacheJson = new Map<string, { etag: string; dati: unknown }>();
 
 async function leggiJson<T>(percorso: string): Promise<{ dati: T; etag: string } | null> {
   return conTentativi(async () => {
     const inCache = cacheJson.get(percorso);
-    const risultato = await get(percorso, { access: 'private', useCache: false, ...(inCache ? { ifNoneMatch: inCache.etag } : {}) });
+    const risultato = await leggiBlobJson<T>(percorso, inCache?.etag);
     if (!risultato) {
       cacheJson.delete(percorso);
       return null;
     }
-    if (risultato.statusCode === 304 && inCache) return { dati: inCache.dati as T, etag: inCache.etag };
-    if (risultato.statusCode !== 200) throw new Error(`lettura di ${percorso}: stato ${risultato.statusCode}`);
-    const dati = (await new Response(risultato.stream).json()) as T;
-    cacheJson.set(percorso, { etag: risultato.blob.etag, dati });
-    return { dati, etag: risultato.blob.etag };
+    if (risultato.statusCode === 304) {
+      if (inCache) return { dati: inCache.dati as T, etag: inCache.etag };
+      throw new Error(`lettura di ${percorso}: 304 senza copia in memoria`);
+    }
+    cacheJson.set(percorso, { etag: risultato.etag, dati: risultato.dati });
+    return { dati: risultato.dati, etag: risultato.etag };
   });
 }
 
 /** Scrive un JSON solo se nessuno l'ha cambiato dopo la lettura (etag), o solo se non esiste (null). */
 async function scriviJson(percorso: string, dati: unknown, etag: string | null): Promise<void> {
-  const risultato = await put(percorso, JSON.stringify(dati), {
-    access: 'private',
-    contentType: 'application/json',
-    addRandomSuffix: false,
-    ...(etag ? { ifMatch: etag } : { allowOverwrite: false }),
-  });
+  const risultato = await scriviBlob(percorso, JSON.stringify(dati), { contentType: 'application/json', ...(etag ? { ifMatch: etag } : { allowOverwrite: false }) });
   cacheJson.set(percorso, { etag: risultato.etag, dati });
 }
 
@@ -201,15 +200,10 @@ async function modificaJson<T, R>(percorso: string, iniziale: () => Promise<T>, 
 /** Le copie per contenuto presenti nello storage, con la data in cui sono state scritte. */
 async function elencaCopie(): Promise<{ percorso: string; id: string; scrittaIl: number }[]> {
   const copie: { percorso: string; id: string; scrittaIl: number }[] = [];
-  let cursor: string | undefined;
-  do {
-    const pagina = await list({ prefix: CARTELLA_CONTENUTI, cursor });
-    for (const b of pagina.blobs) {
-      const id = b.pathname.slice(CARTELLA_CONTENUTI.length).replace(/\.json$/, '');
-      if (ID_VALIDO.test(id)) copie.push({ percorso: b.pathname, id, scrittaIl: new Date(b.uploadedAt).getTime() });
-    }
-    cursor = pagina.hasMore ? pagina.cursor : undefined;
-  } while (cursor);
+  for (const b of await elencaBlob(CARTELLA_CONTENUTI)) {
+    const id = b.pathname.slice(CARTELLA_CONTENUTI.length).replace(/\.json$/, '');
+    if (ID_VALIDO.test(id)) copie.push({ percorso: b.pathname, id, scrittaIl: new Date(b.uploadedAt).getTime() });
+  }
   return copie;
 }
 
@@ -221,9 +215,9 @@ async function leggiCopie(percorsi: string[]): Promise<Contenuto[]> {
   const letti = await aGruppi(percorsi, LETTURE_IN_PARALLELO, async (p) => {
     try {
       return await conTentativi(async () => {
-        const r = await get(p, { access: 'private', useCache: false });
+        const r = await leggiBlobJson<Contenuto>(p);
         if (!r || r.statusCode !== 200) throw new Error(`stato ${r?.statusCode ?? 'assente'}`);
-        return (await new Response(r.stream).json()) as Contenuto;
+        return r.dati;
       });
     } catch (errore) {
       console.error('[redazione] copia non leggibile, la riprende il riallineamento', p, errore);
@@ -278,8 +272,8 @@ async function scriviCopie(contenuto: Contenuto): Promise<void> {
   const corpo = JSON.stringify(contenuto);
   const quando = new Date().toISOString().replace(/[:.]/g, '-');
   const esiti = await Promise.allSettled([
-    put(percorsoContenuto(contenuto.id), corpo, { access: 'private', contentType: 'application/json', addRandomSuffix: false, allowOverwrite: true }),
-    put(`${CARTELLA_STORICO}${contenuto.id}/${quando}.json`, corpo, { access: 'private', contentType: 'application/json', addRandomSuffix: true }),
+    scriviBlob(percorsoContenuto(contenuto.id), corpo, { contentType: 'application/json', allowOverwrite: true }),
+    scriviBlob(`${CARTELLA_STORICO}${contenuto.id}/${quando}.json`, corpo, { contentType: 'application/json', addRandomSuffix: true }),
   ]);
   for (const esito of esiti) {
     // Il contenuto è già salvato nell'indice: la copia mancata si segnala ma non blocca chi pubblica.
@@ -333,13 +327,13 @@ const archivioBlob: Archivio = {
   },
 
   async salvaMedia(id, dati, tipo) {
-    await put(percorsoMedia(id), Buffer.from(dati), { access: 'private', contentType: tipo, addRandomSuffix: false, allowOverwrite: false });
+    await scriviBlob(percorsoMedia(id), Buffer.from(dati), { contentType: tipo });
   },
 
   async leggiMedia(id) {
-    const risultato = await conTentativi(() => get(percorsoMedia(id), { access: 'private' }));
+    const risultato = await conTentativi(() => leggiBlob(percorsoMedia(id)));
     if (!risultato || risultato.statusCode !== 200) return null;
-    return { corpo: risultato.stream, tipo: risultato.blob.contentType };
+    return { corpo: risultato.stream, tipo: risultato.contentType };
   },
 
   async leggiObiettivi() {
@@ -395,8 +389,7 @@ const archivioBlob: Archivio = {
 
 /** Copia datata di un file di impostazioni. */
 async function scriviStoricoImpostazione(nome: string, dati: unknown): Promise<void> {
-  await put(`${CARTELLA_STORICO}${nome}/${new Date().toISOString().replace(/[:.]/g, '-')}.json`, JSON.stringify(dati), {
-    access: 'private',
+  await scriviBlob(`${CARTELLA_STORICO}${nome}/${new Date().toISOString().replace(/[:.]/g, '-')}.json`, JSON.stringify(dati), {
     contentType: 'application/json',
     addRandomSuffix: true,
   }).catch((errore) => console.error(`[redazione] copia di ${nome} non riuscita`, errore));
@@ -480,5 +473,5 @@ const archivioMemoria: Archivio = {
 };
 
 export function archivio(): Archivio {
-  return process.env.BLOB_READ_WRITE_TOKEN ? archivioBlob : archivioMemoria;
+  return blobConfigurato() ? archivioBlob : archivioMemoria;
 }
