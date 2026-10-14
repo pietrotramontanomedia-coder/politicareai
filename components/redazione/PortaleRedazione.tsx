@@ -209,7 +209,7 @@ function CerchioStoria({
 export default function PortaleRedazione({ sessioneIniziale, configurata }: { sessioneIniziale: SessioneRedazione | null; configurata: boolean }) {
   const [sessione, setSessione] = useState(sessioneIniziale);
   const [contenuti, setContenuti] = useState<Contenuto[] | null>(null);
-  const [errore, setErrore] = useState(false);
+  const [errore, setErrore] = useState<false | { dettaglio?: string }>(false);
   // L'archivio è in preparazione sul server (succede una volta, dopo un aggiornamento del sito).
   const [preparazione, setPreparazione] = useState(false);
   const [obiettivi, setObiettivi] = useState<Obiettivi>(OBIETTIVI_PREDEFINITI);
@@ -257,7 +257,7 @@ export default function PortaleRedazione({ sessioneIniziale, configurata }: { se
       else if (inPreparazione(e)) {
         setPreparazione(true);
         window.setTimeout(() => setRiprovaAggiorna((n) => n + 1), 4000);
-      } else setErrore(true);
+      } else setErrore({ dettaglio: e instanceof ErroreApi ? e.dettaglio : e instanceof Error ? e.message : undefined });
     } finally {
       inCorso.current = false;
       ancora.current = false;
@@ -803,12 +803,19 @@ export default function PortaleRedazione({ sessioneIniziale, configurata }: { se
           </p>
         )}
         {errore && (
-          <p role="alert" className="mx-auto mb-4 flex max-w-xl items-center justify-between gap-3 rounded-2xl border p-3 text-sm" style={{ borderColor: 'rgba(239,68,68,0.4)', background: 'rgba(239,68,68,0.08)' }}>
-            {T.feed.errore}
-            <button type="button" onClick={() => void aggiorna()} className="font-bold">
-              {T.feed.riprova}
-            </button>
-          </p>
+          <div role="alert" className="mx-auto mb-4 max-w-xl rounded-2xl border p-3 text-sm" style={{ borderColor: 'rgba(239,68,68,0.4)', background: 'rgba(239,68,68,0.08)' }}>
+            <p className="flex items-center justify-between gap-3">
+              {T.feed.errore}
+              <button type="button" onClick={() => void aggiorna()} className="font-bold">
+                {T.feed.riprova}
+              </button>
+            </p>
+            {errore.dettaglio && (
+              <p className="mt-2 break-words font-mono text-xs" style={{ color: 'var(--fg-muta)' }}>
+                {errore.dettaglio}
+              </p>
+            )}
+          </div>
         )}
         {contenuti === null ? (
           !errore &&
