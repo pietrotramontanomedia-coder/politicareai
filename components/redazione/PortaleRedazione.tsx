@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Avatar from '@/components/profilo/Avatar';
 import { formattaDataRelativa } from '@/lib/data-ora';
-import { caricaContenuti, caricaContenuto, caricaScheda, coloreDaNome, ErroreApi, esci, salvaObiettivi, urlMedia } from '@/lib/redazione/client';
+import { caricaContenuti, caricaContenuto, caricaScheda, coloreDaNome, ErroreApi, esci, inPreparazione, salvaObiettivi, urlMedia } from '@/lib/redazione/client';
 import {
   chiaveNome,
   codaRevisione,
@@ -210,6 +210,8 @@ export default function PortaleRedazione({ sessioneIniziale, configurata }: { se
   const [sessione, setSessione] = useState(sessioneIniziale);
   const [contenuti, setContenuti] = useState<Contenuto[] | null>(null);
   const [errore, setErrore] = useState(false);
+  // L'archivio è in preparazione sul server (succede una volta, dopo un aggiornamento del sito).
+  const [preparazione, setPreparazione] = useState(false);
   const [obiettivi, setObiettivi] = useState<Obiettivi>(OBIETTIVI_PREDEFINITI);
   const [persone, setPersone] = useState<PersonaPubblica[]>([]);
   const [vista, setVista] = useState<Vista>('feed');
@@ -227,6 +229,9 @@ export default function PortaleRedazione({ sessioneIniziale, configurata }: { se
   const revisione = useRef<number | null>(null);
   const inCorso = useRef(false);
   const ancora = useRef(false);
+  // Nuovi tentativi programmati (archivio in preparazione): un cambio di valore li fa partire.
+  const [riprovaAggiorna, setRiprovaAggiorna] = useState(0);
+  const [riprovaScheda, setRiprovaScheda] = useState<{ chiave: string; prima: string | null; n: number } | null>(null);
 
   const aggiorna = useCallback(async () => {
     // Una richiesta alla volta; se ne serve un'altra intanto (dopo una pubblicazione), parte subito dopo.
@@ -245,10 +250,14 @@ export default function PortaleRedazione({ sessioneIniziale, configurata }: { se
         setObiettivi(dati.obiettivi);
         setPersone(dati.persone);
         setErrore(false);
+        setPreparazione(false);
       } while (ancora.current);
     } catch (e) {
       if (e instanceof ErroreApi && e.status === 401) setSessione(null);
-      else setErrore(true);
+      else if (inPreparazione(e)) {
+        setPreparazione(true);
+        window.setTimeout(() => setRiprovaAggiorna((n) => n + 1), 4000);
+      } else setErrore(true);
     } finally {
       inCorso.current = false;
       ancora.current = false;
@@ -263,9 +272,21 @@ export default function PortaleRedazione({ sessioneIniziale, configurata }: { se
       setSchedePersone((s) => ({ ...s, [chiave]: { numeri: dati, altri: dati.altri, prima: dati.contenuti.at(-1)?.creatoIl ?? prima, caricando: false, errore: false } }));
     } catch (e) {
       if (e instanceof ErroreApi && e.status === 401) setSessione(null);
+      if (inPreparazione(e)) {
+        window.setTimeout(() => setRiprovaScheda({ chiave, prima, n: Date.now() }), 4000);
+        return;
+      }
       setSchedePersone((s) => ({ ...s, [chiave]: { ...(s[chiave] ?? SCHEDA_VUOTA), caricando: false, errore: true } }));
     }
   }, []);
+
+  useEffect(() => {
+    if (riprovaAggiorna > 0) void aggiorna();
+  }, [riprovaAggiorna, aggiorna]);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- nuovo tentativo programmato, non una sincronizzazione
+    if (riprovaScheda) void caricaPaginaScheda(riprovaScheda.chiave, riprovaScheda.prima);
+  }, [riprovaScheda, caricaPaginaScheda]);
 
   useEffect(() => {
     if (!sessione) return;
@@ -776,6 +797,11 @@ export default function PortaleRedazione({ sessioneIniziale, configurata }: { se
       </header>
 
       <main className="px-4 py-6">
+        {preparazione && contenuti === null && (
+          <p role="status" className="mx-auto mb-4 max-w-xl rounded-2xl border p-3 text-sm" style={{ borderColor: 'rgba(245,158,11,0.4)', background: 'rgba(245,158,11,0.08)' }}>
+            {T.feed.preparazione}
+          </p>
+        )}
         {errore && (
           <p role="alert" className="mx-auto mb-4 flex max-w-xl items-center justify-between gap-3 rounded-2xl border p-3 text-sm" style={{ borderColor: 'rgba(239,68,68,0.4)', background: 'rgba(239,68,68,0.08)' }}>
             {T.feed.errore}
@@ -785,7 +811,8 @@ export default function PortaleRedazione({ sessioneIniziale, configurata }: { se
           </p>
         )}
         {contenuti === null ? (
-          !errore && (
+          !errore &&
+          !preparazione && (
             <p className="py-12 text-center" role="status" style={{ color: 'var(--fg-muta)' }}>
               {T.feed.caricamento}
             </p>

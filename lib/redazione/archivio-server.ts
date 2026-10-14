@@ -35,11 +35,16 @@ export class ErroreRedazione extends Error {
   constructor(
     readonly status: number,
     messaggio: string,
+    /** Codice per il browser, quando deve fare qualcosa di diverso dal mostrare il messaggio. */
+    readonly codice?: string,
   ) {
     super(messaggio);
     this.name = 'ErroreRedazione';
   }
 }
+
+/** L'indice è in costruzione: il browser aspetta qualche secondo e riprova da solo. */
+export const CODICE_IN_COSTRUZIONE = 'in_costruzione';
 
 export interface Media {
   corpo: ReadableStream<Uint8Array> | Uint8Array;
@@ -50,6 +55,17 @@ export interface Media {
 export interface StatoArchivio {
   revisione: number;
   contenuti: Contenuto[];
+  /**
+   * Solo durante la prima costruzione: gli id delle copie ancora da leggere. Una funzione Vercel ha
+   * pochi secondi: si legge quel che si fa in tempo, si salva, e la richiesta dopo continua da qui.
+   */
+  daLeggere?: string[];
+}
+
+/** Tempo che una richiesta dedica a costruire l'indice prima di salvare e passare la mano. */
+function budgetCostruzioneMs(): number {
+  const n = Number(process.env.REDAZIONE_COSTRUZIONE_MS);
+  return Number.isFinite(n) && n >= 0 ? n : 7000;
 }
 
 export interface Archivio {
@@ -198,22 +214,55 @@ async function elencaCopie(): Promise<{ percorso: string; id: string; scrittaIl:
 }
 
 /**
- * Legge le copie indicate. Se una copia elencata non si legge nemmeno riprovando si ferma con un
- * errore: un indice costruito a metà farebbe sparire contenuti, meglio riprovare alla richiesta dopo.
+ * Legge le copie indicate. Una copia che non si legge nemmeno riprovando si salta e si segnala:
+ * il file resta dov'è e il riallineamento la riprende alla prossima occasione.
  */
 async function leggiCopie(percorsi: string[]): Promise<Contenuto[]> {
-  return aGruppi(percorsi, LETTURE_IN_PARALLELO, (p) =>
-    conTentativi(async () => {
-      const r = await get(p, { access: 'private', useCache: false });
-      if (!r || r.statusCode !== 200) throw new Error(`copia ${p} non leggibile`);
-      return (await new Response(r.stream).json()) as Contenuto;
-    }),
-  );
+  const letti = await aGruppi(percorsi, LETTURE_IN_PARALLELO, async (p) => {
+    try {
+      return await conTentativi(async () => {
+        const r = await get(p, { access: 'private', useCache: false });
+        if (!r || r.statusCode !== 200) throw new Error(`stato ${r?.statusCode ?? 'assente'}`);
+        return (await new Response(r.stream).json()) as Contenuto;
+      });
+    } catch (errore) {
+      console.error('[redazione] copia non leggibile, la riprende il riallineamento', p, errore);
+      return null;
+    }
+  });
+  return letti.filter((c): c is Contenuto => c !== null && ID_VALIDO.test(c.id));
 }
 
-/** Tutte le copie per contenuto: da qui si costruisce l'indice la prima volta. */
-async function leggiCopieContenuti(): Promise<Contenuto[]> {
-  return leggiCopie((await elencaCopie()).map((c) => c.percorso));
+/**
+ * Prima costruzione dell'indice, a tappe: ogni richiesta legge le copie che fa in tempo nel suo
+ * budget, salva i progressi e, se non ha finito, risponde «in costruzione». Due richieste insieme
+ * non si pestano i piedi: la seconda a scrivere trova l'ETag cambiato e lascia valere la prima.
+ */
+async function costruisciIndice(parziale: { dati: StatoArchivio; etag: string } | null): Promise<StatoArchivio> {
+  const inizio = Date.now();
+  let stato: StatoArchivio = parziale ? parziale.dati : { revisione: 0, contenuti: [], daLeggere: (await elencaCopie()).map((c) => c.id) };
+  const etag: string | null = parziale?.etag ?? null;
+  let restanti = stato.daLeggere ?? [];
+  do {
+    const lotto = restanti.slice(0, LETTURE_IN_PARALLELO);
+    const letti = await leggiCopie(lotto.map(percorsoContenuto));
+    restanti = restanti.slice(lotto.length);
+    const contenuti = [...stato.contenuti, ...letti];
+    stato = restanti.length > 0 ? { revisione: 0, contenuti, daLeggere: restanti } : nuovoStato(contenuti);
+  } while (restanti.length > 0 && Date.now() - inizio < budgetCostruzioneMs());
+  try {
+    await scriviJson(FILE_INDICE, stato, etag);
+  } catch (errore) {
+    // Un'altra richiesta ha salvato prima (ETag cambiato, o il file è comparso): alla prossima si
+    // riparte dal suo punto. Qualsiasi altro errore si vede.
+    cacheJson.delete(FILE_INDICE);
+    const altrui = errore instanceof BlobPreconditionFailedError || (etag === null && (await leggiJson<StatoArchivio>(FILE_INDICE)) !== null);
+    if (!altrui) throw errore;
+  }
+  if (stato.daLeggere) {
+    throw new ErroreRedazione(503, 'Sto preparando l\'archivio: ci vuole ancora qualche secondo.', CODICE_IN_COSTRUZIONE);
+  }
+  return stato;
 }
 
 /** Margine fra la scrittura nell'indice e quella della copia: oltre, la copia è più nuova dell'indice. */
@@ -239,7 +288,9 @@ async function scriviCopie(contenuto: Contenuto): Promise<void> {
 }
 
 async function scriviNelloIndice(fn: (stato: StatoArchivio) => { stato: StatoArchivio; contenuto: Contenuto }): Promise<Contenuto> {
-  const contenuto = await modificaJson<StatoArchivio, Contenuto>(FILE_INDICE, async () => nuovoStato(await leggiCopieContenuti()), (stato) => {
+  // Finché l'indice è in costruzione non si scrive: la pubblicazione riprova fra qualche secondo.
+  const contenuto = await modificaJson<StatoArchivio, Contenuto>(FILE_INDICE, () => costruisciIndice(null), (stato) => {
+    if (stato.daLeggere) throw new ErroreRedazione(503, 'Sto preparando l\'archivio: riprova fra qualche secondo.', CODICE_IN_COSTRUZIONE);
     const esito = fn(stato);
     return { dati: esito.stato, risultato: esito.contenuto };
   });
@@ -250,19 +301,9 @@ async function scriviNelloIndice(fn: (stato: StatoArchivio) => { stato: StatoArc
 const archivioBlob: Archivio = {
   async stato() {
     const letto = await leggiJson<StatoArchivio>(FILE_INDICE);
-    if (letto) return letto.dati;
-    // Primo avvio con l'indice: si costruisce dalle copie dei contenuti e si salva una volta sola.
-    const stato = nuovoStato(await leggiCopieContenuti());
-    try {
-      await scriviJson(FILE_INDICE, stato, null);
-      return stato;
-    } catch {
-      // Un'altra richiesta l'ha costruito nello stesso momento: vale il suo.
-      cacheJson.delete(FILE_INDICE);
-      const suo = await leggiJson<StatoArchivio>(FILE_INDICE);
-      if (!suo) throw new ErroreRedazione(503, 'Archivio non disponibile, riprova fra poco.');
-      return suo.dati;
-    }
+    if (letto && !letto.dati.daLeggere) return letto.dati;
+    // Primo avvio con l'indice: si costruisce dalle copie dei contenuti, a tappe se non si fa in tempo.
+    return costruisciIndice(letto);
   },
 
   async elenca() {
@@ -333,7 +374,8 @@ const archivioBlob: Archivio = {
     });
     if (sospette.length === 0) return 0;
     const copie = await leggiCopie(sospette.map((c) => c.percorso));
-    const recuperate = await modificaJson<StatoArchivio, Contenuto[]>(FILE_INDICE, async () => nuovoStato(await leggiCopieContenuti()), (stato) => {
+    const recuperate = await modificaJson<StatoArchivio, Contenuto[]>(FILE_INDICE, () => costruisciIndice(null), (stato) => {
+      if (stato.daLeggere) throw new ErroreRedazione(503, 'Archivio in costruzione.', CODICE_IN_COSTRUZIONE);
       let nuovo = stato;
       const fatte: Contenuto[] = [];
       for (const copia of copie) {

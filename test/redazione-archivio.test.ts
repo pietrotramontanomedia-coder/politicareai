@@ -97,14 +97,47 @@ describe('archivio su Vercel Blob', () => {
     expect(finto.chiamate).toEqual({ get: 1, getPieni: 0, put: 0, list: 0 });
   });
 
-  it('se una copia non si legge non costruisce un indice a metà: riprova alla richiesta dopo', async () => {
+  it('una copia che non si legge non blocca l\'indice: si salta e la riprende il riallineamento', async () => {
     finto.scrivi(`redazione/contenuti/${ID(1)}.json`, JSON.stringify(storia(1)));
     finto.scrivi(`redazione/contenuti/${ID(2)}.json`, JSON.stringify(storia(2)));
     finto.rotti.add(`redazione/contenuti/${ID(2)}.json`);
-    await expect(archivio().stato()).rejects.toThrow();
-    expect(finto.file.has('redazione/indice.json')).toBe(false);
+    const silenzio = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    expect((await archivio().stato()).contenuti.map((c) => c.id)).toEqual([ID(1)]);
     finto.rotti.clear();
+    expect(await archivio().riallinea()).toBe(1);
     expect((await archivio().stato()).contenuti).toHaveLength(2);
+    silenzio.mockRestore();
+  });
+
+  it('con tanti contenuti l\'indice si costruisce a tappe: ogni richiesta salva i progressi e la successiva continua', async () => {
+    // Budget zero: ogni richiesta legge un solo lotto (16 copie) e passa la mano.
+    vi.stubEnv('REDAZIONE_COSTRUZIONE_MS', '0');
+    for (let i = 1; i <= 20; i++) finto.scrivi(`redazione/contenuti/${ID(i)}.json`, JSON.stringify(storia(i)));
+
+    await expect(archivio().stato()).rejects.toMatchObject({ status: 503, codice: 'in_costruzione' });
+    const parziale = JSON.parse(finto.file.get('redazione/indice.json')!.corpo) as { contenuti: unknown[]; daLeggere: string[] };
+    expect(parziale.contenuti).toHaveLength(16);
+    expect(parziale.daLeggere).toHaveLength(4);
+    // Nel frattempo non si pubblica: si riprova fra qualche secondo, niente va perso.
+    await expect(archivio().crea(storia(99))).rejects.toMatchObject({ status: 503, codice: 'in_costruzione' });
+
+    const completo = await archivio().stato();
+    expect(completo.contenuti).toHaveLength(20);
+    expect(completo.daLeggere).toBeUndefined();
+    expect(await archivio().riallinea()).toBe(0);
+    expect((await archivio().crea(storia(99))).rev).toBe(1);
+  });
+
+  it('due richieste che costruiscono insieme: vale la prima a salvare, la seconda continua da lì', async () => {
+    vi.stubEnv('REDAZIONE_COSTRUZIONE_MS', '0');
+    for (let i = 1; i <= 20; i++) finto.scrivi(`redazione/contenuti/${ID(i)}.json`, JSON.stringify(storia(i)));
+    // La richiesta A sta leggendo il primo lotto; prima che salvi, B ha già salvato il suo.
+    finto.intromettiti(() => {
+      finto.scrivi('redazione/indice.json', JSON.stringify({ revisione: 0, contenuti: [storia(1)], daLeggere: [ID(2), ID(3)] }));
+    });
+    await expect(archivio().stato()).rejects.toMatchObject({ codice: 'in_costruzione' });
+    const finale = await archivio().stato();
+    expect(finale.contenuti.map((c) => c.id)).toEqual([ID(1), ID(2), ID(3)]);
   });
 
   it('riallinea: recupera i contenuti scritti fuori dall\'indice, senza toccare gli altri', async () => {

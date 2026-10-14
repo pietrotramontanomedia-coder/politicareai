@@ -5,6 +5,8 @@ import { aggiungiCommento, validaCommento } from '@/lib/redazione/regole';
 /** Correzioni, consigli e risposte; chi corregge può anche cambiare lo stato del contenuto. */
 
 export const dynamic = 'force-dynamic';
+/** La prima costruzione dell'indice legge molti file: più dei 10 secondi predefiniti. */
+export const maxDuration = 60;
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   return conSessione(request, async (sessione) => {

@@ -10,7 +10,9 @@ export function nuovoId(): string {
 }
 
 export function rispostaErrore(errore: unknown): Response {
-  if (errore instanceof ErroreRedazione) return Response.json({ ok: false, errore: errore.message }, { status: errore.status });
+  if (errore instanceof ErroreRedazione) {
+    return Response.json({ ok: false, errore: errore.message, ...(errore.codice ? { codice: errore.codice } : {}) }, { status: errore.status });
+  }
   console.error('[redazione]', errore);
   return Response.json({ ok: false, errore: 'Qualcosa è andato storto, riprova.' }, { status: 500 });
 }
