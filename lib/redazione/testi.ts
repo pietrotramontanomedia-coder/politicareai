@@ -139,6 +139,7 @@ export const TESTI_REDAZIONE = {
     riprova: 'Riprova',
     aggiorna: 'Aggiorna',
     caricamento: 'Carico i contenuti…',
+    preparazione: 'Sto preparando l\'archivio della redazione: succede una volta sola dopo un aggiornamento del sito, ci vuole qualche secondo. Il portale si apre da solo.',
     apri: 'Apri',
     commenti: (n: number) => (n === 1 ? '1 commento' : `${n} commenti`),
     versione: (n: number) => `Versione ${n}`,

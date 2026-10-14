@@ -12,6 +12,8 @@ import { avvisaDopoLaRisposta } from '@/lib/redazione/telegram-server';
  */
 
 export const dynamic = 'force-dynamic';
+/** La prima costruzione dell'indice legge molti file: più dei 10 secondi predefiniti. */
+export const maxDuration = 60;
 
 export async function GET(request: Request) {
   return conSessione(request, async (sessione) => {

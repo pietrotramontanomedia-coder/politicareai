@@ -12,6 +12,8 @@ import type { Persona } from '@/lib/redazione/tipi';
  */
 
 export const dynamic = 'force-dynamic';
+/** La prima costruzione dell'indice legge molti file: più dei 10 secondi predefiniti. */
+export const maxDuration = 60;
 
 function password(valore: unknown): string | null {
   if (valore === undefined || valore === null || valore === '') return null;

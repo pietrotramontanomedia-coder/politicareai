@@ -151,8 +151,11 @@ test/redazione-archivio.test.ts   indice su Blob: migrazione, scritture insieme,
   per contenuto. Prima di questo indice ogni aggiornamento rileggeva tutti i file uno per uno,
   e con centinaia di contenuti il portale diventava lento, consumava le operazioni di Blob e
   rischiava di superare i 4,5 MB di risposta delle funzioni Vercel. Al primo avvio l'indice si
-  costruisce da solo dalle copie dei contenuti: non serve fare niente. Se anche una sola copia non
-  si legge, l'indice non viene scritto e si riprova alla richiesta dopo: mai un indice a metà.
+  costruisce da solo dalle copie dei contenuti: non serve fare niente. Una funzione Vercel ha
+  pochi secondi, quindi si costruisce **a tappe**: ogni richiesta legge quel che fa in tempo (7 s,
+  `REDAZIONE_COSTRUZIONE_MS`), salva i progressi e risponde «in costruzione»; il portale mostra un
+  avviso e riprova da solo ogni 4 secondi finché è pronto. Nel frattempo non si pubblica (la
+  pubblicazione riprova). Una copia che non si legge si salta e la riprende il riallineamento.
 - **Riallineamento**: due volte al giorno, con il promemoria e il resoconto, il server confronta
   le copie dei contenuti con l'indice e recupera quelle più recenti (per esempio scritte dalla
   versione precedente del sito nei secondi del cambio). Costa una lista e legge solo i file sospetti.

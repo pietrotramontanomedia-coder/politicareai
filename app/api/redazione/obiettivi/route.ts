@@ -5,6 +5,8 @@ import { normalizzaNome, validaObiettivi } from '@/lib/redazione/regole';
 /** Obiettivi giornalieri della redazione (storie e post a testa): li cambia solo chi corregge. */
 
 export const dynamic = 'force-dynamic';
+/** La prima costruzione dell'indice legge molti file: più dei 10 secondi predefiniti. */
+export const maxDuration = 60;
 
 export async function PUT(request: Request) {
   return conSessione(request, async (sessione) => {
