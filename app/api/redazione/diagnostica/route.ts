@@ -1,12 +1,17 @@
 import { get, head, list } from '@vercel/blob';
-import { conSessione, descriviErrore } from '@/lib/redazione/api-server';
+import { autorizzatoCron } from '@/lib/cron';
+import { conSessione, descriviErrore, rispostaErrore } from '@/lib/redazione/api-server';
 import { archivio, ErroreRedazione } from '@/lib/redazione/archivio-server';
 import { accessoDaUrl, accessoStore, leggiBlobJson, metadatiBlob, scriviBlob, tokenBlob } from '@/lib/redazione/blob-server';
+import { sincronizza } from '@/lib/redazione/regole';
+import type { SessioneRedazione } from '@/lib/redazione/tipi';
 
 /**
  * Diagnosi dell'archivio per chi coordina: ogni passo che il portale fa con lo storage, con i tempi
- * e l'errore esatto se qualcosa non va. Si apre in /api/redazione/diagnostica (serve la sessione
- * di un revisore). Scrive solo in redazione/diagnostica/, per provare le scritture condizionate.
+ * e l'errore esatto se qualcosa non va. Si apre in /api/redazione/diagnostica con la sessione di
+ * un revisore, oppure con `Authorization: Bearer <CRON_SECRET>` (il workflow «Diagnosi redazione»
+ * su GitHub). Scrive solo in redazione/diagnostica/, per provare le scritture condizionate.
+ * Non espone mai il token: solo l'id dello store, che è già negli indirizzi dei file.
  */
 
 export const dynamic = 'force-dynamic';
@@ -30,8 +35,17 @@ async function provaLettura(url: string, accesso: 'public' | 'private'): Promise
 }
 
 export async function GET(request: Request) {
+  if (autorizzatoCron(request.headers.get('authorization'), process.env.CRON_SECRET)) {
+    return diagnosi({ nome: 'Diagnosi (cron)', ruolo: 'revisore' }).catch((errore) => rispostaErrore(errore, true));
+  }
   return conSessione(request, async (sessione) => {
     if (sessione.ruolo !== 'revisore') throw new ErroreRedazione(403, 'Solo chi coordina.');
+    return diagnosi(sessione);
+  });
+}
+
+async function diagnosi(sessione: SessioneRedazione): Promise<Response> {
+  {
     const grezzo = process.env.BLOB_READ_WRITE_TOKEN;
     const token = tokenBlob();
     const passi: Passo[] = [];
@@ -39,7 +53,7 @@ export async function GET(request: Request) {
       passo: 'configurazione',
       ms: 0,
       esito: {
-        blob: token ? `token presente (${token.length} caratteri, inizio «${token.slice(0, 16)}…», store «${token.split('_')[3] ?? '?'}»)` : 'BLOB_READ_WRITE_TOKEN assente: archivio in memoria',
+        blob: token ? `token presente (${token.length} caratteri, forma ${/^vercel_blob_rw_[A-Za-z0-9]+_[A-Za-z0-9]+$/.test(token) ? 'giusta' : 'INATTESA'}, store «${token.split('_')[3] ?? '?'}»)` : 'BLOB_READ_WRITE_TOKEN assente: archivio in memoria',
         tokenPulito: grezzo !== undefined && grezzo !== token ? 'sì: conteneva spazi o virgolette' : 'non serviva',
         accessoForzato: process.env.REDAZIONE_BLOB_ACCESSO ?? null,
         costruzioneMs: process.env.REDAZIONE_COSTRUZIONE_MS ?? '(7000)',
@@ -116,6 +130,14 @@ export async function GET(request: Request) {
         return { revisione: s.revisione, contenuti: s.contenuti.length, daLeggere: s.daLeggere?.length ?? 0 };
       }),
     );
+    // Lo stesso lavoro della richiesta del feed, per un revisore: se passa, il portale si apre.
+    passi.push(
+      await passo('feed come lo chiede il portale', async () => {
+        const [stato, obiettivi, persone] = await Promise.all([archivio().stato(), archivio().leggiObiettivi(), archivio().leggiPersone()]);
+        const s = sincronizza(sessione, stato, null, new Date(), persone);
+        return { revisione: s.revisione, contenutiInviati: s.contenuti.length, byte: JSON.stringify(s).length, squadra: s.statistiche.length, persone: persone.length, obiettivi };
+      }),
+    );
     return Response.json({ ok: true, passi });
-  });
+  }
 }

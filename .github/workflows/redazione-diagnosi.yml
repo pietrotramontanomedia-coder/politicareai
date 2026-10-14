@@ -1,0 +1,26 @@
+# Diagnosi del portale della redazione in produzione, a richiesta: chiama /api/redazione/diagnostica
+# con CRON_SECRET e stampa il risultato. Il repository è pubblico e i log si vedono: la pagina non
+# espone mai il token, e qui si oscura comunque qualsiasi cosa che gli somigli.
+name: Diagnosi redazione
+
+on:
+  workflow_dispatch:
+
+jobs:
+  diagnosi:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Chiama la diagnosi
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$CRON_SECRET" ]; then
+            echo "CRON_SECRET non impostato fra i segreti del repository"
+            exit 1
+          fi
+          codice=$(curl -s -S -m 120 -o risposta.json -w '%{http_code}' \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            https://politicare-app.vercel.app/api/redazione/diagnostica)
+          echo "HTTP $codice"
+          sed -E 's/vercel_blob_rw_[A-Za-z0-9_]+/vercel_blob_rw_***/g' risposta.json | python3 -m json.tool || cat risposta.json
+          [ "$codice" = "200" ]
