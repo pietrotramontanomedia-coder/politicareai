@@ -8,20 +8,31 @@ import type { Contenuto } from '@/lib/redazione/tipi';
  */
 
 const finto = vi.hoisted(() => {
-  class BlobPreconditionFailedError extends Error {}
+  class BlobError extends Error {}
+  class BlobNotFoundError extends BlobError {}
+  class BlobPreconditionFailedError extends BlobError {}
   const file = new Map<string, { corpo: string; etag: string; tipo: string; quando: Date }>();
   /** Orologio dello storage finto: le prove lo spostano avanti per simulare il tempo che passa. */
   const orologio = { adesso: new Date('2026-10-12T10:00:00Z') };
   let contatore = 0;
   const illeggibili = new Set<string>();
-  const chiamate = { get: 0, getPieni: 0, put: 0, list: 0 };
+  const chiamate = { get: 0, head: 0, put: 0, list: 0 };
   /** Se impostata, gira subito prima della prossima scrittura: simula un'altra persona che scrive. */
   let intrusa: (() => void) | null = null;
+  /** Com'è fatto lo store finto: pubblico o privato, e se rifiuta la lettura diretta per l'indirizzo privato. */
+  const store = { accesso: 'private' as 'public' | 'private', rifiutaPrivato: false, tokenAtteso: 'vercel_blob_rw_finto_segreto' };
+  const url = (pathname: string) => `https://finto.${store.accesso}.blob.vercel-storage.com/${pathname}`;
+  const controllaToken = (opzioni?: { token?: string }) => {
+    if (opzioni?.token !== store.tokenAtteso) throw new BlobError('Access denied, please provide a valid token for this resource.');
+  };
   return {
+    BlobError,
+    BlobNotFoundError,
     BlobPreconditionFailedError,
     file,
     chiamate,
     orologio,
+    store,
     /** Rende illeggibile un file (lo storage risponde, ma senza il contenuto). */
     rotti: illeggibili,
     intromettiti(fn: () => void) {
@@ -30,17 +41,33 @@ const finto = vi.hoisted(() => {
     scrivi(percorso: string, corpo: string) {
       file.set(percorso, { corpo, etag: `e${++contatore}`, tipo: 'application/json', quando: orologio.adesso });
     },
-    get: async (percorso: string, opzioni: { ifNoneMatch?: string }) => {
+    head: async (percorso: string, opzioni?: { token?: string }) => {
+      chiamate.head++;
+      controllaToken(opzioni);
+      const f = file.get(percorso);
+      if (!f) throw new BlobNotFoundError('not found');
+      return { url: url(percorso), etag: f.etag, contentType: f.tipo, size: f.corpo.length, uploadedAt: f.quando, pathname: percorso };
+    },
+    get: async (urlOrPathname: string, opzioni: { access: 'public' | 'private'; token?: string }) => {
       chiamate.get++;
+      controllaToken(opzioni);
+      // Come l'SDK: un indirizzo completo si usa com'è, altrimenti si costruisce dall'accesso chiesto.
+      const indirizzo = /^https?:/.test(urlOrPathname) ? new URL(urlOrPathname) : new URL(`https://finto.${opzioni.access}.blob.vercel-storage.com/${urlOrPathname}`);
+      const percorso = indirizzo.pathname.slice(1);
+      const perPrivato = indirizzo.hostname.includes('.private.');
+      // Lo store serve i file per l'indirizzo del suo tipo; con rifiutaPrivato fa il contrario (il caso
+      // visto in produzione: indirizzo privato negato, pubblico che funziona).
+      const servito = store.rifiutaPrivato ? !perPrivato : perPrivato === (store.accesso === 'private');
+      if (!servito) throw new BlobError('Vercel Blob: Failed to fetch blob: 403 Forbidden');
       if (illeggibili.has(percorso)) return { statusCode: 404, stream: null, blob: {} };
       const f = file.get(percorso);
       if (!f) return null;
-      if (opzioni.ifNoneMatch === f.etag) return { statusCode: 304, stream: null, blob: { etag: f.etag } };
-      chiamate.getPieni++;
       return { statusCode: 200, stream: new Response(f.corpo).body, blob: { etag: f.etag, contentType: f.tipo } };
     },
-    put: async (percorso: string, corpo: unknown, opzioni: { ifMatch?: string; allowOverwrite?: boolean; addRandomSuffix?: boolean; contentType: string }) => {
+    put: async (percorso: string, corpo: unknown, opzioni: { access: 'public' | 'private'; token?: string; ifMatch?: string; allowOverwrite?: boolean; addRandomSuffix?: boolean; contentType: string }) => {
       chiamate.put++;
+      controllaToken(opzioni);
+      if (opzioni.access !== store.accesso) throw new BlobError(`Vercel Blob: this store accepts only ${store.accesso} blobs`);
       if (intrusa) {
         const fn = intrusa;
         intrusa = null;
@@ -48,34 +75,48 @@ const finto = vi.hoisted(() => {
       }
       const f = file.get(percorso);
       if (opzioni.ifMatch && (!f || f.etag !== opzioni.ifMatch)) throw new BlobPreconditionFailedError('cambiato');
-      if (!opzioni.ifMatch && opzioni.allowOverwrite === false && f) throw new Error('esiste già');
+      if (!opzioni.ifMatch && opzioni.allowOverwrite === false && f) throw new BlobError('Vercel Blob: This blob already exists, use allowOverwrite: true');
       const dove = opzioni.addRandomSuffix ? `${percorso}~${++contatore}` : percorso;
       const etag = `e${++contatore}`;
       file.set(dove, { corpo: String(corpo), etag, tipo: opzioni.contentType, quando: orologio.adesso });
-      return { pathname: dove, etag };
+      return { pathname: dove, etag, url: url(dove) };
     },
-    list: async ({ prefix }: { prefix: string }) => {
+    list: async ({ prefix = '', limit, token }: { prefix?: string; limit?: number; token?: string }) => {
       chiamate.list++;
-      return { blobs: [...file.entries()].filter(([k]) => k.startsWith(prefix)).map(([pathname, f]) => ({ pathname, uploadedAt: f.quando })), hasMore: false };
+      controllaToken({ token });
+      const blobs = [...file.entries()].filter(([k]) => k.startsWith(prefix)).map(([pathname, f]) => ({ pathname, url: url(pathname), size: f.corpo.length, uploadedAt: f.quando }));
+      return { blobs: limit ? blobs.slice(0, limit) : blobs, hasMore: false };
     },
   };
 });
 
-vi.mock('@vercel/blob', () => ({ BlobPreconditionFailedError: finto.BlobPreconditionFailedError, get: finto.get, put: finto.put, list: finto.list }));
+vi.mock('@vercel/blob', () => ({
+  BlobError: finto.BlobError,
+  BlobNotFoundError: finto.BlobNotFoundError,
+  BlobPreconditionFailedError: finto.BlobPreconditionFailedError,
+  get: finto.get,
+  head: finto.head,
+  put: finto.put,
+  list: finto.list,
+}));
 
 const { archivio, svuotaMemoria } = await import('@/lib/redazione/archivio-server');
+const { dimenticaAccessoStore } = await import('@/lib/redazione/blob-server');
 
 const ID = (n: number) => n.toString(16).padStart(32, '0');
 const ADESSO = new Date('2026-10-12T10:00:00Z');
 const storia = (n: number): Contenuto => nuovoContenuto(ID(n), 'storia', 'Giulia', { immagini: [ID(900 + n)], didascalia: '', formato: '1:1' }, ADESSO);
 const indice = () => JSON.parse(finto.file.get('redazione/indice.json')!.corpo) as { revisione: number; contenuti: Contenuto[] };
-const azzera = () => Object.assign(finto.chiamate, { get: 0, getPieni: 0, put: 0, list: 0 });
+const azzera = () => Object.assign(finto.chiamate, { get: 0, head: 0, put: 0, list: 0 });
 
 describe('archivio su Vercel Blob', () => {
   beforeEach(() => {
-    vi.stubEnv('BLOB_READ_WRITE_TOKEN', 'finto');
+    vi.stubEnv('BLOB_READ_WRITE_TOKEN', 'vercel_blob_rw_finto_segreto');
     finto.file.clear();
     finto.rotti.clear();
+    finto.store.accesso = 'private';
+    finto.store.rifiutaPrivato = false;
+    dimenticaAccessoStore();
     finto.orologio.adesso = ADESSO;
     svuotaMemoria();
     azzera();
@@ -91,10 +132,10 @@ describe('archivio su Vercel Blob', () => {
     expect(stato.contenuti.map((c) => c.id).sort()).toEqual([ID(1), ID(2)]);
     expect(indice().contenuti).toHaveLength(2);
 
-    // Un aggiornamento del portale: una sola domanda allo storage, che risponde «non cambiato».
+    // Un aggiornamento del portale: una sola domanda allo storage (i metadati), nessun download.
     azzera();
     await archivio().stato();
-    expect(finto.chiamate).toEqual({ get: 1, getPieni: 0, put: 0, list: 0 });
+    expect(finto.chiamate).toEqual({ get: 0, head: 1, put: 0, list: 0 });
   });
 
   it('una copia che non si legge non blocca l\'indice: si salta e la riprende il riallineamento', async () => {
@@ -161,6 +202,39 @@ describe('archivio su Vercel Blob', () => {
     ]);
     // Fatto una volta, la volta dopo non c'è niente da leggere.
     expect(await archivio().riallinea()).toBe(0);
+  });
+
+  it('store pubblico: lo capisce dagli indirizzi e legge e scrive con l\'accesso giusto', async () => {
+    finto.store.accesso = 'public';
+    finto.scrivi(`redazione/contenuti/${ID(1)}.json`, JSON.stringify(storia(1)));
+    expect((await archivio().stato()).contenuti).toHaveLength(1);
+    const creato = await archivio().crea(storia(2));
+    expect(creato.rev).toBe(1);
+    expect(finto.file.has('redazione/indice.json')).toBe(true);
+    expect((await archivio().leggi(ID(2)))?.id).toBe(ID(2));
+  });
+
+  it('store privato che rifiuta la lettura diretta (403): passa dall\'indirizzo pubblico e se lo ricorda', async () => {
+    finto.store.rifiutaPrivato = true;
+    finto.scrivi(`redazione/contenuti/${ID(1)}.json`, JSON.stringify(storia(1)));
+    expect((await archivio().stato()).contenuti.map((c) => c.id)).toEqual([ID(1)]);
+    // Da qui in poi va dritto per l'indirizzo pubblico: una lettura, non due.
+    azzera();
+    expect((await archivio().leggiMedia(ID(1)))).toBeNull();
+    finto.scrivi(`redazione/media/${ID(5)}`, 'jpeg');
+    expect((await archivio().leggiMedia(ID(5)))?.tipo).toBe('application/json');
+    expect(finto.chiamate.get).toBe(1);
+  });
+
+  it('token con spazi o virgolette attorno: si pulisce prima di usarlo', async () => {
+    vi.stubEnv('BLOB_READ_WRITE_TOKEN', ' "vercel_blob_rw_finto_segreto"\n');
+    await archivio().crea(storia(1));
+    expect((await archivio().stato()).contenuti).toHaveLength(1);
+  });
+
+  it('token sbagliato: l\'errore arriva chiaro, non si inventa un archivio vuoto', async () => {
+    vi.stubEnv('BLOB_READ_WRITE_TOKEN', 'vercel_blob_rw_finto_altro');
+    await expect(archivio().stato()).rejects.toThrow(/Access denied/);
   });
 
   it('ogni scrittura porta avanti la revisione e lascia la copia del contenuto e lo storico', async () => {

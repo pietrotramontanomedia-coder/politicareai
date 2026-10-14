@@ -1,6 +1,7 @@
-import { get, list, put } from '@vercel/blob';
+import { get, head, list } from '@vercel/blob';
 import { conSessione, descriviErrore } from '@/lib/redazione/api-server';
 import { archivio, ErroreRedazione } from '@/lib/redazione/archivio-server';
+import { accessoDaUrl, accessoStore, leggiBlobJson, metadatiBlob, scriviBlob, tokenBlob } from '@/lib/redazione/blob-server';
 
 /**
  * Diagnosi dell'archivio per chi coordina: ogni passo che il portale fa con lo storage, con i tempi
@@ -22,16 +23,25 @@ async function passo(nome: string, fn: () => Promise<unknown>): Promise<Passo> {
   }
 }
 
+/** Lettura diretta per un indirizzo, come la fa l'SDK: dice solo se lo storage la accetta. */
+async function provaLettura(url: string, accesso: 'public' | 'private'): Promise<string> {
+  const r = await get(url, { access: accesso, token: tokenBlob() });
+  return r ? `stato ${r.statusCode}` : '404';
+}
+
 export async function GET(request: Request) {
   return conSessione(request, async (sessione) => {
     if (sessione.ruolo !== 'revisore') throw new ErroreRedazione(403, 'Solo chi coordina.');
-    const token = process.env.BLOB_READ_WRITE_TOKEN;
+    const grezzo = process.env.BLOB_READ_WRITE_TOKEN;
+    const token = tokenBlob();
     const passi: Passo[] = [];
     passi.push({
       passo: 'configurazione',
       ms: 0,
       esito: {
-        blob: token ? `token presente (${token.length} caratteri, inizio «${token.slice(0, 16)}…»)` : 'BLOB_READ_WRITE_TOKEN assente: archivio in memoria',
+        blob: token ? `token presente (${token.length} caratteri, inizio «${token.slice(0, 16)}…», store «${token.split('_')[3] ?? '?'}»)` : 'BLOB_READ_WRITE_TOKEN assente: archivio in memoria',
+        tokenPulito: grezzo !== undefined && grezzo !== token ? 'sì: conteneva spazi o virgolette' : 'non serviva',
+        accessoForzato: process.env.REDAZIONE_BLOB_ACCESSO ?? null,
         costruzioneMs: process.env.REDAZIONE_COSTRUZIONE_MS ?? '(7000)',
         regione: process.env.VERCEL_REGION ?? null,
         node: process.version,
@@ -40,59 +50,72 @@ export async function GET(request: Request) {
     if (!token) return Response.json({ ok: true, passi });
 
     passi.push(
+      await passo('tipo di store (dall\'indirizzo dei file)', async () => {
+        const pagina = await list({ limit: 1, token });
+        return { primoFile: pagina.blobs[0]?.url ?? null, accesso: accessoDaUrl(pagina.blobs[0]?.url) ?? 'sconosciuto (store vuoto)', usato: await accessoStore() };
+      }),
+    );
+    passi.push(
       await passo('list copie contenuti', async () => {
-        const pagina = await list({ prefix: 'redazione/contenuti/', limit: 1000 });
+        const pagina = await list({ prefix: 'redazione/contenuti/', limit: 1000, token });
         return { quante: pagina.blobs.length, altre: pagina.hasMore, prima: pagina.blobs[0]?.pathname ?? null, byte: pagina.blobs.reduce((n, b) => n + b.size, 0) };
       }),
     );
     passi.push(
-      await passo('get indice', async () => {
-        const r = await get('redazione/indice.json', { access: 'private', useCache: false });
-        if (!r) return 'assente (ancora da costruire)';
-        if (r.statusCode !== 200) return { statusCode: r.statusCode };
-        const testo = await new Response(r.stream).text();
-        const dati = JSON.parse(testo) as { revisione: number; contenuti: unknown[]; daLeggere?: string[] };
-        return { byte: testo.length, etag: r.blob.etag, revisione: dati.revisione, contenuti: dati.contenuti.length, daLeggere: dati.daLeggere?.length ?? 0 };
+      await passo('head indice', async () => {
+        const m = await metadatiBlob('redazione/indice.json');
+        return m ? { url: m.url, etag: m.etag, byte: m.size } : 'assente (ancora da costruire)';
       }),
     );
     passi.push(
-      await passo('get persone', async () => {
-        const r = await get('redazione/impostazioni/persone.json', { access: 'private', useCache: false });
-        return r ? { statusCode: r.statusCode, etag: r.blob.etag } : 'assente';
-      }),
-    );
-    passi.push(
-      await passo('lettura di una copia', async () => {
-        const pagina = await list({ prefix: 'redazione/contenuti/', limit: 1 });
-        const p = pagina.blobs[0]?.pathname;
+      await passo('lettura di una copia: per l\'indirizzo privato e per quello pubblico', async () => {
+        const pagina = await list({ prefix: 'redazione/contenuti/', limit: 1, token });
+        const p = pagina.blobs[0];
         if (!p) return 'nessuna copia';
-        const r = await get(p, { access: 'private', useCache: false });
-        if (!r || r.statusCode !== 200) return { p, statusCode: r?.statusCode ?? null };
-        const c = (await new Response(r.stream).json()) as { id?: string; tipo?: string };
-        return { p, id: c.id, tipo: c.tipo };
+        const h = await head(p.pathname, { token });
+        const esiti: Record<string, string> = { url: h.url, etag: h.etag };
+        for (const [nome, url, accesso] of [
+          ['privato', h.url.replace('.public.blob.', '.private.blob.'), 'private'],
+          ['pubblico', h.url.replace('.private.blob.', '.public.blob.'), 'public'],
+        ] as const) {
+          try {
+            esiti[nome] = await provaLettura(url, accesso);
+          } catch (e) {
+            esiti[nome] = descriviErrore(e);
+          }
+        }
+        try {
+          const r = await leggiBlobJson<{ id?: string; tipo?: string }>(p.pathname);
+          esiti.conLoStratoDelPortale = r && r.statusCode === 200 ? `ok: ${r.dati.tipo} ${r.dati.id}` : String(r?.statusCode);
+        } catch (e) {
+          esiti.conLoStratoDelPortale = descriviErrore(e);
+        }
+        return esiti;
       }),
     );
-    // Scrittura condizionata, come la fa l'archivio: crea, legge l'ETag, riscrive con ifMatch, poi con un ETag vecchio.
+    // Scrittura condizionata, come la fa l'archivio: crea, legge l'ETag dai metadati, riscrive con ifMatch, poi con un ETag vecchio.
     const prova = `redazione/diagnostica/${Date.now()}.json`;
     passi.push(
       await passo('scrittura condizionata (ifMatch)', async () => {
-        const creato = await put(prova, '{"n":1}', { access: 'private', contentType: 'application/json', addRandomSuffix: false, allowOverwrite: false });
-        const letto = await get(prova, { access: 'private', useCache: false });
-        const etagLetto = letto?.statusCode === 200 ? letto.blob.etag : null;
-        const riscritto = await put(prova, '{"n":2}', { access: 'private', contentType: 'application/json', addRandomSuffix: false, ifMatch: etagLetto ?? creato.etag });
-        let vecchio: string = 'accettato (!)';
+        const creato = await scriviBlob(prova, '{"n":1}', { contentType: 'application/json' });
+        const meta = await metadatiBlob(prova);
+        const riscritto = await scriviBlob(prova, '{"n":2}', { contentType: 'application/json', ifMatch: meta?.etag ?? creato.etag });
+        let vecchio = 'accettato (!)';
         try {
-          await put(prova, '{"n":3}', { access: 'private', contentType: 'application/json', addRandomSuffix: false, ifMatch: creato.etag });
+          await scriviBlob(prova, '{"n":3}', { contentType: 'application/json', ifMatch: creato.etag });
         } catch (e) {
           vecchio = descriviErrore(e);
         }
-        return { etagPut: creato.etag, etagGet: etagLetto, uguali: creato.etag === etagLetto, riscrittoEtag: riscritto.etag, conEtagVecchio: vecchio };
+        const riletto = await leggiBlobJson<{ n: number }>(prova);
+        return { etagPut: creato.etag, etagHead: meta?.etag ?? null, uguali: creato.etag === meta?.etag, riscrittoEtag: riscritto.etag, conEtagVecchio: vecchio, riletto: riletto?.statusCode === 200 ? riletto.dati : riletto?.statusCode };
       }),
     );
-    passi.push(await passo('archivio().stato()', async () => {
-      const s = await archivio().stato();
-      return { revisione: s.revisione, contenuti: s.contenuti.length, daLeggere: s.daLeggere?.length ?? 0 };
-    }));
+    passi.push(
+      await passo('archivio().stato()', async () => {
+        const s = await archivio().stato();
+        return { revisione: s.revisione, contenuti: s.contenuti.length, daLeggere: s.daLeggere?.length ?? 0 };
+      }),
+    );
     return Response.json({ ok: true, passi });
   });
 }

@@ -103,6 +103,12 @@ A ogni post, storia o nuova versione arriva nel canale della redazione un messag
 Se Telegram non risponde la pubblicazione va comunque a buon fine; se le foto non partono
 arriva almeno il testo.
 
+## Se qualcosa non va
+
+Chi coordina vede sotto l'avviso rosso del portale il dettaglio tecnico dell'errore, e in
+`/api/redazione/diagnostica` (da loggato) ogni passo con lo storage: tipo di store, lista dei
+contenuti, lettura per l'indirizzo privato e pubblico, scrittura condizionata, stato dell'indice.
+
 Il revisore può anche dire **Non va bene**, solo scrivendo il perché: il contenuto si chiude, non si corregge e conta a parte nelle percentuali.
 
 Stati: **da rivedere** (appena inviato o nuova versione) → **da correggere** (il revisore ha
@@ -134,7 +140,8 @@ lib/redazione/
 ├── tipi.ts              Contenuto, Versione, Commento, Storia
 ├── regole.ts            funzioni pure: validazione, permessi, versioni, coda, statistiche
 ├── sessione-server.ts   codici, cookie firmato (HMAC), ruolo
-├── archivio-server.ts   Vercel Blob privato (o memoria): indice dei contenuti, copie, foto, storico
+├── blob-server.ts       Vercel Blob: si adatta allo store (pubblico/privato), ETag, letture fresche
+├── archivio-server.ts   archivio (o memoria): indice dei contenuti, copie, foto, storico
 ├── api-server.ts        sessione obbligatoria ed errori in JSON per le API
 ├── client.ts            chiamate dal browser e riduzione delle foto
 └── testi.ts             testi dell'interfaccia
@@ -144,6 +151,15 @@ test/redazione.test.ts            regole, sessioni e API
 test/redazione-archivio.test.ts   indice su Blob: migrazione, scritture insieme, costo di un aggiornamento
 ```
 
+- **Storage**: tutto passa da `blob-server.ts`, che si adatta allo store senza configurazione:
+  capisce se è pubblico o privato dall'indirizzo dei file che contiene (`REDAZIONE_BLOB_ACCESSO`
+  per forzarlo), pulisce il token da spazi e virgolette, legge i metadati con `head` (sempre
+  freschi: l'ETag che ne esce è quello buono per le scritture condizionate) e scarica il file per
+  l'indirizzo che l'API dice suo, con un parametro legato all'ETag così la CDN non serve mai una
+  versione vecchia. Se lo store rifiuta la lettura per l'indirizzo privato (403) prova per quello
+  pubblico e se lo ricorda. Con uno store **pubblico** le foto sono raggiungibili da chi conosce
+  l'indirizzo esatto (non indovinabile, ma non protetto dal login): per avere foto davvero
+  private serve uno store privato, con il suo token in `BLOB_READ_WRITE_TOKEN`.
 - **Archivio**: tutti i contenuti stanno in un solo indice, `redazione/indice.json`, che è la
   fonte di verità; ogni contenuto ha anche la sua copia in `redazione/contenuti/<id>.json`. Il
   server tiene l'indice in memoria e a ogni richiesta chiede allo storage solo se è cambiato
