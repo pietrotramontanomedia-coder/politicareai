@@ -209,7 +209,7 @@ function CerchioStoria({
 export default function PortaleRedazione({ sessioneIniziale, configurata }: { sessioneIniziale: SessioneRedazione | null; configurata: boolean }) {
   const [sessione, setSessione] = useState(sessioneIniziale);
   const [contenuti, setContenuti] = useState<Contenuto[] | null>(null);
-  const [errore, setErrore] = useState<false | { dettaglio?: string }>(false);
+  const [errore, setErrore] = useState<false | { messaggio?: string; dettaglio?: string }>(false);
   // L'archivio è in preparazione sul server (succede una volta, dopo un aggiornamento del sito).
   const [preparazione, setPreparazione] = useState(false);
   const [obiettivi, setObiettivi] = useState<Obiettivi>(OBIETTIVI_PREDEFINITI);
@@ -257,7 +257,10 @@ export default function PortaleRedazione({ sessioneIniziale, configurata }: { se
       else if (inPreparazione(e)) {
         setPreparazione(true);
         window.setTimeout(() => setRiprovaAggiorna((n) => n + 1), 4000);
-      } else setErrore({ dettaglio: e instanceof ErroreApi ? e.dettaglio : e instanceof Error ? e.message : undefined });
+      } else if (e instanceof ErroreApi) {
+        // Un errore dello storage ha un messaggio scritto per tutti: si mostra quello.
+        setErrore({ messaggio: e.codice?.startsWith('storage') ? e.message : undefined, dettaglio: e.dettaglio });
+      } else setErrore({ dettaglio: e instanceof Error ? e.message : undefined });
     } finally {
       inCorso.current = false;
       ancora.current = false;
@@ -804,9 +807,9 @@ export default function PortaleRedazione({ sessioneIniziale, configurata }: { se
         )}
         {errore && (
           <div role="alert" className="mx-auto mb-4 max-w-xl rounded-2xl border p-3 text-sm" style={{ borderColor: 'rgba(239,68,68,0.4)', background: 'rgba(239,68,68,0.08)' }}>
-            <p className="flex items-center justify-between gap-3">
-              {T.feed.errore}
-              <button type="button" onClick={() => void aggiorna()} className="font-bold">
+            <p className="flex items-start justify-between gap-3">
+              <span>{errore.messaggio ?? T.feed.errore}</span>
+              <button type="button" onClick={() => void aggiorna()} className="shrink-0 font-bold">
                 {T.feed.riprova}
               </button>
             </p>

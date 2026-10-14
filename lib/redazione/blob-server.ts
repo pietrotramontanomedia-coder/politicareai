@@ -1,4 +1,4 @@
-import { BlobError, BlobNotFoundError, get, head, list, put } from '@vercel/blob';
+import { BlobError, BlobNotFoundError, BlobStoreSuspendedError, get, head, list, put } from '@vercel/blob';
 
 /*
  * Lo strato fra il portale della redazione e Vercel Blob. Si adatta allo store com'è, senza
@@ -10,6 +10,16 @@ import { BlobError, BlobNotFoundError, get, head, list, put } from '@vercel/blob
  */
 
 export type AccessoStore = 'public' | 'private';
+
+/** Lo store è sospeso da Vercel (limiti del piano superati): nessuna lettura e nessuna scrittura passa. */
+export function storeSospeso(errore: unknown): boolean {
+  return errore instanceof BlobStoreSuspendedError || (errore instanceof Error && /suspended/i.test(errore.message));
+}
+
+/** Lo storage rifiuta la lettura (403): con uno store sospeso succede su ogni file. */
+export function letturaNegata(errore: unknown): boolean {
+  return errore instanceof BlobError && /\b403\b/.test(errore.message);
+}
 
 /** Il token copiato nelle variabili d'ambiente arriva a volte con spazi, a capo o virgolette. */
 export function tokenBlob(): string | undefined {

@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { archivio, ErroreRedazione } from './archivio-server';
+import { letturaNegata, storeSospeso } from './blob-server';
 import { gettoneDaRichiesta, redazioneConfigurata, sessioneAncoraValida } from './sessione-server';
 import type { SessioneRedazione } from './tipi';
 
@@ -8,6 +9,11 @@ import type { SessioneRedazione } from './tipi';
 export function nuovoId(): string {
   return randomUUID().replace(/-/g, '');
 }
+
+export const MESSAGGIO_STORE_SOSPESO =
+  'Lo spazio su Vercel Blob dove stanno post, storie e foto è stato sospeso da Vercel perché ha superato i limiti del piano gratuito. I contenuti sono al sicuro ma non si leggono finché lo store non viene riattivato: chi coordina trova i passi in docs/REDAZIONE.md («Store sospeso»).';
+export const MESSAGGIO_LETTURA_NEGATA =
+  'Vercel Blob rifiuta la lettura dei file (403). Di solito vuol dire che lo store è sospeso per i limiti del piano: chi coordina trova i passi in docs/REDAZIONE.md («Store sospeso»).';
 
 /** Nome e messaggio dell'errore, per i log e per chi coordina (mai il token: gli errori di Blob non lo contengono). */
 export function descriviErrore(errore: unknown): string {
@@ -19,6 +25,19 @@ export function descriviErrore(errore: unknown): string {
 export function rispostaErrore(errore: unknown, perRevisore = false): Response {
   if (errore instanceof ErroreRedazione) {
     return Response.json({ ok: false, errore: errore.message, ...(errore.codice ? { codice: errore.codice } : {}) }, { status: errore.status });
+  }
+  // Lo storage è fuori uso: lo si dice a tutti con parole chiare, non con «qualcosa è andato storto».
+  if (storeSospeso(errore) || letturaNegata(errore)) {
+    console.error('[redazione] storage non disponibile', errore);
+    return Response.json(
+      {
+        ok: false,
+        errore: storeSospeso(errore) ? MESSAGGIO_STORE_SOSPESO : MESSAGGIO_LETTURA_NEGATA,
+        codice: storeSospeso(errore) ? 'storage_sospeso' : 'storage_negato',
+        ...(perRevisore ? { dettaglio: descriviErrore(errore) } : {}),
+      },
+      { status: 503 },
+    );
   }
   console.error('[redazione]', errore);
   return Response.json({ ok: false, errore: 'Qualcosa è andato storto, riprova.', ...(perRevisore ? { dettaglio: descriviErrore(errore) } : {}) }, { status: 500 });

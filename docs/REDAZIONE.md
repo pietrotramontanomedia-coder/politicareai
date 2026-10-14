@@ -103,6 +103,36 @@ A ogni post, storia o nuova versione arriva nel canale della redazione un messag
 Se Telegram non risponde la pubblicazione va comunque a buon fine; se le foto non partono
 arriva almeno il testo.
 
+## Store sospeso (limiti del piano Hobby)
+
+Vercel Blob nel piano **Hobby** include al mese 10.000 operazioni semplici (letture, metadati),
+2.000 operazioni avanzate (scritture, elenchi), 1 GB di spazio e 10 GB di traffico. Superati i
+limiti, Vercel **sospende lo store**: ogni lettura risponde 403 e ogni scrittura «This store has
+been suspended», e il portale lo dice a chiare lettere. I file restano al loro posto: niente va
+perso, ma non si legge finché lo store non torna attivo. La prima versione del portale faceva un
+elenco al minuto per ogni persona collegata (più di 1.400 operazioni avanzate al giorno a
+persona): il limite mensile saltava in poche ore. Anche il radar (una scrittura all'ora) e il
+ponte Telegram → X consumano operazioni avanzate dello stesso store.
+
+Per ripartire, una di queste:
+
+1. **Passare al piano Pro di Vercel** (consigliato: è il piano adatto a questo uso). Su Pro Blob
+   non ha il blocco e le operazioni si pagano a consumo, centesimi al mese per questi volumi.
+   Dopo il passaggio, se lo store resta segnato come sospeso, aprire un ticket a Vercel chiedendo
+   la riattivazione (in Pro si può; in Hobby no).
+2. Restare in Hobby e **aspettare**: Vercel riapre dopo 30 giorni dal superamento (secondo la
+   comunità non sempre da solo). Con il portale nuovo le operazioni sono molte meno (una verifica
+   dei metadati ogni 15 secondi per istanza, non una per persona; una scrittura per
+   pubblicazione), ma 10.000 letture al mese bastano per circa un'ora al giorno di portale aperto:
+   non è un piano per usarlo tutti i giorni.
+3. **Cambiare storage**: l'archivio parla con lo storage solo attraverso `blob-server.ts` e
+   l'interfaccia `Archivio` in `archivio-server.ts`, quindi si può portare su Supabase (già usato
+   dal profilo) o su un altro store. I 40 contenuti già pubblicati si recuperano dal vecchio store
+   appena torna leggibile, con il riallineamento.
+
+Per vedere cosa dice lo storage: il workflow GitHub **Diagnosi redazione** (Actions → Run
+workflow) chiama `/api/redazione/diagnostica` con `CRON_SECRET` e stampa ogni passo.
+
 ## Se qualcosa non va
 
 Chi coordina vede sotto l'avviso rosso del portale il dettaglio tecnico dell'errore, e in

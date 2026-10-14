@@ -151,21 +151,32 @@ function applica(stato: StatoArchivio, contenuto: Contenuto): { stato: StatoArch
  * File JSON letti di recente, con il loro ETag: se i metadati dicono che il file non è cambiato,
  * non si scarica di nuovo.
  */
-const cacheJson = new Map<string, { etag: string; dati: unknown }>();
+const cacheJson = new Map<string, { etag: string; dati: unknown; verificatoIl: number }>();
 
-async function leggiJson<T>(percorso: string): Promise<{ dati: T; etag: string } | null> {
+/**
+ * Ogni verifica dei metadati è un'operazione sullo storage, e Vercel le conta: per chi legge basta
+ * controllare se il file è cambiato ogni tanto, una volta per istanza e non una per persona
+ * collegata. Chi scrive legge sempre fresco (ETag esatto per la scrittura condizionata).
+ */
+const FRESCHEZZA_MS = 15_000;
+
+async function leggiJson<T>(percorso: string, fresco = false): Promise<{ dati: T; etag: string } | null> {
+  const inCache = cacheJson.get(percorso);
+  if (inCache && !fresco && Date.now() - inCache.verificatoIl < FRESCHEZZA_MS) return { dati: inCache.dati as T, etag: inCache.etag };
   return conTentativi(async () => {
-    const inCache = cacheJson.get(percorso);
     const risultato = await leggiBlobJson<T>(percorso, inCache?.etag);
     if (!risultato) {
       cacheJson.delete(percorso);
       return null;
     }
     if (risultato.statusCode === 304) {
-      if (inCache) return { dati: inCache.dati as T, etag: inCache.etag };
+      if (inCache) {
+        inCache.verificatoIl = Date.now();
+        return { dati: inCache.dati as T, etag: inCache.etag };
+      }
       throw new Error(`lettura di ${percorso}: 304 senza copia in memoria`);
     }
-    cacheJson.set(percorso, { etag: risultato.etag, dati: risultato.dati });
+    cacheJson.set(percorso, { etag: risultato.etag, dati: risultato.dati, verificatoIl: Date.now() });
     return { dati: risultato.dati, etag: risultato.etag };
   });
 }
@@ -173,7 +184,7 @@ async function leggiJson<T>(percorso: string): Promise<{ dati: T; etag: string }
 /** Scrive un JSON solo se nessuno l'ha cambiato dopo la lettura (etag), o solo se non esiste (null). */
 async function scriviJson(percorso: string, dati: unknown, etag: string | null): Promise<void> {
   const risultato = await scriviBlob(percorso, JSON.stringify(dati), { contentType: 'application/json', ...(etag ? { ifMatch: etag } : { allowOverwrite: false }) });
-  cacheJson.set(percorso, { etag: risultato.etag, dati });
+  cacheJson.set(percorso, { etag: risultato.etag, dati, verificatoIl: Date.now() });
 }
 
 /**
@@ -182,7 +193,7 @@ async function scriviJson(percorso: string, dati: unknown, etag: string | null):
  */
 async function modificaJson<T, R>(percorso: string, iniziale: () => Promise<T>, modifica: (dati: T) => { dati: T; risultato: R }): Promise<R> {
   for (let tentativo = 1; ; tentativo++) {
-    const letto = await leggiJson<T>(percorso);
+    const letto = await leggiJson<T>(percorso, true);
     const { dati, risultato } = modifica(letto ? letto.dati : await iniziale());
     try {
       await scriviJson(percorso, dati, letto?.etag ?? null);
@@ -250,7 +261,7 @@ async function costruisciIndice(parziale: { dati: StatoArchivio; etag: string } 
     // Un'altra richiesta ha salvato prima (ETag cambiato, o il file è comparso): alla prossima si
     // riparte dal suo punto. Qualsiasi altro errore si vede.
     cacheJson.delete(FILE_INDICE);
-    const altrui = errore instanceof BlobPreconditionFailedError || (etag === null && (await leggiJson<StatoArchivio>(FILE_INDICE)) !== null);
+    const altrui = errore instanceof BlobPreconditionFailedError || (etag === null && (await leggiJson<StatoArchivio>(FILE_INDICE, true)) !== null);
     if (!altrui) throw errore;
   }
   if (stato.daLeggere) {

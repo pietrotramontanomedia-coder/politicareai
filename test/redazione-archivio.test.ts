@@ -132,9 +132,14 @@ describe('archivio su Vercel Blob', () => {
     expect(stato.contenuti.map((c) => c.id).sort()).toEqual([ID(1), ID(2)]);
     expect(indice().contenuti).toHaveLength(2);
 
-    // Un aggiornamento del portale: una sola domanda allo storage (i metadati), nessun download.
+    // Un aggiornamento del portale subito dopo: nessuna operazione sullo storage (Vercel le conta);
+    // passati 15 secondi, una sola domanda sui metadati e nessun download.
     azzera();
     await archivio().stato();
+    expect(finto.chiamate).toEqual({ get: 0, head: 0, put: 0, list: 0 });
+    vi.useFakeTimers({ now: Date.now() + 20_000, toFake: ['Date'] });
+    await archivio().stato();
+    vi.useRealTimers();
     expect(finto.chiamate).toEqual({ get: 0, head: 1, put: 0, list: 0 });
   });
 
