@@ -9,8 +9,11 @@ import type { Contenuto } from '@/lib/redazione/tipi';
 
 const finto = vi.hoisted(() => {
   class BlobPreconditionFailedError extends Error {}
-  const file = new Map<string, { corpo: string; etag: string; tipo: string }>();
+  const file = new Map<string, { corpo: string; etag: string; tipo: string; quando: Date }>();
+  /** Orologio dello storage finto: le prove lo spostano avanti per simulare il tempo che passa. */
+  const orologio = { adesso: new Date('2026-10-12T10:00:00Z') };
   let contatore = 0;
+  const illeggibili = new Set<string>();
   const chiamate = { get: 0, getPieni: 0, put: 0, list: 0 };
   /** Se impostata, gira subito prima della prossima scrittura: simula un'altra persona che scrive. */
   let intrusa: (() => void) | null = null;
@@ -18,14 +21,18 @@ const finto = vi.hoisted(() => {
     BlobPreconditionFailedError,
     file,
     chiamate,
+    orologio,
+    /** Rende illeggibile un file (lo storage risponde, ma senza il contenuto). */
+    rotti: illeggibili,
     intromettiti(fn: () => void) {
       intrusa = fn;
     },
     scrivi(percorso: string, corpo: string) {
-      file.set(percorso, { corpo, etag: `e${++contatore}`, tipo: 'application/json' });
+      file.set(percorso, { corpo, etag: `e${++contatore}`, tipo: 'application/json', quando: orologio.adesso });
     },
     get: async (percorso: string, opzioni: { ifNoneMatch?: string }) => {
       chiamate.get++;
+      if (illeggibili.has(percorso)) return { statusCode: 404, stream: null, blob: {} };
       const f = file.get(percorso);
       if (!f) return null;
       if (opzioni.ifNoneMatch === f.etag) return { statusCode: 304, stream: null, blob: { etag: f.etag } };
@@ -44,12 +51,12 @@ const finto = vi.hoisted(() => {
       if (!opzioni.ifMatch && opzioni.allowOverwrite === false && f) throw new Error('esiste già');
       const dove = opzioni.addRandomSuffix ? `${percorso}~${++contatore}` : percorso;
       const etag = `e${++contatore}`;
-      file.set(dove, { corpo: String(corpo), etag, tipo: opzioni.contentType });
+      file.set(dove, { corpo: String(corpo), etag, tipo: opzioni.contentType, quando: orologio.adesso });
       return { pathname: dove, etag };
     },
     list: async ({ prefix }: { prefix: string }) => {
       chiamate.list++;
-      return { blobs: [...file.keys()].filter((k) => k.startsWith(prefix)).map((pathname) => ({ pathname })), hasMore: false };
+      return { blobs: [...file.entries()].filter(([k]) => k.startsWith(prefix)).map(([pathname, f]) => ({ pathname, uploadedAt: f.quando })), hasMore: false };
     },
   };
 });
@@ -68,6 +75,8 @@ describe('archivio su Vercel Blob', () => {
   beforeEach(() => {
     vi.stubEnv('BLOB_READ_WRITE_TOKEN', 'finto');
     finto.file.clear();
+    finto.rotti.clear();
+    finto.orologio.adesso = ADESSO;
     svuotaMemoria();
     azzera();
   });
@@ -86,6 +95,39 @@ describe('archivio su Vercel Blob', () => {
     azzera();
     await archivio().stato();
     expect(finto.chiamate).toEqual({ get: 1, getPieni: 0, put: 0, list: 0 });
+  });
+
+  it('se una copia non si legge non costruisce un indice a metà: riprova alla richiesta dopo', async () => {
+    finto.scrivi(`redazione/contenuti/${ID(1)}.json`, JSON.stringify(storia(1)));
+    finto.scrivi(`redazione/contenuti/${ID(2)}.json`, JSON.stringify(storia(2)));
+    finto.rotti.add(`redazione/contenuti/${ID(2)}.json`);
+    await expect(archivio().stato()).rejects.toThrow();
+    expect(finto.file.has('redazione/indice.json')).toBe(false);
+    finto.rotti.clear();
+    expect((await archivio().stato()).contenuti).toHaveLength(2);
+  });
+
+  it('riallinea: recupera i contenuti scritti fuori dall\'indice, senza toccare gli altri', async () => {
+    await archivio().crea(storia(1));
+    await archivio().crea(storia(2));
+    expect(await archivio().riallinea()).toBe(0);
+
+    // Un'ora dopo la versione precedente del sito scrive solo le copie: un contenuto nuovo e un commento.
+    finto.orologio.adesso = new Date(ADESSO.getTime() + 3600_000);
+    finto.scrivi(`redazione/contenuti/${ID(3)}.json`, JSON.stringify(storia(3)));
+    const commentata = aggiungiCommento(storia(1), { nome: 'Pietro', ruolo: 'revisore' }, { tipo: 'consiglio', testo: 'Ok', stato: 'approvato' }, ID(55), finto.orologio.adesso);
+    finto.scrivi(`redazione/contenuti/${ID(1)}.json`, JSON.stringify(commentata));
+
+    azzera();
+    expect(await archivio().riallinea()).toBe(2);
+    const stato = await archivio().stato();
+    expect(stato.contenuti.map((c) => [c.id, c.stato]).sort()).toEqual([
+      [ID(1), 'approvato'],
+      [ID(2), 'da_rivedere'],
+      [ID(3), 'da_rivedere'],
+    ]);
+    // Fatto una volta, la volta dopo non c'è niente da leggere.
+    expect(await archivio().riallinea()).toBe(0);
   });
 
   it('ogni scrittura porta avanti la revisione e lascia la copia del contenuto e lo storico', async () => {

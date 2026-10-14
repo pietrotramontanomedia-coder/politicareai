@@ -151,7 +151,11 @@ test/redazione-archivio.test.ts   indice su Blob: migrazione, scritture insieme,
   per contenuto. Prima di questo indice ogni aggiornamento rileggeva tutti i file uno per uno,
   e con centinaia di contenuti il portale diventava lento, consumava le operazioni di Blob e
   rischiava di superare i 4,5 MB di risposta delle funzioni Vercel. Al primo avvio l'indice si
-  costruisce da solo dalle copie dei contenuti: non serve fare niente.
+  costruisce da solo dalle copie dei contenuti: non serve fare niente. Se anche una sola copia non
+  si legge, l'indice non viene scritto e si riprova alla richiesta dopo: mai un indice a metà.
+- **Riallineamento**: due volte al giorno, con il promemoria e il resoconto, il server confronta
+  le copie dei contenuti con l'indice e recupera quelle più recenti (per esempio scritte dalla
+  versione precedente del sito nei secondi del cambio). Costa una lista e legge solo i file sospetti.
 - **Revisioni**: ogni scrittura porta avanti la revisione dell'archivio e la segna sul
   contenuto. Il browser chiede `?dal=<revisione>` e riceve solo quello che è cambiato (più gli id
   di ciò che non deve più vedere); fra due copie dello stesso contenuto tiene quella con la

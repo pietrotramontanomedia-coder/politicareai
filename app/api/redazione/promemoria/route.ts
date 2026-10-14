@@ -17,6 +17,10 @@ export async function GET(request: Request) {
     return Response.json({ ok: false, errore: 'non autorizzato' }, { status: 401 });
   }
   try {
+    // Rete di sicurezza due volte al giorno: nessun contenuto resta fuori dall'indice.
+    await archivio()
+      .riallinea()
+      .catch((errore) => console.error('[redazione] riallineamento non riuscito', errore));
     const base = process.env.SITO_URL?.replace(/\/$/, '') || new URL(request.url).origin;
     const testo = testoPromemoria(await archivio().elenca(), new Date(), `${base}/redazione`);
     if (new URL(request.url).searchParams.has('anteprima') || !testo) return Response.json({ ok: true, testo, inviato: false });

@@ -69,6 +69,12 @@ export interface Archivio {
   leggiPersone(): Promise<Persona[]>;
   /** Modifica l'elenco a partire dall'ultima versione salvata, senza perdere modifiche altrui. */
   aggiornaPersone(modifica: (persone: Persona[]) => Persona[]): Promise<Persona[]>;
+  /**
+   * Rete di sicurezza: riporta nell'indice i contenuti che hanno una copia più recente
+   * dell'indice stesso (per esempio scritti dalla versione precedente del sito durante il cambio).
+   * Restituisce quanti ne ha recuperati.
+   */
+  riallinea(): Promise<number>;
 }
 
 function percorsoContenuto(id: string): string {
@@ -176,22 +182,46 @@ async function modificaJson<T, R>(percorso: string, iniziale: () => Promise<T>, 
   }
 }
 
-/** Le copie per contenuto, scritte prima dell'indice: da qui si ricostruisce se l'indice manca. */
-async function leggiCopieContenuti(): Promise<Contenuto[]> {
-  const percorsi: string[] = [];
+/** Le copie per contenuto presenti nello storage, con la data in cui sono state scritte. */
+async function elencaCopie(): Promise<{ percorso: string; id: string; scrittaIl: number }[]> {
+  const copie: { percorso: string; id: string; scrittaIl: number }[] = [];
   let cursor: string | undefined;
   do {
     const pagina = await list({ prefix: CARTELLA_CONTENUTI, cursor });
-    percorsi.push(...pagina.blobs.map((b) => b.pathname));
+    for (const b of pagina.blobs) {
+      const id = b.pathname.slice(CARTELLA_CONTENUTI.length).replace(/\.json$/, '');
+      if (ID_VALIDO.test(id)) copie.push({ percorso: b.pathname, id, scrittaIl: new Date(b.uploadedAt).getTime() });
+    }
     cursor = pagina.hasMore ? pagina.cursor : undefined;
   } while (cursor);
-  const letti = await aGruppi(percorsi, LETTURE_IN_PARALLELO, (p) =>
+  return copie;
+}
+
+/**
+ * Legge le copie indicate. Se una copia elencata non si legge nemmeno riprovando si ferma con un
+ * errore: un indice costruito a metà farebbe sparire contenuti, meglio riprovare alla richiesta dopo.
+ */
+async function leggiCopie(percorsi: string[]): Promise<Contenuto[]> {
+  return aGruppi(percorsi, LETTURE_IN_PARALLELO, (p) =>
     conTentativi(async () => {
       const r = await get(p, { access: 'private', useCache: false });
-      return r && r.statusCode === 200 ? ((await new Response(r.stream).json()) as Contenuto) : null;
+      if (!r || r.statusCode !== 200) throw new Error(`copia ${p} non leggibile`);
+      return (await new Response(r.stream).json()) as Contenuto;
     }),
   );
-  return letti.filter((c): c is Contenuto => c !== null);
+}
+
+/** Tutte le copie per contenuto: da qui si costruisce l'indice la prima volta. */
+async function leggiCopieContenuti(): Promise<Contenuto[]> {
+  return leggiCopie((await elencaCopie()).map((c) => c.percorso));
+}
+
+/** Margine fra la scrittura nell'indice e quella della copia: oltre, la copia è più nuova dell'indice. */
+const MARGINE_COPIA_MS = 5 * 60_000;
+
+/** L'ultima modifica di un contenuto (le eliminazioni di prima non aggiornavano aggiornatoIl). */
+function ultimaModifica(c: Contenuto): string {
+  return c.eliminatoIl && c.eliminatoIl > c.aggiornatoIl ? c.eliminatoIl : c.aggiornatoIl;
 }
 
 /** Copia del contenuto nel suo file e nello storico: la verità resta l'indice, queste sono la rete. */
@@ -293,6 +323,32 @@ const archivioBlob: Archivio = {
     await scriviStoricoImpostazione('persone', persone);
     return persone;
   },
+
+  async riallinea() {
+    const indice = new Map((await this.stato()).contenuti.map((c) => [c.id, c]));
+    // Si leggono solo le copie che mancano nell'indice o scritte ben dopo l'ultima modifica nota.
+    const sospette = (await elencaCopie()).filter((c) => {
+      const noto = indice.get(c.id);
+      return !noto || c.scrittaIl > Date.parse(ultimaModifica(noto)) + MARGINE_COPIA_MS;
+    });
+    if (sospette.length === 0) return 0;
+    const copie = await leggiCopie(sospette.map((c) => c.percorso));
+    const recuperate = await modificaJson<StatoArchivio, Contenuto[]>(FILE_INDICE, async () => nuovoStato(await leggiCopieContenuti()), (stato) => {
+      let nuovo = stato;
+      const fatte: Contenuto[] = [];
+      for (const copia of copie) {
+        const attuale = nuovo.contenuti.find((c) => c.id === copia.id);
+        if (attuale && ultimaModifica(copia) <= ultimaModifica(attuale)) continue;
+        const esito = applica(nuovo, copia);
+        nuovo = esito.stato;
+        fatte.push(esito.contenuto);
+      }
+      return { dati: nuovo, risultato: fatte };
+    });
+    await Promise.all(recuperate.map(scriviCopie));
+    if (recuperate.length > 0) console.warn('[redazione] contenuti recuperati nell\'indice', recuperate.map((c) => c.id));
+    return recuperate.length;
+  },
 };
 
 /** Copia datata di un file di impostazioni. */
@@ -375,6 +431,9 @@ const archivioMemoria: Archivio = {
     const nuove = modifica(structuredClone(memoria().persone ?? []));
     memoria().persone = structuredClone(nuove);
     return nuove;
+  },
+  async riallinea() {
+    return 0;
   },
 };
 
