@@ -8,6 +8,8 @@ export class ErroreApi extends Error {
     messaggio: string,
     /** Codice dal server, per esempio «in_costruzione» (l'archivio sta per essere pronto). */
     readonly codice?: string,
+    /** Dettaglio tecnico, solo per chi coordina. */
+    readonly dettaglio?: string,
   ) {
     super(messaggio);
     this.name = 'ErroreApi';
@@ -19,8 +21,11 @@ export const inPreparazione = (e: unknown): boolean => e instanceof ErroreApi &&
 
 async function api<T>(url: string, init?: RequestInit): Promise<T> {
   const risposta = await fetch(url, { cache: 'no-store', ...init });
-  const corpo = (await risposta.json().catch(() => ({}))) as { ok?: boolean; errore?: string; codice?: string } & T;
-  if (!risposta.ok || corpo.ok === false) throw new ErroreApi(risposta.status, corpo.errore ?? 'Errore di rete, riprova.', corpo.codice);
+  const corpo = (await risposta.json().catch(() => ({}))) as { ok?: boolean; errore?: string; codice?: string; dettaglio?: string } & T;
+  if (!risposta.ok || corpo.ok === false) {
+    // Senza JSON (per esempio un timeout della funzione) resta almeno lo stato HTTP.
+    throw new ErroreApi(risposta.status, corpo.errore ?? 'Errore di rete, riprova.', corpo.codice, corpo.dettaglio ?? (corpo.ok === undefined ? `HTTP ${risposta.status}` : undefined));
+  }
   return corpo;
 }
 
