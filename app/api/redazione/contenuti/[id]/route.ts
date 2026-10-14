@@ -1,6 +1,6 @@
 import { archivio, ErroreRedazione } from '@/lib/redazione/archivio-server';
 import { conSessione, corpoJson } from '@/lib/redazione/api-server';
-import { aggiungiVersione, eliminato, perLettore, puoEliminare, puoModificare, ripristina, segnaEliminato, validaBozza } from '@/lib/redazione/regole';
+import { aggiungiVersione, eAutore, eliminato, perLettore, puoEliminare, puoModificare, ripristina, segnaEliminato, validaBozza } from '@/lib/redazione/regole';
 import { avvisaDopoLaRisposta } from '@/lib/redazione/telegram-server';
 
 /**
@@ -15,7 +15,7 @@ type Parametri = { params: Promise<{ id: string }> };
 export async function GET(request: Request, { params }: Parametri) {
   return conSessione(request, async (sessione) => {
     const contenuto = await archivio().leggi((await params).id);
-    if (!contenuto || (eliminato(contenuto) && sessione.ruolo !== 'revisore')) throw new ErroreRedazione(404, 'Contenuto non trovato.');
+    if (!contenuto || (eliminato(contenuto) && sessione.ruolo !== 'revisore' && !eAutore(sessione, contenuto))) throw new ErroreRedazione(404, 'Contenuto non trovato.');
     return Response.json({ ok: true, contenuto: perLettore(sessione, contenuto) });
   });
 }
@@ -39,12 +39,12 @@ export async function PUT(request: Request, { params }: Parametri) {
 export async function DELETE(request: Request, { params }: Parametri) {
   return conSessione(request, async (sessione) => {
     const { id } = await params;
-    await archivio().aggiorna(id, (attuale) => {
+    const contenuto = await archivio().aggiorna(id, (attuale) => {
       if (eliminato(attuale)) throw new ErroreRedazione(404, 'Contenuto non trovato.');
       if (!puoEliminare(sessione, attuale)) throw new ErroreRedazione(403, 'Non puoi eliminare questo contenuto.');
       return segnaEliminato(attuale, sessione, new Date());
     });
-    return Response.json({ ok: true });
+    return Response.json({ ok: true, contenuto: perLettore(sessione, contenuto) });
   });
 }
 
@@ -53,7 +53,10 @@ export async function PATCH(request: Request, { params }: Parametri) {
   return conSessione(request, async (sessione) => {
     if (sessione.ruolo !== 'revisore') throw new ErroreRedazione(403, 'Solo chi corregge può ripristinare.');
     const { id } = await params;
-    const contenuto = await archivio().aggiorna(id, (attuale) => ripristina(attuale, sessione, new Date()));
+    const contenuto = await archivio().aggiorna(id, (attuale) => {
+      if (!eliminato(attuale)) throw new ErroreRedazione(409, 'Il contenuto non è nel cestino.');
+      return ripristina(attuale, sessione, new Date());
+    });
     return Response.json({ ok: true, contenuto });
   });
 }

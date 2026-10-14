@@ -67,7 +67,7 @@ export default function AnteprimaPost({
       <div className="relative w-full bg-black" style={{ aspectRatio: formato === '1:1' ? '1 / 1' : '4 / 5' }}>
         {immagini.length > 0 && (
           // eslint-disable-next-line @next/next/no-img-element -- foto private servite dalle API del portale
-          <img src={immagini[corrente]} alt="" className="absolute inset-0 h-full w-full object-cover" />
+          <img src={immagini[corrente]} alt="" loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover" />
         )}
         {immagini.length > 1 && (
           <>

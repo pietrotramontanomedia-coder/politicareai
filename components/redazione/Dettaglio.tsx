@@ -26,7 +26,7 @@ export default function Dettaglio({
   contenuto: Contenuto;
   sessione: SessioneRedazione;
   onAggiornato: (c: Contenuto) => void;
-  onEliminato: (id: string) => void;
+  onEliminato: (c: Contenuto) => void;
   onCorreggi: (c: Contenuto) => void;
   onChiudi: () => void;
 }) {
@@ -61,8 +61,7 @@ export default function Dettaglio({
   async function elimina() {
     setInvio(true);
     try {
-      await eliminaContenuto(contenuto.id);
-      onEliminato(contenuto.id);
+      onEliminato(await eliminaContenuto(contenuto.id));
     } catch (e) {
       setErrore(e instanceof Error ? e.message : T.errore);
       setInvio(false);
@@ -194,78 +193,84 @@ export default function Dettaglio({
               ))}
             </ol>
 
-            <div className="mt-5 rounded-2xl border p-3" style={{ borderColor: 'var(--bordo)' }}>
-              {revisore && (
-                <div className="mb-2 flex flex-wrap gap-1.5" role="group" aria-label={T.tipo}>
-                  {TIPI_COMMENTO_REVISORE.map((t) => (
-                    <button
-                      key={t}
-                      type="button"
-                      aria-pressed={t === tipo}
-                      onClick={() => setTipo(t)}
-                      className="rounded-full border px-2.5 py-1 text-xs font-semibold"
-                      style={t === tipo ? { background: TESTI_REDAZIONE.coloreCommento[t], color: '#0a0a0a', borderColor: 'transparent' } : { borderColor: 'var(--bordo)' }}
-                    >
-                      {TESTI_REDAZIONE.tipoCommento[t]}
-                    </button>
-                  ))}
-                </div>
-              )}
-              <label htmlFor={`${id}-testo`} className="sr-only">
-                {revisore ? T.scriviCommento : T.scriviRisposta}
-              </label>
-              <textarea
-                id={`${id}-testo`}
-                value={testo}
-                onChange={(e) => setTesto(e.target.value)}
-                rows={4}
-                placeholder={revisore ? T.segnapostoRevisore : T.segnapostoAutore}
-                className="w-full rounded-xl border px-3 py-2.5 text-sm outline-none"
-                style={{ borderColor: 'var(--bordo)', background: 'var(--bg)' }}
-              />
-              {errore && (
-                <p role="alert" className="mt-1 text-sm" style={{ color: '#F87171' }}>
-                  {errore}
-                </p>
-              )}
-              <div className="mt-2 flex flex-wrap gap-2">
-                <button type="button" disabled={invio || !testo.trim()} onClick={() => invia(null)} className="rounded-full px-4 py-2 text-sm font-bold disabled:opacity-40" style={{ background: 'rgba(255,255,255,0.1)' }}>
-                  {invio ? T.invio : T.invia}
-                </button>
+            {nelCestino ? (
+              <p className="mt-5 text-sm" style={{ color: 'var(--fg-muta)' }}>
+                {T.nelCestino}
+              </p>
+            ) : (
+              <div className="mt-5 rounded-2xl border p-3" style={{ borderColor: 'var(--bordo)' }}>
                 {revisore && (
-                  <>
-                    <button
-                      type="button"
-                      disabled={invio || !testo.trim()}
-                      onClick={() => invia('da_correggere')}
-                      className="rounded-full px-4 py-2 text-sm font-bold disabled:opacity-40"
-                      style={{ background: TESTI_REDAZIONE.coloreStato.da_correggere, color: '#0a0a0a' }}
-                    >
-                      {T.inviaECorreggi}
-                    </button>
-                    <button
-                      type="button"
-                      disabled={invio || !testo.trim()}
-                      title={testo.trim() ? undefined : T.nonVaBeneAiuto}
-                      onClick={() => invia('non_va_bene')}
-                      className="rounded-full px-4 py-2 text-sm font-bold disabled:opacity-40"
-                      style={{ background: TESTI_REDAZIONE.coloreStato.non_va_bene, color: '#fff' }}
-                    >
-                      {T.nonVaBene}
-                    </button>
-                    {contenuto.stato !== 'approvato' ? (
-                      <button type="button" disabled={invio} onClick={() => invia('approvato')} className="rounded-full px-4 py-2 text-sm font-bold disabled:opacity-40" style={{ background: TESTI_REDAZIONE.coloreStato.approvato, color: '#0a0a0a' }}>
-                        {T.approva}
+                  <div className="mb-2 flex flex-wrap gap-1.5" role="group" aria-label={T.tipo}>
+                    {TIPI_COMMENTO_REVISORE.map((t) => (
+                      <button
+                        key={t}
+                        type="button"
+                        aria-pressed={t === tipo}
+                        onClick={() => setTipo(t)}
+                        className="rounded-full border px-2.5 py-1 text-xs font-semibold"
+                        style={t === tipo ? { background: TESTI_REDAZIONE.coloreCommento[t], color: '#0a0a0a', borderColor: 'transparent' } : { borderColor: 'var(--bordo)' }}
+                      >
+                        {TESTI_REDAZIONE.tipoCommento[t]}
                       </button>
-                    ) : (
-                      <button type="button" disabled={invio} onClick={() => invia('da_rivedere')} className="rounded-full px-4 py-2 text-sm font-semibold disabled:opacity-40" style={{ background: 'rgba(255,255,255,0.08)' }}>
-                        {T.riapri}
-                      </button>
-                    )}
-                  </>
+                    ))}
+                  </div>
                 )}
+                <label htmlFor={`${id}-testo`} className="sr-only">
+                  {revisore ? T.scriviCommento : T.scriviRisposta}
+                </label>
+                <textarea
+                  id={`${id}-testo`}
+                  value={testo}
+                  onChange={(e) => setTesto(e.target.value)}
+                  rows={4}
+                  placeholder={revisore ? T.segnapostoRevisore : T.segnapostoAutore}
+                  className="w-full rounded-xl border px-3 py-2.5 text-sm outline-none"
+                  style={{ borderColor: 'var(--bordo)', background: 'var(--bg)' }}
+                />
+                {errore && (
+                  <p role="alert" className="mt-1 text-sm" style={{ color: '#F87171' }}>
+                    {errore}
+                  </p>
+                )}
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <button type="button" disabled={invio || !testo.trim()} onClick={() => invia(null)} className="rounded-full px-4 py-2 text-sm font-bold disabled:opacity-40" style={{ background: 'rgba(255,255,255,0.1)' }}>
+                    {invio ? T.invio : T.invia}
+                  </button>
+                  {revisore && (
+                    <>
+                      <button
+                        type="button"
+                        disabled={invio || !testo.trim()}
+                        onClick={() => invia('da_correggere')}
+                        className="rounded-full px-4 py-2 text-sm font-bold disabled:opacity-40"
+                        style={{ background: TESTI_REDAZIONE.coloreStato.da_correggere, color: '#0a0a0a' }}
+                      >
+                        {T.inviaECorreggi}
+                      </button>
+                      <button
+                        type="button"
+                        disabled={invio || !testo.trim()}
+                        title={testo.trim() ? undefined : T.nonVaBeneAiuto}
+                        onClick={() => invia('non_va_bene')}
+                        className="rounded-full px-4 py-2 text-sm font-bold disabled:opacity-40"
+                        style={{ background: TESTI_REDAZIONE.coloreStato.non_va_bene, color: '#fff' }}
+                      >
+                        {T.nonVaBene}
+                      </button>
+                      {contenuto.stato !== 'approvato' ? (
+                        <button type="button" disabled={invio} onClick={() => invia('approvato')} className="rounded-full px-4 py-2 text-sm font-bold disabled:opacity-40" style={{ background: TESTI_REDAZIONE.coloreStato.approvato, color: '#0a0a0a' }}>
+                          {T.approva}
+                        </button>
+                      ) : (
+                        <button type="button" disabled={invio} onClick={() => invia('da_rivedere')} className="rounded-full px-4 py-2 text-sm font-semibold disabled:opacity-40" style={{ background: 'rgba(255,255,255,0.08)' }}>
+                          {T.riapri}
+                        </button>
+                      )}
+                    </>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
           </section>
         )}
       </div>

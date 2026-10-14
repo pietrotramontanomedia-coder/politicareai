@@ -3,10 +3,24 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Avatar from '@/components/profilo/Avatar';
 import { formattaDataRelativa } from '@/lib/data-ora';
-import { caricaContenuti, coloreDaNome, ErroreApi, esci, salvaObiettivi, urlMedia } from '@/lib/redazione/client';
-import { chiaveNome, codaRevisione, cronologia, eliminato, OBIETTIVI_PREDEFINITI, obiettiviDiOggi, percentuale, puoVedereCommenti, statistiche, storieRecenti, URL_GENERATORE, versioneCorrente } from '@/lib/redazione/regole';
+import { caricaContenuti, caricaContenuto, caricaScheda, coloreDaNome, ErroreApi, esci, salvaObiettivi, urlMedia } from '@/lib/redazione/client';
+import {
+  chiaveNome,
+  codaRevisione,
+  cronologia,
+  eliminato,
+  OBIETTIVI_PREDEFINITI,
+  obiettiviDiOggi,
+  ordinaFeed,
+  percentuale,
+  puoVedereCommenti,
+  storieRecenti,
+  unisci,
+  URL_GENERATORE,
+  versioneCorrente,
+} from '@/lib/redazione/regole';
 import { TESTI_REDAZIONE } from '@/lib/redazione/testi';
-import type { Contenuto, Obiettivi, PersonaPubblica, SessioneRedazione, TipoContenuto } from '@/lib/redazione/tipi';
+import type { Contenuto, Obiettivi, PersonaPubblica, SchedaDati, SessioneRedazione, StatistichePersona, TipoContenuto } from '@/lib/redazione/tipi';
 import AccessoRedazione from './AccessoRedazione';
 import Andamento from './Andamento';
 import Attivita from './Attivita';
@@ -22,6 +36,18 @@ import VisoreStorie, { type GruppoStorie } from './VisoreStorie';
 const T = TESTI_REDAZIONE;
 /** Ogni minuto il portale si aggiorna da solo, così chi corregge vede arrivare i contenuti. */
 const AGGIORNAMENTO_MS = 60_000;
+/** Post mostrati nel feed prima di «Mostra altri»: le immagini si caricano solo per quelli. */
+const PAGINA_FEED = 15;
+
+/** I contenuti di una persona chiesti a pagine, con i numeri calcolati dal server su tutto. */
+interface StatoScheda {
+  numeri: SchedaDati | null;
+  altri: boolean;
+  prima: string | null;
+  caricando: boolean;
+  errore: boolean;
+}
+const SCHEDA_VUOTA: StatoScheda = { numeri: null, altri: false, prima: null, caricando: false, errore: false };
 
 type Vista = 'feed' | 'profilo' | 'revisione' | 'attivita' | 'squadra';
 
@@ -193,24 +219,61 @@ export default function PortaleRedazione({ sessioneIniziale, configurata }: { se
   const [aperto, setAperto] = useState<string | null>(null);
   const [storieAperte, setStorieAperte] = useState<number | null>(null);
   const [storieViste, setStorieViste] = useState<Set<string>>(() => new Set());
+  const [squadra, setSquadra] = useState<StatistichePersona[]>([]);
+  const [schedePersone, setSchedePersone] = useState<Record<string, StatoScheda>>({});
+  const [quantiPost, setQuantiPost] = useState(PAGINA_FEED);
+
+  // Revisione dell'archivio già ricevuta: ogni aggiornamento chiede solo quello che è cambiato dopo.
+  const revisione = useRef<number | null>(null);
+  const inCorso = useRef(false);
+  const ancora = useRef(false);
 
   const aggiorna = useCallback(async () => {
+    // Una richiesta alla volta; se ne serve un'altra intanto (dopo una pubblicazione), parte subito dopo.
+    if (inCorso.current) {
+      ancora.current = true;
+      return;
+    }
+    inCorso.current = true;
     try {
-      const dati = await caricaContenuti();
-      setContenuti(dati.contenuti);
-      setObiettivi(dati.obiettivi);
-      setPersone(dati.persone);
-      setErrore(false);
+      do {
+        ancora.current = false;
+        const dati = await caricaContenuti(revisione.current);
+        setContenuti((attuali) => (dati.completo ? unisci([], dati.contenuti) : unisci(attuali ?? [], dati.contenuti, dati.rimossi)));
+        revisione.current = dati.revisione;
+        setSquadra(dati.statistiche);
+        setObiettivi(dati.obiettivi);
+        setPersone(dati.persone);
+        setErrore(false);
+      } while (ancora.current);
     } catch (e) {
       if (e instanceof ErroreApi && e.status === 401) setSessione(null);
       else setErrore(true);
+    } finally {
+      inCorso.current = false;
+      ancora.current = false;
+    }
+  }, []);
+
+  const caricaPaginaScheda = useCallback(async (chiave: string, prima: string | null) => {
+    setSchedePersone((s) => ({ ...s, [chiave]: { ...(s[chiave] ?? SCHEDA_VUOTA), caricando: true, errore: false } }));
+    try {
+      const dati = await caricaScheda(chiave, prima);
+      setContenuti((attuali) => unisci(attuali ?? [], dati.contenuti));
+      setSchedePersone((s) => ({ ...s, [chiave]: { numeri: dati, altri: dati.altri, prima: dati.contenuti.at(-1)?.creatoIl ?? prima, caricando: false, errore: false } }));
+    } catch (e) {
+      if (e instanceof ErroreApi && e.status === 401) setSessione(null);
+      setSchedePersone((s) => ({ ...s, [chiave]: { ...(s[chiave] ?? SCHEDA_VUOTA), caricando: false, errore: true } }));
     }
   }, []);
 
   useEffect(() => {
     if (!sessione) return;
-    // Primo caricamento e aggiornamento periodico quando la scheda è in primo piano.
+    // Nuova sessione: si riparte da capo, niente di quello che vedeva chi c'era prima.
+    revisione.current = null;
     // eslint-disable-next-line react-hooks/set-state-in-effect
+    setSchedePersone({});
+    // Primo caricamento e aggiornamento periodico quando la scheda è in primo piano.
     void aggiorna();
     const t = window.setInterval(() => document.visibilityState === 'visible' && void aggiorna(), AGGIORNAMENTO_MS);
     const visibile = () => document.visibilityState === 'visible' && void aggiorna();
@@ -222,24 +285,43 @@ export default function PortaleRedazione({ sessioneIniziale, configurata }: { se
   }, [sessione, aggiorna]);
 
   const adesso = useMemo(() => new Date(), [contenuti]); // eslint-disable-line react-hooks/exhaustive-deps
-  // Feed, profili e statistiche ignorano i contenuti eliminati; chi corregge li ritrova nel cestino.
-  const tutti = useMemo(() => (contenuti ?? []).filter((c) => !eliminato(c)), [contenuti]);
-  const cestino = useMemo(() => (contenuti ?? []).filter(eliminato), [contenuti]);
+  // Feed e profili ignorano i contenuti eliminati; chi corregge li ritrova nel cestino. Le
+  // statistiche (eliminati compresi, per le percentuali) le calcola il server su tutto l'archivio.
+  const tutti = useMemo(() => ordinaFeed((contenuti ?? []).filter((c) => !eliminato(c))), [contenuti]);
+  const cestino = useMemo(() => (contenuti ?? []).filter(eliminato).sort((a, b) => (b.eliminatoIl ?? '').localeCompare(a.eliminatoIl ?? '')), [contenuti]);
   const gruppiStorie: GruppoStorie[] = useMemo(() => storieRecenti(tutti, adesso), [tutti, adesso]);
   const coda = useMemo(() => codaRevisione(tutti), [tutti]);
-  // Le statistiche contano anche gli eliminati, per le percentuali.
-  const squadra = useMemo(() => statistiche(contenuti ?? [], adesso, persone), [contenuti, adesso, persone]);
   const voci = useMemo(() => cronologia(contenuti ?? []), [contenuti]);
 
-  // Link dall'avviso Telegram (/redazione?apri=<id>): apre il contenuto appena arriva il feed.
+  // Profilo o scheda aperti: si chiedono al server i contenuti della persona, anche i più vecchi.
+  const chiaveProfilo = sessione && vista === 'profilo' ? (persona ?? chiaveNome(sessione.nome)) : null;
+  useEffect(() => {
+    if (!chiaveProfilo) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void caricaPaginaScheda(chiaveProfilo, null);
+    // Anche i numeri della squadra, così obiettivi e percentuali sono quelli di adesso.
+    void aggiorna();
+  }, [chiaveProfilo, caricaPaginaScheda, aggiorna]);
+
+  // Link dall'avviso Telegram (/redazione?apri=<id>): apre il contenuto appena arriva il feed,
+  // chiedendolo a parte se è più vecchio delle ultime settimane.
   const linkAperto = useRef(false);
   useEffect(() => {
     if (!contenuti || linkAperto.current) return;
     linkAperto.current = true;
     const id = new URLSearchParams(window.location.search).get('apri');
     if (!id) return;
-    if (contenuti.some((c) => c.id === id)) setAperto(id); // eslint-disable-line react-hooks/set-state-in-effect
     window.history.replaceState(null, '', window.location.pathname);
+    if (contenuti.some((c) => c.id === id)) {
+      setAperto(id); // eslint-disable-line react-hooks/set-state-in-effect
+      return;
+    }
+    caricaContenuto(id)
+      .then((c) => {
+        setContenuti((attuali) => unisci(attuali ?? [], [c]));
+        setAperto(c.id);
+      })
+      .catch(() => undefined);
   }, [contenuti]);
 
   if (!sessione) return <AccessoRedazione configurata={configurata} onEntrato={setSessione} />;
@@ -249,11 +331,10 @@ export default function PortaleRedazione({ sessioneIniziale, configurata }: { se
   const mieDaCorreggere = tutti.filter((c) => c.chiaveAutore === mia && c.stato === 'da_correggere').length;
   const contenutoAperto = aperto ? (contenuti ?? []).find((c) => c.id === aperto) : undefined;
 
+  /** Dopo una modifica: il contenuto aggiornato subito, poi i numeri (obiettivi, coda) dal server. */
   function sostituisci(c: Contenuto) {
-    setContenuti((attuali) => {
-      const lista = attuali ?? [];
-      return lista.some((x) => x.id === c.id) ? lista.map((x) => (x.id === c.id ? c : x)) : [c, ...lista];
-    });
+    setContenuti((attuali) => unisci(attuali ?? [], [c]));
+    void aggiorna();
   }
 
   function apriProfilo(chiave: string) {
@@ -266,6 +347,7 @@ export default function PortaleRedazione({ sessioneIniziale, configurata }: { se
     await esci().catch(() => undefined);
     setSessione(null);
     setContenuti(null);
+    setSquadra([]);
   }
 
   const schede: { id: Vista; etichetta: string; conta?: number }[] = [
@@ -284,6 +366,7 @@ export default function PortaleRedazione({ sessioneIniziale, configurata }: { se
 
   function vistaFeed() {
     const post = tutti.filter((c) => c.tipo === 'post');
+    const mostrati = post.slice(0, quantiPost);
     const mieStorie = gruppiStorie.findIndex((g) => g.chiave === mia);
     return (
       <div className="mx-auto max-w-xl">
@@ -302,10 +385,7 @@ export default function PortaleRedazione({ sessioneIniziale, configurata }: { se
                 <CerchioStoria
                   nome={g.autore}
                   anello={g.storie.every((s) => storieViste.has(s.id)) ? 'viste' : 'nuove'}
-                  onClick={() => {
-                    setStorieAperte(i);
-                    setStorieViste((v) => new Set([...v, ...g.storie.map((s) => s.id)]));
-                  }}
+                  onClick={() => setStorieAperte(i)}
                 />
               </div>
             ),
@@ -318,7 +398,7 @@ export default function PortaleRedazione({ sessioneIniziale, configurata }: { se
           </p>
         ) : (
           <div className="space-y-6">
-            {post.map((c) => {
+            {mostrati.map((c) => {
               const v = versioneCorrente(c);
               const conGiudizio = puoVedereCommenti(sessione!, c);
               return (
@@ -342,6 +422,15 @@ export default function PortaleRedazione({ sessioneIniziale, configurata }: { se
                 />
               );
             })}
+            {post.length > quantiPost ? (
+              <button type="button" onClick={() => setQuantiPost(quantiPost + PAGINA_FEED)} className="w-full rounded-full py-2.5 text-sm font-semibold" style={{ background: 'rgba(255,255,255,0.08)' }}>
+                {T.feed.altriPost}
+              </button>
+            ) : (
+              <p className="pb-4 text-center text-xs" style={{ color: 'var(--fg-muta)' }}>
+                {T.feed.finestra}
+              </p>
+            )}
           </div>
         )}
       </div>
@@ -362,6 +451,27 @@ export default function PortaleRedazione({ sessioneIniziale, configurata }: { se
 
   function vistaProfilo() {
     const chiave = persona ?? mia;
+    const scheda = schedePersone[chiave] ?? SCHEDA_VUOTA;
+    const precedenti = (
+      <div className="mt-4 text-center text-sm" style={{ color: 'var(--fg-muta)' }}>
+        {scheda.errore ? (
+          <p role="alert">
+            {T.profilo.errore}{' '}
+            <button type="button" onClick={() => void caricaPaginaScheda(chiave, scheda.prima)} className="font-bold" style={{ color: 'var(--fg)' }}>
+              {T.feed.riprova}
+            </button>
+          </p>
+        ) : scheda.caricando ? (
+          <p role="status">{T.profilo.caricando}</p>
+        ) : (
+          scheda.altri && (
+            <button type="button" onClick={() => void caricaPaginaScheda(chiave, scheda.prima)} className="w-full rounded-full py-2.5 font-semibold" style={{ background: 'rgba(255,255,255,0.08)', color: 'var(--fg)' }}>
+              {T.profilo.precedenti}
+            </button>
+          )
+        )}
+      </div>
+    );
     // Chi coordina, sul profilo di un ragazzo, vede la sua scheda completa.
     if (revisore && chiave !== mia) {
       const stat = squadra.find((s) => s.chiave === chiave);
@@ -370,9 +480,13 @@ export default function PortaleRedazione({ sessioneIniziale, configurata }: { se
           chiave={chiave}
           nome={stat?.nome ?? persone.find((p) => p.chiave === chiave)?.nome ?? chiave}
           stat={stat}
-          contenuti={contenuti ?? []}
+          contenuti={ordinaFeed((contenuti ?? []).filter((c) => c.chiaveAutore === chiave))}
+          numeri={scheda.numeri}
+          voci={voci}
+          tutti={contenuti ?? []}
           obiettivi={obiettivi}
           adesso={adesso}
+          piede={precedenti}
           onApri={setAperto}
           onIndietro={() => setVista('squadra')}
         />
@@ -469,6 +583,7 @@ export default function PortaleRedazione({ sessioneIniziale, configurata }: { se
             ))}
           </div>
         )}
+        {precedenti}
       </div>
     );
   }
@@ -636,6 +751,7 @@ export default function PortaleRedazione({ sessioneIniziale, configurata }: { se
               onClick={() => {
                 setVista(s.id);
                 if (s.id === 'profilo') setPersona(null);
+                if (s.id === 'feed') setQuantiPost(PAGINA_FEED);
               }}
               className="flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-semibold"
               style={vista === s.id ? { background: 'var(--fg)', color: '#0a0a0a' } : { color: 'var(--fg-muta)' }}
@@ -668,10 +784,12 @@ export default function PortaleRedazione({ sessioneIniziale, configurata }: { se
             </button>
           </p>
         )}
-        {contenuti === null && !errore ? (
-          <p className="py-12 text-center" role="status" style={{ color: 'var(--fg-muta)' }}>
-            {T.feed.caricamento}
-          </p>
+        {contenuti === null ? (
+          !errore && (
+            <p className="py-12 text-center" role="status" style={{ color: 'var(--fg-muta)' }}>
+              {T.feed.caricamento}
+            </p>
+          )
         ) : vista === 'feed' ? (
           vistaFeed()
         ) : vista === 'profilo' ? (
@@ -692,6 +810,7 @@ export default function PortaleRedazione({ sessioneIniziale, configurata }: { se
           gruppi={gruppiStorie}
           iniziale={storieAperte}
           sessione={sessione}
+          onVista={(id) => setStorieViste((v) => (v.has(id) ? v : new Set([...v, id])))}
           onApri={(c) => {
             setStorieAperte(null);
             setAperto(c.id);
@@ -705,11 +824,10 @@ export default function PortaleRedazione({ sessioneIniziale, configurata }: { se
           contenuto={contenutoAperto}
           sessione={sessione}
           onAggiornato={sostituisci}
-          onEliminato={(id) => {
+          onEliminato={(c) => {
+            // Resta nell'archivio: esce da feed e profili e va nel cestino di chi coordina.
             setAperto(null);
-            // Resta nell'archivio: qui si segna come eliminato, l'aggiornamento successivo lo conferma.
-            const adesso = new Date().toISOString();
-            setContenuti((attuali) => (attuali ?? []).map((c) => (c.id === id ? { ...c, eliminatoIl: adesso, eliminatoDa: sessione.nome } : c)));
+            sostituisci(c);
           }}
           onCorreggi={(c) => setComposizione({ tipo: c.tipo, base: c })}
           onChiudi={() => setAperto(null)}

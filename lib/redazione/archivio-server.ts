@@ -3,23 +3,31 @@ import { ID_VALIDO, OBIETTIVI_PREDEFINITI } from './regole';
 import type { Contenuto, Obiettivi, Persona } from './tipi';
 
 /*
- * Archivio del portale della redazione nello storage privato di Vercel Blob: un file JSON per
- * contenuto (con versioni e commenti) e un file per immagine. Niente è pubblico: le immagini
- * passano da /api/redazione/media, che controlla la sessione. Le modifiche sono condizionate
- * all'ETag letto, così due persone che commentano insieme non si cancellano a vicenda.
+ * Archivio del portale della redazione nello storage privato di Vercel Blob.
  *
- * Non si perde niente: nessuna funzione cancella file (eliminare un contenuto è solo un segno nel
- * suo JSON), e ogni scrittura lascia anche una copia datata in redazione/storico/<id>/, da cui si
- * può ricostruire qualsiasi stato passato. Senza storage (sviluppo) resta tutto in memoria.
+ * Tutti i contenuti (con versioni, commenti e registro) stanno in un solo indice,
+ * redazione/indice.json: è la fonte di verità. Ogni scrittura è condizionata all'ETag letto, così
+ * due persone che commentano insieme non si cancellano a vicenda, e porta la revisione
+ * dell'archivio un passo avanti. Il server tiene l'indice in memoria e a ogni richiesta chiede
+ * allo storage solo se è cambiato (If-None-Match): un aggiornamento del portale costa una sola
+ * domanda leggera, non una lettura per contenuto.
+ *
+ * Non si perde niente: nessuna funzione cancella file. Ogni contenuto ha anche la sua copia in
+ * redazione/contenuti/<id>.json, e ogni scrittura lascia una copia datata in
+ * redazione/storico/<id>/. Se l'indice manca (il primo avvio dopo questo cambio) si ricostruisce
+ * dalle copie dei contenuti. Le immagini sono un file ciascuna e passano da
+ * /api/redazione/media, che controlla la sessione. Senza storage (sviluppo) resta tutto in memoria.
  */
 
+const FILE_INDICE = 'redazione/indice.json';
 const CARTELLA_CONTENUTI = 'redazione/contenuti/';
 const CARTELLA_MEDIA = 'redazione/media/';
 const CARTELLA_STORICO = 'redazione/storico/';
 const FILE_OBIETTIVI = 'redazione/impostazioni/obiettivi.json';
 const FILE_PERSONE = 'redazione/impostazioni/persone.json';
-const TENTATIVI = 4;
-/** Letture ripetute prima di arrendersi: un intoppo di rete non deve far sparire un contenuto dal feed. */
+/** Scritture concorrenti sullo stesso file: si rilegge e si riprova, con un'attesa a caso. */
+const TENTATIVI_SCRITTURA = 8;
+/** Letture ripetute prima di arrendersi: un intoppo di rete non deve far sparire niente. */
 const TENTATIVI_LETTURA = 3;
 const LETTURE_IN_PARALLELO = 16;
 
@@ -38,10 +46,18 @@ export interface Media {
   tipo: string;
 }
 
+/** Lo stato dell'archivio: la revisione (cresce a ogni scrittura) e tutti i contenuti. */
+export interface StatoArchivio {
+  revisione: number;
+  contenuti: Contenuto[];
+}
+
 export interface Archivio {
+  /** Tutti i contenuti con la revisione dell'archivio. Non va modificato: è condiviso. */
+  stato(): Promise<StatoArchivio>;
   elenca(): Promise<Contenuto[]>;
   leggi(id: string): Promise<Contenuto | null>;
-  crea(contenuto: Contenuto): Promise<void>;
+  crea(contenuto: Contenuto): Promise<Contenuto>;
   /** Legge, applica la modifica e riscrive; se nel frattempo qualcuno ha scritto, riprova. */
   aggiorna(id: string, modifica: (contenuto: Contenuto) => Contenuto): Promise<Contenuto>;
   salvaMedia(id: string, dati: Uint8Array, tipo: string): Promise<void>;
@@ -51,7 +67,8 @@ export interface Archivio {
   salvaObiettivi(obiettivi: Obiettivi): Promise<void>;
   /** I ragazzi registrati da chi coordina (vuoto = chiunque abbia il codice). */
   leggiPersone(): Promise<Persona[]>;
-  salvaPersone(persone: Persona[]): Promise<void>;
+  /** Modifica l'elenco a partire dall'ultima versione salvata, senza perdere modifiche altrui. */
+  aggiornaPersone(modifica: (persone: Persona[]) => Persona[]): Promise<Persona[]>;
 }
 
 function percorsoContenuto(id: string): string {
@@ -64,6 +81,10 @@ function percorsoMedia(id: string): string {
   return `${CARTELLA_MEDIA}${id}`;
 }
 
+function controllaId(id: string): void {
+  percorsoContenuto(id);
+}
+
 async function aGruppi<T, R>(elementi: T[], quanti: number, fn: (e: T) => Promise<R>): Promise<R[]> {
   const risultati: R[] = [];
   for (let i = 0; i < elementi.length; i += quanti) {
@@ -72,87 +93,172 @@ async function aGruppi<T, R>(elementi: T[], quanti: number, fn: (e: T) => Promis
   return risultati;
 }
 
-/* ---------- Vercel Blob ---------- */
+const pausa = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-async function leggiBlob(percorso: string): Promise<{ contenuto: Contenuto; etag: string } | null> {
-  const risultato = await get(percorso, { access: 'private', useCache: false });
-  if (!risultato || risultato.statusCode !== 200) return null;
-  return { contenuto: (await new Response(risultato.stream).json()) as Contenuto, etag: risultato.blob.etag };
-}
-
-async function leggiConTentativi(percorso: string): Promise<{ contenuto: Contenuto; etag: string } | null> {
+async function conTentativi<T>(fn: () => Promise<T>): Promise<T> {
   for (let tentativo = 1; ; tentativo++) {
     try {
-      return await leggiBlob(percorso);
+      return await fn();
     } catch (errore) {
       if (tentativo >= TENTATIVI_LETTURA) throw errore;
-      await new Promise((r) => setTimeout(r, 250 * tentativo));
+      await pausa(250 * tentativo);
     }
   }
 }
 
-async function scriviBlob(percorso: string, contenuto: Contenuto, etag: string | null): Promise<void> {
-  await put(percorso, JSON.stringify(contenuto), {
+/** Indice vuoto o con i contenuti di prima: la revisione parte da qui. */
+function nuovoStato(contenuti: Contenuto[] = []): StatoArchivio {
+  return { revisione: Math.max(0, ...contenuti.map((c) => c.rev ?? 0)), contenuti };
+}
+
+/** Applica una modifica all'archivio: il contenuto toccato prende la revisione successiva. */
+function applica(stato: StatoArchivio, contenuto: Contenuto): { stato: StatoArchivio; contenuto: Contenuto } {
+  const revisione = stato.revisione + 1;
+  const nuovo = { ...contenuto, rev: revisione };
+  const presente = stato.contenuti.some((c) => c.id === nuovo.id);
+  const contenuti = presente ? stato.contenuti.map((c) => (c.id === nuovo.id ? nuovo : c)) : [...stato.contenuti, nuovo];
+  return { stato: { revisione, contenuti }, contenuto: nuovo };
+}
+
+/* ---------- Vercel Blob ---------- */
+
+/**
+ * File JSON letti di recente, con il loro ETag: si richiedono con If-None-Match e, se non sono
+ * cambiati, lo storage risponde 304 senza mandarli di nuovo.
+ */
+const cacheJson = new Map<string, { etag: string; dati: unknown }>();
+
+async function leggiJson<T>(percorso: string): Promise<{ dati: T; etag: string } | null> {
+  return conTentativi(async () => {
+    const inCache = cacheJson.get(percorso);
+    const risultato = await get(percorso, { access: 'private', useCache: false, ...(inCache ? { ifNoneMatch: inCache.etag } : {}) });
+    if (!risultato) {
+      cacheJson.delete(percorso);
+      return null;
+    }
+    if (risultato.statusCode === 304 && inCache) return { dati: inCache.dati as T, etag: inCache.etag };
+    if (risultato.statusCode !== 200) throw new Error(`lettura di ${percorso}: stato ${risultato.statusCode}`);
+    const dati = (await new Response(risultato.stream).json()) as T;
+    cacheJson.set(percorso, { etag: risultato.blob.etag, dati });
+    return { dati, etag: risultato.blob.etag };
+  });
+}
+
+/** Scrive un JSON solo se nessuno l'ha cambiato dopo la lettura (etag), o solo se non esiste (null). */
+async function scriviJson(percorso: string, dati: unknown, etag: string | null): Promise<void> {
+  const risultato = await put(percorso, JSON.stringify(dati), {
     access: 'private',
     contentType: 'application/json',
     addRandomSuffix: false,
     ...(etag ? { ifMatch: etag } : { allowOverwrite: false }),
   });
+  cacheJson.set(percorso, { etag: risultato.etag, dati });
 }
 
-/** Copia datata di ogni stato salvato: non si sovrascrive e non si cancella mai. */
-async function scriviStorico(contenuto: Contenuto): Promise<void> {
-  try {
-    const quando = new Date().toISOString().replace(/[:.]/g, '-');
-    await put(`${CARTELLA_STORICO}${contenuto.id}/${quando}.json`, JSON.stringify(contenuto), {
-      access: 'private',
-      contentType: 'application/json',
-      addRandomSuffix: true,
-    });
-  } catch (errore) {
-    // Il contenuto è già salvato: la copia mancata si segnala ma non blocca chi pubblica.
-    console.error('[redazione] copia nello storico non riuscita', contenuto.id, errore);
+/**
+ * Legge l'ultima versione, applica la modifica e scrive a condizione che nessuno abbia scritto nel
+ * frattempo; altrimenti riprova. Gli errori della modifica (permessi, validazione) passano subito.
+ */
+async function modificaJson<T, R>(percorso: string, iniziale: () => Promise<T>, modifica: (dati: T) => { dati: T; risultato: R }): Promise<R> {
+  for (let tentativo = 1; ; tentativo++) {
+    const letto = await leggiJson<T>(percorso);
+    const { dati, risultato } = modifica(letto ? letto.dati : await iniziale());
+    try {
+      await scriviJson(percorso, dati, letto?.etag ?? null);
+      return risultato;
+    } catch (errore) {
+      // Qualcuno ha scritto prima: si dimentica la copia in memoria e si riparte dall'ultima versione.
+      cacheJson.delete(percorso);
+      if (tentativo >= TENTATIVI_SCRITTURA) throw errore;
+      if (!(errore instanceof BlobPreconditionFailedError) && letto) throw errore;
+      await pausa(50 + Math.random() * 150 * tentativo);
+    }
   }
 }
 
+/** Le copie per contenuto, scritte prima dell'indice: da qui si ricostruisce se l'indice manca. */
+async function leggiCopieContenuti(): Promise<Contenuto[]> {
+  const percorsi: string[] = [];
+  let cursor: string | undefined;
+  do {
+    const pagina = await list({ prefix: CARTELLA_CONTENUTI, cursor });
+    percorsi.push(...pagina.blobs.map((b) => b.pathname));
+    cursor = pagina.hasMore ? pagina.cursor : undefined;
+  } while (cursor);
+  const letti = await aGruppi(percorsi, LETTURE_IN_PARALLELO, (p) =>
+    conTentativi(async () => {
+      const r = await get(p, { access: 'private', useCache: false });
+      return r && r.statusCode === 200 ? ((await new Response(r.stream).json()) as Contenuto) : null;
+    }),
+  );
+  return letti.filter((c): c is Contenuto => c !== null);
+}
+
+/** Copia del contenuto nel suo file e nello storico: la verità resta l'indice, queste sono la rete. */
+async function scriviCopie(contenuto: Contenuto): Promise<void> {
+  const corpo = JSON.stringify(contenuto);
+  const quando = new Date().toISOString().replace(/[:.]/g, '-');
+  const esiti = await Promise.allSettled([
+    put(percorsoContenuto(contenuto.id), corpo, { access: 'private', contentType: 'application/json', addRandomSuffix: false, allowOverwrite: true }),
+    put(`${CARTELLA_STORICO}${contenuto.id}/${quando}.json`, corpo, { access: 'private', contentType: 'application/json', addRandomSuffix: true }),
+  ]);
+  for (const esito of esiti) {
+    // Il contenuto è già salvato nell'indice: la copia mancata si segnala ma non blocca chi pubblica.
+    if (esito.status === 'rejected') console.error('[redazione] copia del contenuto non riuscita', contenuto.id, esito.reason);
+  }
+}
+
+async function scriviNelloIndice(fn: (stato: StatoArchivio) => { stato: StatoArchivio; contenuto: Contenuto }): Promise<Contenuto> {
+  const contenuto = await modificaJson<StatoArchivio, Contenuto>(FILE_INDICE, async () => nuovoStato(await leggiCopieContenuti()), (stato) => {
+    const esito = fn(stato);
+    return { dati: esito.stato, risultato: esito.contenuto };
+  });
+  await scriviCopie(contenuto);
+  return contenuto;
+}
+
 const archivioBlob: Archivio = {
+  async stato() {
+    const letto = await leggiJson<StatoArchivio>(FILE_INDICE);
+    if (letto) return letto.dati;
+    // Primo avvio con l'indice: si costruisce dalle copie dei contenuti e si salva una volta sola.
+    const stato = nuovoStato(await leggiCopieContenuti());
+    try {
+      await scriviJson(FILE_INDICE, stato, null);
+      return stato;
+    } catch {
+      // Un'altra richiesta l'ha costruito nello stesso momento: vale il suo.
+      cacheJson.delete(FILE_INDICE);
+      const suo = await leggiJson<StatoArchivio>(FILE_INDICE);
+      if (!suo) throw new ErroreRedazione(503, 'Archivio non disponibile, riprova fra poco.');
+      return suo.dati;
+    }
+  },
+
   async elenca() {
-    const percorsi: string[] = [];
-    let cursor: string | undefined;
-    do {
-      const pagina = await list({ prefix: CARTELLA_CONTENUTI, cursor });
-      percorsi.push(...pagina.blobs.map((b) => b.pathname));
-      cursor = pagina.hasMore ? pagina.cursor : undefined;
-    } while (cursor);
-    // Se un contenuto non si legge neanche riprovando, meglio un errore (il browser tiene quello che
-    // aveva già) che un feed in cui quel contenuto sembra sparito.
-    const letti = await aGruppi(percorsi, LETTURE_IN_PARALLELO, (p) => leggiConTentativi(p));
-    return letti.flatMap((l) => (l ? [l.contenuto] : []));
+    return (await this.stato()).contenuti;
   },
 
   async leggi(id) {
-    return (await leggiConTentativi(percorsoContenuto(id)))?.contenuto ?? null;
+    controllaId(id);
+    return (await this.stato()).contenuti.find((c) => c.id === id) ?? null;
   },
 
   async crea(contenuto) {
-    await scriviBlob(percorsoContenuto(contenuto.id), contenuto, null);
-    await scriviStorico(contenuto);
+    controllaId(contenuto.id);
+    return scriviNelloIndice((stato) => {
+      if (stato.contenuti.some((c) => c.id === contenuto.id)) throw new ErroreRedazione(409, 'Contenuto già esistente.');
+      return applica(stato, contenuto);
+    });
   },
 
   async aggiorna(id, modifica) {
-    const percorso = percorsoContenuto(id);
-    for (let tentativo = 1; ; tentativo++) {
-      const letto = await leggiBlob(percorso);
-      if (!letto) throw new ErroreRedazione(404, 'Contenuto non trovato.');
-      const nuovo = modifica(letto.contenuto);
-      try {
-        await scriviBlob(percorso, nuovo, letto.etag);
-        await scriviStorico(nuovo);
-        return nuovo;
-      } catch (e) {
-        if (!(e instanceof BlobPreconditionFailedError) || tentativo >= TENTATIVI) throw e;
-      }
-    }
+    controllaId(id);
+    return scriviNelloIndice((stato) => {
+      const attuale = stato.contenuti.find((c) => c.id === id);
+      if (!attuale) throw new ErroreRedazione(404, 'Contenuto non trovato.');
+      return applica(stato, modifica(structuredClone(attuale)));
+    });
   },
 
   async salvaMedia(id, dati, tipo) {
@@ -160,37 +266,38 @@ const archivioBlob: Archivio = {
   },
 
   async leggiMedia(id) {
-    const risultato = await get(percorsoMedia(id), { access: 'private' });
+    const risultato = await conTentativi(() => get(percorsoMedia(id), { access: 'private' }));
     if (!risultato || risultato.statusCode !== 200) return null;
     return { corpo: risultato.stream, tipo: risultato.blob.contentType };
   },
 
   async leggiObiettivi() {
-    const risultato = await get(FILE_OBIETTIVI, { access: 'private', useCache: false });
-    if (!risultato || risultato.statusCode !== 200) return OBIETTIVI_PREDEFINITI;
-    return { ...OBIETTIVI_PREDEFINITI, ...((await new Response(risultato.stream).json()) as Partial<Obiettivi>) };
+    const letto = await leggiJson<Partial<Obiettivi>>(FILE_OBIETTIVI);
+    return { ...OBIETTIVI_PREDEFINITI, ...(letto?.dati ?? {}) };
   },
 
   async salvaObiettivi(obiettivi) {
-    await scriviImpostazione(FILE_OBIETTIVI, 'obiettivi', obiettivi);
+    await modificaJson<Obiettivi, null>(FILE_OBIETTIVI, async () => OBIETTIVI_PREDEFINITI, () => ({ dati: obiettivi, risultato: null }));
+    await scriviStoricoImpostazione('obiettivi', obiettivi);
   },
 
   async leggiPersone() {
-    const risultato = await get(FILE_PERSONE, { access: 'private', useCache: false });
-    if (!risultato || risultato.statusCode !== 200) return [];
-    return (await new Response(risultato.stream).json()) as Persona[];
+    return structuredClone((await leggiJson<Persona[]>(FILE_PERSONE))?.dati ?? []);
   },
 
-  async salvaPersone(persone) {
-    await scriviImpostazione(FILE_PERSONE, 'persone', persone);
+  async aggiornaPersone(modifica) {
+    const persone = await modificaJson<Persona[], Persona[]>(FILE_PERSONE, async () => [], (attuali) => {
+      const nuove = modifica(structuredClone(attuali));
+      return { dati: nuove, risultato: nuove };
+    });
+    await scriviStoricoImpostazione('persone', persone);
+    return persone;
   },
 };
 
-/** Un file di impostazioni, più la sua copia datata nello storico. */
-async function scriviImpostazione(percorso: string, nome: string, dati: unknown): Promise<void> {
-  const corpo = JSON.stringify(dati);
-  await put(percorso, corpo, { access: 'private', contentType: 'application/json', addRandomSuffix: false, allowOverwrite: true });
-  await put(`${CARTELLA_STORICO}${nome}/${new Date().toISOString().replace(/[:.]/g, '-')}.json`, corpo, {
+/** Copia datata di un file di impostazioni. */
+async function scriviStoricoImpostazione(nome: string, dati: unknown): Promise<void> {
+  await put(`${CARTELLA_STORICO}${nome}/${new Date().toISOString().replace(/[:.]/g, '-')}.json`, JSON.stringify(dati), {
     access: 'private',
     contentType: 'application/json',
     addRandomSuffix: true,
@@ -200,7 +307,7 @@ async function scriviImpostazione(percorso: string, nome: string, dati: unknown)
 /* ---------- Memoria (sviluppo e test) ---------- */
 
 interface Memoria {
-  contenuti: Map<string, Contenuto>;
+  stato: StatoArchivio;
   media: Map<string, { dati: Uint8Array; tipo: string }>;
   obiettivi?: Obiettivi;
   persone?: Persona[];
@@ -209,33 +316,42 @@ interface Memoria {
 const globale = globalThis as typeof globalThis & { __memoriaRedazione?: Memoria };
 
 function memoria(): Memoria {
-  globale.__memoriaRedazione ??= { contenuti: new Map(), media: new Map() };
+  globale.__memoriaRedazione ??= { stato: nuovoStato(), media: new Map() };
   return globale.__memoriaRedazione;
 }
 
 export function svuotaMemoria(): void {
-  globale.__memoriaRedazione = { contenuti: new Map(), media: new Map() };
+  globale.__memoriaRedazione = { stato: nuovoStato(), media: new Map() };
+  cacheJson.clear();
 }
 
 const archivioMemoria: Archivio = {
+  async stato() {
+    return structuredClone(memoria().stato);
+  },
   async elenca() {
-    return [...memoria().contenuti.values()].map((c) => structuredClone(c));
+    return (await this.stato()).contenuti;
   },
   async leggi(id) {
-    percorsoContenuto(id);
-    const c = memoria().contenuti.get(id);
-    return c ? structuredClone(c) : null;
+    controllaId(id);
+    return (await this.stato()).contenuti.find((c) => c.id === id) ?? null;
   },
   async crea(contenuto) {
-    percorsoContenuto(contenuto.id);
-    memoria().contenuti.set(contenuto.id, structuredClone(contenuto));
+    controllaId(contenuto.id);
+    const m = memoria();
+    if (m.stato.contenuti.some((c) => c.id === contenuto.id)) throw new ErroreRedazione(409, 'Contenuto già esistente.');
+    const esito = applica(m.stato, structuredClone(contenuto));
+    m.stato = esito.stato;
+    return structuredClone(esito.contenuto);
   },
   async aggiorna(id, modifica) {
-    const c = await this.leggi(id);
-    if (!c) throw new ErroreRedazione(404, 'Contenuto non trovato.');
-    const nuovo = modifica(c);
-    memoria().contenuti.set(id, structuredClone(nuovo));
-    return nuovo;
+    controllaId(id);
+    const m = memoria();
+    const attuale = m.stato.contenuti.find((c) => c.id === id);
+    if (!attuale) throw new ErroreRedazione(404, 'Contenuto non trovato.');
+    const esito = applica(m.stato, modifica(structuredClone(attuale)));
+    m.stato = esito.stato;
+    return structuredClone(esito.contenuto);
   },
   async salvaMedia(id, dati, tipo) {
     percorsoMedia(id);
@@ -255,8 +371,10 @@ const archivioMemoria: Archivio = {
   async leggiPersone() {
     return structuredClone(memoria().persone ?? []);
   },
-  async salvaPersone(persone) {
-    memoria().persone = structuredClone(persone);
+  async aggiornaPersone(modifica) {
+    const nuove = modifica(structuredClone(memoria().persone ?? []));
+    memoria().persone = structuredClone(nuove);
+    return nuove;
   },
 };
 

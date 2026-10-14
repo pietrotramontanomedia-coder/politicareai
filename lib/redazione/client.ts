@@ -1,4 +1,4 @@
-import type { BozzaVersione, Contenuto, Obiettivi, PersonaPubblica, SessioneRedazione, StatoContenuto, TipoCommento, TipoContenuto } from './tipi';
+import type { BozzaVersione, Contenuto, Obiettivi, PersonaPubblica, SchedaDati, SessioneRedazione, Sincronizzazione, StatoContenuto, TipoCommento, TipoContenuto } from './tipi';
 
 /** Chiamate del browser alle API del portale della redazione. */
 
@@ -35,9 +35,21 @@ export async function esci(): Promise<void> {
   await api('/api/redazione/accesso', { method: 'DELETE' });
 }
 
-export async function caricaContenuti(): Promise<{ contenuti: Contenuto[]; obiettivi: Obiettivi; persone: PersonaPubblica[] }> {
-  const { contenuti, obiettivi, persone } = await api<{ contenuti: Contenuto[]; obiettivi: Obiettivi; persone: PersonaPubblica[] }>('/api/redazione/contenuti');
-  return { contenuti, obiettivi, persone };
+export type RispostaElenco = Sincronizzazione & { completo: boolean; obiettivi: Obiettivi; persone: PersonaPubblica[] };
+
+/** Prima volta (dal = null) le ultime settimane; poi solo quello che è cambiato dopo la revisione `dal`. */
+export async function caricaContenuti(dal: number | null): Promise<RispostaElenco> {
+  return api<RispostaElenco>(`/api/redazione/contenuti${dal === null ? '' : `?dal=${dal}`}`);
+}
+
+/** La scheda di una persona, a pagine: `prima` è la data dell'ultimo contenuto già ricevuto. */
+export async function caricaScheda(chiave: string, prima: string | null = null): Promise<SchedaDati> {
+  const parametri = new URLSearchParams({ autore: chiave, ...(prima ? { prima } : {}) });
+  return api<SchedaDati>(`/api/redazione/contenuti?${parametri}`);
+}
+
+export async function caricaContenuto(id: string): Promise<Contenuto> {
+  return (await api<{ contenuto: Contenuto }>(`/api/redazione/contenuti/${id}`)).contenuto;
 }
 
 export async function aggiungiPersona(nome: string, password: string): Promise<PersonaPubblica[]> {
@@ -60,8 +72,8 @@ export async function nuovaVersione(id: string, bozza: BozzaVersione): Promise<C
   return (await api<{ contenuto: Contenuto }>(`/api/redazione/contenuti/${id}`, json('PUT', bozza))).contenuto;
 }
 
-export async function eliminaContenuto(id: string): Promise<void> {
-  await api(`/api/redazione/contenuti/${id}`, { method: 'DELETE' });
+export async function eliminaContenuto(id: string): Promise<Contenuto> {
+  return (await api<{ contenuto: Contenuto }>(`/api/redazione/contenuti/${id}`, { method: 'DELETE' })).contenuto;
 }
 
 export async function ripristinaContenuto(id: string): Promise<Contenuto> {
@@ -89,26 +101,52 @@ export async function caricaFoto(foto: Blob): Promise<string> {
 const LATO_MASSIMO = 1920;
 
 /**
+ * Apre l'immagine scelta. createImageBitmap con l'orientamento EXIF dove c'è; sui browser che non
+ * accettano l'opzione, o non sanno decodificare il file così, si passa da un elemento <img>.
+ */
+async function apriImmagine(file: File): Promise<{ disegno: CanvasImageSource; larghezza: number; altezza: number; chiudi: () => void }> {
+  try {
+    const bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
+    return { disegno: bitmap, larghezza: bitmap.width, altezza: bitmap.height, chiudi: () => bitmap.close() };
+  } catch {
+    const url = URL.createObjectURL(file);
+    try {
+      const img = new Image();
+      img.src = url;
+      await img.decode();
+      return { disegno: img, larghezza: img.naturalWidth, altezza: img.naturalHeight, chiudi: () => URL.revokeObjectURL(url) };
+    } catch (errore) {
+      URL.revokeObjectURL(url);
+      throw errore;
+    }
+  }
+}
+
+/**
  * Riduce e ricomprime l'immagine nel browser: meno attesa, meno spazio, niente dati EXIF (posizione
- * compresa). Qualità alta perché sono card con testo, dove la compressione si vede.
+ * compresa). Qualità alta perché sono card con testo, dove la compressione si vede. Le parti
+ * trasparenti di un PNG diventano bianche: nel JPEG sarebbero nere.
  */
 export async function riduciFoto(file: File): Promise<Blob> {
-  const bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
+  const immagine = await apriImmagine(file);
   try {
-    const scala = Math.min(1, LATO_MASSIMO / Math.max(bitmap.width, bitmap.height));
-    const larghezza = Math.round(bitmap.width * scala);
-    const altezza = Math.round(bitmap.height * scala);
+    if (!immagine.larghezza || !immagine.altezza) throw new Error('immagine vuota');
+    const scala = Math.min(1, LATO_MASSIMO / Math.max(immagine.larghezza, immagine.altezza));
+    const larghezza = Math.round(immagine.larghezza * scala);
+    const altezza = Math.round(immagine.altezza * scala);
     const tela = document.createElement('canvas');
     tela.width = larghezza;
     tela.height = altezza;
     const ctx = tela.getContext('2d');
     if (!ctx) throw new Error('canvas non disponibile');
-    ctx.drawImage(bitmap, 0, 0, larghezza, altezza);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, larghezza, altezza);
+    ctx.drawImage(immagine.disegno, 0, 0, larghezza, altezza);
     return await new Promise<Blob>((risolvi, rifiuta) =>
       tela.toBlob((blob) => (blob ? risolvi(blob) : rifiuta(new Error('compressione non riuscita'))), 'image/jpeg', 0.92),
     );
   } finally {
-    bitmap.close();
+    immagine.chiudi();
   }
 }
 

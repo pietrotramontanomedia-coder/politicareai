@@ -12,7 +12,7 @@ export const TESTI_REDAZIONE = {
     nomeSegnaposto: 'Nome e cognome',
     nomeAiuto: 'Usa sempre lo stesso: è così che ritrovi i tuoi contenuti.',
     codice: 'Password',
-    codiceAiuto: 'La tua password personale. Te la dà chi coordina.',
+    codiceAiuto: 'La tua password personale: te la dà chi coordina. Chi corregge usa il codice dei revisori.',
     entra: 'Entra',
     entrando: 'Entro…',
     nonConfigurato: 'Il portale non è ancora attivo: mancano i codici di accesso sul server (REDAZIONE_CODICE e REDAZIONE_CODICE_REVISORI).',
@@ -32,7 +32,8 @@ export const TESTI_REDAZIONE = {
 
   attivita: {
     titolo: 'Tutte le attività',
-    spiegazione: 'Ogni pubblicazione, versione, commento, cambio di stato ed eliminazione, dal più recente. Non si cancella niente.',
+    spiegazione:
+      'Ogni pubblicazione, versione, commento, cambio di stato ed eliminazione delle ultime tre settimane, dal più recente. Non si cancella niente: le attività più vecchie sono nella scheda di ognuno.',
     tutti: 'Tutta la redazione',
     filtro: 'Persona',
     vuota: 'Ancora nessuna attività.',
@@ -142,6 +143,8 @@ export const TESTI_REDAZIONE = {
     commenti: (n: number) => (n === 1 ? '1 commento' : `${n} commenti`),
     versione: (n: number) => `Versione ${n}`,
     altro: 'altro',
+    altriPost: 'Mostra altri post',
+    finestra: 'Qui ci sono le ultime tre settimane: i post più vecchi sono nel profilo di chi li ha pubblicati.',
   },
 
   profilo: {
@@ -157,6 +160,9 @@ export const TESTI_REDAZIONE = {
     generatore: 'Apri il generatore ↗',
     generatoreAiuto: 'Card e storie si fanno lì: scaricale e pubblicale qui.',
     di: (nome: string) => `I contenuti di ${nome}`,
+    precedenti: 'Mostra i contenuti precedenti',
+    caricando: 'Carico i contenuti…',
+    errore: 'Non riesco a caricare tutti i contenuti.',
     avvisoCorrezioni: (n: number) =>
       n === 1 ? 'Hai 1 contenuto con correzioni da fare.' : `Hai ${n} contenuti con correzioni da fare.`,
   },
@@ -243,6 +249,7 @@ export const TESTI_REDAZIONE = {
     riapri: 'Rimetti da rivedere',
     invio: 'Invio…',
     errore: 'Non sono riuscito a salvare, riprova.',
+    nelCestino: 'Nel cestino non si commenta: ripristinalo per riprendere le correzioni.',
   },
 
   compositore: {

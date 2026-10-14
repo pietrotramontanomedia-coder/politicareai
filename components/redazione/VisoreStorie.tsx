@@ -22,18 +22,24 @@ export interface GruppoStorie {
 
 /** Le storie a schermo intero, una persona dopo l'altra, come su Instagram. Frecce, spazio ed Esc da tastiera. */
 export default function VisoreStorie({
-  gruppi,
+  gruppi: gruppiIniziali,
   iniziale,
   sessione,
+  onVista,
   onApri,
   onChiudi,
 }: {
   gruppi: GruppoStorie[];
   iniziale: number;
   sessione: SessioneRedazione;
+  /** Ogni storia mostrata, per l'anello grigio delle storie già viste. */
+  onVista: (id: string) => void;
   onApri: (c: Contenuto) => void;
   onChiudi: () => void;
 }) {
+  // Le storie restano quelle di quando si è aperto: l'aggiornamento del portale non deve far
+  // saltare a un'altra persona a metà visione.
+  const [gruppi] = useState(gruppiIniziali);
   const [posizione, setPosizione] = useState({ g: iniziale, s: 0, trascorso: 0 });
   const [pausa, setPausa] = useState(false);
   const gruppo = gruppi[posizione.g];
@@ -63,6 +69,11 @@ export default function VisoreStorie({
     }, PASSO_MS);
     return () => window.clearInterval(t);
   }, [pausa, gruppi]);
+
+  const idStoria = storia?.id;
+  useEffect(() => {
+    if (idStoria) onVista(idStoria);
+  }, [idStoria, onVista]);
 
   // Finite tutte le storie si chiude.
   const finite = posizione.g >= gruppi.length;

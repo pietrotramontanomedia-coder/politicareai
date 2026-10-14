@@ -24,7 +24,7 @@ export default function AnteprimaStoria({
     <div className={`relative overflow-hidden bg-black ${piccola ? '' : 'rounded-2xl'} ${className}`} style={{ aspectRatio: '9 / 16' }}>
       {immagine && (
         // eslint-disable-next-line @next/next/no-img-element -- foto private servite dalle API del portale
-        <img src={immagine} alt="" className="absolute inset-0 h-full w-full object-cover" />
+        <img src={immagine} alt="" loading={piccola ? 'lazy' : undefined} decoding="async" className="absolute inset-0 h-full w-full object-cover" />
       )}
       {!piccola && (
         <div className="absolute inset-x-0 top-0 z-10 px-3 pt-3" style={{ background: 'linear-gradient(rgba(0,0,0,0.45), transparent)' }}>

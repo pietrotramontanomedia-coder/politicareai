@@ -24,7 +24,10 @@ import {
   storieRecenti,
   testoPromemoria,
   testoResoconto,
+  schedaPersona,
+  sincronizza,
   tipoImmagine,
+  unisci,
   validaBozza,
   validaCommento,
   validaObiettivi,
@@ -243,6 +246,40 @@ describe('regole', () => {
     expect(testoAvviso(v2, 'l')).toContain('ha corretto il post (versione 2)');
   });
 
+  it('sincronizzazione: le ultime settimane e quello ancora aperto, poi solo le novità', () => {
+    const vecchio = (id: number, giorni: number) => ({ ...contenuto(giulia.nome, ID(id), new Date(ADESSO.getTime() - giorni * 24 * 3600_000)), rev: id });
+    const approvato = { ...aggiungiCommento(vecchio(1, 40), capo, { tipo: 'complimento', testo: 'ok', stato: 'approvato' }, ID(50), new Date(ADESSO.getTime() - 39 * 24 * 3600_000)), rev: 1 };
+    const daRivedere = vecchio(2, 40);
+    const recente = vecchio(3, 2);
+    const archivio = { revisione: 3, contenuti: [approvato, daRivedere, recente] };
+    const prima = sincronizza(marco, archivio, null, ADESSO);
+    expect(prima.completo).toBe(true);
+    expect(prima.contenuti.map((c) => c.id)).toEqual([ID(3), ID(2)]);
+    // Le statistiche invece contano tutto: per chi coordina, tutti e tre i contenuti.
+    expect(sincronizza(capo, archivio, null, ADESSO).statistiche[0].totale).toBe(3);
+    expect(sincronizza(marco, archivio, 2, ADESSO).contenuti.map((c) => c.id)).toEqual([ID(3)]);
+    expect(sincronizza(marco, archivio, 3, ADESSO).contenuti).toEqual([]);
+  });
+
+  it('nel browser vince la copia più recente, anche se la risposta arriva dopo', () => {
+    const a = { ...contenuto(), rev: 5, stato: 'approvato' as const };
+    const vecchia = { ...contenuto(), rev: 4 };
+    expect(unisci([a], [vecchia])[0].stato).toBe('approvato');
+    expect(unisci([vecchia], [a])[0].stato).toBe('approvato');
+    expect(unisci([a], [], [[a.id, 4]])).toHaveLength(1);
+    expect(unisci([a], [], [[a.id, 5]])).toHaveLength(0);
+  });
+
+  it('scheda: pagine dal più recente, numeri su tutto', () => {
+    const tanti = Array.from({ length: 5 }, (_, i) => contenuto(giulia.nome, ID(i + 1), new Date(ADESSO.getTime() - i * 3600_000)));
+    const pagina = schedaPersona(capo, tanti, 'giulia rossi', OBIETTIVI_PREDEFINITI, ADESSO, null, 2);
+    expect(pagina.contenuti.map((c) => c.id)).toEqual([ID(1), ID(2)]);
+    expect(pagina.altri).toBe(true);
+    const seconda = schedaPersona(capo, tanti, 'giulia rossi', OBIETTIVI_PREDEFINITI, ADESSO, pagina.contenuti[1].creatoIl, 2);
+    expect(seconda.contenuti.map((c) => c.id)).toEqual([ID(3), ID(4)]);
+    expect(pagina.versioniMedie).toBe(1);
+  });
+
   it('riconosce le immagini dai primi byte', () => {
     expect(tipoImmagine(new Uint8Array([0xff, 0xd8, 0xff, 0xe0]))).toBe('image/jpeg');
     expect(tipoImmagine(new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))).toBe('image/png');
@@ -418,7 +455,14 @@ describe('API', () => {
     expect((await mediaId.GET(richiesta(`/api/redazione/media/${foto}`, capo), parametri(foto))).status).toBe(200);
     const feedDopo = (await (await contenuti.GET(richiesta('/api/redazione/contenuti', marco))).json()) as { contenuti: Contenuto[] };
     expect(feedDopo.contenuti).toHaveLength(0);
-    expect((await uno.GET(richiesta(`/api/redazione/contenuti/${contenuto.id}`, giulia), parametri(contenuto.id))).status).toBe(404);
+    expect((await uno.GET(richiesta(`/api/redazione/contenuti/${contenuto.id}`, marco), parametri(contenuto.id))).status).toBe(404);
+    // L'autrice lo ritrova (conta nelle sue percentuali), ma nel cestino non si commenta.
+    expect((await uno.GET(richiesta(`/api/redazione/contenuti/${contenuto.id}`, giulia), parametri(contenuto.id))).status).toBe(200);
+    const nelCestino = await commenti.POST(
+      richiesta(`/api/redazione/contenuti/${contenuto.id}/commenti`, capo, { method: 'POST', body: JSON.stringify({ testo: 'ancora?', stato: 'approvato' }) }),
+      parametri(contenuto.id),
+    );
+    expect(nelCestino.status).toBe(400);
     const cestino = (await (await contenuti.GET(richiesta('/api/redazione/contenuti', capo))).json()) as { contenuti: Contenuto[] };
     expect(cestino.contenuti[0].eliminatoDa).toBe('Pietro');
 
@@ -456,6 +500,113 @@ describe('API', () => {
     // Disattivato non entra più, ma il suo lavoro resta.
     await persone.PATCH(richiesta('/api/redazione/persone', capo, { method: 'PATCH', body: JSON.stringify({ chiave: 'matteo', attiva: false }) }));
     expect((await entra('Matteo', 'Matteo2026')).status).toBe(401);
+  });
+
+  it('aggiornamenti: la prima volta le ultime settimane, poi solo quello che è cambiato', async () => {
+    const contenuti = await import('@/app/api/redazione/contenuti/route');
+    const uno = await import('@/app/api/redazione/contenuti/[id]/route');
+    const commenti = await import('@/app/api/redazione/contenuti/[id]/commenti/route');
+    type Risposta = { revisione: number; completo: boolean; contenuti: Contenuto[]; rimossi: [string, number][]; statistiche: { chiave: string }[]; persone: unknown[] };
+    const leggi = async (s: SessioneRedazione, dal?: number) =>
+      (await (await contenuti.GET(richiesta(`/api/redazione/contenuti${dal === undefined ? '' : `?dal=${dal}`}`, s))).json()) as Risposta;
+    const pubblica = async (s: SessioneRedazione) =>
+      ((await (await contenuti.POST(richiesta('/api/redazione/contenuti', s, { method: 'POST', body: JSON.stringify({ tipo: 'storia', immagini: [ID(7)] }) }))).json()) as { contenuto: Contenuto }).contenuto;
+
+    const primo = await pubblica(giulia);
+    const inizio = await leggi(marco);
+    expect(inizio).toMatchObject({ completo: true, contenuti: [{ id: primo.id }], persone: [] });
+    // Per chi scrive, le statistiche sono solo le sue.
+    expect(inizio.statistiche.map((p) => p.chiave)).toEqual([]);
+    expect((await leggi(giulia)).statistiche.map((p) => p.chiave)).toEqual(['giulia rossi']);
+    expect((await leggi(capo)).statistiche.map((p) => p.chiave)).toEqual(['giulia rossi']);
+
+    // Niente di nuovo: risposta vuota.
+    expect(await leggi(marco, inizio.revisione)).toMatchObject({ completo: false, contenuti: [], rimossi: [] });
+
+    // Un commento cambia il contenuto: arriva solo quello, con la revisione nuova.
+    const secondo = await pubblica(marco);
+    await commenti.POST(
+      richiesta(`/api/redazione/contenuti/${primo.id}/commenti`, capo, { method: 'POST', body: JSON.stringify({ tipo: 'consiglio', testo: 'Bene', stato: 'approvato' }) }),
+      parametri(primo.id),
+    );
+    const dopo = await leggi(marco, inizio.revisione);
+    expect(dopo.contenuti.map((c) => c.id).sort()).toEqual([primo.id, secondo.id].sort());
+    expect(dopo.contenuti.find((c) => c.id === primo.id)?.commenti).toEqual([]);
+    expect(dopo.revisione).toBeGreaterThan(inizio.revisione);
+
+    // Eliminato da chi coordina: a Marco arriva solo l'ordine di toglierlo.
+    await uno.DELETE(richiesta(`/api/redazione/contenuti/${primo.id}`, capo, { method: 'DELETE' }), parametri(primo.id));
+    const tolto = await leggi(marco, dopo.revisione);
+    expect(tolto.contenuti).toEqual([]);
+    expect(tolto.rimossi.map(([id]) => id)).toEqual([primo.id]);
+    expect((await leggi(capo, dopo.revisione)).contenuti[0]).toMatchObject({ id: primo.id, eliminatoDa: 'Pietro' });
+
+    // Una revisione che l'archivio non ha (ricostruito): si riparte da capo.
+    expect((await leggi(marco, 999)).completo).toBe(true);
+  });
+
+  it('sessioni: chi viene disattivato o cambia password esce subito, non dopo 30 giorni', async () => {
+    const accesso = await import('@/app/api/redazione/accesso/route');
+    const persone = await import('@/app/api/redazione/persone/route');
+    const contenuti = await import('@/app/api/redazione/contenuti/route');
+    const entra = async (nome: string, codice: string) => {
+      const r = await accesso.POST(richiesta('/api/redazione/accesso', null, { method: 'POST', body: JSON.stringify({ nome, codice }) }));
+      return r.headers.get('set-cookie')?.split(';')[0] ?? null;
+    };
+    const feed = (biscotto: string) => contenuti.GET(new Request('http://sito/api/redazione/contenuti', { headers: { cookie: biscotto } }));
+    const modifica = (corpo: object) => persone.PATCH(richiesta('/api/redazione/persone', capo, { method: 'PATCH', body: JSON.stringify(corpo) }));
+
+    await persone.POST(richiesta('/api/redazione/persone', capo, { method: 'POST', body: JSON.stringify({ nome: 'Matteo', password: 'Matteo2026' }) }));
+    await persone.POST(richiesta('/api/redazione/persone', capo, { method: 'POST', body: JSON.stringify({ nome: 'Sara' }) }));
+    const matteo = (await entra('Matteo', 'Matteo2026'))!;
+    const sara = (await entra('Sara', 'ragazzi-2026'))!;
+    expect((await feed(matteo)).status).toBe(200);
+    expect((await feed(sara)).status).toBe(200);
+
+    // Password nuova: la vecchia sessione non vale più, la nuova password sì.
+    await modifica({ chiave: 'matteo', password: 'NuovaPassword' });
+    expect((await feed(matteo)).status).toBe(401);
+    expect((await feed((await entra('Matteo', 'NuovaPassword'))!)).status).toBe(200);
+
+    // Disattivata: fuori subito; riattivata: rientra.
+    await modifica({ chiave: 'sara', attiva: false });
+    expect((await feed(sara)).status).toBe(401);
+    await modifica({ chiave: 'sara', attiva: true });
+    expect((await feed(sara)).status).toBe(200);
+
+    // Con l'elenco, chi non c'è non passa nemmeno con un vecchio cookie.
+    expect((await feed(cookie(giulia))).status).toBe(401);
+    // I revisori non dipendono dall'elenco.
+    expect((await feed(cookie(capo))).status).toBe(200);
+  });
+
+  it('revisori: entrano col loro codice e non si possono aggiungere fra i ragazzi', async () => {
+    vi.stubEnv('REDAZIONE_REVISORI', 'Pietro Tramontano, Jacopo Esposito');
+    const accesso = await import('@/app/api/redazione/accesso/route');
+    const persone = await import('@/app/api/redazione/persone/route');
+    const pietro: SessioneRedazione = { nome: 'Pietro Tramontano', ruolo: 'revisore' };
+    const aggiunta = await persone.POST(richiesta('/api/redazione/persone', pietro, { method: 'POST', body: JSON.stringify({ nome: 'jacopo esposito', password: 'segreta123' }) }));
+    expect(aggiunta.status).toBe(400);
+    const entra = (nome: string, codice: string) => accesso.POST(richiesta('/api/redazione/accesso', null, { method: 'POST', body: JSON.stringify({ nome, codice }) }));
+    expect((await entra('Jacopo Esposito', 'capi-2026')).status).toBe(200);
+    expect((await entra('Jacopo Esposito', 'ragazzi-2026')).status).toBe(401);
+    // Un revisore tolto da REDAZIONE_REVISORI esce anche con il cookie ancora valido.
+    const contenuti = await import('@/app/api/redazione/contenuti/route');
+    expect((await contenuti.GET(richiesta('/api/redazione/contenuti', pietro))).status).toBe(200);
+    vi.stubEnv('REDAZIONE_REVISORI', 'Jacopo Esposito');
+    expect((await contenuti.GET(richiesta('/api/redazione/contenuti', pietro))).status).toBe(401);
+  });
+
+  it('scheda: la propria o, per chi coordina, quella di tutti; a pagine con i numeri su tutto', async () => {
+    const contenuti = await import('@/app/api/redazione/contenuti/route');
+    const scheda = (s: SessioneRedazione, chiave: string) => contenuti.GET(richiesta(`/api/redazione/contenuti?autore=${encodeURIComponent(chiave)}`, s));
+    await contenuti.POST(richiesta('/api/redazione/contenuti', giulia, { method: 'POST', body: JSON.stringify({ tipo: 'storia', immagini: [ID(7)] }) }));
+    expect((await scheda(marco, 'giulia rossi')).status).toBe(403);
+    const propria = (await (await scheda(giulia, 'giulia rossi')).json()) as { contenuti: Contenuto[]; andamento: unknown[]; altri: boolean };
+    expect(propria.contenuti).toHaveLength(1);
+    expect(propria.andamento).toHaveLength(14);
+    expect(propria.altri).toBe(false);
+    expect((await scheda(capo, 'giulia rossi')).status).toBe(200);
   });
 
   it('identificativi strani non arrivano all\'archivio', async () => {

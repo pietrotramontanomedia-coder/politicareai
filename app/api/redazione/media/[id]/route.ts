@@ -17,5 +17,5 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
         'x-content-type-options': 'nosniff',
       },
     });
-  });
+  }, { controllaPersona: false });
 }
