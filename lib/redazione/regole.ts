@@ -38,7 +38,7 @@ export const LIMITI = {
 export const ORE_STORIA = 24;
 
 /** Dove si fanno card e storie: nel portale si pubblicano soltanto. */
-export const URL_GENERATORE = 'https://politicare-storie.vercel.app';
+export const URL_GENERATORE = 'https://card.politicare.it';
 
 export const STATI: StatoContenuto[] = ['da_rivedere', 'da_correggere', 'approvato', 'non_va_bene'];
 export const TIPI_COMMENTO_REVISORE: TipoCommento[] = ['correzione', 'consiglio', 'complimento'];
