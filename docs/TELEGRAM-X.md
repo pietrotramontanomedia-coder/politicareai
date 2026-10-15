@@ -7,7 +7,7 @@ chiama il sito su Vercel (`/api/telegram/x`) e il sito pubblica su X.
 ## Come funziona
 
 1. Un bot Telegram è amministratore del canale: Telegram gli invia ogni post nuovo.
-2. Il bot ha un webhook che punta a `https://politicare-app.vercel.app/api/telegram/x`.
+2. Il bot ha un webhook che punta a `https://app.politicare.it/api/telegram/x`.
 3. Il sito controlla la firma segreta, scarta modifiche e post senza testo, toglie la
    firma `@politicare`, porta il testo entro 280 caratteri (contati come li conta X) e pubblica.
 4. I post pubblicati finiscono in un registro (`telegram-x/pubblicati.json` nello
@@ -94,7 +94,7 @@ Le modifiche a un post già pubblicato non si propagano.
    e crea un progetto e un'app. Dal 2026 non esiste più un piano gratuito: servono
    crediti prepagati (pay-per-use), da caricare dalla console sviluppatori.
 2. Nell'app → *User authentication settings* → **Read and Write** (tipo: Web App/Bot,
-   callback e website URL qualsiasi, es. `https://politicare-app.vercel.app`).
+   callback e website URL qualsiasi, es. `https://app.politicare.it`).
 3. *Keys and tokens*: copia **API Key** e **API Key Secret** (`X_API_KEY`, `X_API_SECRET`),
    poi genera **Access Token and Secret** dell'account (`X_ACCESS_TOKEN`, `X_ACCESS_SECRET`).
    Se i token erano già stati generati prima di impostare Read and Write, rigenerali.
@@ -135,7 +135,7 @@ npm run telegram-x stato
 ```
 
 `In attesa: 0` e nessun errore = tutto ok. Il post compare su X entro pochi secondi.
-Anche `https://politicare-app.vercel.app/api/telegram/x` (GET) dice se le chiavi sono
+Anche `https://app.politicare.it/api/telegram/x` (GET) dice se le chiavi sono
 configurate, senza mostrarle.
 
 Per vedere come uscirebbe un post, riscrittura compresa, con `ANTHROPIC_API_KEY` in `.env.local`:

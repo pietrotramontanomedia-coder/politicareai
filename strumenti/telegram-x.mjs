@@ -12,7 +12,7 @@
 import { readFileSync } from 'node:fs';
 import { componiPostConRiscrittura, lunghezzaX, opzioniFormato } from '../lib/telegram-x.ts';
 
-const SITO_PREDEFINITO = 'https://politicare-app.vercel.app';
+const SITO_PREDEFINITO = 'https://app.politicare.it';
 
 function caricaEnv() {
   try {

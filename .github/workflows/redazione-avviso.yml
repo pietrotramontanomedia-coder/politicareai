@@ -21,6 +21,6 @@ jobs:
           corpo=$(python3 -c 'import json,os; print(json.dumps({"testo": os.environ["TESTO"].replace("\\n", "\n")}))')
           codice=$(curl -s -S -m 60 -o risposta.json -w '%{http_code}' -X POST \
             -H "Authorization: Bearer $CRON_SECRET" -H 'content-type: application/json' \
-            --data "$corpo" https://politicare-app.vercel.app/api/redazione/telegram)
+            --data "$corpo" https://app.politicare.it/api/redazione/telegram)
           echo "HTTP $codice"; cat risposta.json
           [ "$codice" = "200" ]

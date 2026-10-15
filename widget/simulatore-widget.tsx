@@ -41,7 +41,7 @@ const DA_SOLA = '';
 
 // Logo e immagini della grafica arrivano dall'app che serve questo file, non da politicare.it.
 const scriptCorrente = document.currentScript as HTMLScriptElement | null;
-impostaOrigineRisorse(scriptCorrente?.src ? new URL(scriptCorrente.src).origin : 'https://politicare-app.vercel.app');
+impostaOrigineRisorse(scriptCorrente?.src ? new URL(scriptCorrente.src).origin : 'https://app.politicare.it');
 
 const specialiDi = (p: Preset): Speciali => ({ camera: { ...(p.speciali?.camera ?? {}) }, senato: { ...(p.speciali?.senato ?? {}) } });
 

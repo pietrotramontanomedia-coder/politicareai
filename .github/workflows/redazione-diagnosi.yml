@@ -20,7 +20,7 @@ jobs:
           fi
           codice=$(curl -s -S -m 120 -o risposta.json -w '%{http_code}' \
             -H "Authorization: Bearer $CRON_SECRET" \
-            https://politicare-app.vercel.app/api/redazione/diagnostica)
+            https://app.politicare.it/api/redazione/diagnostica)
           echo "HTTP $codice"
           sed -E 's/vercel_blob_rw_[A-Za-z0-9_]+/vercel_blob_rw_***/g' risposta.json | python3 -m json.tool || cat risposta.json
           [ "$codice" = "200" ]

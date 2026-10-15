@@ -53,7 +53,7 @@ di ogni quiz completato, pulsante "Salva il risultato" nei risultati del test.
 
 1. **Creare il progetto Supabase**, regione *EU Central (Frankfurt)*. In *Authentication →
    Providers* abilitare **Email** (magic link) e **Google**; in *URL Configuration* mettere
-   l'indirizzo del sito e `https://politicare-app.vercel.app/accedi` fra i redirect (in locale
+   l'indirizzo del sito e `https://app.politicare.it/accedi` fra i redirect (in locale
    anche `http://localhost:3000/accedi`).
 2. **Creare le tabelle**: incollare `supabase/schema.sql` nel SQL editor ed eseguirlo. Crea
    `profili` e `storico_quiz` con row level security (ognuno vede solo i propri dati) e la

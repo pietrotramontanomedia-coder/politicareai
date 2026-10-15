@@ -7,7 +7,7 @@ l'app con il testo già scritto, e il post lo decide e lo pubblica una persona.
 
 ## Come funziona
 
-Un job programmato chiama `https://politicare-app.vercel.app/api/radar` da una volta all'ora (per la prova) a ogni 20 minuti. A ogni giro:
+Un job programmato chiama `https://app.politicare.it/api/radar` da una volta all'ora (per la prova) a ogni 20 minuti. A ogni giro:
 
 1. **Tendenze.** Legge le prime 30 tendenze di X per l'Italia (`lib/radar-x-server.ts`).
 2. **Salita.** Le confronta con la classifica di circa un'ora prima (`lib/radar.ts`; dopo una pausa
@@ -153,7 +153,7 @@ Dopo aver salvato fai un **Redeploy**. Per spegnere il radar basta togliere `RAD
   `{ "path": "/api/radar", "schedule": "*/20 * * * *" }`. Vercel manda da solo il `CRON_SECRET`.
   Sul piano Hobby i job possono girare solo una volta al giorno e il deploy fallisce: non aggiungerlo lì.
 - **Piano Hobby**: un servizio esterno gratuito come [cron-job.org](https://cron-job.org).
-  URL `https://politicare-app.vercel.app/api/radar`, ogni ora per la prova (poi ogni 20-30 minuti), con l'intestazione
+  URL `https://app.politicare.it/api/radar`, ogni ora per la prova (poi ogni 20-30 minuti), con l'intestazione
   `Authorization: Bearer <CRON_SECRET>`.
 
 ### 6. Prova

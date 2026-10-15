@@ -64,12 +64,12 @@ jobs:
           # Il promemoria in anteprima riallinea l'indice senza mandare niente su Telegram.
           for giro in 1 2 3 4 5 6; do
             codice=$(curl -s -o /dev/null -w '%{http_code}' -m 120 -H "Authorization: Bearer $CRON_SECRET" \
-              "https://politicare-app.vercel.app/api/redazione/promemoria?anteprima=1")
+              "https://app.politicare.it/api/redazione/promemoria?anteprima=1")
             echo "riallineamento $giro: HTTP $codice"
             [ "$codice" = "200" ] && break
             sleep 10
           done
-          contenuti=$(curl -s -m 120 -H "Authorization: Bearer $CRON_SECRET" https://politicare-app.vercel.app/api/redazione/diagnostica \
+          contenuti=$(curl -s -m 120 -H "Authorization: Bearer $CRON_SECRET" https://app.politicare.it/api/redazione/diagnostica \
             | node -e 'let t="";process.stdin.on("data",d=>t+=d).on("end",()=>{try{const p=JSON.parse(t).passi.find(x=>x.passo==="archivio().stato()");console.log(p?.esito?.contenuti ?? "?")}catch{console.log("?")}})')
           echo "Contenuti nell'indice: $contenuti"
           echo "$contenuti" > contenuti.txt
