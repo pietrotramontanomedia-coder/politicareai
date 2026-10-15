@@ -12,9 +12,11 @@ RUN npm run build
 FROM node:22-alpine
 WORKDIR /app
 ENV NODE_ENV=production PORT=3000 HOSTNAME=0.0.0.0 NEXT_TELEMETRY_DISABLED=1 TZ=Europe/Rome
-COPY --from=costruzione /app/.next/standalone ./
-COPY --from=costruzione /app/.next/static ./.next/static
+# .next di node: Next.js ci scrive la cache delle pagine che si rigenerano (con root dava EACCES).
+COPY --from=costruzione --chown=node:node /app/.next/standalone ./
+COPY --from=costruzione --chown=node:node /app/.next/static ./.next/static
 COPY --from=costruzione /app/public ./public
+RUN mkdir -p .next/cache && chown node:node .next/cache
 USER node
 EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=5s CMD wget -qO- http://127.0.0.1:3000/redazione >/dev/null || exit 1
