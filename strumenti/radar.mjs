@@ -8,7 +8,7 @@
  */
 import { readFileSync } from 'node:fs';
 
-const SITO_PREDEFINITO = 'https://politicare-app.vercel.app';
+const SITO_PREDEFINITO = 'https://app.politicare.it';
 
 function caricaEnv() {
   try {

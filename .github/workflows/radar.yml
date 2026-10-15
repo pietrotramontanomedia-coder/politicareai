@@ -23,7 +23,7 @@ jobs:
           fi
           codice=$(curl -s -S -m 300 -o risposta.json -w '%{http_code}' \
             -H "Authorization: Bearer $CRON_SECRET" \
-            https://politicare-app.vercel.app/api/radar)
+            https://app.politicare.it/api/radar)
           # Il repository è pubblico e questi log sono visibili a tutti:
           # si stampa solo l'esito, mai le bozze o il contenuto della risposta.
           esito=$(node -e 'const r=require("./risposta.json");console.log(r.ok?(r.nota??"giro eseguito"):("errore: "+r.error))' 2>/dev/null || echo "risposta non leggibile")

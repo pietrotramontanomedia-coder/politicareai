@@ -14,7 +14,7 @@ import { pubblicaSuX, rifiutatoDaX, xConfigurato } from '@/lib/x-server';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
-const SITO = process.env.SITO_URL ?? 'https://politicare-app.vercel.app';
+const SITO = process.env.SITO_URL ?? 'https://app.politicare.it';
 
 /**
  * Minuti minimi fra un post e l'altro su X. Predefinito 0: ogni post del canale esce subito
