@@ -1,4 +1,5 @@
 import { get, put } from '@vercel/blob';
+import { archivioNostroConfigurato, leggiJsonNostro, scriviJsonNostro } from './archivio-nostro';
 
 /**
  * Registro dei post Telegram già pubblicati su X, per non pubblicare due volte
@@ -26,6 +27,13 @@ let ultimaLocale = 0;
 const improteLocali: { impronta: string; quando: number }[] = [];
 
 async function leggi(): Promise<Registro> {
+  if (archivioNostroConfigurato()) {
+    try {
+      return (await leggiJsonNostro<Registro>(PERCORSO)) ?? { voci: {} };
+    } catch {
+      return { voci: {} };
+    }
+  }
   if (!process.env.BLOB_READ_WRITE_TOKEN) return memoria;
   try {
     // Senza cache: la copia sulla CDN può restare indietro di un minuto, e due post consegnati
@@ -72,6 +80,7 @@ export async function registraPubblicazione(numero: number, idX: string, impront
   registro.voci[String(numero)] = { x: idX, data: adesso.toISOString(), ...(impronta ? { impronta } : {}) };
   const chiavi = Object.keys(registro.voci).sort((a, b) => Number(b) - Number(a));
   for (const vecchia of chiavi.slice(MASSIMO_VOCI)) delete registro.voci[vecchia];
+  if (archivioNostroConfigurato()) return scriviJsonNostro(PERCORSO, registro);
   if (!process.env.BLOB_READ_WRITE_TOKEN) return;
   await put(PERCORSO, JSON.stringify(registro), {
     access: 'private',

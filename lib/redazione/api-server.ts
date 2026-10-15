@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { archivio, ErroreRedazione } from './archivio-server';
+import { ErroreArchivio } from '../archivio-nostro';
 import { letturaNegata, storeSospeso } from './blob-server';
 import { gettoneDaRichiesta, redazioneConfigurata, sessioneAncoraValida } from './sessione-server';
 import type { SessioneRedazione } from './tipi';
@@ -14,6 +15,8 @@ export const MESSAGGIO_STORE_SOSPESO =
   'Lo spazio su Vercel Blob dove stanno post, storie e foto è stato sospeso da Vercel perché ha superato i limiti del piano gratuito. I contenuti sono al sicuro ma non si leggono finché lo store non viene riattivato: chi coordina trova i passi in docs/REDAZIONE.md («Store sospeso»).';
 export const MESSAGGIO_LETTURA_NEGATA =
   'Vercel Blob rifiuta la lettura dei file (403). Di solito vuol dire che lo store è sospeso per i limiti del piano: chi coordina trova i passi in docs/REDAZIONE.md («Store sospeso»).';
+export const MESSAGGIO_ARCHIVIO_IRRAGGIUNGIBILE =
+  'Il server dove stanno post, storie e foto non risponde. I contenuti sono al sicuro: riprova tra qualche minuto, e se continua avvisa chi coordina.';
 
 /** Nome e messaggio dell'errore, per i log e per chi coordina (mai il token: gli errori di Blob non lo contengono). */
 export function descriviErrore(errore: unknown): string {
@@ -36,6 +39,13 @@ export function rispostaErrore(errore: unknown, perRevisore = false): Response {
         codice: storeSospeso(errore) ? 'storage_sospeso' : 'storage_negato',
         ...(perRevisore ? { dettaglio: descriviErrore(errore) } : {}),
       },
+      { status: 503 },
+    );
+  }
+  if (errore instanceof ErroreArchivio && errore.status === 503) {
+    console.error('[redazione] archivio non raggiungibile', errore);
+    return Response.json(
+      { ok: false, errore: MESSAGGIO_ARCHIVIO_IRRAGGIUNGIBILE, codice: 'archivio_irraggiungibile', ...(perRevisore ? { dettaglio: descriviErrore(errore) } : {}) },
       { status: 503 },
     );
   }

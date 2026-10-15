@@ -1,0 +1,42 @@
+# Archivio di Politicare: PostgreSQL + il piccolo servizio HTTP davanti (server.mjs).
+# Sul server sta in /opt/archivio, con un .env accanto (ARCHIVIO_TOKEN, POSTGRES_PASSWORD).
+# Nessuna porta pubblicata: da fuori si arriva solo da Caddy della newsletter, che inoltra
+# https://newsletter.politicare.it/archivio/… al servizio sulla rete interna.
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: archivio
+      POSTGRES_USER: archivio
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?manca POSTGRES_PASSWORD in .env}
+    volumes:
+      - dati-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U archivio -d archivio"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+    networks: [privata]
+
+  archivio:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://archivio:${POSTGRES_PASSWORD}@db:5432/archivio
+      ARCHIVIO_TOKEN: ${ARCHIVIO_TOKEN:?manca ARCHIVIO_TOKEN in .env}
+      TZ: Europe/Rome
+    networks: [privata, newsletter]
+
+networks:
+  privata:
+  # La rete di Caddy (progetto /opt/newsletter): Caddy vede il servizio come «archivio».
+  newsletter:
+    external: true
+    name: newsletter_interna
+
+volumes:
+  dati-db:
