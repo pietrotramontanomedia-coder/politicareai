@@ -103,6 +103,17 @@ A ogni post, storia o nuova versione arriva nel canale della redazione un messag
 Se Telegram non risponde la pubblicazione va comunque a buon fine; se le foto non partono
 arriva almeno il testo.
 
+## Il portale sul nostro server (dal 15/10/2026)
+
+Anche il portale gira sul server Hetzner, non più su Vercel: **https://redazione.politicare.it**.
+
+- `/opt/redazione`: il container della stessa app Next.js (`servizi/redazione`), con il codice in
+  `/opt/redazione/codice` e le variabili in `/opt/redazione/.env` (REDAZIONE_CODICE,
+  REDAZIONE_CODICE_REVISORI, REDAZIONE_REVISORI, REDAZIONE_SEGRETO, ARCHIVIO_TOKEN, CRON_SECRET).
+- Parla con l'archivio sulla rete interna (`http://archivio:8090`). Caddy della newsletter serve
+  il dominio e prende da solo il certificato HTTPS.
+- Aggiornare: `ssh root@2.28.205.90 /opt/redazione/aggiorna.sh` (prende main e ricostruisce, circa 2 minuti).
+
 ## Archivio sul nostro server (dal 15/10/2026)
 
 Post, storie, foto, commenti e impostazioni non stanno più su Vercel Blob ma in un database
