@@ -1,6 +1,7 @@
 {
   "framework": "nextjs",
   "redirects": [
+    { "source": "/", "destination": "https://app.politicare.it/", "permanent": true },
     { "source": "/redazione/:percorso*", "destination": "https://redazione.politicare.it/redazione/:percorso*", "permanent": true },
     { "source": "/:percorso*", "destination": "https://app.politicare.it/:percorso*", "permanent": true }
   ]
