@@ -1,0 +1,51 @@
+# Sorveglianza del portale della redazione sul nostro server: ogni 15 minuti controlla che il
+# portale (redazione.politicare.it) e l'archivio rispondano. Se uno dei due non va per due
+# controlli di fila apre una issue (arriva per mail); quando torna a funzionare la chiude.
+name: Sorveglianza redazione
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+concurrency:
+  group: sorveglianza-redazione
+  cancel-in-progress: false
+
+jobs:
+  controllo:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Controlla portale e archivio
+        id: controllo
+        run: |
+          prova() { # nome, indirizzo, testo atteso
+            for tentativo in 1 2; do
+              corpo=$(curl -s -S -m 20 "$2" 2>&1) && echo "$corpo" | grep -q "$3" && { echo "ok $1"; return 0; }
+              sleep 60
+            done
+            echo "GUASTO $1: $(echo "$corpo" | head -c 200)"; return 1
+          }
+          esito=0
+          prova "portale" https://redazione.politicare.it/redazione "Entra in redazione" >> rapporto.txt || esito=1
+          prova "archivio" https://newsletter.politicare.it/archivio/salute '"ok":true' >> rapporto.txt || esito=1
+          cat rapporto.txt
+          echo "guasto=$esito" >> "$GITHUB_OUTPUT"
+      - name: Apre o chiude la segnalazione
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TITOLO: "Portale redazione: qualcosa non risponde"
+        run: |
+          aperta=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search "\"$TITOLO\" in:title" --json number -q '.[0].number')
+          if [ "${{ steps.controllo.outputs.guasto }}" = "1" ]; then
+            if [ -z "$aperta" ]; then
+              { echo "Controllo delle $(TZ=Europe/Rome date '+%H:%M del %d/%m'):"; echo; sed 's/^/- /' rapporto.txt; echo; echo "Server: ssh root@2.28.205.90 — portale in /opt/redazione, archivio in /opt/archivio (docker compose ps / logs). Guida: docs/REDAZIONE.md."; } > corpo.md
+              gh issue create --repo "$GITHUB_REPOSITORY" --title "$TITOLO" --body-file corpo.md
+            fi
+            exit 1
+          elif [ -n "$aperta" ]; then
+            gh issue close "$aperta" --repo "$GITHUB_REPOSITORY" --comment "Di nuovo tutto ok alle $(TZ=Europe/Rome date '+%H:%M del %d/%m')."
+          fi
