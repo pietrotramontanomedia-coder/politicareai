@@ -6,6 +6,15 @@ import { COOKIE_SESSIONE, leggiToken, redazioneConfigurata } from '@/lib/redazio
 export const metadata: Metadata = {
   title: 'Redazione — Politicare',
   robots: { index: false, follow: false },
+  manifest: '/icone/redazione/manifest.webmanifest',
+  appleWebApp: { capable: true, statusBarStyle: 'black-translucent', title: 'Redazione' },
+  icons: {
+    icon: [
+      { url: '/icone/redazione/favicon-32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/icone/redazione/icon-192.png', sizes: '192x192', type: 'image/png' },
+    ],
+    apple: [{ url: '/icone/redazione/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
+  },
 };
 
 export const dynamic = 'force-dynamic';
