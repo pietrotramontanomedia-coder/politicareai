@@ -1,0 +1,94 @@
+# Recupero dal vecchio store Vercel Blob, sospeso il 14/10/2026 (vedi docs/REDAZIONE.md).
+# Ogni 3 ore prova a scaricare un file. Finché Vercel risponde «store blocked» si ferma lì, senza
+# installare niente e senza errori. Appena il file arriva, lancia strumenti/migra-blob.mjs copia, che
+# scrive solo i file che mancano: non sovrascrive e non cancella. Poi riallinea l'indice della
+# redazione, apre una issue con l'esito e si spegne da solo.
+# Il repository è pubblico e i log si vedono: qui si stampano solo i percorsi dei file, mai il contenuto.
+name: Recupero vecchio store
+
+on:
+  schedule:
+    - cron: '23 */3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+  actions: write
+
+jobs:
+  recupero:
+    runs-on: ubuntu-latest
+    env:
+      BLOB_READ_WRITE_TOKEN: ${{ secrets.BLOB_READ_WRITE_TOKEN }}
+      ARCHIVIO_URL: ${{ secrets.ARCHIVIO_URL }}
+      ARCHIVIO_TOKEN: ${{ secrets.ARCHIVIO_TOKEN }}
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
+    steps:
+      - name: Lo store si legge?
+        id: prova
+        run: |
+          for nome in BLOB_READ_WRITE_TOKEN ARCHIVIO_URL ARCHIVIO_TOKEN CRON_SECRET; do
+            [ -n "${!nome}" ] || { echo "$nome non impostato fra i segreti del repository"; exit 1; }
+          done
+          token=$(printf '%s' "$BLOB_READ_WRITE_TOKEN" | tr -d '"'"'"' \r\n')
+          store=$(printf '%s' "$token" | cut -d_ -f4 | tr 'A-Z' 'a-z')
+          codice=$(curl -s -o risposta.txt -w '%{http_code}' -m 30 -H "Authorization: Bearer $token" \
+            "https://$store.private.blob.vercel-storage.com/redazione/impostazioni/persone.json")
+          if [ "$codice" = "200" ]; then
+            echo "Lo store si legge di nuovo: si copia."
+            echo "leggibile=1" >> "$GITHUB_OUTPUT"
+          else
+            echo "Ancora chiuso: HTTP $codice $(head -c 80 risposta.txt). Si riprova fra 3 ore."
+          fi
+          rm -f risposta.txt
+
+      - uses: actions/checkout@v4
+        if: steps.prova.outputs.leggibile == '1'
+
+      - uses: actions/setup-node@v4
+        if: steps.prova.outputs.leggibile == '1'
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Copia i file che mancano
+        if: steps.prova.outputs.leggibile == '1'
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          node --no-warnings strumenti/migra-blob.mjs copia | tee esito.txt
+
+      - name: Riallinea l'indice della redazione
+        if: steps.prova.outputs.leggibile == '1'
+        run: |
+          # Il promemoria in anteprima riallinea l'indice senza mandare niente su Telegram.
+          for giro in 1 2 3 4 5 6; do
+            codice=$(curl -s -o /dev/null -w '%{http_code}' -m 120 -H "Authorization: Bearer $CRON_SECRET" \
+              "https://politicare-app.vercel.app/api/redazione/promemoria?anteprima=1")
+            echo "riallineamento $giro: HTTP $codice"
+            [ "$codice" = "200" ] && break
+            sleep 10
+          done
+          contenuti=$(curl -s -m 120 -H "Authorization: Bearer $CRON_SECRET" https://politicare-app.vercel.app/api/redazione/diagnostica \
+            | node -e 'let t="";process.stdin.on("data",d=>t+=d).on("end",()=>{try{const p=JSON.parse(t).passi.find(x=>x.passo==="archivio().stato()");console.log(p?.esito?.contenuti ?? "?")}catch{console.log("?")}})')
+          echo "Contenuti nell'indice: $contenuti"
+          echo "$contenuti" > contenuti.txt
+
+      - name: Avvisa e si spegne
+        if: steps.prova.outputs.leggibile == '1'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          {
+            echo "Il vecchio store Vercel Blob si è riaperto e la copia è partita."
+            echo
+            echo "Contenuti nell'indice della redazione dopo il riallineamento: $(cat contenuti.txt) (attesi almeno 40)."
+            echo
+            echo '```'
+            grep -v '^copiato ' esito.txt
+            echo '```'
+            echo
+            echo "Il workflow «Recupero vecchio store» si è spento da solo. Se qualcosa è FERMATO o in ERRORE, riaccenderlo da Actions e rilanciarlo: copia solo quello che manca."
+          } > corpo.md
+          gh issue create --repo "$GITHUB_REPOSITORY" --title "Recupero vecchio store: esito della copia" --body-file corpo.md
+          gh workflow disable recupero-blob.yml --repo "$GITHUB_REPOSITORY"
