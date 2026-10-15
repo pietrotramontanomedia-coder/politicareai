@@ -2,7 +2,7 @@
 
 `/redazione` è la palestra interna dei ragazzi della redazione: pubblicano post e storie come
 su Instagram, e chi coordina vede tutto, lascia correzioni e consigli e segue come lavora
-ognuno. Le grafiche si fanno nel generatore (https://politicare-storie.vercel.app): qui si
+ognuno. Le grafiche si fanno nel generatore (https://card.politicare.it): qui si
 pubblicano soltanto. Nulla esce dal portale: niente viene pubblicato sui social, le foto sono private e la
 pagina non è indicizzata. Non ha legami con il profilo pubblico dell'app né con il test partiti.
 
