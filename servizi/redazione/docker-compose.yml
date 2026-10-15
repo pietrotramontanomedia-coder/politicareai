@@ -1,0 +1,21 @@
+# Portale della redazione sul server Hetzner (/opt/redazione), accanto a newsletter e archivio.
+# Il codice è una copia del repository in /opt/redazione/codice (aggiorna.sh la rinnova).
+# Le variabili stanno in /opt/redazione/.env: REDAZIONE_CODICE, REDAZIONE_CODICE_REVISORI,
+# REDAZIONE_REVISORI, REDAZIONE_SEGRETO, ARCHIVIO_TOKEN, CRON_SECRET.
+# Nessuna porta pubblicata: Caddy della newsletter serve https://redazione.politicare.it.
+services:
+  portale:
+    build:
+      context: ./codice
+      dockerfile: servizi/redazione/Dockerfile
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      # L'archivio è sulla stessa rete interna: niente giro su Internet.
+      ARCHIVIO_URL: http://archivio:8090
+    networks: [newsletter]
+
+networks:
+  newsletter:
+    external: true
+    name: newsletter_interna
