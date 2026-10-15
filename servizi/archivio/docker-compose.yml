@@ -1,0 +1,30 @@
+# Archivio di Politicare: PostgreSQL + il piccolo servizio HTTP davanti.
+# Sul server sta in /opt/archivio, con un .env accanto (ARCHIVIO_TOKEN, POSTGRES_PASSWORD).
+# Il servizio ascolta solo su 127.0.0.1: da fuori ci si arriva dal proxy HTTPS del server.
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: archivio
+      POSTGRES_USER: archivio
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ./dati:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U archivio -d archivio"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  archivio:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://archivio:${POSTGRES_PASSWORD}@db:5432/archivio
+      ARCHIVIO_TOKEN: ${ARCHIVIO_TOKEN}
+    ports:
+      - "127.0.0.1:8090:8090"

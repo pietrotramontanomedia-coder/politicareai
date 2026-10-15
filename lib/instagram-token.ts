@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import { get, put } from '@vercel/blob';
+import { archivioNostroConfigurato, leggiJsonNostro, scriviJsonNostro } from './archivio-nostro';
 
 /**
  * Il token Instagram dura 60 giorni. Un job settimanale lo rinnova e salva la
@@ -43,6 +44,11 @@ export function calcolaScadenza(secondiValidita: number, da: Date): string {
 
 async function leggiDaStorage(): Promise<TokenSalvato | null> {
   if (cache && Date.now() - cache.letto < DURATA_CACHE_MS) return cache.valore;
+  if (archivioNostroConfigurato()) {
+    const valore = await leggiJsonNostro<TokenSalvato>(PERCORSO).catch(() => null);
+    cache = { valore, letto: Date.now() };
+    return valore;
+  }
   if (!process.env.BLOB_READ_WRITE_TOKEN) return null;
 
   let valore: TokenSalvato | null = null;
@@ -99,7 +105,8 @@ export async function rinnovaToken(
     scadeIl: calcolaScadenza(dati.expires_in, adesso),
     origineAmbiente: ambiente ? impronta(ambiente) : undefined,
   };
-  await put(PERCORSO, JSON.stringify(nuovo), {
+  if (archivioNostroConfigurato()) await scriviJsonNostro(PERCORSO, nuovo);
+  else await put(PERCORSO, JSON.stringify(nuovo), {
     access: 'private',
     addRandomSuffix: false,
     allowOverwrite: true,

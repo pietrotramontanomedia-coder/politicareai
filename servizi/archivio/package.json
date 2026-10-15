@@ -1,0 +1,7 @@
+{
+  "name": "politicare-archivio",
+  "private": true,
+  "type": "module",
+  "scripts": { "start": "node server.mjs" },
+  "dependencies": { "postgres": "3.4.7" }
+}

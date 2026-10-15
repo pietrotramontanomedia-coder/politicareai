@@ -1,4 +1,5 @@
 import { BlobError, BlobNotFoundError, BlobStoreSuspendedError, get, head, list, put } from '@vercel/blob';
+import { archivioNostroConfigurato, elencaOggetti, leggiOggetto, metadatiOggetto, scriviOggetto } from '../archivio-nostro';
 
 /*
  * Lo strato fra il portale della redazione e Vercel Blob. Si adatta allo store com'è, senza
@@ -7,6 +8,9 @@ import { BlobError, BlobNotFoundError, BlobStoreSuspendedError, get, head, list,
  * rifiutata prova per l'indirizzo pubblico. Ogni lettura passa dai metadati (head, sempre
  * freschi): l'ETag che ne esce è lo stesso che accettano le scritture condizionate, e permette di
  * saltare il download quando il file non è cambiato.
+ *
+ * Con ARCHIVIO_URL e ARCHIVIO_TOKEN tutto va invece all'archivio sul nostro server
+ * (lib/archivio-nostro.ts), con le stesse funzioni e lo stesso comportamento.
  */
 
 export type AccessoStore = 'public' | 'private';
@@ -27,7 +31,7 @@ export function tokenBlob(): string | undefined {
 }
 
 export function blobConfigurato(): boolean {
-  return tokenBlob() !== undefined;
+  return archivioNostroConfigurato() || tokenBlob() !== undefined;
 }
 
 let accessoNoto: AccessoStore | null = null;
@@ -72,6 +76,10 @@ export interface MetadatiBlob {
 
 /** I metadati di un file, sempre freschi (passano dall'API, non dalla CDN); null se non esiste. */
 export async function metadatiBlob(percorso: string): Promise<MetadatiBlob | null> {
+  if (archivioNostroConfigurato()) {
+    const m = await metadatiOggetto(percorso);
+    return m && { url: percorso, ...m };
+  }
   try {
     const h = await head(percorso, { token: tokenBlob() });
     return { url: h.url, etag: h.etag, contentType: h.contentType, size: h.size, uploadedAt: h.uploadedAt };
@@ -104,6 +112,11 @@ async function scaricaPerUrl(url: string, etag: string, accesso: AccessoStore): 
  * per l'indirizzo privato è rifiutata, prova per quello pubblico e se funziona lo ricorda.
  */
 export async function leggiBlob(percorso: string, ifNoneMatch?: string): Promise<LetturaBlob | null> {
+  if (archivioNostroConfigurato()) {
+    const r = await leggiOggetto(percorso, ifNoneMatch);
+    if (!r || r.statusCode === 304) return r;
+    return { statusCode: 200, stream: new Blob([r.corpo as Uint8Array<ArrayBuffer>]).stream(), etag: r.etag, contentType: r.contentType };
+  }
   const meta = await metadatiBlob(percorso);
   if (!meta) return null;
   if (ifNoneMatch && ifNoneMatch === meta.etag) return { statusCode: 304, etag: meta.etag, contentType: meta.contentType };
@@ -147,6 +160,10 @@ export interface OpzioniScrittura {
 
 /** Scrive un file con l'accesso giusto per lo store. Restituisce l'ETag (quello dell'API, buono per ifMatch). */
 export async function scriviBlob(percorso: string, corpo: string | Buffer, opzioni: OpzioniScrittura): Promise<{ etag: string; url: string; pathname: string }> {
+  if (archivioNostroConfigurato()) {
+    const r = await scriviOggetto(percorso, corpo, opzioni);
+    return { ...r, url: r.pathname };
+  }
   const accesso = await accessoStore();
   const r = await put(percorso, corpo, {
     access: accesso,
@@ -169,6 +186,9 @@ export interface VoceElenco {
 
 /** Tutti i file con un prefisso, pagina dopo pagina. */
 export async function elencaBlob(prefix: string): Promise<VoceElenco[]> {
+  if (archivioNostroConfigurato()) {
+    return (await elencaOggetti(prefix)).map((v) => ({ pathname: v.pathname, url: v.pathname, size: v.size, uploadedAt: v.uploadedAt }));
+  }
   const voci: VoceElenco[] = [];
   let cursor: string | undefined;
   do {

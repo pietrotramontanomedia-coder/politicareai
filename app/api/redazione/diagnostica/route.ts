@@ -1,4 +1,5 @@
 import { get, head, list } from '@vercel/blob';
+import { archivioNostroConfigurato, elencaOggetti } from '@/lib/archivio-nostro';
 import { autorizzatoCron } from '@/lib/cron';
 import { conSessione, descriviErrore, rispostaErrore } from '@/lib/redazione/api-server';
 import { archivio, ErroreRedazione } from '@/lib/redazione/archivio-server';
@@ -57,56 +58,72 @@ async function diagnosi(sessione: SessioneRedazione): Promise<Response> {
         tokenPulito: grezzo !== undefined && grezzo !== token ? 'sì: conteneva spazi o virgolette' : 'non serviva',
         accessoForzato: process.env.REDAZIONE_BLOB_ACCESSO ?? null,
         costruzioneMs: process.env.REDAZIONE_COSTRUZIONE_MS ?? '(7000)',
+        archivioNostro: archivioNostroConfigurato() ? `attivo (${new URL(process.env.ARCHIVIO_URL!.trim()).host})` : 'spento: si usa Vercel Blob',
         regione: process.env.VERCEL_REGION ?? null,
         node: process.version,
       },
     });
-    if (!token) return Response.json({ ok: true, passi });
+    if (archivioNostroConfigurato()) {
+      passi.push(
+        await passo('archivio nostro: salute', async () => {
+          const r = await fetch(`${process.env.ARCHIVIO_URL!.trim().replace(/\/+$/, '')}/salute`, { cache: 'no-store', signal: AbortSignal.timeout(10_000) });
+          return `HTTP ${r.status} ${await r.text()}`;
+        }),
+      );
+      passi.push(
+        await passo('archivio nostro: copie contenuti', async () => {
+          const voci = await elencaOggetti('redazione/contenuti/');
+          return { quante: voci.length, prima: voci[0]?.pathname ?? null, byte: voci.reduce((n, v) => n + v.size, 0) };
+        }),
+      );
+    } else {
+      if (!token) return Response.json({ ok: true, passi });
 
-    passi.push(
-      await passo('tipo di store (dall\'indirizzo dei file)', async () => {
-        const pagina = await list({ limit: 1, token });
-        return { primoFile: pagina.blobs[0]?.url ?? null, accesso: accessoDaUrl(pagina.blobs[0]?.url) ?? 'sconosciuto (store vuoto)', usato: await accessoStore() };
-      }),
-    );
-    passi.push(
-      await passo('list copie contenuti', async () => {
-        const pagina = await list({ prefix: 'redazione/contenuti/', limit: 1000, token });
-        return { quante: pagina.blobs.length, altre: pagina.hasMore, prima: pagina.blobs[0]?.pathname ?? null, byte: pagina.blobs.reduce((n, b) => n + b.size, 0) };
-      }),
-    );
-    passi.push(
-      await passo('head indice', async () => {
-        const m = await metadatiBlob('redazione/indice.json');
-        return m ? { url: m.url, etag: m.etag, byte: m.size } : 'assente (ancora da costruire)';
-      }),
-    );
-    passi.push(
-      await passo('lettura di una copia: per l\'indirizzo privato e per quello pubblico', async () => {
-        const pagina = await list({ prefix: 'redazione/contenuti/', limit: 1, token });
-        const p = pagina.blobs[0];
-        if (!p) return 'nessuna copia';
-        const h = await head(p.pathname, { token });
-        const esiti: Record<string, string> = { url: h.url, etag: h.etag };
-        for (const [nome, url, accesso] of [
-          ['privato', h.url.replace('.public.blob.', '.private.blob.'), 'private'],
-          ['pubblico', h.url.replace('.private.blob.', '.public.blob.'), 'public'],
-        ] as const) {
-          try {
-            esiti[nome] = await provaLettura(url, accesso);
-          } catch (e) {
-            esiti[nome] = descriviErrore(e);
+      passi.push(
+        await passo('tipo di store (dall\'indirizzo dei file)', async () => {
+          const pagina = await list({ limit: 1, token });
+          return { primoFile: pagina.blobs[0]?.url ?? null, accesso: accessoDaUrl(pagina.blobs[0]?.url) ?? 'sconosciuto (store vuoto)', usato: await accessoStore() };
+        }),
+      );
+      passi.push(
+        await passo('list copie contenuti', async () => {
+          const pagina = await list({ prefix: 'redazione/contenuti/', limit: 1000, token });
+          return { quante: pagina.blobs.length, altre: pagina.hasMore, prima: pagina.blobs[0]?.pathname ?? null, byte: pagina.blobs.reduce((n, b) => n + b.size, 0) };
+        }),
+      );
+      passi.push(
+        await passo('head indice', async () => {
+          const m = await metadatiBlob('redazione/indice.json');
+          return m ? { url: m.url, etag: m.etag, byte: m.size } : 'assente (ancora da costruire)';
+        }),
+      );
+      passi.push(
+        await passo('lettura di una copia: per l\'indirizzo privato e per quello pubblico', async () => {
+          const pagina = await list({ prefix: 'redazione/contenuti/', limit: 1, token });
+          const p = pagina.blobs[0];
+          if (!p) return 'nessuna copia';
+          const h = await head(p.pathname, { token });
+          const esiti: Record<string, string> = { url: h.url, etag: h.etag };
+          for (const [nome, url, accesso] of [
+            ['privato', h.url.replace('.public.blob.', '.private.blob.'), 'private'],
+            ['pubblico', h.url.replace('.private.blob.', '.public.blob.'), 'public'],
+          ] as const) {
+            try {
+              esiti[nome] = await provaLettura(url, accesso);
+            } catch (e) {
+              esiti[nome] = descriviErrore(e);
+            }
           }
-        }
-        try {
-          const r = await leggiBlobJson<{ id?: string; tipo?: string }>(p.pathname);
-          esiti.conLoStratoDelPortale = r && r.statusCode === 200 ? `ok: ${r.dati.tipo} ${r.dati.id}` : String(r?.statusCode);
-        } catch (e) {
-          esiti.conLoStratoDelPortale = descriviErrore(e);
-        }
-        return esiti;
-      }),
-    );
+          try {
+            const r = await leggiBlobJson<{ id?: string; tipo?: string }>(p.pathname);
+            esiti.conLoStratoDelPortale = r && r.statusCode === 200 ? `ok: ${r.dati.tipo} ${r.dati.id}` : String(r?.statusCode);
+          } catch (e) {
+            esiti.conLoStratoDelPortale = descriviErrore(e);
+          }
+          return esiti;
+        }),
+      );
+    }
     // Scrittura condizionata, come la fa l'archivio: crea, legge l'ETag dai metadati, riscrive con ifMatch, poi con un ETag vecchio.
     const prova = `redazione/diagnostica/${Date.now()}.json`;
     passi.push(

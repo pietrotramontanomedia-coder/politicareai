@@ -1,4 +1,5 @@
 import { get, put } from '@vercel/blob';
+import { archivioNostroConfigurato, leggiJsonNostro, scriviJsonNostro } from './archivio-nostro';
 import type { Avviso, Rilevazione } from './radar';
 
 /**
@@ -17,6 +18,9 @@ export interface StatoRadar {
 let memoria: StatoRadar = { rilevazioni: [], avvisi: [] };
 
 export async function leggiStato(): Promise<StatoRadar> {
+  if (archivioNostroConfigurato()) {
+    return (await leggiJsonNostro<StatoRadar>(PERCORSO).catch(() => null)) ?? { rilevazioni: [], avvisi: [] };
+  }
   if (!process.env.BLOB_READ_WRITE_TOKEN) return memoria;
   try {
     const risultato = await get(PERCORSO, { access: 'private', useCache: false });
@@ -28,6 +32,7 @@ export async function leggiStato(): Promise<StatoRadar> {
 }
 
 export async function salvaStato(stato: StatoRadar): Promise<void> {
+  if (archivioNostroConfigurato()) return scriviJsonNostro(PERCORSO, stato);
   if (!process.env.BLOB_READ_WRITE_TOKEN) {
     memoria = stato;
     return;
