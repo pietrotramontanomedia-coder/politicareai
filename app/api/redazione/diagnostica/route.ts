@@ -76,6 +76,23 @@ async function diagnosi(sessione: SessioneRedazione): Promise<Response> {
           return { quante: voci.length, prima: voci[0]?.pathname ?? null, byte: voci.reduce((n, v) => n + v.size, 0) };
         }),
       );
+      // Il vecchio store Vercel (sospeso il 14/10/2026): se una copia si scarica, si lancia strumenti/migra-blob.mjs.
+      if (token) {
+        passi.push(
+          await passo('vecchio store Vercel: si legge?', async () => {
+            const pagina = await list({ prefix: 'redazione/contenuti/', limit: 1000, token });
+            const p = pagina.blobs[0];
+            if (!p) return { copie: 0 };
+            let lettura: string;
+            try {
+              lettura = await provaLettura(p.url, accessoDaUrl(p.url) ?? 'private');
+            } catch (e) {
+              lettura = descriviErrore(e);
+            }
+            return { copie: pagina.blobs.length, lettura, leggibile: lettura === 'stato 200' };
+          }),
+        );
+      }
     } else {
       if (!token) return Response.json({ ok: true, passi });
 

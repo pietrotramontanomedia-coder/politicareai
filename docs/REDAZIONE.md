@@ -127,6 +127,28 @@ token Instagram. Niente limiti di operazioni e niente costi in più.
 I 40 contenuti pubblicati fino al 14/10 sono rimasti nel vecchio store Vercel, che è sospeso:
 si recuperano copiandoli nell'archivio nuovo appena Vercel lo rende di nuovo leggibile.
 
+### Recupero dal vecchio store
+
+Nel vecchio store ci sono 135 file (inventario del 15/10/2026): 40 contenuti, 42 foto,
+`redazione/impostazioni/persone.json` (le password dei ragazzi), 49 copie dello storico,
+`radar/stato.json`, `telegram-x/pubblicati.json` e `instagram/token.json`. `obiettivi.json` e
+`indice.json` nel vecchio store non ci sono mai stati. Al 15/10 lo store risponde a elenchi e
+metadati ma rifiuta ogni download (403).
+
+1. **Si legge?** Workflow **Diagnosi redazione**: il passo «vecchio store Vercel: si legge?» deve
+   dire `leggibile: true`.
+2. **Prova**: `node strumenti/migra-blob.mjs prova` elenca cosa copierebbe e cosa c'è già,
+   senza scaricare né scrivere. Vuole `BLOB_READ_WRITE_TOKEN`, `ARCHIVIO_URL` e `ARCHIVIO_TOKEN`
+   (in `.env.local` o nell'ambiente; la chiave dell'archivio è in `/opt/archivio/.env` sul server).
+3. **Copia**: `node strumenti/migra-blob.mjs copia`. Scrive solo i file che nell'archivio nostro
+   mancano (`If-None-Match: *`): non sovrascrive e non cancella niente. Un file presente in tutti e
+   due ma diverso compare come `DIVERSO` e si guarda a mano. Se lo store si richiude a metà si
+   ferma; rilanciato, riprende da quello che manca. Prima copia contenuti, foto e impostazioni.
+4. **Riallineamento**: `GET /api/redazione/promemoria?anteprima=1` con
+   `Authorization: Bearer <CRON_SECRET>` riallinea l'indice senza mandare niente su Telegram.
+5. **Controllo**: di nuovo la Diagnosi: «archivio().stato()» deve dire `contenuti: 40` (o di più,
+   con quelli pubblicati dopo il 15/10) e «archivio nostro: copie contenuti» almeno 40.
+
 ## Store sospeso (limiti del piano Hobby, fino al 14/10/2026)
 
 Vercel Blob nel piano **Hobby** include al mese 10.000 operazioni semplici (letture, metadati),

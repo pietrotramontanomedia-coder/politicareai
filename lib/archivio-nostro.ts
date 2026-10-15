@@ -17,13 +17,14 @@ export function archivioNostroConfigurato(): boolean {
   return Boolean(process.env.ARCHIVIO_URL?.trim() && process.env.ARCHIVIO_TOKEN?.trim());
 }
 
+// Senza «parameter property» nel costruttore: così anche gli strumenti in node (strumenti/*.mjs) lo importano.
 export class ErroreArchivio extends Error {
-  constructor(
-    readonly status: number,
-    messaggio: string,
-  ) {
+  readonly status: number;
+
+  constructor(status: number, messaggio: string) {
     super(messaggio);
     this.name = 'ErroreArchivio';
+    this.status = status;
   }
 }
 
