@@ -1,10 +1,11 @@
 import { autorizzatoCron } from '@/lib/cron';
-import { provaBotRedazione, statoBotRedazione } from '@/lib/redazione/telegram-server';
+import { inviaTestoRedazione, provaBotRedazione, statoBotRedazione } from '@/lib/redazione/telegram-server';
 
 /**
  * Messa a punto degli avvisi Telegram della redazione, con `Authorization: Bearer <CRON_SECRET>`.
  * GET: nome del bot e chat in cui è stato aggiunto (per trovare l'id del canale).
- * POST: messaggio di prova nel canale impostato.
+ * POST: messaggio di prova nel canale impostato; con `{ "testo": "…" }` manda quel testo (un avviso
+ * di chi coordina, dal workflow GitHub «Avviso redazione»).
  */
 
 export const dynamic = 'force-dynamic';
@@ -29,7 +30,14 @@ export async function POST(request: Request) {
   const no = vietato(request);
   if (no) return no;
   try {
-    await provaBotRedazione();
+    const corpo = (await request.json().catch(() => null)) as { testo?: unknown } | null;
+    const testo = typeof corpo?.testo === 'string' ? corpo.testo.trim() : '';
+    if (testo) {
+      if (testo.length > 3500) return Response.json({ ok: false, errore: 'testo troppo lungo' }, { status: 400 });
+      await inviaTestoRedazione(testo.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'));
+    } else {
+      await provaBotRedazione();
+    }
     return Response.json({ ok: true });
   } catch (e) {
     return Response.json({ ok: false, errore: (e as Error).message }, { status: 500 });
