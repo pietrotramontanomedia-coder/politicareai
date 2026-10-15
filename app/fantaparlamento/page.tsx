@@ -6,6 +6,15 @@ export const metadata: Metadata = {
   title: 'Fantaparlamento — Politicare',
   description:
     'Il fantacalcio della Camera: scegli 11 deputati con un budget di crediti e fai punti con le loro votazioni vere, dai dati aperti della Camera dei deputati.',
+  manifest: '/icone/fantaparlamento/manifest.webmanifest',
+  appleWebApp: { capable: true, statusBarStyle: 'black-translucent', title: 'Fanta' },
+  icons: {
+    icon: [
+      { url: '/icone/fantaparlamento/favicon-32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/icone/fantaparlamento/icon-192.png', sizes: '192x192', type: 'image/png' },
+    ],
+    apple: [{ url: '/icone/fantaparlamento/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
+  },
 };
 
 export default function FantaparlamentoPage() {

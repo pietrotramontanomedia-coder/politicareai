@@ -7,6 +7,15 @@ import { GEOGRAFIA_SENATO_2022 } from '@/lib/simulatore-geografia-2022';
 export const metadata: Metadata = {
   title: `${T.titolo} — Politicare`,
   description: T.descrizione,
+  manifest: '/icone/simulatore/manifest.webmanifest',
+  appleWebApp: { capable: true, statusBarStyle: 'black-translucent', title: 'Simulatore' },
+  icons: {
+    icon: [
+      { url: '/icone/simulatore/favicon-32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/icone/simulatore/icon-192.png', sizes: '192x192', type: 'image/png' },
+    ],
+    apple: [{ url: '/icone/simulatore/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
+  },
 };
 
 /** I colori dei partiti arrivano dal pack del test; il pack resta fuori dal bundle del client. */
