@@ -135,6 +135,11 @@ Nel vecchio store ci sono 135 file (inventario del 15/10/2026): 40 contenuti, 42
 `indice.json` nel vecchio store non ci sono mai stati. Al 15/10 lo store risponde a elenchi e
 metadati ma rifiuta ogni download (403).
 
+Tutto questo lo fa da solo il workflow **Recupero vecchio store** (`.github/workflows/recupero-blob.yml`).
+Ogni 3 ore prova a scaricare un file; appena Vercel lo lascia passare copia, riallinea, apre una
+issue con l'esito e si spegne. I segreti `BLOB_READ_WRITE_TOKEN`, `ARCHIVIO_URL` e
+`ARCHIVIO_TOKEN` sono nel repository dal 15/10/2026. A mano, gli stessi passi:
+
 1. **Si legge?** Workflow **Diagnosi redazione**: il passo «vecchio store Vercel: si legge?» deve
    dire `leggibile: true`.
 2. **Prova**: `node strumenti/migra-blob.mjs prova` elenca cosa copierebbe e cosa c'è già,
