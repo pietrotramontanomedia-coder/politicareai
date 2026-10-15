@@ -103,7 +103,31 @@ A ogni post, storia o nuova versione arriva nel canale della redazione un messag
 Se Telegram non risponde la pubblicazione va comunque a buon fine; se le foto non partono
 arriva almeno il testo.
 
-## Store sospeso (limiti del piano Hobby)
+## Archivio sul nostro server (dal 15/10/2026)
+
+Post, storie, foto, commenti e impostazioni non stanno più su Vercel Blob ma in un database
+nostro: **PostgreSQL sul server Hetzner della newsletter** (2.28.205.90), in `/opt/archivio`.
+Lo stesso archivio tiene anche lo stato del radar, il registro del ponte Telegram → X e il
+token Instagram. Niente limiti di operazioni e niente costi in più.
+
+- Il servizio è `servizi/archivio` in questo repository: un piccolo server Node davanti a
+  PostgreSQL, con le stesse operazioni di Blob (leggi, scrivi solo se nessuno ha scritto
+  dopo, elenca). Non ha nessuna operazione di cancellazione; quando un file sotto
+  `redazione/` viene sovrascritto, la versione precedente resta in `oggetti_storico`.
+- Si raggiunge da `https://newsletter.politicare.it/archivio/`, attraverso il Caddy della
+  newsletter (`/opt/newsletter/Caddyfile`), solo con la chiave `ARCHIVIO_TOKEN`.
+- Su Vercel: `ARCHIVIO_URL` e `ARCHIVIO_TOKEN` (production e preview). Senza queste due l'app
+  torna a usare Vercel Blob.
+- Copia del database ogni notte alle 3:30 UTC in `/opt/archivio/backup` (30 giorni).
+- Aggiornare il servizio: copiare i file di `servizi/archivio` in `/opt/archivio` e lanciare
+  `docker compose up -d --build`.
+- Per vedere se va: il workflow GitHub **Diagnosi redazione**, oppure
+  `https://newsletter.politicare.it/archivio/salute`.
+
+I 40 contenuti pubblicati fino al 14/10 sono rimasti nel vecchio store Vercel, che è sospeso:
+si recuperano copiandoli nell'archivio nuovo appena Vercel lo rende di nuovo leggibile.
+
+## Store sospeso (limiti del piano Hobby, fino al 14/10/2026)
 
 Vercel Blob nel piano **Hobby** include al mese 10.000 operazioni semplici (letture, metadati),
 2.000 operazioni avanzate (scritture, elenchi), 1 GB di spazio e 10 GB di traffico. Superati i
@@ -146,8 +170,7 @@ chiesto modifiche) → **approvato**.
 
 ## Accenderlo (su Vercel)
 
-1. Lo storage privato è quello già usato da radar e Instagram (`BLOB_READ_WRITE_TOKEN`): non
-   serve altro.
+1. Lo storage è l'archivio sul nostro server (`ARCHIVIO_URL`, `ARCHIVIO_TOKEN`, vedi sopra).
 2. In *Settings → Environment Variables* aggiungere:
    - `REDAZIONE_CODICE`: il codice da dare ai ragazzi;
    - `REDAZIONE_CODICE_REVISORI`: il codice di chi corregge, diverso dal primo;
