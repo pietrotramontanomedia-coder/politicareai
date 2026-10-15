@@ -67,6 +67,12 @@ export interface Contenuto {
   /** Registro di tutto quello che è successo al contenuto, in ordine. Mai riscritto, solo allungato. */
   eventi?: Evento[];
   /**
+   * Contenuto ricostruito dagli avvisi del bot nel gruppo Telegram (15/10/2026, store Vercel
+   * bloccato): data, autore, copy e immagine sono quelli veri, ma mancano commenti, versioni
+   * successive e stato. Se il vecchio store torna leggibile, la copia originale lo sostituisce.
+   */
+  recuperatoDa?: 'telegram';
+  /**
    * Revisione dell'archivio all'ultima modifica: cresce a ogni scrittura. Il browser chiede solo
    * quello che è cambiato dopo la revisione che ha già, e fra due copie tiene la più recente.
    */
