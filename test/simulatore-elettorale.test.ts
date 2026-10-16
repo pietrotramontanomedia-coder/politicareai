@@ -289,14 +289,22 @@ describe('risultati 2022 con le regole nuove', () => {
   });
 });
 
-describe('sondaggi di oggi (Supermedia YouTrend/Agi del 1° ottobre 2026)', () => {
+describe('sondaggi di oggi (Supermedia YouTrend/Agi del 15 ottobre 2026)', () => {
   const partiti = ['fdi', 'pd', 'm5s', 'lega', 'fi', 'avs', 'futuronazionale', 'azione', 'iv', 'piueuropa', 'noimoderati', 'pld', 'ora'].map((id) => ({ id, nome: id, colore: '#000' }));
   const p = presetSondaggi(partiti);
 
   it('somma al 100% con le altre liste e lascia fuori chi non è nella Supermedia', () => {
     expect(Math.round(p.liste.reduce((a, l) => a + l.percentuale, 0) * 100) / 100).toBe(100);
-    expect(p.liste.find((l) => l.id === 'altri')!.percentuale).toBeCloseTo(3.4);
+    expect(p.liste.find((l) => l.id === 'altri')!.percentuale).toBeCloseTo(2.3);
     expect(p.liste.map((l) => l.id)).not.toContain('ora');
+  });
+
+  it('aggiunge Sud chiama Nord al centrodestra anche se non è fra i partiti del test', () => {
+    const scn = p.liste.find((l) => l.id === 'sudchiamanord')!;
+    expect(scn).toMatchObject({ nome: 'Sud chiama Nord', percentuale: 1.1, coalizione: 'cdx' });
+    const coalizione = (c: string) => Math.round(p.liste.filter((l) => l.coalizione === c).reduce((a, l) => a + l.percentuale, 0) * 10) / 10;
+    expect(coalizione('cdx')).toBe(42.9);
+    expect(coalizione('csx')).toBe(43); // la Supermedia dà 43,1 sui dati non arrotondati
   });
 
   it('assegna tutti i seggi', () => {
