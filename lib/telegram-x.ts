@@ -7,7 +7,8 @@
 export const LIMITE_X = 280;
 /** X accorcia ogni link con t.co: conta sempre 23 caratteri. */
 const PESO_URL = 23;
-const FIRMA_TELEGRAM = /\s*@politicare\s*$/i;
+// Firma del canale, anche nella forma con il link ('@Politicare · t.me/politicare'): su X non va.
+const FIRMA_TELEGRAM = /\s*@politicare(?:\s*[·•|-]?\s*(?:https?:\/\/)?t\.me\/politicare\/?)?\s*$/i;
 const URL = /https?:\/\/\S+|(?<![\w@])[a-z0-9-]+(?:\.[a-z0-9-]+)*\.[a-z]{2,}(?:\/\S*)?/gi;
 
 export interface PostCanale {
