@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { componiPagina, datiStrutturati, giornoDi, giorniDaPubblicare, notizieDelGiorno, oraDi, riassunto, slugGiorno, titoloGiorno } from '@/lib/live-giornaliera';
+import { componiPagina, datiStrutturati, datiYoast, giornoDi, giorniDaPubblicare, LUNGHEZZA_DESCRIZIONE, notizieDelGiorno, oraDi, riassunto, slugGiorno, soloLink, titoloGiorno } from '@/lib/live-giornaliera';
 import type { NotiziaUltimOra } from '@/lib/ultimora-server';
 
 const voce = (id: string, data: string, titolo: string, testo = ''): NotiziaUltimOra => ({
@@ -72,8 +72,43 @@ describe('pagina Politica oggi', () => {
   it('il riassunto cita i primi titoli', () => {
     const g = giornoDi(new Date('2026-10-06T10:00:00Z'));
     expect(riassunto([voce('tg-2', '2026-10-06T08:00:00Z', 'Primo.'), voce('tg-1', '2026-10-06T07:00:00Z', 'Secondo')], g)).toBe(
-      'Le notizie di politica del 6 ottobre: Primo; Secondo.',
+      'Le notizie di politica del 6 ottobre 2026: Primo; Secondo.',
     );
+  });
+
+  it('il riassunto sta nella lunghezza di Google e prende solo titoli interi', () => {
+    const g = giornoDi(new Date('2026-10-06T10:00:00Z'));
+    const lungo = 'Il ministro ha presentato in Consiglio dei ministri il disegno di legge che cambia le regole';
+    const testo = riassunto([voce('tg-3', '2026-10-06T09:00:00Z', lungo), voce('tg-2', '2026-10-06T08:00:00Z', lungo + ' bis')], g);
+    expect(testo.length).toBeLessThanOrEqual(LUNGHEZZA_DESCRIZIONE);
+    expect(testo).toBe(`Le notizie di politica del 6 ottobre 2026: ${lungo}.`);
+  });
+
+  it('se il primo titolo non sta, il riassunto lo tronca a parola', () => {
+    const g = giornoDi(new Date('2026-10-06T10:00:00Z'));
+    const testo = riassunto([voce('tg-3', '2026-10-06T09:00:00Z', 'parola '.repeat(40).trim())], g);
+    expect(testo.length).toBeLessThanOrEqual(LUNGHEZZA_DESCRIZIONE);
+    expect(testo.endsWith('parola…')).toBe(true);
+  });
+
+  it('i messaggi fatti solo di un link restano fuori dalla pagina e dal riassunto', () => {
+    const g = giornoDi(new Date('2026-11-01T10:00:00Z'));
+    const reel = voce('tg-9', '2026-11-01T20:50:00Z', 'https://www.instagram.com/p/DfNEzWXgtq4/?rpxt=dTRqMG5ybTdsYnhs');
+    const notizia = voce('tg-8', '2026-11-01T19:43:00Z', 'Conte commenta la manovra');
+    expect(soloLink(reel)).toBe(true);
+    expect(soloLink(notizia)).toBe(false);
+    const voci = notizieDelGiorno([reel, notizia], g);
+    expect(voci.map((v) => v.id)).toEqual(['tg-8']);
+    expect(riassunto(voci, g)).toBe('Le notizie di politica del 1 novembre 2026: Conte commenta la manovra.');
+  });
+
+  it('campi Yoast: titolo senza nome del sito, descrizione e frase chiave', () => {
+    const g = giornoDi(new Date('2026-11-02T10:00:00Z'));
+    expect(datiYoast(g, false, 'Descrizione.')).toEqual({
+      _yoast_wpseo_title: 'Politica oggi, 2 novembre 2026: le notizie del giorno',
+      _yoast_wpseo_metadesc: 'Descrizione.',
+      _yoast_wpseo_focuskw: 'politica oggi',
+    });
   });
 
   it('titolo dei giorni passati', () => {
