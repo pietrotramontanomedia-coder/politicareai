@@ -48,6 +48,12 @@ describe('componiTweet', () => {
     );
   });
 
+  it('toglie anche la firma con il link al canale, che serve solo a chi copia il post su WhatsApp', () => {
+    for (const firma of ['@Politicare · t.me/politicare', '@Politicare · https://t.me/politicare/', '@politicare t.me/politicare']) {
+      expect(componiTweet(`Il testo passa al Senato.\n\n${firma}`, { link: LINK, titolo: 'nessuno' })).toBe('Il testo passa al Senato.');
+    }
+  });
+
   it('stile agenzia: la prima frase diventa il titolo, poi il corpo, poi la firma', () => {
     const post = '🇸🇪Elezioni in Svezia, scarto minimo: si dovrà aspettare mercoledì per il conteggio. I risultati vedono il centrosinistra in testa.\n@Politicare';
     expect(componiTweet(post, { firma: '#Politicare' })).toBe(
