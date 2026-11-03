@@ -1,5 +1,5 @@
 import { after } from 'next/server';
-import { componiPagina, giorniDaPubblicare, inizioDiIeri, MINIMO_NOTIZIE, notizieDelGiorno, riassunto, slugGiorno, titoloGiorno, type Giorno } from '@/lib/live-giornaliera';
+import { componiPagina, datiYoast, giorniDaPubblicare, inizioDiIeri, MINIMO_NOTIZIE, notizieDelGiorno, riassunto, slugGiorno, titoloGiorno, type Giorno } from '@/lib/live-giornaliera';
 import type { NotiziaUltimOra } from '@/lib/ultimora-server';
 import { leggiUltimOra } from '@/lib/ultimora-server';
 
@@ -97,7 +97,10 @@ async function pubblicaGiorno(c: Config, tutte: NotiziaUltimOra[], g: Giorno, og
     if (esistente.content.raw.trim() === contenuto.trim()) {
       return { stato: 'invariata', giorno: g.chiave, notizie: voci.length, url: esistente.link };
     }
-    await wp(c, `posts/${esistente.id}`, { method: 'POST', body: JSON.stringify({ title: titoloGiorno(g, oggi), content: contenuto, excerpt: estratto }) });
+    await wp(c, `posts/${esistente.id}`, {
+      method: 'POST',
+      body: JSON.stringify({ title: titoloGiorno(g, oggi), content: contenuto, excerpt: estratto, meta: datiYoast(g, oggi, estratto) }),
+    });
     return { stato: 'aggiornata', giorno: g.chiave, notizie: voci.length, url: esistente.link };
   }
 
@@ -110,6 +113,7 @@ async function pubblicaGiorno(c: Config, tutte: NotiziaUltimOra[], g: Giorno, og
       status: 'publish',
       content: contenuto,
       excerpt: estratto,
+      meta: datiYoast(g, oggi, estratto),
       author: c.autore,
       // Data della pagina = ultima notizia del giorno, così l'archivio resta in ordine anche per i giorni recuperati.
       ...(oggi ? {} : { date_gmt: new Date(voci[0].data).toISOString().slice(0, 19) }),

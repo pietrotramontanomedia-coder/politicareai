@@ -66,10 +66,17 @@ export function giorniDaPubblicare(voci: NotiziaUltimOra[], adesso: Date): Giorn
   return [oggi, ...passati.reverse().map((c) => giornoDi(new Date(`${c}T12:00:00Z`)))];
 }
 
+const LINK = /https?:\/\/\S+/g;
+
+/** Un messaggio che è solo un link (per esempio un reel Instagram girato sul canale): sulla pagina sarebbe un titolo fatto di URL. */
+export function soloLink(v: NotiziaUltimOra): boolean {
+  return `${v.titolo} ${v.testo}`.replace(LINK, '').replace(/[\s\p{P}\p{S}]/gu, '') === '';
+}
+
 /** Le notizie di quel giorno (fuso di Roma), dalla più recente. */
 export function notizieDelGiorno(voci: NotiziaUltimOra[], g: Giorno): NotiziaUltimOra[] {
   return voci
-    .filter((v) => giornoDi(new Date(v.data)).chiave === g.chiave)
+    .filter((v) => giornoDi(new Date(v.data)).chiave === g.chiave && !soloLink(v))
     .sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime());
 }
 
@@ -154,9 +161,34 @@ export function componiPagina(voci: NotiziaUltimOra[], g: Giorno, url: string, o
   return blocchi.join('\n\n');
 }
 
-/** Riassunto per Google e per le anteprime: i primi titoli del giorno. */
+/** Oltre questa lunghezza Google taglia la descrizione nei risultati. */
+export const LUNGHEZZA_DESCRIZIONE = 155;
+
+/** Frase chiave Yoast di tutte le pagine del giorno. */
+export const FRASE_CHIAVE = 'politica oggi';
+
+/**
+ * Riassunto per Google e per le anteprime: i primi titoli del giorno, solo quelli interi che
+ * stanno nella lunghezza della descrizione. Se non ne sta nemmeno uno, il primo si tronca a parola.
+ */
 export function riassunto(voci: NotiziaUltimOra[], g: Giorno): string {
-  const titoli = voci.slice(0, 3).map((v) => troncaAParola(v.titolo, 110).replace(/[.…]+$/, ''));
-  const testo = `Le notizie di politica del ${g.giorno} ${g.mese}: ${titoli.join('; ')}.`;
-  return testo.length > 300 ? `${testo.slice(0, 297).replace(/\s+\S*$/, '')}…` : testo;
+  const inizio = `Le notizie di politica del ${g.giorno} ${g.mese} ${g.anno}: `;
+  const spazio = LUNGHEZZA_DESCRIZIONE - inizio.length - 1;
+  const titoli = voci.slice(0, 3).map((v) => v.titolo.replace(LINK, '').replace(/\s+/g, ' ').trim().replace(/[.…:;,]+$/, '')).filter(Boolean);
+  const scelti: string[] = [];
+  for (const t of titoli) {
+    if ([...scelti, t].join('; ').length > spazio) break;
+    scelti.push(t);
+  }
+  if (!scelti.length && titoli.length) return `${inizio}${troncaAParola(titoli[0], spazio)}`;
+  return `${inizio}${scelti.join('; ')}.`;
+}
+
+/** Campi Yoast della pagina: titolo SEO senza « - Politicare» in coda, descrizione e frase chiave. */
+export function datiYoast(g: Giorno, oggi: boolean, descrizione: string): Record<string, string> {
+  return {
+    _yoast_wpseo_title: titoloGiorno(g, oggi),
+    _yoast_wpseo_metadesc: descrizione,
+    _yoast_wpseo_focuskw: FRASE_CHIAVE,
+  };
 }
