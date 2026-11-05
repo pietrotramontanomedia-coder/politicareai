@@ -9,8 +9,8 @@ import { leggiUltimOra } from '@/lib/ultimora-server';
  * Categoria «Live» (slug `live`) e immagine «politicare-live-copertina» vengono cercate per slug.
  */
 
-/** Utente «Politicare» (ex «Redazione») su WordPress: le pagine escono a nome della testata. */
-const AUTORE_PREDEFINITO = 45;
+/** Utente «Redazione» su WordPress (id 2): dal 05/11/2026 l’unica firma generica della testata. */
+const AUTORE_PREDEFINITO = 2;
 
 interface Config {
   base: string;
